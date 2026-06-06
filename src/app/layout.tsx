@@ -9,6 +9,8 @@ import { CookieConsent } from '@/components/CookieConsent';
 import { SiteFooter } from '@/components/SiteFooter';
 import { SiteHeader } from '@/components/SiteHeader';
 import { getSiteUrlObject } from '@/lib/env';
+import { getDictionary } from '@/lib/i18n/dictionary';
+import { resolveLocale } from '@/lib/i18n/server';
 
 import { Providers } from './providers';
 import './globals.css';
@@ -59,13 +61,16 @@ export const viewport: Viewport = {
   ],
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await resolveLocale();
+  const dict = getDictionary(locale);
+
   return (
-    <html lang="ja" suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning>
       <head>
         <ColorSchemeScript defaultColorScheme="dark" />
       </head>
@@ -79,10 +84,10 @@ export default function RootLayout({
           {/* キーボード/スクリーンリーダ向け: ヘッダのナビを飛ばして本文へ（WCAG 2.4.1）。
               通常は画面外、Tab でフォーカスされたときだけ可視化する（.wc-skip-link）。 */}
           <a href="#main-content" className="wc-skip-link">
-            メインコンテンツへスキップ
+            {dict.header.skipToContent}
           </a>
           <div className="wc-shell" style={{ display: 'flex', flexDirection: 'column' }}>
-            <SiteHeader />
+            <SiteHeader locale={locale} dict={dict} />
             <main id="main-content" style={{ flex: 1 }}>
               {children}
             </main>

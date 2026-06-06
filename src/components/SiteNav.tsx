@@ -5,35 +5,21 @@ import { usePathname } from 'next/navigation';
 import { Group } from '@mantine/core';
 
 import { useFavoriteTeams } from '@/hooks/useFavoriteTeams';
+import type { Dictionary } from '@/lib/i18n/dictionary';
 
-type NavLink = {
+type NavItem = {
   href: string;
-  label: string;
+  /** nav 辞書のキー。ラベルは labels[key] から引く。 */
+  key: 'groups' | 'knockout' | 'teams' | 'prediction';
   /** 完全一致でなくこのプレフィックスならアクティブとみなす場合に使う。 */
-  match?: (pathname: string) => boolean;
+  match: (pathname: string) => boolean;
 };
 
-const NAV_LINKS: NavLink[] = [
-  {
-    href: '/groups',
-    label: 'グループリーグ',
-    match: (pathname) => pathname.startsWith('/groups'),
-  },
-  {
-    href: '/',
-    label: '決勝T',
-    match: (pathname) => pathname === '/' || pathname.startsWith('/matches'),
-  },
-  {
-    href: '/teams',
-    label: '出場国',
-    match: (pathname) => pathname.startsWith('/teams'),
-  },
-  {
-    href: '/prediction',
-    label: '優勝予想',
-    match: (pathname) => pathname.startsWith('/prediction'),
-  },
+const NAV_ITEMS: NavItem[] = [
+  { href: '/groups', key: 'groups', match: (p) => p.startsWith('/groups') },
+  { href: '/', key: 'knockout', match: (p) => p === '/' || p.startsWith('/matches') },
+  { href: '/teams', key: 'teams', match: (p) => p.startsWith('/teams') },
+  { href: '/prediction', key: 'prediction', match: (p) => p.startsWith('/prediction') },
 ];
 
 const STAR_PATH =
@@ -59,7 +45,7 @@ function NavStarIcon({ filled }: { filled: boolean }) {
   );
 }
 
-export function SiteNav() {
+export function SiteNav({ labels }: { labels: Dictionary['nav'] }) {
   const pathname = usePathname() ?? '/';
   const { favorites, ready } = useFavoriteTeams();
   const isFavoritesActive = pathname.startsWith('/favorites');
@@ -67,19 +53,17 @@ export function SiteNav() {
   const hasFavorites = favCount > 0;
 
   return (
-    <Group gap="xs" className="wc-site-nav" role="navigation" aria-label="主要ページ">
-      {NAV_LINKS.map((link) => {
-        const isActive = link.match
-          ? link.match(pathname)
-          : pathname === link.href;
+    <Group gap="xs" className="wc-site-nav" role="navigation" aria-label={labels.label}>
+      {NAV_ITEMS.map((item) => {
+        const isActive = item.match(pathname);
         return (
           <Link
-            key={link.href}
-            href={link.href}
+            key={item.href}
+            href={item.href}
             className={`wc-nav-link${isActive ? ' is-active' : ''}`}
             aria-current={isActive ? 'page' : undefined}
           >
-            {link.label}
+            {labels[item.key]}
           </Link>
         );
       })}
@@ -88,8 +72,8 @@ export function SiteNav() {
         href="/favorites"
         className={`wc-nav-link wc-nav-favorites${isFavoritesActive ? ' is-active' : ''}${hasFavorites ? ' has-favorites' : ''}`}
         aria-current={isFavoritesActive ? 'page' : undefined}
-        aria-label={hasFavorites ? `お気に入り (${favCount}件)` : 'お気に入り'}
-        title="お気に入り"
+        aria-label={hasFavorites ? `${labels.favorites} (${favCount})` : labels.favorites}
+        title={labels.favorites}
       >
         <NavStarIcon filled={hasFavorites} />
         {hasFavorites ? (
