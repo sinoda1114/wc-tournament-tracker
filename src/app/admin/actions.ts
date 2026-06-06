@@ -1,7 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { cookies } from 'next/headers';
+import { cookies, headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 
 import {
@@ -13,8 +13,27 @@ import {
   isAdminAuthenticated,
   isValidAdminPassword,
 } from '@/lib/auth';
+import { checkRateLimit } from '@/lib/rate-limit';
+
+/** プロキシ経由のクライアント IP を推定する（Vercel は x-forwarded-for を付与）。 */
+function clientIpFrom(h: Headers): string {
+  const xff = h.get('x-forwarded-for');
+  if (xff) return xff.split(',')[0]?.trim() || 'unknown';
+  return h.get('x-real-ip') ?? 'unknown';
+}
 
 export async function loginAdminAction(password: string) {
+  // 総当たり緩和: IP ごとに 60 秒で 5 回まで（ベストエフォート・インメモリ）。
+  const ip = clientIpFrom(await headers());
+  const limit = checkRateLimit(`admin-login:${ip}`, { limit: 5, windowMs: 60_000 });
+  if (!limit.allowed) {
+    const seconds = Math.ceil(limit.retryAfterMs / 1000);
+    return {
+      ok: false as const,
+      message: `試行回数が多すぎます。約${seconds}秒後にもう一度お試しください`,
+    };
+  }
+
   if (!isValidAdminPassword(password)) {
     return { ok: false as const, message: 'パスワードが正しくありません' };
   }
