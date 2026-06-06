@@ -20,25 +20,25 @@
     "@mantine/dates": "7.17.8",
     "@mantine/form": "7.17.8",
     "@mantine/hooks": "7.17.8",
-    "dayjs": "1.11.20",
+    "dayjs": "1.11.21",
     "flag-icons": "7.5.0",
     "next": "16.2.7",
     "react": "19.2.7",
     "react-dom": "19.2.7"
   },
   "devDependencies": {
-    "@types/node": "22.15.21",
+    "@types/node": "24.13.1",
     "@types/react": "19.2.17",
     "@types/react-dom": "19.2.3",
-    "@vitest/coverage-v8": "2.1.9",
+    "@vitest/coverage-v8": "4.1.8",
     "dotenv": "17.4.2",
-    "eslint": "9.27.0",
+    "eslint": "9.39.4",
     "eslint-config-next": "16.2.7",
-    "postcss": "8.5.3",
-    "postcss-preset-mantine": "1.17.0",
+    "postcss": "8.5.15",
+    "postcss-preset-mantine": "1.18.0",
     "postcss-simple-vars": "7.0.1",
-    "tsx": "4.19.4",
-    "typescript": "5.8.3",
-    "vitest": "2.1.9"
+    "tsx": "4.22.4",
+    "typescript": "5.9.3",
+    "vitest": "4.1.8"
   }
 }
