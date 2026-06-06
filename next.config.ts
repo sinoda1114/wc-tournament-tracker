@@ -1,10 +1,29 @@
 import type { NextConfig } from 'next';
 
 /**
- * 全レスポンスに付与するセキュリティヘッダ。
- * 注: Content-Security-Policy は Mantine / Next の inline style・script と相性があり、
- * 厳格に入れると壊れやすいため本タスクでは見送り（#8 残: nonce 方式 or report-only で別途）。
+ * Content-Security-Policy（まずは Report-Only で導入）。
+ * Mantine / Next は inline の style / script（ColorSchemeScript 等）を使うため、
+ * script/style に `'unsafe-inline'` を許可する。Report-Only なのでブロックはせず、
+ * 違反はブラウザに報告されるだけ。プレビューで違反が無いことを確認してから、
+ * ヘッダ名を `Content-Security-Policy`（enforce）に切り替える想定。
+ * 真の厳格化（nonce 方式で 'unsafe-inline' を外す）は #8 のフォローアップ。
  */
+const contentSecurityPolicy = [
+  "default-src 'self'",
+  "base-uri 'self'",
+  "object-src 'none'",
+  "frame-ancestors 'none'",
+  "form-action 'self'",
+  "script-src 'self' 'unsafe-inline'", // Next/Mantine の inline bootstrap
+  "style-src 'self' 'unsafe-inline'", // Mantine の inline style
+  "img-src 'self' data: blob: https:", // flag-icons(SVG/data)・OGP・https 画像
+  "font-src 'self' data:",
+  "connect-src 'self' https:",
+  "manifest-src 'self'",
+  "worker-src 'self' blob:",
+].join('; ');
+
+/** 全レスポンスに付与するセキュリティヘッダ。 */
 const securityHeaders = [
   // MIME スニッフィング抑止。
   { key: 'X-Content-Type-Options', value: 'nosniff' },
@@ -19,6 +38,8 @@ const securityHeaders = [
     key: 'Permissions-Policy',
     value: 'camera=(), microphone=(), geolocation=(), browsing-topics=()',
   },
+  // CSP は安全側の Report-Only から（違反を観測してから enforce に切替）。
+  { key: 'Content-Security-Policy-Report-Only', value: contentSecurityPolicy },
 ];
 
 const nextConfig: NextConfig = {
