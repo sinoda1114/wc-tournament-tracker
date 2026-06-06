@@ -1,9 +1,14 @@
+'use client';
+
 import Link from 'next/link';
 import { Text } from '@mantine/core';
 
 import { CountryFlag } from '@/components/CountryFlag';
 import { FilterableMatchList } from '@/components/FilterableMatchList';
 import type { MatchDetail, Team } from '@/db/queries';
+import type { Locale } from '@/lib/i18n/config';
+import { useI18n } from '@/lib/i18n/context';
+import { localizedTeamName } from '@/lib/i18n/team-name';
 import { calculateGroupStandings, type GroupStanding } from '@/lib/standings';
 
 type GroupCardProps = {
@@ -29,61 +34,61 @@ export function GroupCard({
   matches,
   standingsMatches,
 }: GroupCardProps) {
+  const { locale, dict } = useI18n();
+  const t = dict.standings;
+  const heading = dict.groups.groupHeading.replace('{letter}', letter);
   const standings = calculateGroupStandings(teams, standingsMatches ?? matches);
   const lookup = teamLookup(teams);
 
   return (
-    <section className="wc-group-card" aria-label={`グループ${letter}`}>
+    <section className="wc-group-card" aria-label={t.groupAria.replace('{letter}', letter)}>
       <header className="wc-group-card-header">
         <Link
           href={`/groups/${letter.toLowerCase()}`}
           className="wc-group-title"
-          aria-label={`グループ${letter} の詳細`}
+          aria-label={t.detailAria.replace('{letter}', letter)}
         >
-          グループ{letter}
+          {heading}
         </Link>
       </header>
 
-      <table className="wc-standings-table" aria-label={`グループ${letter} 順位表`}>
+      <table className="wc-standings-table" aria-label={t.tableAria.replace('{letter}', letter)}>
         <thead>
           <tr>
-            <th aria-label="順位">#</th>
-            <th>国</th>
-            <th>チーム</th>
-            <th title="試合数" aria-label="試合数">試</th>
-            <th title="勝" aria-label="勝">勝</th>
-            <th title="分" aria-label="分">分</th>
-            <th title="負" aria-label="負">負</th>
-            <th title="得点" aria-label="得点">得</th>
-            <th title="失点" aria-label="失点">失</th>
-            <th title="得失点差" aria-label="得失点差">差</th>
-            <th title="勝点" aria-label="勝点">勝点</th>
+            <th aria-label={t.posAria}>#</th>
+            <th>{t.country}</th>
+            <th>{t.team}</th>
+            <th title={t.playedAria} aria-label={t.playedAria}>{t.played}</th>
+            <th title={t.winAria} aria-label={t.winAria}>{t.win}</th>
+            <th title={t.drawAria} aria-label={t.drawAria}>{t.draw}</th>
+            <th title={t.lossAria} aria-label={t.lossAria}>{t.loss}</th>
+            <th title={t.goalsForAria} aria-label={t.goalsForAria}>{t.goalsFor}</th>
+            <th title={t.goalsAgainstAria} aria-label={t.goalsAgainstAria}>{t.goalsAgainst}</th>
+            <th title={t.goalDiffAria} aria-label={t.goalDiffAria}>{t.goalDiff}</th>
+            <th title={t.pointsAria} aria-label={t.pointsAria}>{t.points}</th>
           </tr>
         </thead>
         <tbody>
           {standings.map((row) => (
-            <StandingRow key={row.teamId} row={row} team={lookup.get(row.teamId)} />
+            <StandingRow key={row.teamId} row={row} team={lookup.get(row.teamId)} locale={locale} />
           ))}
         </tbody>
       </table>
 
       <p className="wc-standings-legend">
         <span className="wc-legend-mark is-advancing" aria-hidden />
-        突破（上位2）
+        {t.legendAdvancing}
         <span className="wc-legend-mark is-playoff" aria-hidden />
-        3位通過枠
+        {t.legendPlayoff}
       </p>
 
-      <div className="wc-group-matches" aria-label={`グループ${letter} 試合一覧`}>
+      <div className="wc-group-matches" aria-label={t.matchesAria.replace('{letter}', letter)}>
         {matches.length === 0 ? (
           <Text c="dimmed" size="sm">
-            このグループの試合データはまだありません。
+            {t.noMatches}
           </Text>
         ) : (
-          <FilterableMatchList
-            matches={matches}
-            emptyText="お気に入りチームの試合はこのグループにはありません。"
-          />
+          <FilterableMatchList matches={matches} emptyText={t.favoriteNoMatches} />
         )}
       </div>
     </section>
@@ -93,9 +98,11 @@ export function GroupCard({
 function StandingRow({
   row,
   team,
+  locale,
 }: {
   row: GroupStanding;
   team: Team | undefined;
+  locale: Locale;
 }) {
   // 1-2 位＝グループ突破、3 位＝ベスト3位通過の枠（上位8グループのみ R32 進出）、4 位＝敗退。
   const qualification =
@@ -118,7 +125,7 @@ function StandingRow({
             {team?.fifaCode ?? row.teamId.toUpperCase()}
           </span>
           <Text component="span" size="xs" c="dimmed">
-            {team?.nameJa ?? ''}
+            {localizedTeamName(team, locale)}
           </Text>
         </span>
       </td>

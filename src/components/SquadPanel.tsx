@@ -7,6 +7,8 @@ import { CountryFlag } from '@/components/CountryFlag';
 import { FavoriteStar } from '@/components/FavoriteStar';
 import type { SquadPlayer, TeamSquad } from '@/db/queries';
 import { calcAge } from '@/lib/age';
+import { useI18n } from '@/lib/i18n/context';
+import { localizedTeamName } from '@/lib/i18n/team-name';
 import {
   classifyPosition,
   POSITION_GROUPS,
@@ -17,9 +19,9 @@ type SquadPanelProps = {
   squad: TeamSquad;
 };
 
-function ageLabel(dateBorn: string | null): string {
+function ageLabel(dateBorn: string | null, suffix: string): string {
   const age = calcAge(dateBorn);
-  return age === null ? '—' : `${age}歳`;
+  return age === null ? '—' : `${age}${suffix}`;
 }
 
 /**
@@ -42,6 +44,7 @@ function groupPlayers(players: SquadPlayer[]) {
 }
 
 export function SquadPanel({ squad }: SquadPanelProps) {
+  const { locale, dict } = useI18n();
   const { team, coach, players } = squad;
   const grouped = useMemo(() => groupPlayers(players), [players]);
 
@@ -52,7 +55,7 @@ export function SquadPanel({ squad }: SquadPanelProps) {
       <Group gap="sm" align="center" wrap="nowrap" mb="xs">
         <CountryFlag fifaCode={team.fifaCode} size="lg" ariaLabel={team.nameJa} />
         <Text fw={700} size="lg">
-          {team.nameJa}
+          {localizedTeamName(team, locale)}
         </Text>
         <Text size="sm" c="dimmed" ff="monospace" style={{ letterSpacing: '0.04em' }}>
           {team.fifaCode}
@@ -62,21 +65,25 @@ export function SquadPanel({ squad }: SquadPanelProps) {
 
       {isEmpty ? (
         <Text c="dimmed" size="sm">
-          この国のメンバー情報は準備中です。
+          {dict.squad.empty}
         </Text>
       ) : (
         <Stack gap="md">
           {grouped.map(({ group, label, players: groupPlayersList }) => (
             <div key={group} className="wc-squad-group">
               <Text className="wc-squad-group-title" size="xs" c="dimmed" tt="uppercase">
-                {label}（{groupPlayersList.length}）
+                {dict.squad.groupCount
+                  .replace('{label}', group === 'OTHER' ? dict.squad.positionOther : label)
+                  .replace('{count}', String(groupPlayersList.length))}
               </Text>
               <ul className="wc-squad-list">
                 {groupPlayersList.map((p) => (
                   <li key={p.id} className="wc-squad-player">
                     <span className="wc-squad-num">{p.number || '—'}</span>
-                    <span className="wc-squad-name">{p.name}</span>
-                    <span className="wc-squad-age">{ageLabel(p.dateBorn)}</span>
+                    <span className="wc-squad-name">
+                      {locale === 'ja' ? (p.nameJa ?? p.nameEn) : p.nameEn}
+                    </span>
+                    <span className="wc-squad-age">{ageLabel(p.dateBorn, dict.squad.ageSuffix)}</span>
                   </li>
                 ))}
               </ul>
@@ -86,7 +93,7 @@ export function SquadPanel({ squad }: SquadPanelProps) {
           {coach ? (
             <Group gap="xs" align="center" wrap="wrap">
               <Badge color="yellow" variant="light" radius="sm">
-                監督
+                {dict.squad.coach}
               </Badge>
               {coach.nationalityIso ? (
                 <CountryFlag
@@ -95,7 +102,9 @@ export function SquadPanel({ squad }: SquadPanelProps) {
                   ariaLabel={coach.nationality ?? undefined}
                 />
               ) : null}
-              <Text fw={600}>{coach.name}</Text>
+              <Text fw={600}>
+                {locale === 'ja' ? (coach.nameJa ?? coach.nameEn) : coach.nameEn}
+              </Text>
             </Group>
           ) : null}
         </Stack>

@@ -38,9 +38,10 @@ describe('getDictionary', () => {
     expect(getDictionary('en').nav.groups).toBe('Groups');
   });
 
-  it('en は ja と同じキー構造（翻訳漏れが無い）', () => {
-    expect(flatKeys(getDictionary('en')).sort()).toEqual(
-      flatKeys(getDictionary('ja')).sort(),
-    );
+  it('全ロケールが ja と同じキー構造（翻訳漏れが無い）', () => {
+    const base = flatKeys(getDictionary('ja')).sort();
+    for (const locale of LOCALES) {
+      expect(flatKeys(getDictionary(locale)).sort()).toEqual(base);
+    }
   });
 });

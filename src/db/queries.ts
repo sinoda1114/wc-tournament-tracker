@@ -28,6 +28,10 @@ export type TeamRating = Team & {
 export type SquadPlayer = {
   id: string;
   name: string;
+  /** 英語名（常に英語）。表示で ja 以外はこれを使う。 */
+  nameEn: string;
+  /** 日本語名（取得できた国のみ。無ければ null → ja でも nameEn にフォールバック）。 */
+  nameJa: string | null;
   position: string | null;
   dateBorn: string | null;
   number: string | null;
@@ -35,6 +39,8 @@ export type SquadPlayer = {
 
 export type Coach = {
   name: string;
+  nameEn: string;
+  nameJa: string | null;
   nationality: string | null;
   nationalityIso: string | null;
   dateBorn: string | null;
@@ -452,7 +458,7 @@ export async function getTeamSquad(fifaCode: string): Promise<TeamSquad | null> 
   const [coachResult, playersResult] = await Promise.all([
     db().execute({
       sql: `
-        SELECT name, nationality, nationality_iso, date_born
+        SELECT name, name_en, name_ja, nationality, nationality_iso, date_born
         FROM coaches
         WHERE team_id = ?
       `,
@@ -460,7 +466,7 @@ export async function getTeamSquad(fifaCode: string): Promise<TeamSquad | null> 
     }),
     db().execute({
       sql: `
-        SELECT id, name, position, date_born, number
+        SELECT id, name, name_en, name_ja, position, date_born, number
         FROM players
         WHERE team_id = ?
         ORDER BY sort_order ASC, name ASC
@@ -474,12 +480,16 @@ export async function getTeamSquad(fifaCode: string): Promise<TeamSquad | null> 
     ? (() => {
         const c = rowAs<{
           name: string;
+          name_en: string | null;
+          name_ja: string | null;
           nationality: string | null;
           nationality_iso: string | null;
           date_born: string | null;
         }>(coachRow);
         return {
           name: c.name,
+          nameEn: c.name_en ?? c.name,
+          nameJa: c.name_ja,
           nationality: c.nationality,
           nationalityIso: c.nationality_iso,
           dateBorn: c.date_born,
@@ -491,6 +501,8 @@ export async function getTeamSquad(fifaCode: string): Promise<TeamSquad | null> 
     const p = rowAs<{
       id: string;
       name: string;
+      name_en: string | null;
+      name_ja: string | null;
       position: string | null;
       date_born: string | null;
       number: string | null;
@@ -498,6 +510,8 @@ export async function getTeamSquad(fifaCode: string): Promise<TeamSquad | null> 
     return {
       id: p.id,
       name: p.name,
+      nameEn: p.name_en ?? p.name,
+      nameJa: p.name_ja,
       position: p.position,
       dateBorn: p.date_born,
       number: p.number,

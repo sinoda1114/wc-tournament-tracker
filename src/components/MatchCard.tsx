@@ -5,11 +5,8 @@ import { Badge, Stack, Text } from '@mantine/core';
 
 import type { MatchDetail } from '@/db/queries';
 import { useFavoriteTeams } from '@/hooks/useFavoriteTeams';
-import {
-  STATUS_LABELS,
-  formatKickoffJst,
-  formatMatchDateJst,
-} from '@/lib/bracket';
+import { formatKickoff, formatMatchDateZoned } from '@/lib/bracket';
+import { useDictionary, useTimeZone } from '@/lib/i18n/context';
 
 import { CountryFlag } from './CountryFlag';
 import { MatchVersus } from './MatchVersus';
@@ -19,7 +16,9 @@ type MatchCardProps = {
 };
 
 export function MatchCard({ match }: MatchCardProps) {
-  const kickoffJst = formatKickoffJst(match.kickoffAt);
+  const dict = useDictionary();
+  const timeZone = useTimeZone();
+  const kickoff = formatKickoff(match.kickoffAt, timeZone);
   const { isFavorite, ready } = useFavoriteTeams();
 
   const homeFav = ready && match.homeTeam ? isFavorite(match.homeTeam.fifaCode) : false;
@@ -37,11 +36,11 @@ export function MatchCard({ match }: MatchCardProps) {
             #{match.id}
           </Text>
           <Text size="sm" c="dimmed" component="span">
-            {formatMatchDateJst(match)}
+            {formatMatchDateZoned(match, timeZone, dict.match.weekdays)}
           </Text>
-          {kickoffJst ? (
-            <Text size="xs" c="dimmed" title="日本時間（JST）" component="span">
-              {kickoffJst}
+          {kickoff ? (
+            <Text size="xs" c="dimmed" title={timeZone} component="span">
+              {kickoff}
             </Text>
           ) : null}
           <span aria-hidden className="wc-venue-sep">
@@ -51,7 +50,7 @@ export function MatchCard({ match }: MatchCardProps) {
             <CountryFlag
               fifaCode={match.venue.countryCode}
               size="sm"
-              ariaLabel={`${match.venue.country} 開催`}
+              ariaLabel={dict.match.venueHostingAria.replace('{country}', match.venue.country)}
             />
             <span aria-hidden>🏟️</span>
             <span>{match.venue.stadiumName}</span>
@@ -62,19 +61,15 @@ export function MatchCard({ match }: MatchCardProps) {
               {match.venue.state} / {match.venue.city}
             </span>
           </span>
-          <Badge
-            variant="light"
-            size="sm"
-            color={
-              match.status === 'finished'
-                ? 'green'
-                : match.status === 'in_progress'
-                  ? 'yellow'
-                  : 'gray'
-            }
-          >
-            {STATUS_LABELS[match.status]}
-          </Badge>
+          {match.status !== 'scheduled' ? (
+            <Badge
+              variant="light"
+              size="sm"
+              color={match.status === 'finished' ? 'green' : 'yellow'}
+            >
+              {dict.match.status[match.status]}
+            </Badge>
+          ) : null}
         </div>
 
         <MatchVersus match={match} />

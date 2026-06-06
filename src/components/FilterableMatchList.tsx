@@ -4,6 +4,7 @@ import { Text } from '@mantine/core';
 
 import type { MatchDetail } from '@/db/queries';
 import { useFavoriteFilter, useFavoriteTeams } from '@/hooks/useFavoriteTeams';
+import { useDictionary } from '@/lib/i18n/context';
 
 import { MatchCard } from './MatchCard';
 
@@ -29,11 +30,12 @@ function matchHasFavorite(match: MatchDetail, favorites: Set<string>): boolean {
  */
 export function FilterableMatchList({
   matches,
-  emptyText = 'この条件に合致する試合はまだありません。',
+  emptyText,
   hideWhenEmpty = false,
 }: FilterableMatchListProps) {
   const { filterOn, ready: filterReady } = useFavoriteFilter();
   const { favorites, ready: favReady } = useFavoriteTeams();
+  const dict = useDictionary();
 
   const activeFilter = filterReady && favReady && filterOn && favorites.size > 0;
   const visible = activeFilter
@@ -44,7 +46,7 @@ export function FilterableMatchList({
     if (hideWhenEmpty) return null;
     return (
       <Text c="dimmed" size="sm">
-        {emptyText}
+        {emptyText ?? dict.standings.noMatchesFilter}
       </Text>
     );
   }

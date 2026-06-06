@@ -41,6 +41,25 @@ export function dayAfterTomorrowJst(now: Date = new Date()): string {
   return addDaysJst(todayJst(now), 2);
 }
 
+/** 指定TZ（観戦者ローカル）基準の現在暦日 YYYY-MM-DD（不正TZ時はJST）。 */
+export function todayInZone(timeZone: string, now: Date = new Date()): string {
+  try {
+    return new Intl.DateTimeFormat('en-CA', {
+      timeZone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    }).format(now);
+  } catch {
+    return todayJst(now);
+  }
+}
+
+/** YYYY-MM-DD に日数を加算（TZ非依存の純粋な日付計算）。 */
+export function addDays(ymd: string, days: number): string {
+  return addDaysJst(ymd, days);
+}
+
 /**
  * URL クエリの `date=...` をパースする。形式不正・存在しない日付は `all` とみなす。
  *
@@ -89,6 +108,30 @@ export function toJstYmd(kickoffAt: string | null | undefined): string | null {
   const d = new Date(kickoffAt);
   if (Number.isNaN(d.getTime())) return null;
   return jstDateFormatter.format(d);
+}
+
+/**
+ * `kickoffAt`（TZ 付き ISO）を任意 TZ の暦日 `YYYY-MM-DD` に変換する。
+ * 表示TZ（観戦者ローカル）で「日付」と「時刻」を一致させるための変換点。
+ * null/不正・不正TZ は null。
+ */
+export function toZonedYmd(
+  kickoffAt: string | null | undefined,
+  timeZone: string,
+): string | null {
+  if (!kickoffAt) return null;
+  const d = new Date(kickoffAt);
+  if (Number.isNaN(d.getTime())) return null;
+  try {
+    return new Intl.DateTimeFormat('en-CA', {
+      timeZone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    }).format(d);
+  } catch {
+    return null;
+  }
 }
 
 /**

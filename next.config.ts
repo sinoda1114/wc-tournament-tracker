@@ -44,6 +44,10 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  // 開発時、LAN IP 等クロスオリジンからの dev リソース（HMR / クライアントチャンク）アクセスを許可。
+  // 未許可だと client JS が読めず hydration が無効化され、検索 / お気に入り / テーマ / 言語が
+  // すべて効かなくなる（本番 Vercel には影響しない dev 専用設定）。
+  allowedDevOrigins: ['192.168.40.124'],
   async headers() {
     return [
       {

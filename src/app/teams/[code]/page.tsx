@@ -7,6 +7,8 @@ import { JsonLd } from '@/components/JsonLd';
 import { SquadPanel } from '@/components/SquadPanel';
 import { getTeamSquad } from '@/db/queries';
 import { getSiteUrl } from '@/lib/env';
+import { getDictionary } from '@/lib/i18n/dictionary';
+import { resolveLocale } from '@/lib/i18n/server';
 import { buildBreadcrumbList } from '@/lib/structured-data';
 
 export const dynamic = 'force-dynamic';
@@ -63,6 +65,8 @@ export default async function TeamSquadPage({ params }: PageProps) {
     { name: squad.team.nameJa, path: `/teams/${code.toLowerCase()}` },
   ]);
 
+  const dict = getDictionary(await resolveLocale());
+
   return (
     <Container size="xl" py="xl">
       <JsonLd data={breadcrumb} />
@@ -73,7 +77,7 @@ export default async function TeamSquadPage({ params }: PageProps) {
         px={6}
         mb="sm"
       >
-        ← 出場国一覧に戻る
+        {dict.teams.backToList}
       </ButtonLink>
       <SquadPanel squad={squad} />
     </Container>

@@ -4,7 +4,7 @@
  */
 
 /** 対応ロケール。先頭が既定。拡張時はここに追加し messages/<locale>.ts を用意する。 */
-export const LOCALES = ['ja', 'en'] as const;
+export const LOCALES = ['ja', 'en', 'es', 'pt', 'zh'] as const;
 export type Locale = (typeof LOCALES)[number];
 
 export const DEFAULT_LOCALE: Locale = 'ja';
@@ -16,6 +16,9 @@ export const LOCALE_COOKIE = 'wc_locale';
 export const LOCALE_LABELS: Record<Locale, string> = {
   ja: '日本語',
   en: 'English',
+  es: 'Español',
+  pt: 'Português',
+  zh: '简体中文',
 };
 
 export function isLocale(value: string | null | undefined): value is Locale {

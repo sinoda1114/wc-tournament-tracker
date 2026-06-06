@@ -4,6 +4,8 @@ import { useMemo, useState, type ReactNode } from 'react';
 import { Combobox, Group, Input, Text, useCombobox } from '@mantine/core';
 
 import { CountryFlag } from '@/components/CountryFlag';
+import { useI18n } from '@/lib/i18n/context';
+import { localizedTeamName } from '@/lib/i18n/team-name';
 import { matchesTeamQuery } from '@/lib/team-search';
 
 /** 検索に必要なチームの最小情報。 */
@@ -47,8 +49,8 @@ type TeamSearchComboboxProps = {
 export function TeamSearchCombobox({
   teams,
   onSelect,
-  placeholder = '日本 / Japan / JPN で検索',
-  ariaLabel = '出場国を検索',
+  placeholder,
+  ariaLabel,
   className,
   maxDropdownHeight = 360,
   closeOnSelect = true,
@@ -57,6 +59,9 @@ export function TeamSearchCombobox({
   isOptionActive,
   optionAdornment,
 }: TeamSearchComboboxProps) {
+  const { locale, dict } = useI18n();
+  const ph = placeholder ?? dict.teams.searchPlaceholder;
+  const aria = ariaLabel ?? dict.teams.searchAria;
   const [query, setQuery] = useState('');
   const combobox = useCombobox({
     onDropdownClose: () => combobox.resetSelectedOption(),
@@ -85,7 +90,7 @@ export function TeamSearchCombobox({
           const team = byCode.get(value);
           if (!team) return;
           onSelect(team);
-          if (fillInputOnSelect) setQuery(team.nameJa);
+          if (fillInputOnSelect) setQuery(localizedTeamName(team, locale));
           if (closeOnSelect) combobox.closeDropdown();
         }}
       >
@@ -102,10 +107,10 @@ export function TeamSearchCombobox({
             onFocus={() => combobox.openDropdown()}
             onBlur={() => combobox.closeDropdown()}
             onClick={() => combobox.openDropdown()}
-            placeholder={placeholder}
+            placeholder={ph}
             rightSection={<Combobox.Chevron />}
             rightSectionPointerEvents="none"
-            aria-label={ariaLabel}
+            aria-label={aria}
           />
         </Combobox.Target>
 
@@ -119,13 +124,19 @@ export function TeamSearchCombobox({
                   active={isOptionActive?.(t)}
                 >
                   <Group gap="xs" wrap="nowrap" align="center">
-                    <CountryFlag fifaCode={t.fifaCode} size="sm" ariaLabel={t.nameJa} />
+                    <CountryFlag
+                      fifaCode={t.fifaCode}
+                      size="sm"
+                      ariaLabel={localizedTeamName(t, locale)}
+                    />
                     <Text component="span" fw={600} size="sm">
-                      {t.nameJa}
+                      {localizedTeamName(t, locale)}
                     </Text>
-                    <Text component="span" size="xs" c="dimmed">
-                      {t.nameEn}
-                    </Text>
+                    {locale === 'ja' ? (
+                      <Text component="span" size="xs" c="dimmed">
+                        {t.nameEn}
+                      </Text>
+                    ) : null}
                     <Text
                       component="span"
                       size="xs"
@@ -140,7 +151,7 @@ export function TeamSearchCombobox({
                 </Combobox.Option>
               ))
             ) : (
-              <Combobox.Empty>該当する国はありません</Combobox.Empty>
+              <Combobox.Empty>{dict.teams.searchEmpty}</Combobox.Empty>
             )}
           </Combobox.Options>
         </Combobox.Dropdown>

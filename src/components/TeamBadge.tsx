@@ -1,5 +1,8 @@
 import type { Team } from '@/db/queries';
 import { formatSlotLabel, isWinner } from '@/lib/bracket';
+import type { Locale } from '@/lib/i18n/config';
+import type { Dictionary } from '@/lib/i18n/dictionary';
+import { localizedTeamName } from '@/lib/i18n/team-name';
 
 import { CountryFlag } from './CountryFlag';
 
@@ -8,6 +11,8 @@ type TeamBadgeProps = {
   slot: string;
   score: number | null;
   winnerTeamId: string | null;
+  locale: Locale;
+  dict: Dictionary;
 };
 
 export function TeamBadge({
@@ -15,6 +20,8 @@ export function TeamBadge({
   slot,
   score,
   winnerTeamId,
+  locale,
+  dict,
 }: TeamBadgeProps) {
   const winner = isWinner(team?.id ?? null, winnerTeamId);
 
@@ -39,11 +46,13 @@ export function TeamBadge({
                 whiteSpace: 'nowrap',
               }}
             >
-              {team.nameJa}
+              {localizedTeamName(team, locale)}
             </span>
           </>
         ) : (
-          <span style={{ color: 'var(--wc-muted)' }}>{formatSlotLabel(slot)}</span>
+          <span style={{ color: 'var(--wc-muted)' }}>
+            {formatSlotLabel(slot, dict.match.slot)}
+          </span>
         )}
       </span>
       {score !== null ? <strong>{score}</strong> : null}

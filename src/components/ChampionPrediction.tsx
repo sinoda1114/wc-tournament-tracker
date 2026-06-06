@@ -5,6 +5,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { Text } from '@mantine/core';
 
 import { CountryFlag } from '@/components/CountryFlag';
+import { useI18n } from '@/lib/i18n/context';
+import { localizedTeamName } from '@/lib/i18n/team-name';
 import {
   combineFactors,
   FACTOR_KEYS,
@@ -17,6 +19,7 @@ import {
 type TeamMeta = {
   id: string;
   nameJa: string;
+  nameEn: string;
   fifaCode: string;
 };
 
@@ -29,13 +32,6 @@ type ChampionPredictionProps = {
 };
 
 const STORAGE_KEY = 'wc-champion-toggles';
-
-const FACTOR_LABELS: Record<FactorKey, string> = {
-  pastWorldCup: '過去W杯成績',
-  fifaRank: 'FIFAランク',
-  wc2026: 'WC2026成績',
-  crowd: 'みんなの予想',
-};
 
 const DEFAULT_TOGGLES: FactorToggles = {
   pastWorldCup: true,
@@ -65,6 +61,13 @@ function formatPercent(probability: number): string {
 }
 
 export function ChampionPrediction({ teams, factors }: ChampionPredictionProps) {
+  const { locale, dict } = useI18n();
+  const factorLabels: Record<FactorKey, string> = {
+    pastWorldCup: dict.prediction.factorPastWorldCup,
+    fifaRank: dict.prediction.factorFifaRank,
+    wc2026: dict.prediction.factorWc2026,
+    crowd: dict.prediction.factorCrowd,
+  };
   const [toggles, setToggles] = useState<FactorToggles>(DEFAULT_TOGGLES);
   const [showAll, setShowAll] = useState(false);
 
@@ -111,11 +114,11 @@ export function ChampionPrediction({ teams, factors }: ChampionPredictionProps) 
   const hideList = noneActive || isFlat;
 
   return (
-    <section className="wc-prediction" aria-label="優勝国予想">
+    <section className="wc-prediction" aria-label={dict.prediction.sectionAria}>
       <div
         className="wc-prediction-toggles"
         role="group"
-        aria-label="予想に使う指標の切替"
+        aria-label={dict.prediction.togglesAria}
       >
         {FACTOR_KEYS.map((key) => (
           <button
@@ -125,22 +128,22 @@ export function ChampionPrediction({ teams, factors }: ChampionPredictionProps) 
             className={toggles[key] ? 'is-active' : ''}
             onClick={() => toggle(key)}
           >
-            {FACTOR_LABELS[key]}
+            {factorLabels[key]}
           </button>
         ))}
       </div>
 
       {noneActive ? (
         <Text c="dimmed" size="sm" mt="md">
-          指標を1つ以上選んでください。すべてOFFだと全チームが同じ確率になり、予想になりません。
+          {dict.prediction.noneActive}
         </Text>
       ) : isFlat ? (
         <Text c="dimmed" size="sm" mt="md">
-          選んだ指標にはまだデータがありません。全チームが横並びになり予想にならないため、データが入るまで表示しません（試合が進むと参考値として表示されます）。
+          {dict.prediction.flat}
         </Text>
       ) : onlyWc2026 ? (
         <Text c="dimmed" size="sm" mt="md">
-          WC2026成績のみで算出しています。大会序盤は消化試合が少なく、わずかな結果に数字が大きく振られて偏りが出ます。試合が進むほど精度が上がるため、現時点ではおおまかな傾向としてご覧ください。
+          {dict.prediction.onlyWc2026}
         </Text>
       ) : null}
 
@@ -166,7 +169,7 @@ export function ChampionPrediction({ teams, factors }: ChampionPredictionProps) 
                   {team?.fifaCode ?? row.teamId.toUpperCase()}
                 </span>
                 <Text component="span" size="xs" c="dimmed">
-                  {team?.nameJa ?? ''}
+                  {localizedTeamName(team, locale)}
                 </Text>
               </span>
               <span className="wc-prediction-prob">{formatPercent(row.probability)}</span>
@@ -179,7 +182,10 @@ export function ChampionPrediction({ teams, factors }: ChampionPredictionProps) 
                 <Link
                   href={teamUrl}
                   className={`${rowClass} wc-prediction-row-link`}
-                  aria-label={`${team!.nameJa}の選手を見る`}
+                  aria-label={dict.prediction.teamSquadAria.replace(
+                    '{name}',
+                    localizedTeamName(team, locale),
+                  )}
                 >
                   {inner}
                 </Link>
@@ -197,7 +203,9 @@ export function ChampionPrediction({ teams, factors }: ChampionPredictionProps) 
           className="wc-prediction-more"
           onClick={() => setShowAll((v) => !v)}
         >
-          {showAll ? '上位だけ表示' : `全${ranked.length}チームを表示`}
+          {showAll
+            ? dict.prediction.showTop
+            : dict.prediction.showAll.replace('{count}', String(ranked.length))}
         </button>
       ) : null}
       </>

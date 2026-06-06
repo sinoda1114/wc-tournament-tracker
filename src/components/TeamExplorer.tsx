@@ -12,6 +12,8 @@ import { TeamSearchCombobox } from '@/components/TeamSearchCombobox';
 import type { Team } from '@/db/queries';
 import { useFavoriteFilter, useFavoriteTeams } from '@/hooks/useFavoriteTeams';
 import { groupTeamsByConfederation } from '@/lib/confederations';
+import { useI18n } from '@/lib/i18n/context';
+import { localizedTeamName } from '@/lib/i18n/team-name';
 
 type TeamExplorerProps = {
   teams: Team[];
@@ -32,6 +34,7 @@ function squadHref(fifaCode: string): string {
  */
 export function TeamExplorer({ teams }: TeamExplorerProps) {
   const router = useRouter();
+  const { locale, dict } = useI18n();
   const { isFavorite, ready } = useFavoriteTeams();
   const { filterOn, ready: filterReady } = useFavoriteFilter();
 
@@ -55,26 +58,29 @@ export function TeamExplorer({ teams }: TeamExplorerProps) {
       <Stack gap="sm">
         <Stack gap={4}>
           <Group align="center" wrap="wrap" gap="sm">
-            <Title order={2}>出場国（{teams.length}）</Title>
+            <Title order={2}>
+              {dict.teams.heading.replace('{count}', String(teams.length))}
+            </Title>
             <FavoriteFilterToggle showHintWhenEmpty={false} />
           </Group>
           <Text c="dimmed" size="sm">
-            日本語名・英語名・FIFA 3文字コード（例: 日本 / Japan / JPN）で検索できます。国を選ぶと監督と選手が表示されます。
+            {dict.teams.description}
           </Text>
         </Stack>
 
         <TeamSearchCombobox
           className="wc-team-explorer-search"
           teams={teams}
-          ariaLabel="出場国を検索"
+          ariaLabel={dict.teams.searchAria}
+          placeholder={dict.teams.searchPlaceholder}
           onSelect={(t) => router.push(squadHref(t.fifaCode))}
           optionAdornment={(t) =>
             ready && isFavorite(t.fifaCode) ? (
               <span
                 className="wc-team-option-fav"
                 role="img"
-                aria-label="お気に入り登録済"
-                title="お気に入り登録済"
+                aria-label={dict.teams.favoriteRegistered}
+                title={dict.teams.favoriteRegistered}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -99,17 +105,17 @@ export function TeamExplorer({ teams }: TeamExplorerProps) {
         <div className="wc-team-conf-groups">
           {showFavOnly && visibleGroups.length === 0 ? (
             <Text c="dimmed" size="sm">
-              お気に入りに登録した国がありません。各国の ★ から登録できます。
+              {dict.teams.favoriteEmpty}
             </Text>
           ) : null}
           {visibleGroups.map((group) => (
             <section
               key={group.key}
               className="wc-team-conf-section"
-              aria-label={group.label}
+              aria-label={dict.confederations[group.key]}
             >
               <h3 className="wc-team-conf-title">
-                <span>{group.label}</span>
+                <span>{dict.confederations[group.key]}</span>
                 <span className="wc-team-conf-count">{group.teams.length}</span>
               </h3>
               <ul className="wc-team-grid">
@@ -120,7 +126,7 @@ export function TeamExplorer({ teams }: TeamExplorerProps) {
                       className="wc-team-chip-main"
                     >
                       <CountryFlag fifaCode={t.fifaCode} size="sm" ariaLabel={t.nameJa} />
-                      <span className="wc-team-chip-name">{t.nameJa}</span>
+                      <span className="wc-team-chip-name">{localizedTeamName(t, locale)}</span>
                       <span className="wc-team-chip-code">{t.fifaCode}</span>
                     </Link>
                     <FavoriteStar fifaCode={t.fifaCode} teamName={t.nameJa} size="sm" />

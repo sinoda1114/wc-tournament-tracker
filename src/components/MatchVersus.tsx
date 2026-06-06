@@ -1,5 +1,8 @@
+'use client';
+
 import type { MatchDetail } from '@/db/queries';
 import { formatSlotLabel, formatSlotTitle, isWinner } from '@/lib/bracket';
+import { useDictionary } from '@/lib/i18n/context';
 
 import { CountryFlag } from './CountryFlag';
 import { FavoriteStar } from './FavoriteStar';
@@ -15,6 +18,8 @@ export function MatchVersus({
   size = 'md',
   showFavoriteStar = true,
 }: MatchVersusProps) {
+  const dict = useDictionary();
+  const slotT = dict.match.slot;
   const homeWin = isWinner(match.homeTeamId, match.winnerTeamId);
   const awayWin = isWinner(match.awayTeamId, match.winnerTeamId);
   const hasScore = match.homeScore !== null && match.awayScore !== null;
@@ -41,8 +46,8 @@ export function MatchVersus({
             />
           </>
         ) : (
-          <span className="wc-versus-slot" title={formatSlotTitle(match.homeSlot)}>
-            {formatSlotLabel(match.homeSlot)}
+          <span className="wc-versus-slot" title={formatSlotTitle(match.homeSlot, slotT)}>
+            {formatSlotLabel(match.homeSlot, slotT)}
           </span>
         )}
       </div>
@@ -54,7 +59,7 @@ export function MatchVersus({
             <strong className={awayWin ? 'is-winner' : ''}>{match.awayScore}</strong>
           </>
         ) : (
-          <span aria-hidden>vs</span>
+          <span aria-hidden>{dict.match.versus}</span>
         )}
       </div>
       <div className={`wc-versus-side wc-versus-away${awayWin ? ' is-winner' : ''}`}>
@@ -75,8 +80,8 @@ export function MatchVersus({
             ) : null}
           </>
         ) : (
-          <span className="wc-versus-slot" title={formatSlotTitle(match.awaySlot)}>
-            {formatSlotLabel(match.awaySlot)}
+          <span className="wc-versus-slot" title={formatSlotTitle(match.awaySlot, slotT)}>
+            {formatSlotLabel(match.awaySlot, slotT)}
           </span>
         )}
       </div>

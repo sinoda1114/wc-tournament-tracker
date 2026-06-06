@@ -9,6 +9,7 @@ import { AddToHomeScreen } from './AddToHomeScreen';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { SiteNav } from './SiteNav';
 import { ThemeToggle } from './ThemeToggle';
+import { TimeZonePicker } from './TimeZonePicker';
 
 type SiteHeaderProps = {
   locale: Locale;
@@ -36,6 +37,7 @@ export function SiteHeader({ locale, dict, showAdminLink = true }: SiteHeaderPro
               </TextLink>
             ) : null}
             <LanguageSwitcher locale={locale} label={dict.language.label} />
+            <TimeZonePicker label={dict.timezone.label} />
             <AddToHomeScreen />
             <ThemeToggle />
           </Group>

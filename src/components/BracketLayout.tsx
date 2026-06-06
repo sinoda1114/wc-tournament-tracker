@@ -1,4 +1,7 @@
+'use client';
+
 import type { MatchDetail } from '@/db/queries';
+import { useDictionary } from '@/lib/i18n/context';
 
 import { BracketMiniCard } from './BracketMiniCard';
 
@@ -42,6 +45,7 @@ const FINAL_ID = 104;
 const THIRD_PLACE_ID = 103;
 
 export function BracketLayout({ matches }: BracketLayoutProps) {
+  const t = useDictionary().tournament;
   const byId = new Map(matches.map((match) => [match.id, match]));
   const get = (id: number) => byId.get(id) ?? null;
 
@@ -85,13 +89,13 @@ export function BracketLayout({ matches }: BracketLayoutProps) {
         <div className="wc-bracket-final-cell">
           {finalMatch ? (
             <div className="wc-final-wrap">
-              <div className="wc-final-title">🏆 決勝</div>
+              <div className="wc-final-title">{t.final}</div>
               <BracketMiniCard match={finalMatch} emphasized />
             </div>
           ) : null}
           {thirdMatch ? (
             <div className="wc-third-place">
-              <div className="wc-third-place-title">🥉 3位決定戦</div>
+              <div className="wc-third-place-title">{t.thirdPlace}</div>
               <BracketMiniCard match={thirdMatch} />
             </div>
           ) : null}

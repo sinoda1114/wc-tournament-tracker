@@ -6,7 +6,7 @@
  */
 
 .footer {
-  margin-top: 4rem;
+  margin-top: 2rem;
   border-top: 1px solid var(--wc-border);
   background: var(--wc-surface);
   /* 半透明の薄いブルーを上から重ねてヘッダーと色調を揃える。 */
@@ -16,7 +16,7 @@
 .inner {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 0.4rem;
 }
 
 .top {
@@ -35,8 +35,8 @@
 
 .brandTitle {
   margin: 0;
-  font-size: 1.05rem;
-  font-weight: 800;
+  font-size: 0.95rem;
+  font-weight: 700;
   letter-spacing: 0.04em;
   color: var(--wc-text);
 }
@@ -96,8 +96,13 @@
 .bottom {
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 0.5rem;
+  align-items: center;
+  gap: 0.4rem 0.9rem;
   font-size: 0.76rem;
   color: var(--wc-muted);
+}
+
+.sep {
+  color: var(--wc-border);
+  user-select: none;
 }

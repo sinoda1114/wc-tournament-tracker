@@ -47,11 +47,12 @@ describe('groupTeamsByConfederation', () => {
     expect(groups.map((g) => g.key)).toEqual(['UEFA', 'CONMEBOL', 'AFC']);
   });
 
-  it('sorts teams within a section by Japanese name', () => {
+  it('sorts teams within a section alphabetically by English name', () => {
     const teams = [team('IRN', 'イラン'), team('JPN', '日本'), team('AUS', 'オーストラリア')];
     const groups = groupTeamsByConfederation(teams);
     const afc = groups.find((g) => g.key === 'AFC')!;
-    expect(afc.teams.map((t) => t.nameJa)).toEqual(['イラン', 'オーストラリア', '日本']);
+    // 並びは英語名(nameEn)のアルファベット昇順: Australia < Iran < Japan
+    expect(afc.teams.map((t) => t.nameJa)).toEqual(['オーストラリア', 'イラン', '日本']);
   });
 
   it('excludes teams with an unknown confederation', () => {

@@ -14,9 +14,10 @@ import {
   aggregateLatestVotes,
   aliveTeamIdsForStage,
   currentVotingStage,
-  STAGE_LABELS,
   VOTING_STAGES,
 } from '@/lib/crowd';
+import { getDictionary } from '@/lib/i18n/dictionary';
+import { resolveLocale } from '@/lib/i18n/server';
 import { readVoterId } from '@/lib/voter';
 
 export const dynamic = 'force-dynamic';
@@ -48,12 +49,15 @@ export default async function PredictionPage() {
     readVoterId(),
   ]);
 
+  const dict = getDictionary(await resolveLocale());
+
   // ③2026成績は matches から、④みんなの予想は投票からライブ計算される。
   const crowdCounts = aggregateLatestVotes(votes);
   const factors = computeFactorScores(teamRatings, matches, crowdCounts);
   const predictionTeams = teamRatings.map((t) => ({
     id: t.id,
     nameJa: t.nameJa,
+    nameEn: t.nameEn,
     fifaCode: t.fifaCode,
   }));
 
@@ -71,17 +75,15 @@ export default async function PredictionPage() {
   const stageIndex = stage ? VOTING_STAGES.indexOf(stage) : -1;
   const nextStageLabel =
     stageIndex >= 0 && stageIndex < VOTING_STAGES.length - 1
-      ? STAGE_LABELS[VOTING_STAGES[stageIndex + 1]]
+      ? dict.match.stage[VOTING_STAGES[stageIndex + 1]]
       : null;
 
   return (
     <Container size="xl" py="xl">
       <Stack gap="lg">
         <Stack gap={4}>
-          <Title order={1}>優勝国予想</Title>
-          <Text c="dimmed">
-            過去W杯成績・FIFAランク・WC2026成績・みんなの予想を掛け合わせて優勝確率を算出します。指標のON/OFFで予想が変わります。
-          </Text>
+          <Title order={1}>{dict.prediction.title}</Title>
+          <Text c="dimmed">{dict.prediction.description}</Text>
         </Stack>
 
         <ChampionPrediction
@@ -91,7 +93,7 @@ export default async function PredictionPage() {
 
         <VotePanel
           stage={stage}
-          stageLabel={stage ? STAGE_LABELS[stage] : null}
+          stageLabel={stage ? dict.match.stage[stage] : null}
           nextStageLabel={nextStageLabel}
           candidates={candidates}
           myVoteTeamId={myVoteTeamId}

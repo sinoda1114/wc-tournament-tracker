@@ -10,7 +10,7 @@ import { SiteFooter } from '@/components/SiteFooter';
 import { SiteHeader } from '@/components/SiteHeader';
 import { getSiteUrlObject } from '@/lib/env';
 import { getDictionary } from '@/lib/i18n/dictionary';
-import { resolveLocale } from '@/lib/i18n/server';
+import { resolveLocale, resolveTimeZone } from '@/lib/i18n/server';
 
 import { Providers } from './providers';
 import './globals.css';
@@ -68,6 +68,7 @@ export default async function RootLayout({
 }>) {
   const locale = await resolveLocale();
   const dict = getDictionary(locale);
+  const timeZone = await resolveTimeZone();
 
   return (
     <html lang={locale} suppressHydrationWarning>
@@ -75,7 +76,7 @@ export default async function RootLayout({
         <ColorSchemeScript defaultColorScheme="dark" />
       </head>
       <body>
-        <Providers>
+        <Providers locale={locale} dict={dict} timeZone={timeZone}>
           {/*
             フッタを常にビューポート下端へ送るための縦フレックス。wc-shell（globals.css）は
             min-height だけを持つので、レイアウト用の flex はここでインライン指定し、
@@ -91,7 +92,7 @@ export default async function RootLayout({
             <main id="main-content" style={{ flex: 1 }}>
               {children}
             </main>
-            <SiteFooter />
+            <SiteFooter t={dict.footer} />
           </div>
           <CookieConsent />
         </Providers>

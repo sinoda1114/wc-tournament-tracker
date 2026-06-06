@@ -5,6 +5,7 @@ import { Stack, Text } from '@mantine/core';
 import { GroupCard } from '@/components/GroupCard';
 import type { MatchDetail, Team } from '@/db/queries';
 import { useFavoriteFilter, useFavoriteTeams } from '@/hooks/useFavoriteTeams';
+import { useDictionary } from '@/lib/i18n/context';
 
 export type GroupDataItem = {
   letter: string;
@@ -32,6 +33,7 @@ function groupHasFavorite(item: GroupDataItem, favorites: Set<string>): boolean 
 export function GroupsFilterableGrid({ groupData }: GroupsFilterableGridProps) {
   const { filterOn, ready: filterReady } = useFavoriteFilter();
   const { favorites, ready: favReady } = useFavoriteTeams();
+  const t = useDictionary().groups;
 
   const activeFilter = filterReady && favReady && filterOn && favorites.size > 0;
   const visible = activeFilter
@@ -41,10 +43,7 @@ export function GroupsFilterableGrid({ groupData }: GroupsFilterableGridProps) {
   if (activeFilter && visible.length === 0) {
     return (
       <Stack gap="xs" className="wc-favorite-empty">
-        <Text c="dimmed">
-          お気に入りチームの所属するグループはありません。フィルターを解除するか、
-          別のチームを ★ で登録してください。
-        </Text>
+        <Text c="dimmed">{t.favoriteEmpty}</Text>
       </Stack>
     );
   }

@@ -109,7 +109,7 @@ export type ConfederationGroup = {
 /**
  * チーム配列を連盟別にまとめる。
  * - セクションは {@link CONFEDERATION_ORDER} 順。
- * - 各連盟内は日本語名の五十音順。
+ * - 各連盟内は英語名のアルファベット順（全ロケール共通）。
  * - 所属不明（マップ外）チームは除外し、空の連盟も結果から落とす。
  */
 export function groupTeamsByConfederation(teams: Team[]): ConfederationGroup[] {
@@ -125,7 +125,8 @@ export function groupTeamsByConfederation(teams: Team[]): ConfederationGroup[] {
   }
 
   for (const list of buckets.values()) {
-    list.sort((a, b) => a.nameJa.localeCompare(b.nameJa, 'ja'));
+    // 並びは英語名のアルファベット昇順で全ロケール共通（検索リスト等と統一）。
+    list.sort((a, b) => a.nameEn.localeCompare(b.nameEn, 'en'));
   }
 
   return CONFEDERATION_ORDER.map((conf) => ({

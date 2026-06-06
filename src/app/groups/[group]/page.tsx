@@ -8,6 +8,8 @@ import { FavoriteFilterToggle } from '@/components/FavoriteFilterToggle';
 import { GroupCard } from '@/components/GroupCard';
 import { getGroupTeams, listGroupMatches } from '@/db/queries';
 import { filterMatchesByDate, parseDateParam } from '@/lib/date-filter';
+import { getDictionary } from '@/lib/i18n/dictionary';
+import { resolveLocale } from '@/lib/i18n/server';
 
 export const dynamic = 'force-dynamic';
 
@@ -73,17 +75,18 @@ export default async function GroupDetailPage({ params, searchParams }: PageProp
   const filteredMatches = filterMatchesByDate(matches, filter);
   const showEmptyDate = filter.kind === 'date' && filteredMatches.length === 0;
 
+  const dict = getDictionary(await resolveLocale());
+  const heading = dict.groups.groupHeading.replace('{letter}', letter);
+
   return (
     <Container size="lg" py="xl">
       <Stack gap="lg">
         <Stack gap={4}>
           <AnchorLink href="/groups" c="dimmed" size="sm">
-            ← グループリーグ一覧
+            {dict.groups.backToList}
           </AnchorLink>
-          <Title order={1}>グループ{letter}</Title>
-          <Text c="dimmed">
-            グループ{letter} の順位表と試合結果。スコア入力後に再読み込みすると順位が更新されます。
-          </Text>
+          <Title order={1}>{heading}</Title>
+          <Text c="dimmed">{dict.groups.detailDescription.replace('{letter}', letter)}</Text>
         </Stack>
 
         <div className="wc-groups-toolbar">
@@ -94,7 +97,7 @@ export default async function GroupDetailPage({ params, searchParams }: PageProp
         <div style={{ maxWidth: 760 }}>
           {showEmptyDate ? (
             <div className="wc-groups-empty-date" role="status">
-              <Text c="dimmed">この日にグループ{letter}の試合はありません。</Text>
+              <Text c="dimmed">{dict.groups.detailEmptyDate.replace('{letter}', letter)}</Text>
             </div>
           ) : (
             <GroupCard

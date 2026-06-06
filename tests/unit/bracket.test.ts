@@ -13,6 +13,7 @@ import {
   isWinner,
 } from '@/lib/bracket';
 import type { MatchDetail } from '@/db/queries';
+import { en } from '@/lib/i18n/messages/en';
 
 function buildMatch(overrides: Partial<MatchDetail>): MatchDetail {
   return {
@@ -166,6 +167,12 @@ describe('formatSlotLabel', () => {
     expect(formatSlotLabel('未確定')).toBe('未確定');
     expect(formatSlotLabel('')).toBe('');
   });
+
+  it('uses the supplied dictionary (en) instead of the default (ja)', () => {
+    expect(formatSlotLabel('Winner match 73', en.match.slot)).toBe('Winner #73');
+    expect(formatSlotLabel('Group A winners', en.match.slot)).toBe('A 1st');
+    expect(formatSlotLabel('Group A/B/C/D/F third place', en.match.slot)).toBe('A/B/C/D/F 3rd');
+  });
 });
 
 describe('formatSlotTitle', () => {
@@ -180,6 +187,11 @@ describe('formatSlotTitle', () => {
   it('勝者/敗者は試合番号付きの全文', () => {
     expect(formatSlotTitle('Winner match 89')).toBe('第89試合の勝者');
     expect(formatSlotTitle('Runner-up match 90')).toBe('第90試合の敗者');
+  });
+
+  it('uses the supplied dictionary (en) for the full label', () => {
+    expect(formatSlotTitle('Winner match 89', en.match.slot)).toBe('Winner of match 89');
+    expect(formatSlotTitle('Group A winners', en.match.slot)).toBe('Group A winners');
   });
 });
 

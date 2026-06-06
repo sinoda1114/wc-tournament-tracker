@@ -4,12 +4,8 @@ import Link from 'next/link';
 
 import type { MatchDetail } from '@/db/queries';
 import { useFavoriteFilter, useFavoriteTeams } from '@/hooks/useFavoriteTeams';
-import {
-  STAGE_LABELS,
-  formatKickoffJst,
-  formatMatchDateJst,
-  type MatchStage,
-} from '@/lib/bracket';
+import { formatKickoff, formatMatchDateZoned, type MatchStage } from '@/lib/bracket';
+import { useDictionary, useTimeZone } from '@/lib/i18n/context';
 
 import { CountryFlag } from './CountryFlag';
 import { MatchVersus } from './MatchVersus';
@@ -20,8 +16,10 @@ type BracketMiniCardProps = {
 };
 
 export function BracketMiniCard({ match, emphasized = false }: BracketMiniCardProps) {
-  const stageLabel = STAGE_LABELS[match.stage as MatchStage] ?? match.stage;
-  const kickoffJst = formatKickoffJst(match.kickoffAt);
+  const dict = useDictionary();
+  const timeZone = useTimeZone();
+  const stageLabel = dict.match.stage[match.stage as MatchStage] ?? match.stage;
+  const kickoff = formatKickoff(match.kickoffAt, timeZone);
   const { favorites, isFavorite, ready } = useFavoriteTeams();
   const { filterOn, ready: filterReady } = useFavoriteFilter();
 
@@ -45,21 +43,23 @@ export function BracketMiniCard({ match, emphasized = false }: BracketMiniCardPr
     <Link href={`/matches/${match.id}`} className={classes}>
       <span
         className="wc-mini-card-venue-badge"
-        title={`会場: ${match.venue.country} / ${match.venue.stadiumName}`}
+        title={dict.match.venueTitle
+          .replace('{country}', match.venue.country)
+          .replace('{stadium}', match.venue.stadiumName)}
       >
         <CountryFlag
           fifaCode={match.venue.countryCode}
           size="sm"
-          ariaLabel={`会場 ${match.venue.country}`}
+          ariaLabel={dict.match.venueAria.replace('{country}', match.venue.country)}
         />
       </span>
       <div className="wc-mini-card-header">
         <span className="wc-mini-card-id">#{match.id}</span>
         <span className="wc-mini-card-datetime">
-          <span>{formatMatchDateJst(match)}</span>
-          {kickoffJst ? (
-            <span className="wc-mini-card-kickoff" title="日本時間（JST）">
-              {kickoffJst}
+          <span>{formatMatchDateZoned(match, timeZone, dict.match.weekdays)}</span>
+          {kickoff ? (
+            <span className="wc-mini-card-kickoff" title={timeZone}>
+              {kickoff}
             </span>
           ) : null}
         </span>

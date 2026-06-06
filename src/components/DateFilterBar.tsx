@@ -7,34 +7,27 @@ import { DatePicker } from '@mantine/dates';
 import dayjs from 'dayjs';
 
 import { formatMatchDate } from '@/lib/bracket';
-import {
-  dayAfterTomorrowJst,
-  parseDateParam,
-  todayJst,
-  tomorrowJst,
-} from '@/lib/date-filter';
+import { addDays, parseDateParam, todayInZone } from '@/lib/date-filter';
+import { useDictionary, useTimeZone } from '@/lib/i18n/context';
 
 type QuickBadge = {
-  key: 'all' | 'today' | 'tomorrow' | 'day-after-tomorrow';
-  label: string;
+  key: 'all' | 'yesterday' | 'today' | 'tomorrow' | 'day-after-tomorrow';
   /** クリック時に設定する `?date` 値。null なら `?date` を消す。 */
   targetDate: string | null;
 };
 
 function buildBadges(anchors: {
+  yesterday: string;
   today: string;
   tomorrow: string;
   dayAfterTomorrow: string;
 } | null): QuickBadge[] {
   return [
-    { key: 'all', label: 'すべて', targetDate: null },
-    { key: 'today', label: '今日', targetDate: anchors?.today ?? null },
-    { key: 'tomorrow', label: '明日', targetDate: anchors?.tomorrow ?? null },
-    {
-      key: 'day-after-tomorrow',
-      label: '明後日',
-      targetDate: anchors?.dayAfterTomorrow ?? null,
-    },
+    { key: 'all', targetDate: null },
+    { key: 'yesterday', targetDate: anchors?.yesterday ?? null },
+    { key: 'today', targetDate: anchors?.today ?? null },
+    { key: 'tomorrow', targetDate: anchors?.tomorrow ?? null },
+    { key: 'day-after-tomorrow', targetDate: anchors?.dayAfterTomorrow ?? null },
   ];
 }
 
@@ -47,16 +40,31 @@ function buildBadges(anchors: {
  *
  * 状態は URL クエリ `?date=YYYY-MM-DD` で表現する（共有可能、リロードで保持）。
  */
-export function DateFilterBar() {
+export function DateFilterBar({
+  showQuickBadges = true,
+}: {
+  showQuickBadges?: boolean;
+}) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [, startTransition] = useTransition();
   const [popoverOpen, setPopoverOpen] = useState(false);
+  const dict = useDictionary();
+  const t = dict.dateFilter;
+  const timeZone = useTimeZone();
+  const badgeLabels: Record<QuickBadge['key'], string> = {
+    all: t.all,
+    yesterday: t.yesterday,
+    today: t.today,
+    tomorrow: t.tomorrow,
+    'day-after-tomorrow': t.dayAfterTomorrow,
+  };
 
   // SSR と CSR で "今日" がズレるとフリッカーするので mount 後にアンカー値を確定する。
   const [anchors, setAnchors] = useState<
     | {
+        yesterday: string;
         today: string;
         tomorrow: string;
         dayAfterTomorrow: string;
@@ -65,13 +73,14 @@ export function DateFilterBar() {
   >(null);
 
   useEffect(() => {
-    const now = new Date();
+    const today = todayInZone(timeZone);
     setAnchors({
-      today: todayJst(now),
-      tomorrow: tomorrowJst(now),
-      dayAfterTomorrow: dayAfterTomorrowJst(now),
+      yesterday: addDays(today, -1),
+      today,
+      tomorrow: addDays(today, 1),
+      dayAfterTomorrow: addDays(today, 2),
     });
-  }, []);
+  }, [timeZone]);
 
   const dateParam = searchParams.get('date');
   const filter = parseDateParam(dateParam);
@@ -100,13 +109,15 @@ export function DateFilterBar() {
       updateDate(null);
       return;
     }
-    const now = new Date();
+    const today = todayInZone(timeZone);
     const target =
-      badge.key === 'today'
-        ? todayJst(now)
-        : badge.key === 'tomorrow'
-          ? tomorrowJst(now)
-          : dayAfterTomorrowJst(now);
+      badge.key === 'yesterday'
+        ? addDays(today, -1)
+        : badge.key === 'today'
+          ? today
+          : badge.key === 'tomorrow'
+            ? addDays(today, 1)
+            : addDays(today, 2);
     updateDate(target);
   };
 
@@ -128,7 +139,8 @@ export function DateFilterBar() {
   // アクティブな日付がクイックバッジに該当しない場合、独立した「pill + ×」を表示する。
   const customActiveDate =
     activeDate &&
-    !badges.some((b) => b.key !== 'all' && b.targetDate === activeDate)
+    (!showQuickBadges ||
+      !badges.some((b) => b.key !== 'all' && b.targetDate === activeDate))
       ? activeDate
       : null;
 
@@ -137,24 +149,26 @@ export function DateFilterBar() {
     : null;
 
   return (
-    <div className="wc-date-filter-bar" role="group" aria-label="日付フィルター">
-      <div className="wc-date-filter-quick" role="tablist" aria-label="クイック日付">
-        {badges.map((badge) => {
-          const active = isBadgeActive(badge);
-          return (
-            <button
-              key={badge.key}
-              type="button"
-              role="tab"
-              aria-selected={active}
-              className={`wc-date-filter-badge${active ? ' is-on' : ''}`}
-              onClick={() => handleBadgeClick(badge)}
-            >
-              {badge.label}
-            </button>
-          );
-        })}
-      </div>
+    <div className="wc-date-filter-bar" role="group" aria-label={t.groupAria}>
+      {showQuickBadges ? (
+        <div className="wc-date-filter-quick" role="tablist" aria-label={t.quickAria}>
+          {badges.map((badge) => {
+            const active = isBadgeActive(badge);
+            return (
+              <button
+                key={badge.key}
+                type="button"
+                role="tab"
+                aria-selected={active}
+                className={`wc-date-filter-badge${active ? ' is-on' : ''}`}
+                onClick={() => handleBadgeClick(badge)}
+              >
+                {badgeLabels[badge.key]}
+              </button>
+            );
+          })}
+        </div>
+      ) : null}
 
       <div className="wc-date-filter-actions">
         <Popover
@@ -172,10 +186,10 @@ export function DateFilterBar() {
               onClick={() => setPopoverOpen((o) => !o)}
               aria-haspopup="dialog"
               aria-expanded={popoverOpen}
-              aria-label="カレンダーから日付を選ぶ"
+              aria-label={t.openCalendar}
             >
               <span aria-hidden>📅</span>
-              <span>カレンダー</span>
+              <span>{t.calendar}</span>
             </button>
           </Popover.Target>
           <Popover.Dropdown>
@@ -185,12 +199,12 @@ export function DateFilterBar() {
 
         {customActiveDate ? (
           <span className="wc-date-filter-active-chip" aria-live="polite">
-            <span>{formatMatchDate(customActiveDate)}</span>
+            <span>{formatMatchDate(customActiveDate, dict.match.weekdays)}</span>
             <button
               type="button"
               className="wc-date-filter-reset"
               onClick={() => updateDate(null)}
-              aria-label="日付フィルターを解除"
+              aria-label={t.reset}
             >
               ×
             </button>

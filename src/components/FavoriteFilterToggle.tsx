@@ -1,6 +1,7 @@
 'use client';
 
 import { useFavoriteFilter, useFavoriteTeams } from '@/hooks/useFavoriteTeams';
+import { useDictionary } from '@/lib/i18n/context';
 
 type FavoriteFilterToggleProps = {
   /** 0 件のときの控えめなヒント文を表示するかどうか。 */
@@ -16,29 +17,33 @@ type FavoriteFilterToggleProps = {
 export function FavoriteFilterToggle({ showHintWhenEmpty = true }: FavoriteFilterToggleProps) {
   const { filterOn, setFilterOn, ready } = useFavoriteFilter();
   const { favorites, ready: favReady } = useFavoriteTeams();
+  const t = useDictionary().favoriteFilter;
 
   const hasFavorites = favReady && favorites.size > 0;
   const isOn = ready && filterOn;
 
   return (
-    <div className="wc-favorite-filter-toggle" role="group" aria-label="お気に入りフィルター">
+    <div className="wc-favorite-filter-toggle" role="group" aria-label={t.groupLabel}>
       <button
         type="button"
         className={`wc-favorite-filter-button${isOn ? ' is-on' : ''}`}
         onClick={() => setFilterOn(!isOn)}
         aria-pressed={isOn}
-        aria-label="☆を付けた試合のみ表示"
+        aria-label={t.onlyStarredAria}
         disabled={!ready}
       >
-        <span>☆のみを表示</span>
+        <span>{t.onlyStarred}</span>
         {favReady && favorites.size > 0 ? (
-          <span className="wc-favorite-filter-count" aria-label={`${favorites.size} チーム`}>
+          <span
+            className="wc-favorite-filter-count"
+            aria-label={`${favorites.size} ${t.teamsUnit}`}
+          >
             {favorites.size}
           </span>
         ) : null}
       </button>
       {showHintWhenEmpty && favReady && !hasFavorites ? (
-        <span className="wc-favorite-filter-hint">★ ボタンで気になる国を登録できます</span>
+        <span className="wc-favorite-filter-hint">{t.hint}</span>
       ) : null}
     </div>
   );

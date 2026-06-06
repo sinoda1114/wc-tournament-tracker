@@ -49,7 +49,10 @@ const CODE_TO_ISO: Record<string, string> = {
 type ParsedPlayer = {
   number: string | null;
   pos: string;
+  /** 英語名（英語版 Wikipedia の表示名）。 */
   name: string;
+  /** 日本語名（取得できた場合のみ。既定 null）。 */
+  nameJa: string | null;
   /** 英語版 Wikipedia の記事タイトル（リンク先）。日本語名解決に使う。 */
   link: string | null;
   dateBorn: string | null;
@@ -57,6 +60,7 @@ type ParsedPlayer = {
 
 type ParsedCoach = {
   name: string;
+  nameJa: string | null;
   flagCode: string | null;
   /** 英語版 Wikipedia の記事タイトル（リンク先）。日本語名解決に使う。 */
   link: string | null;
@@ -212,14 +216,14 @@ async function localizeJapaneseNames(
   for (const p of players) {
     const ja = resolve(p.link);
     if (ja) {
-      p.name = ja;
+      p.nameJa = ja;
       replaced += 1;
     }
   }
   if (coach) {
     const ja = resolve(coach.link);
     if (ja) {
-      coach.name = ja;
+      coach.nameJa = ja;
       replaced += 1;
     }
   }
@@ -236,6 +240,7 @@ function parseCoach(section: string): ParsedCoach | null {
   const { target, display } = linkParts(m[2]);
   return {
     name: display,
+    nameJa: null,
     flagCode: m[1] ? m[1].toUpperCase() : null,
     link: target,
   };
@@ -254,6 +259,7 @@ function parsePlayers(section: string): ParsedPlayer[] {
       number: no && /\d/.test(no) ? no : null,
       pos,
       name: display,
+      nameJa: null,
       link: target,
       dateBorn,
     });
@@ -315,10 +321,10 @@ async function main() {
       const nationality = coach.flagCode ?? null;
       await db.execute({
         sql: `
-          INSERT INTO coaches (team_id, name, nationality, nationality_iso, date_born)
-          VALUES (?, ?, ?, ?, ?)
+          INSERT INTO coaches (team_id, name, name_en, name_ja, nationality, nationality_iso, date_born)
+          VALUES (?, ?, ?, ?, ?, ?, ?)
         `,
-        args: [team.id, coach.name, nationality, nationalityIso, null],
+        args: [team.id, coach.name, coach.name, coach.nameJa, nationality, nationalityIso, null],
       });
       totalCoaches += 1;
     }
@@ -327,11 +333,13 @@ async function main() {
       await db.batch(
         players.map((p, index) => ({
           sql: `
-            INSERT INTO players (id, team_id, name, position, date_born, number, sort_order)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO players (id, team_id, name, name_en, name_ja, position, date_born, number, sort_order)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(id) DO UPDATE SET
               team_id = excluded.team_id,
               name = excluded.name,
+              name_en = excluded.name_en,
+              name_ja = excluded.name_ja,
               position = excluded.position,
               date_born = excluded.date_born,
               number = excluded.number,
@@ -341,6 +349,8 @@ async function main() {
             `${team.id}-${index}`,
             team.id,
             p.name,
+            p.name,
+            p.nameJa,
             p.pos,
             p.dateBorn,
             p.number,

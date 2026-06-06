@@ -3,6 +3,7 @@
 import { useState } from 'react';
 
 import type { MatchDetail } from '@/db/queries';
+import { useDictionary } from '@/lib/i18n/context';
 
 import { BracketLayout } from './BracketLayout';
 import { TournamentBracket } from './TournamentBracket';
@@ -15,11 +16,12 @@ type TournamentViewToggleProps = {
 
 export function TournamentViewToggle({ matches }: TournamentViewToggleProps) {
   const [mode, setMode] = useState<ViewMode>('bracket');
+  const t = useDictionary().tournament;
 
   return (
     <div>
       <div className="wc-tournament-toolbar">
-        <div className="wc-view-toggle" role="tablist" aria-label="表示切替">
+        <div className="wc-view-toggle" role="tablist" aria-label={t.viewLabel}>
           <button
             type="button"
             role="tab"
@@ -27,7 +29,7 @@ export function TournamentViewToggle({ matches }: TournamentViewToggleProps) {
             className={mode === 'bracket' ? 'is-active' : ''}
             onClick={() => setMode('bracket')}
           >
-            ブラケット
+            {t.bracket}
           </button>
           <button
             type="button"
@@ -36,7 +38,7 @@ export function TournamentViewToggle({ matches }: TournamentViewToggleProps) {
             className={mode === 'cards' ? 'is-active' : ''}
             onClick={() => setMode('cards')}
           >
-            カード
+            {t.cards}
           </button>
         </div>
       </div>
