@@ -8,6 +8,11 @@ import { LOCALE_COOKIE, LOCALE_LABELS, LOCALES, type Locale } from '@/lib/i18n/c
 
 const ONE_YEAR = 60 * 60 * 24 * 365;
 
+/** wc_locale cookie に選択ロケールを保存する（コンポーネント外の副作用ヘルパー）。 */
+function persistLocale(next: Locale): void {
+  document.cookie = `${LOCALE_COOKIE}=${next}; path=/; max-age=${ONE_YEAR}; samesite=lax`;
+}
+
 /**
  * 右上の言語スイッチャー（dep 無し・Cookie 方式）。
  * 選択を `wc_locale` cookie に保存し、router.refresh() でサーバ再レンダリング
@@ -19,7 +24,7 @@ export function LanguageSwitcher({ locale, label }: { locale: Locale; label: str
 
   function choose(next: Locale) {
     if (next === locale) return;
-    document.cookie = `${LOCALE_COOKIE}=${next}; path=/; max-age=${ONE_YEAR}; samesite=lax`;
+    persistLocale(next);
     startTransition(() => router.refresh());
   }
 
