@@ -7,3 +7,6 @@ out
 .env.local
 .env.*.local
 *.tsbuildinfo
+
+# work-summary skill output (local-only, not pushed)
+work-summary/
