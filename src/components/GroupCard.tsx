@@ -67,6 +67,13 @@ export function GroupCard({
         </tbody>
       </table>
 
+      <p className="wc-standings-legend">
+        <span className="wc-legend-mark is-advancing" aria-hidden />
+        突破（上位2）
+        <span className="wc-legend-mark is-playoff" aria-hidden />
+        3位通過枠
+      </p>
+
       <div className="wc-group-matches" aria-label={`グループ${letter} 試合一覧`}>
         {matches.length === 0 ? (
           <Text c="dimmed" size="sm">
@@ -90,9 +97,16 @@ function StandingRow({
   row: GroupStanding;
   team: Team | undefined;
 }) {
+  // 1-2 位＝グループ突破、3 位＝ベスト3位通過の枠（上位8グループのみ R32 進出）、4 位＝敗退。
+  const qualification =
+    row.position <= 2 ? 'advancing' : row.position === 3 ? 'playoff' : 'out';
   return (
-    <tr>
-      <td>{row.position}</td>
+    <tr
+      className={`wc-standings-row is-${qualification}${row.position === 2 ? ' is-cutoff' : ''}`}
+    >
+      <td>
+        <span className="wc-standings-pos">{row.position}</span>
+      </td>
       <td>
         {team ? (
           <CountryFlag fifaCode={team.fifaCode} size="sm" ariaLabel={team.nameJa} />

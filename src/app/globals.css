@@ -1655,3 +1655,45 @@ a {
   outline: 2px solid #fff;
   outline-offset: 2px;
 }
+
+/* ===== 順位表の突破ライン（1-2位=グループ突破 / 3位=ベスト3位通過枠）===== */
+.wc-standings-pos {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.4rem;
+}
+.wc-standings-row.is-advancing .wc-standings-pos {
+  font-weight: 700;
+  color: var(--wc-accent);
+}
+.wc-standings-row.is-playoff .wc-standings-pos {
+  font-weight: 700;
+  color: var(--wc-emphasis);
+}
+/* 2位と3位の境界＝グループ突破ライン（ここまでが確定突破）。 */
+.wc-standings-row.is-cutoff > td {
+  border-bottom: 2px solid var(--wc-accent);
+}
+
+.wc-standings-legend {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0.45rem 0 0;
+  font-size: 0.72rem;
+  color: var(--wc-muted);
+}
+.wc-legend-mark {
+  display: inline-block;
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 2px;
+  margin-left: 0.6rem;
+}
+.wc-legend-mark.is-advancing {
+  background: var(--wc-accent);
+}
+.wc-legend-mark.is-playoff {
+  background: var(--wc-emphasis);
+}
