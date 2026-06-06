@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
+import { AnchorLink } from '@/components/RouterLink';
 import { notFound } from 'next/navigation';
-import { Anchor, Container, Stack, Text, Title } from '@mantine/core';
+import { Container, Stack, Text, Title } from '@mantine/core';
 
 import { DateFilterBar } from '@/components/DateFilterBar';
 import { FavoriteFilterToggle } from '@/components/FavoriteFilterToggle';
@@ -77,9 +77,9 @@ export default async function GroupDetailPage({ params, searchParams }: PageProp
     <Container size="lg" py="xl">
       <Stack gap="lg">
         <Stack gap={4}>
-          <Anchor component={Link} href="/groups" c="dimmed" size="sm">
+          <AnchorLink href="/groups" c="dimmed" size="sm">
             ← グループリーグ一覧
-          </Anchor>
+          </AnchorLink>
           <Title order={1}>グループ{letter}</Title>
           <Text c="dimmed">
             グループ{letter} の順位表と試合結果。スコア入力後に再読み込みすると順位が更新されます。

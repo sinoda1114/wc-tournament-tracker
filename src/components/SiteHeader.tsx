@@ -1,5 +1,7 @@
 import Link from 'next/link';
-import { Container, Group, Text, Title } from '@mantine/core';
+import { Container, Group, Title } from '@mantine/core';
+
+import { TextLink } from '@/components/RouterLink';
 
 import { SiteNav } from './SiteNav';
 import { ThemeToggle } from './ThemeToggle';
@@ -23,9 +25,9 @@ export function SiteHeader({ showAdminLink = true }: SiteHeaderProps) {
           </Group>
           <Group gap="sm" align="center" wrap="nowrap">
             {showAdminLink ? (
-              <Text component={Link} href="/admin" c="dimmed" size="sm">
+              <TextLink href="/admin" c="dimmed" size="sm">
                 管理画面
-              </Text>
+              </TextLink>
             ) : null}
             <ThemeToggle />
           </Group>

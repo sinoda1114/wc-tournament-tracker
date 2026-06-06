@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import { TextLink } from '@/components/RouterLink';
 import { notFound, redirect } from 'next/navigation';
 import { Container, Group, Stack, Text, Title } from '@mantine/core';
 
@@ -44,9 +44,9 @@ export default async function AdminMatchPage({ params }: AdminMatchPageProps) {
       <Stack gap="lg">
         <Group justify="space-between">
           <Stack gap={4}>
-            <Text component={Link} href="/admin" c="dimmed" size="sm">
+            <TextLink href="/admin" c="dimmed" size="sm">
               ← 管理一覧へ
-            </Text>
+            </TextLink>
             <Title order={1}>
               第{match.id}試合 · {stageLabel}
             </Title>
