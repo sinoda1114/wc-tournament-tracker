@@ -1,5 +1,6 @@
-import Link from 'next/link';
-import { Button, Container, Group, Stack, Text, Title } from '@mantine/core';
+import { Container, Group, Stack, Text, Title } from '@mantine/core';
+
+import { ButtonLink } from '@/components/RouterLink';
 
 /**
  * 404 の着地ページ。notFound()（チーム/試合/グループ詳細など）や
@@ -22,12 +23,12 @@ export default function NotFound() {
             URL をご確認のうえ、トップページからお進みください。
           </Text>
           <Group justify="center" gap="sm" mt="xs">
-            <Button component={Link} href="/" variant="filled">
+            <ButtonLink href="/" variant="filled">
               トップへ戻る
-            </Button>
-            <Button component={Link} href="/groups" variant="default">
+            </ButtonLink>
+            <ButtonLink href="/groups" variant="default">
               グループリーグを見る
-            </Button>
+            </ButtonLink>
           </Group>
         </Stack>
       </div>

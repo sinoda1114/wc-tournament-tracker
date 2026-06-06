@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
+import { ButtonLink } from '@/components/RouterLink';
 import { notFound } from 'next/navigation';
-import { Button, Container } from '@mantine/core';
+import { Container } from '@mantine/core';
 
 import { JsonLd } from '@/components/JsonLd';
 import { SquadPanel } from '@/components/SquadPanel';
@@ -66,8 +66,7 @@ export default async function TeamSquadPage({ params }: PageProps) {
   return (
     <Container size="xl" py="xl">
       <JsonLd data={breadcrumb} />
-      <Button
-        component={Link}
+      <ButtonLink
         href="/teams"
         variant="subtle"
         size="xs"
@@ -75,7 +74,7 @@ export default async function TeamSquadPage({ params }: PageProps) {
         mb="sm"
       >
         ← 出場国一覧に戻る
-      </Button>
+      </ButtonLink>
       <SquadPanel squad={squad} />
     </Container>
   );
