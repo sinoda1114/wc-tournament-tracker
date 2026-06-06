@@ -76,9 +76,16 @@ export default function RootLayout({
             min-height だけを持つので、レイアウト用の flex はここでインライン指定し、
             globals.css には手を入れない。main を flex:1 で伸ばしてフッタを押し下げる。
           */}
+          {/* キーボード/スクリーンリーダ向け: ヘッダのナビを飛ばして本文へ（WCAG 2.4.1）。
+              通常は画面外、Tab でフォーカスされたときだけ可視化する（.wc-skip-link）。 */}
+          <a href="#main-content" className="wc-skip-link">
+            メインコンテンツへスキップ
+          </a>
           <div className="wc-shell" style={{ display: 'flex', flexDirection: 'column' }}>
             <SiteHeader />
-            <main style={{ flex: 1 }}>{children}</main>
+            <main id="main-content" style={{ flex: 1 }}>
+              {children}
+            </main>
             <SiteFooter />
           </div>
           <CookieConsent />

@@ -5,11 +5,18 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const listTournamentMatches = vi.fn();
 const listAllTeams = vi.fn();
 const updateMatchResult = vi.fn();
+const resolveAndPersistRoundOf32 = vi.fn();
 
 vi.mock('@/db/queries', () => ({
   listTournamentMatches: () => listTournamentMatches(),
   listAllTeams: () => listAllTeams(),
   updateMatchResult: (input: unknown) => updateMatchResult(input),
+}));
+
+// R32 結線（グループ順位→入口）は別モジュール。ここでは ingest の集約・部分失敗の検証に
+// 集中し、結線自体はモックする（結線の実挙動は round-of-32 専用テストで担保）。
+vi.mock('@/db/queries/round-of-32', () => ({
+  resolveAndPersistRoundOf32: () => resolveAndPersistRoundOf32(),
 }));
 
 import type { ResultProvider } from '@/lib/ingest/types';
@@ -52,6 +59,8 @@ beforeEach(() => {
   listTournamentMatches.mockReset();
   listAllTeams.mockReset();
   updateMatchResult.mockReset();
+  resolveAndPersistRoundOf32.mockReset();
+  resolveAndPersistRoundOf32.mockResolvedValue({ updated: 0 });
 });
 
 describe('runIngestion', () => {

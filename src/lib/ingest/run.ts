@@ -1,4 +1,5 @@
 import { listAllTeams, listTournamentMatches, updateMatchResult } from '@/db/queries';
+import { resolveAndPersistRoundOf32 } from '@/db/queries/round-of-32';
 
 import { planMatchUpdates } from './reconcile';
 import type { ResultProvider } from './types';
@@ -21,6 +22,8 @@ export type IngestionSummary = {
   matchIds: number[];
   /** 反映に失敗した試合（部分失敗）。空なら全件成功。 */
   failures: IngestionFailure[];
+  /** グループ順位確定で R32 入口（home/away_team_id）を埋めたスロット数。 */
+  roundOf32Updated: number;
 };
 
 /**
@@ -60,11 +63,24 @@ export async function runIngestion(
     }
   }
 
+  // グループ結果が入ったら、順位表から R32 入口（home/away_team_id）を埋める。
+  // 冪等（確定済み・変化なしは 0 更新）。R32 解決の失敗は取込成功を覆さない。
+  let roundOf32Updated = 0;
+  if (matchIds.length > 0) {
+    try {
+      const r32 = await resolveAndPersistRoundOf32();
+      roundOf32Updated = r32.updated;
+    } catch (error) {
+      console.error('[ingest] R32 解決に失敗', error);
+    }
+  }
+
   return {
     fetched: results.length,
     planned: updates.length,
     updated: matchIds.length,
     matchIds,
     failures,
+    roundOf32Updated,
   };
 }
