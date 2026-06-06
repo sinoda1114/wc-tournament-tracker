@@ -7,6 +7,7 @@ loadEnv({ path: resolve(process.cwd(), '.env') });
 
 import { seedTeams } from '../src/data/seed-teams';
 import { getDb } from '../src/db/client';
+import { fetchJsonWithRetry } from '../src/lib/fetch-retry';
 
 // 全選手＋監督は Wikipedia「2026 FIFA World Cup squads」から取得する。
 // 1 リクエストでページ全体の wikitext を取り、48 カ国分を構造化テンプレートから
@@ -62,11 +63,6 @@ type ParsedCoach = {
 };
 
 const pad = (n: string) => n.padStart(2, '0');
-
-/** `[[Name]]` / `[[Link|Display]]` から表示名を取り出す。 */
-function stripLink(raw: string): string {
-  return linkParts(raw).display;
-}
 
 /** `[[target|display]]` を記事タイトル(target)と表示名(display)に分解する。 */
 function linkParts(raw: string): { target: string | null; display: string } {
@@ -268,15 +264,14 @@ function parsePlayers(section: string): ParsedPlayer[] {
 async function main() {
   const db = getDb();
 
-  const res = await fetch(WIKI_API, {
-    headers: { 'User-Agent': 'wc-tournament-tracker/1.0 (squad importer)' },
-  });
-  if (!res.ok) {
-    throw new Error(`Wikipedia API HTTP ${res.status}`);
-  }
-  const json = (await res.json()) as {
+  // 一過性のネットワーク/HTTP 失敗に備えてリトライ＋タイムアウト付きで取得する。
+  const json = await fetchJsonWithRetry<{
     parse?: { wikitext?: { '*'?: string } };
-  };
+  }>(WIKI_API, {
+    headers: { 'User-Agent': 'wc-tournament-tracker/1.0 (squad importer)' },
+    retries: 3,
+    timeoutMs: 20_000,
+  });
   const rawWikitext = json.parse?.wikitext?.['*'];
   if (!rawWikitext) {
     throw new Error('Wikipedia wikitext was empty');
