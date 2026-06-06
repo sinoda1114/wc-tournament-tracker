@@ -101,3 +101,24 @@ export function writeFilterEnabled(on: boolean): void {
     // 同上
   }
 }
+
+/**
+ * クラウド同期への移行 seam（#11 準備 / 本体は #13 認証導入後）。
+ *
+ * 移行計画:
+ *  1. 認証導入後、お気に入りは `user_favorites(user_id, fifa_code)` に持つ。
+ *  2. 読み書きは、未ログイン時はこの localStorage 実装、ログイン時はサーバ実装へ
+ *     差し替える（useFavoriteTeams が依存するのは read/write/toggle なので 1 箇所差替で済む。
+ *     voter.ts の readVoterId/ensureVoterId 拡張と同じ方針）。
+ *  3. **初回ログイン時**、匿名 localStorage の分を失わないよう、この `mergeFavoriteCodes`
+ *     でサーバ側と統合してから永続化する。
+ *
+ * ローカルとリモートのお気に入りコードを正規化（大文字・空白除去・重複排除）して和集合で返す。
+ * リモートの並びを優先し、ローカル固有分を後ろに足す純関数（テスト可能・DOM 非依存）。
+ */
+export function mergeFavoriteCodes(
+  remote: readonly string[],
+  local: readonly string[],
+): string[] {
+  return normalizeList([...remote, ...local]);
+}
