@@ -3,6 +3,7 @@ import { Container, Group, Title } from '@mantine/core';
 
 import { TextLink } from '@/components/RouterLink';
 
+import { AddToHomeScreen } from './AddToHomeScreen';
 import { SiteNav } from './SiteNav';
 import { ThemeToggle } from './ThemeToggle';
 
@@ -29,6 +30,7 @@ export function SiteHeader({ showAdminLink = true }: SiteHeaderProps) {
                 管理画面
               </TextLink>
             ) : null}
+            <AddToHomeScreen />
             <ThemeToggle />
           </Group>
         </Group>
