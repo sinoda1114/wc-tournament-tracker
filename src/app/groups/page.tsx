@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import { Container, Group, Stack, Text, Title } from '@mantine/core';
 
 import { DateFilterBar } from '@/components/DateFilterBar';
@@ -7,6 +8,13 @@ import { getGroupTeams, listGroupStageMatches } from '@/db/queries';
 import { filterMatchesByDate, parseDateParam } from '@/lib/date-filter';
 
 export const dynamic = 'force-dynamic';
+
+export const metadata: Metadata = {
+  title: 'グループリーグ',
+  description:
+    '48ヶ国 × 12 グループの順位表と全 72 試合。WC 2026 のグループリーグを日程・結果つきで一覧できます。',
+  alternates: { canonical: '/groups' },
+};
 
 const GROUP_LETTERS = [
   'A',

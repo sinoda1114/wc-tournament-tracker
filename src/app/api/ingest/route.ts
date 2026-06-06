@@ -27,6 +27,11 @@ export async function GET(request: Request) {
       revalidatePath('/prediction');
       revalidatePath('/');
     }
+    // 部分失敗は 200 で返しつつ（成功分は確定済み）、監視用に Function ログへ残す。
+    // ネットワーク失敗（fetch 自体）は runIngestion が throw し、下の catch で 500。
+    if (summary.failures.length > 0) {
+      console.error('[ingest] partial failures', summary.failures);
+    }
     return NextResponse.json({ ok: true, ...summary });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'ingest failed';

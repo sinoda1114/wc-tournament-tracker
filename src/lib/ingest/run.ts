@@ -3,19 +3,37 @@ import { listAllTeams, listTournamentMatches, updateMatchResult } from '@/db/que
 import { planMatchUpdates } from './reconcile';
 import type { ResultProvider } from './types';
 
+export type IngestionFailure = {
+  /** 反映に失敗した試合 id。 */
+  matchId: number;
+  /** 失敗理由（ログ/監視用）。 */
+  message: string;
+};
+
 export type IngestionSummary = {
   /** 取得元から得たイベント総数。 */
   fetched: number;
-  /** 実際に DB を更新した試合数。 */
+  /** 反映を試みた（=突き合わせで更新対象になった）試合数。 */
+  planned: number;
+  /** 実際に DB 更新が成功した試合数。 */
   updated: number;
-  /** 更新した試合 id（確認用）。 */
+  /** 更新に成功した試合 id（確認用）。 */
   matchIds: number[];
+  /** 反映に失敗した試合（部分失敗）。空なら全件成功。 */
+  failures: IngestionFailure[];
 };
 
 /**
  * 取得元 → 正規化 → 突き合わせ → DB反映 を一括実行する。
  * 書き込みは既存 `updateMatchResult` を使うため、勝者解決とブラケット伝播が一貫する。
  * 取得元は引数で差し替え可能（テスト時はモック provider を渡せる）。
+ *
+ * 堅牢化:
+ * - 冪等性は planMatchUpdates が担保（同結果ならそもそも更新対象に入らない）。
+ *   そのため cron 多重起動・再実行で重複適用にならない。
+ * - 部分失敗耐性: 1 試合の反映が失敗しても残りは継続し、失敗は summary.failures に集約する
+ *   （1 件の不整合で全取込が止まらないようにする）。手入力フォールバックは従来どおり有効。
+ * - fetchResults 自体（ネットワーク失敗）は呼び出し側に投げて 500 とし、cron の再試行に委ねる。
  */
 export async function runIngestion(
   provider: ResultProvider,
@@ -27,13 +45,26 @@ export async function runIngestion(
   ]);
 
   const updates = planMatchUpdates(results, matches, teams);
+
+  const matchIds: number[] = [];
+  const failures: IngestionFailure[] = [];
   for (const update of updates) {
-    await updateMatchResult(update);
+    try {
+      await updateMatchResult(update);
+      matchIds.push(update.matchId);
+    } catch (error) {
+      failures.push({
+        matchId: update.matchId,
+        message: error instanceof Error ? error.message : 'update failed',
+      });
+    }
   }
 
   return {
     fetched: results.length,
-    updated: updates.length,
-    matchIds: updates.map((u) => u.matchId),
+    planned: updates.length,
+    updated: matchIds.length,
+    matchIds,
+    failures,
   };
 }

@@ -1562,3 +1562,34 @@ a {
   color: var(--wc-emphasis);
   font-weight: 700;
 }
+
+/* ===== エラー境界 / 404 の着地カード（error.tsx・not-found.tsx 共用） =====
+   --wc-* 変数を使うのでダーク/ライト両対応。global-error.tsx は layout 外で
+   この CSS を読めないため、別途インラインスタイルで同等の見た目を持つ。 */
+.wc-error-card {
+  margin-top: 2rem;
+  border: 1px solid var(--wc-border);
+  border-radius: 16px;
+  background: linear-gradient(180deg, var(--wc-surface-elevated), var(--wc-surface));
+  padding: 2rem 1.5rem;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+}
+
+.wc-error-title {
+  color: var(--wc-gold);
+  text-align: center;
+}
+
+.wc-error-digest {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  letter-spacing: 0.03em;
+}
+
+.wc-notfound-code {
+  font-size: 3.5rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  color: var(--wc-accent);
+  font-variant-numeric: tabular-nums;
+}

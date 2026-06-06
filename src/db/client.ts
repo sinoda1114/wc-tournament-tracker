@@ -1,5 +1,7 @@
 import { createClient, type Client } from '@libsql/client';
 
+import { requireDbEnv } from '@/lib/env';
+
 let client: Client | null = null;
 
 export function getDb(): Client {
@@ -7,12 +9,10 @@ export function getDb(): Client {
     return client;
   }
 
-  const databaseUrl = process.env.TURSO_DATABASE_URL;
-  const authToken = process.env.TURSO_AUTH_TOKEN;
-
-  if (!databaseUrl) {
-    throw new Error('TURSO_DATABASE_URL is required');
-  }
+  // env 欠落時は MissingEnvError（人間可読）を投げる。
+  // RSC からの呼び出しなら src/app/error.tsx / global-error.tsx が拾い、
+  // 素の 500 ではなくフォールバック UI を表示する。
+  const { databaseUrl, authToken } = requireDbEnv();
 
   client = createClient({
     url: databaseUrl,

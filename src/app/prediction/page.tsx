@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import { Container, Stack, Text, Title } from '@mantine/core';
 
 import { ChampionPrediction } from '@/components/ChampionPrediction';
@@ -19,6 +20,13 @@ import {
 import { readVoterId } from '@/lib/voter';
 
 export const dynamic = 'force-dynamic';
+
+export const metadata: Metadata = {
+  title: '優勝国予想',
+  description:
+    '過去W杯成績・FIFAランク・WC2026成績・みんなの予想を掛け合わせて優勝確率を算出します。指標のON/OFFで予想が変わります。',
+  alternates: { canonical: '/prediction' },
+};
 
 /** Map は RSC 境界を越えられないため、クライアントへはプレーンオブジェクトで渡す。 */
 function serializeFactors(

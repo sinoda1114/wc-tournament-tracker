@@ -1,0 +1,103 @@
+/*
+ * サイト共通フッタ専用スタイル（CSS Modules でスコープ）。
+ * globals.css（ui-feature 正本）には手を入れない方針のため、配色は globals.css 側の
+ * --wc-* 変数を参照してダーク/ライト両テーマに追従させる。クラス名はモジュールで
+ * ローカル化されるので、既存 .wc-* と衝突しない。
+ */
+
+.footer {
+  margin-top: 4rem;
+  border-top: 1px solid var(--wc-border);
+  background: var(--wc-surface);
+  /* 半透明の薄いブルーを上から重ねてヘッダーと色調を揃える。 */
+  background-image: linear-gradient(180deg, var(--wc-accent-soft), transparent 40%);
+}
+
+.inner {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.top {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+.brand {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  max-width: 30rem;
+}
+
+.brandTitle {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: var(--wc-text);
+}
+
+.brandDesc {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: var(--wc-muted);
+}
+
+.nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.25rem;
+  align-items: flex-start;
+}
+
+.navLink {
+  font-size: 0.85rem;
+  color: var(--wc-muted);
+  text-decoration: none;
+  transition:
+    color 140ms ease,
+    border-color 140ms ease;
+  border-bottom: 1px solid transparent;
+  padding-bottom: 1px;
+}
+
+.navLink:hover {
+  color: var(--wc-accent);
+  border-bottom-color: rgba(59, 130, 246, 0.5);
+}
+
+.navLink:focus-visible {
+  outline: 2px solid var(--wc-accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* FIFA 非公認・商標まわりの注意書き。最も伝えるべき情報なので枠で囲って独立させる。 */
+.disclaimer {
+  border: 1px solid var(--wc-border);
+  border-radius: 12px;
+  background: rgba(148, 163, 184, 0.06);
+  padding: 0.85rem 1rem;
+  font-size: 0.76rem;
+  line-height: 1.7;
+  color: var(--wc-muted);
+}
+
+.disclaimer strong {
+  color: var(--wc-emphasis);
+  font-weight: 700;
+}
+
+.bottom {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.76rem;
+  color: var(--wc-muted);
+}

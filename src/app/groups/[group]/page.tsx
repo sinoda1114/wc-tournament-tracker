@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Anchor, Container, Stack, Text, Title } from '@mantine/core';
@@ -29,6 +30,24 @@ type PageProps = {
   params: Promise<{ group: string }>;
   searchParams: Promise<{ date?: string | string[] }>;
 };
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { group } = await params;
+  const lower = group.toLowerCase();
+  if (!VALID_GROUPS.has(lower)) {
+    return { title: 'グループリーグ' };
+  }
+  const letter = lower.toUpperCase();
+  const title = `グループ${letter}`;
+  const description = `WC 2026 グループ${letter}の順位表と試合結果。出場国と日程をまとめています。`;
+
+  return {
+    title,
+    description,
+    alternates: { canonical: `/groups/${lower}` },
+    openGraph: { title, description, url: `/groups/${lower}` },
+  };
+}
 
 function pickDateParam(value: string | string[] | undefined): string | null {
   if (Array.isArray(value)) return value[0] ?? null;

@@ -1,0 +1,130 @@
+/*
+ * 法務ページ（利用規約 / プライバシーポリシー / 特商法表記）共通の本文スタイル。
+ * CSS Modules でスコープし、globals.css には触れない。配色は --wc-* 変数に追従。
+ */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--wc-border);
+}
+
+.updated {
+  font-size: 0.8rem;
+  color: var(--wc-muted);
+}
+
+/* 「これは雛形であり弁護士確認が必要」等の注意書きを目立たせる枠。 */
+.notice {
+  border: 1px solid rgba(251, 191, 36, 0.5);
+  background: rgba(251, 191, 36, 0.1);
+  border-radius: 12px;
+  padding: 0.85rem 1rem;
+  font-size: 0.82rem;
+  line-height: 1.7;
+  color: var(--wc-text);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: var(--wc-gold);
+}
+
+.body {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.85;
+  color: var(--wc-text);
+}
+
+.muted {
+  color: var(--wc-muted);
+}
+
+.list {
+  margin: 0;
+  padding-left: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+  line-height: 1.8;
+  color: var(--wc-text);
+}
+
+.list li {
+  padding-left: 0.15rem;
+}
+
+/* 特商法の項目テーブル（定義リスト）。課金実装時に値を埋める。 */
+.defList {
+  margin: 0;
+  display: grid;
+  grid-template-columns: minmax(8rem, 12rem) 1fr;
+  gap: 0.1rem 1rem;
+  border: 1px solid var(--wc-border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.defList dt {
+  background: rgba(148, 163, 184, 0.08);
+  padding: 0.7rem 0.9rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--wc-muted);
+  border-bottom: 1px solid var(--wc-border);
+}
+
+.defList dd {
+  margin: 0;
+  padding: 0.7rem 0.9rem;
+  font-size: 0.88rem;
+  color: var(--wc-text);
+  border-bottom: 1px solid var(--wc-border);
+}
+
+@media (max-width: 600px) {
+  .defList {
+    grid-template-columns: 1fr;
+  }
+
+  .defList dt {
+    border-bottom: 0;
+    padding-bottom: 0.2rem;
+  }
+}
+
+.placeholder {
+  color: var(--wc-muted);
+  font-style: italic;
+}
+
+.backLink {
+  align-self: flex-start;
+  font-size: 0.85rem;
+  color: var(--wc-accent);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+}
+
+.backLink:hover {
+  border-bottom-color: var(--wc-accent);
+}
