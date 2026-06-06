@@ -1,0 +1,65 @@
+# CI パイプライン
+#
+# 目的: main への push / PR で「型・lint・テスト・ビルド・脆弱性監査」を一気通貫で検証する。
+# 方針（リポジトリのサプライチェーン規律に従う）:
+#   - 依存解決は必ず `npm ci`（lockfile 厳守。非決定的なインストールは避ける）。
+#   - `.npmrc` の ignore-scripts=true により postinstall は走らない。
+#     依存（libsql=prebuilt / next=wasm）はネイティブビルド不要なので問題なし。
+#   - audit は high 閾値。現状 next 内部 postcss の moderate 警告は残るが、
+#     high 未満なので CI は落とさない（= しきい値どおりで意図的に許容）。
+#
+# 注意: env（TURSO_*, CRON_SECRET 等）は不要。
+#   - env.ts は import 副作用で throw しない遅延検証設計。
+#   - DB を読むページ／sitemap は全て force-dynamic（リクエスト時評価）。
+#   よって build / test は env 無しで通る。
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# 同一 ref で新しい push が来たら、進行中の旧ジョブをキャンセルして無駄打ちを防ぐ。
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: typecheck / lint / test / build / audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      # lockfile 厳守でクリーンインストール（postinstall は .npmrc で無効）。
+      - name: Install dependencies
+        run: npm ci
+
+      # 型チェック（tsconfig は noEmit）。
+      - name: Type check
+        run: npx tsc --noEmit
+
+      # ESLint（package.json: lint = "eslint ."）。
+      - name: Lint
+        run: npm run lint
+
+      # 単体・結合テスト（package.json: test = "vitest run"）。DB はテスト内でモック。
+      - name: Test
+        run: npm run test
+
+      # 本番ビルド（Next 16 / Turbopack）。env 不要（上記の注意を参照）。
+      - name: Build
+        run: npm run build
+
+      # 依存の脆弱性監査。high 以上で失敗。moderate（next内部postcss 等）は許容。
+      - name: Audit dependencies
+        run: npm audit --audit-level=high
