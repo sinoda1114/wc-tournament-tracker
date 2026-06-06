@@ -14,6 +14,7 @@ import {
   isValidAdminPassword,
 } from '@/lib/auth';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { adminPasswordSchema, matchUpdateSchema } from '@/lib/validation';
 
 /** プロキシ経由のクライアント IP を推定する（Vercel は x-forwarded-for を付与）。 */
 function clientIpFrom(h: Headers): string {
@@ -34,7 +35,7 @@ export async function loginAdminAction(password: string) {
     };
   }
 
-  if (!isValidAdminPassword(password)) {
+  if (!adminPasswordSchema.safeParse(password).success || !isValidAdminPassword(password)) {
     return { ok: false as const, message: 'パスワードが正しくありません' };
   }
 
@@ -62,8 +63,14 @@ export async function updateAdminMatchAction(
     return { ok: false as const, message: '認証が必要です' };
   }
 
+  // クライアント由来の入力を DB 手前で検証（スコア範囲・ステータス enum 等）。
+  const parsed = matchUpdateSchema.safeParse(input);
+  if (!parsed.success) {
+    return { ok: false as const, message: '入力が不正です' };
+  }
+
   try {
-    await updateMatchResult(input);
+    await updateMatchResult(parsed.data);
     revalidatePath('/');
     revalidatePath('/prediction');
     revalidatePath(`/matches/${input.matchId}`);
