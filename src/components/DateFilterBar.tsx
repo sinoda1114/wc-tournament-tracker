@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState, useTransition } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Popover } from '@mantine/core';
 import { DatePicker } from '@mantine/dates';
-import dayjs from 'dayjs';
 
 import { formatMatchDate } from '@/lib/bracket';
 import { addDays, parseDateParam, todayInZone } from '@/lib/date-filter';
@@ -121,12 +120,9 @@ export function DateFilterBar({
     updateDate(target);
   };
 
-  const handleCalendarChange = (value: Date | null) => {
-    if (!value) {
-      updateDate(null);
-    } else {
-      updateDate(dayjs(value).format('YYYY-MM-DD'));
-    }
+  // Mantine 8 の DatePicker は値が string(YYYY-MM-DD)。そのまま URL クエリに使える。
+  const handleCalendarChange = (value: string | null) => {
+    updateDate(value);
     setPopoverOpen(false);
   };
 
@@ -143,10 +139,6 @@ export function DateFilterBar({
       !badges.some((b) => b.key !== 'all' && b.targetDate === activeDate))
       ? activeDate
       : null;
-
-  const calendarValue: Date | null = activeDate
-    ? dayjs(activeDate, 'YYYY-MM-DD').toDate()
-    : null;
 
   return (
     <div className="wc-date-filter-bar" role="group" aria-label={t.groupAria}>
@@ -193,7 +185,7 @@ export function DateFilterBar({
             </button>
           </Popover.Target>
           <Popover.Dropdown>
-            <DatePicker value={calendarValue} onChange={handleCalendarChange} />
+            <DatePicker value={activeDate} onChange={handleCalendarChange} />
           </Popover.Dropdown>
         </Popover>
 

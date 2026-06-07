@@ -29,7 +29,7 @@ export function Providers({ children, locale, dict, timeZone }: ProvidersProps) 
     <I18nProvider locale={locale} dict={dict} timeZone={timeZone}>
       <MantineProvider theme={theme} defaultColorScheme="dark">
         {/* 日付ピッカーは全言語で英語表記に統一（月名・曜日。サッカーファンに十分通じる）。 */}
-        <DatesProvider settings={{ locale: 'en', timezone: 'Asia/Tokyo' }}>
+        <DatesProvider settings={{ locale: 'en' }}>
           {children}
         </DatesProvider>
       </MantineProvider>
