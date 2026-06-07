@@ -37,6 +37,7 @@ export function TimeZonePicker({ label }: { label: string }) {
           variant="default"
           size="xs"
           radius="md"
+          h={34}
           loading={pending}
           aria-label={label}
           title={`${label}: ${current}`}

@@ -64,7 +64,12 @@ export function BracketMiniCard({ match, emphasized = false }: BracketMiniCardPr
           ) : null}
         </span>
       </div>
-      <MatchVersus match={match} size="sm" showFavoriteStar={false} />
+      <MatchVersus
+        match={match}
+        size="sm"
+        showFavoriteStar={false}
+        nameMode={emphasized ? 'full' : 'code'}
+      />
       {emphasized ? (
         <div style={{ textAlign: 'center', color: 'var(--wc-gold)', fontSize: '0.72rem' }}>
           {stageLabel}

@@ -8,7 +8,6 @@ import {
   formatVenueStageSummary,
   isHighAltitude,
   roofTypeLabel,
-  surfaceLabel,
 } from '@/lib/venue';
 
 import { CountryFlag } from './CountryFlag';
@@ -73,10 +72,6 @@ export function VenueInfoCard({ venue, summary, locale, dict }: VenueInfoCardPro
             <dd>{roof}</dd>
           </div>
         ) : null}
-        <div className="wc-venue-card-item">
-          <dt>{t.pitch}</dt>
-          <dd>{surfaceLabel(venue.roofType, locale)}</dd>
-        </div>
         {elevation ? (
           <div className="wc-venue-card-item">
             <dt>{t.elevation}</dt>
