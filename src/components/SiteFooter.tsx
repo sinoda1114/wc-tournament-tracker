@@ -22,7 +22,7 @@ const FOOTER_LINKS: { href: string; key: 'linkTerms' | 'linkPrivacy' | 'linkToku
 ];
 
 export function SiteFooter({ t }: { t: Dictionary['footer'] }) {
-  const items: { key: string; node: ReactNode }[] = [
+  const leftItems: { key: string; node: ReactNode }[] = [
     ...FOOTER_LINKS.map((link) => ({
       key: link.href,
       node: (
@@ -31,7 +31,6 @@ export function SiteFooter({ t }: { t: Dictionary['footer'] }) {
         </Link>
       ),
     })),
-    { key: 'copyright', node: <span>{t.copyright}</span> },
     { key: 'notice', node: <span>{t.dataNotice}</span> },
   ];
 
@@ -42,16 +41,19 @@ export function SiteFooter({ t }: { t: Dictionary['footer'] }) {
           <p className={styles.brandTitle}>{t.brandTitle}</p>
 
           <div className={styles.bottom}>
-            {items.map((item, index) => (
-              <Fragment key={item.key}>
-                {index > 0 ? (
-                  <span aria-hidden className={styles.sep}>
-                    ·
-                  </span>
-                ) : null}
-                {item.node}
-              </Fragment>
-            ))}
+            <div className={styles.left}>
+              {leftItems.map((item, index) => (
+                <Fragment key={item.key}>
+                  {index > 0 ? (
+                    <span aria-hidden className={styles.sep}>
+                      ·
+                    </span>
+                  ) : null}
+                  {item.node}
+                </Fragment>
+              ))}
+            </div>
+            <p className={styles.copyright}>{t.copyright}</p>
           </div>
         </div>
       </Container>

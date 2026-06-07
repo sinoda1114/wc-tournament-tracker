@@ -102,6 +102,19 @@
   color: var(--wc-muted);
 }
 
+.left {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.9rem;
+}
+
+/* コピーライトは右寄せ（狭幅では折り返して左の行の下に回る）。 */
+.copyright {
+  margin: 0;
+  margin-left: auto;
+}
+
 .sep {
   color: var(--wc-border);
   user-select: none;
