@@ -10,3 +10,6 @@ out
 
 # work-summary skill output (local-only, not pushed)
 work-summary/
+
+# codegraph local index (per-machine, not pushed)
+.codegraph/
