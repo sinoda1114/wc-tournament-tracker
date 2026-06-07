@@ -2,6 +2,8 @@ import { Container, Stack, Text, Title } from '@mantine/core';
 
 import { FavoritesPageView } from '@/components/FavoritesPageView';
 import { listAllTeams, listTournamentMatches } from '@/db/queries';
+import { getDictionary } from '@/lib/i18n/dictionary';
+import { resolveLocale } from '@/lib/i18n/server';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,15 +13,14 @@ export default async function FavoritesPage() {
     listTournamentMatches(),
   ]);
 
+  const t = getDictionary(await resolveLocale()).favorites;
+
   return (
     <Container size="xl" py="xl">
       <Stack gap="lg">
         <Stack gap={4}>
-          <Title order={1}>お気に入りチーム</Title>
-          <Text c="dimmed">
-            48ヶ国から気になるチームを ★ で選ぶと、決勝T・グループリーグの試合カードに金色の枠が付き、
-            「お気に入りのみ」フィルターで素早く確認できるようになります。設定はこのブラウザに保存されます。
-          </Text>
+          <Title order={1}>{t.pageTitle}</Title>
+          <Text c="dimmed">{t.pageDescription}</Text>
         </Stack>
 
         <FavoritesPageView teams={teams} matches={matches} />

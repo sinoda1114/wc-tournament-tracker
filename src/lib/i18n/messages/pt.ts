@@ -223,4 +223,76 @@ export const pt: Dictionary = {
   timezone: {
     label: 'Fuso horário',
   },
+  errorBoundary: {
+    title: 'Ocorreu um problema',
+    body: 'Ocorreu um erro ao carregar os dados. Aguarde um momento e tente novamente. Se o problema continuar, volte mais tarde.',
+    errorIdPrefix: 'ID do erro: ',
+    retry: 'Tentar novamente',
+    backHome: 'Voltar ao início',
+  },
+  globalError: {
+    title: 'Ocorreu um erro inesperado',
+    body: 'Não foi possível carregar o aplicativo. Desculpe o transtorno. Recarregue a página.',
+    errorIdPrefix: 'ID do erro: ',
+    reload: 'Recarregar',
+  },
+  notFound: {
+    title: 'Página não encontrada',
+    body: 'A página que você procura não existe ou pode ter sido movida. Verifique a URL ou comece pela página inicial.',
+    backHome: 'Voltar ao início',
+    viewGroups: 'Ver fase de grupos',
+  },
+  loading: {
+    text: 'Carregando…',
+  },
+  consent: {
+    dialogAria: 'Consentimento para uso de cookies e armazenamento',
+    bodyBefore:
+      'Este site usa cookies e o armazenamento local do navegador para recursos como favoritos e votação. Ao continuar usando o site, considera-se que você concordou com o uso deles. Para mais detalhes, consulte nossa',
+    policyLink: 'Política de Privacidade',
+    bodyAfter: '.',
+    dismiss: 'Fechar',
+    accept: 'Aceitar',
+  },
+  addToHome: {
+    label: 'Adicionar à tela de início',
+    intro: 'Você pode adicionar este site à sua tela de início como um app. Siga os passos abaixo no Safari.',
+    step1Before: 'Toque no ',
+    shareButton: ' botão Compartilhar ',
+    step1After: 'na parte inferior da tela.',
+    step2Before: 'Role o menu e selecione ',
+    addToHomeItem: '“Adicionar à Tela de Início”',
+    step2After: '.',
+    step3Before: 'Toque em ',
+    addButton: '“Adicionar”',
+    step3After: 'no canto superior direito para concluir.',
+  },
+  theme: {
+    switchToLight: 'Mudar para o modo claro',
+    switchToDark: 'Mudar para o modo escuro',
+  },
+  favorites: {
+    pageTitle: 'Times favoritos',
+    pageDescription:
+      'Escolha os times que você gosta entre as 48 nações com ★ e os cartões de partida deles na fase eliminatória e de grupos ganham uma borda dourada. O filtro “Apenas favoritos” permite vê-los rapidamente. As configurações são salvas neste navegador.',
+    selectTeamTitle: 'Selecione os times',
+    selectTeamDescription:
+      'Pesquise pelo nome em japonês, em inglês ou pelo código FIFA de 3 letras (ex.: 日本 / Japan / JPN). Ao selecionar um time, ele é adicionado aos favoritos e uma borda dourada é adicionada aos cartões de partida.',
+    currentCount: 'Favoritos atuais ({count})',
+    loading: 'Carregando…',
+    emptyPicker: 'Use a busca acima para escolher os times que você gosta.',
+    listAria: 'Lista de times favoritos',
+    removeAria: 'Remover {name} dos favoritos',
+    matchesTitle: 'Partidas dos times favoritos',
+    matchesDescription: 'Mostra as partidas que envolvem seus times favoritos em ordem cronológica.',
+    emptyMatches: 'Você ainda não tem times favoritos. Escolha os que você gosta na busca acima.',
+    noMatches: 'Não há partidas correspondentes.',
+    pickerSearchAria: 'Buscar nações favoritas',
+    registeredBadge: '✓ Adicionado',
+    registeredAria: 'Adicionado',
+  },
+  favoriteStar: {
+    addAria: 'Adicionar {name} aos favoritos',
+    removeAria: 'Remover {name} dos favoritos',
+  },
 };

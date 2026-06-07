@@ -218,4 +218,76 @@ export const zh: Dictionary = {
   timezone: {
     label: '时区',
   },
+  errorBoundary: {
+    title: '出现了问题',
+    body: '加载数据时发生错误。请稍后再试。如果问题持续，请过一会儿再来访问。',
+    errorIdPrefix: '错误 ID: ',
+    retry: '重试',
+    backHome: '返回首页',
+  },
+  globalError: {
+    title: '发生了意外错误',
+    body: '应用加载失败。给您带来不便，敬请谅解。请重新加载页面。',
+    errorIdPrefix: '错误 ID: ',
+    reload: '重新加载',
+  },
+  notFound: {
+    title: '未找到页面',
+    body: '您要找的页面不存在，或者可能已被移动。请检查网址，或从首页开始浏览。',
+    backHome: '返回首页',
+    viewGroups: '查看小组赛',
+  },
+  loading: {
+    text: '加载中…',
+  },
+  consent: {
+    dialogAria: '同意使用 Cookie 和存储',
+    bodyBefore:
+      '本网站会使用 Cookie 和浏览器本地存储来实现收藏、投票等功能。继续使用本网站即视为您同意使用这些技术。详情请参阅我们的',
+    policyLink: '隐私政策',
+    bodyAfter: '。',
+    dismiss: '关闭',
+    accept: '同意',
+  },
+  addToHome: {
+    label: '添加到主屏幕',
+    intro: '您可以像应用一样将本网站添加到主屏幕。请在 Safari 中按以下步骤操作。',
+    step1Before: '点按屏幕底部的',
+    shareButton: '分享按钮',
+    step1After: '。',
+    step2Before: '向下滚动菜单并选择',
+    addToHomeItem: '“添加到主屏幕”',
+    step2After: '。',
+    step3Before: '点按右上角的',
+    addButton: '“添加”',
+    step3After: '即可完成。',
+  },
+  theme: {
+    switchToLight: '切换到浅色模式',
+    switchToDark: '切换到深色模式',
+  },
+  favorites: {
+    pageTitle: '收藏的球队',
+    pageDescription:
+      '用 ★ 从全部 48 支球队中选出您关注的球队后，淘汰赛和小组赛的比赛卡片会加上金色边框，并可通过“仅显示收藏”筛选快速查看。设置保存在本浏览器中。',
+    selectTeamTitle: '选择球队',
+    selectTeamDescription:
+      '可按日文名、英文名或 FIFA 三字母代码搜索（例如 日本 / Japan / JPN）。选择球队后会加入收藏，并在其比赛卡片上加上金色边框。',
+    currentCount: '当前收藏（{count}）',
+    loading: '加载中…',
+    emptyPicker: '请用上方搜索选择您关注的球队。',
+    listAria: '收藏球队列表',
+    removeAria: '将 {name} 从收藏中移除',
+    matchesTitle: '收藏球队的比赛',
+    matchesDescription: '按时间顺序显示与您收藏球队相关的比赛。',
+    emptyMatches: '您还没有收藏的球队。请用上方搜索选择您关注的球队。',
+    noMatches: '没有符合条件的比赛。',
+    pickerSearchAria: '搜索收藏的球队',
+    registeredBadge: '✓ 已收藏',
+    registeredAria: '已收藏',
+  },
+  favoriteStar: {
+    addAria: '将 {name} 加入收藏',
+    removeAria: '将 {name} 从收藏中移除',
+  },
 };

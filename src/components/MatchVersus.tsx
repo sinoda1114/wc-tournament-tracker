@@ -2,7 +2,8 @@
 
 import type { MatchDetail } from '@/db/queries';
 import { formatSlotLabel, formatSlotTitle, isWinner } from '@/lib/bracket';
-import { useDictionary } from '@/lib/i18n/context';
+import { useI18n } from '@/lib/i18n/context';
+import { localizedTeamName } from '@/lib/i18n/team-name';
 
 import { CountryFlag } from './CountryFlag';
 import { FavoriteStar } from './FavoriteStar';
@@ -11,15 +12,30 @@ type MatchVersusProps = {
   match: MatchDetail;
   size?: 'sm' | 'md';
   showFavoriteStar?: boolean;
+  /**
+   * チーム名の表示形式。
+   * - 'code': FIFA コード（3 文字）。幅の狭い決勝T ブラケット用の既定値。
+   * - 'full': ロケール連動の正式名（試合カード用）。
+   */
+  nameMode?: 'code' | 'full';
 };
 
 export function MatchVersus({
   match,
   size = 'md',
   showFavoriteStar = true,
+  nameMode = 'code',
 }: MatchVersusProps) {
-  const dict = useDictionary();
+  const { locale, dict } = useI18n();
   const slotT = dict.match.slot;
+  const homeName =
+    nameMode === 'full' && match.homeTeam
+      ? localizedTeamName(match.homeTeam, locale)
+      : match.homeTeam?.fifaCode;
+  const awayName =
+    nameMode === 'full' && match.awayTeam
+      ? localizedTeamName(match.awayTeam, locale)
+      : match.awayTeam?.fifaCode;
   const homeWin = isWinner(match.homeTeamId, match.winnerTeamId);
   const awayWin = isWinner(match.awayTeamId, match.winnerTeamId);
   const hasScore = match.homeScore !== null && match.awayScore !== null;
@@ -38,7 +54,7 @@ export function MatchVersus({
                 size={starSize}
               />
             ) : null}
-            <span className="wc-versus-name">{match.homeTeam.fifaCode}</span>
+            <span className="wc-versus-name">{homeName}</span>
             <CountryFlag
               fifaCode={match.homeTeam.fifaCode}
               size={flagSize}
@@ -70,7 +86,7 @@ export function MatchVersus({
               size={flagSize}
               ariaLabel={match.awayTeam.nameJa}
             />
-            <span className="wc-versus-name">{match.awayTeam.fifaCode}</span>
+            <span className="wc-versus-name">{awayName}</span>
             {showFavoriteStar ? (
               <FavoriteStar
                 fifaCode={match.awayTeam.fifaCode}

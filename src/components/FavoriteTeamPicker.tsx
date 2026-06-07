@@ -5,6 +5,7 @@ import { Text } from '@mantine/core';
 import { TeamSearchCombobox } from '@/components/TeamSearchCombobox';
 import type { Team } from '@/db/queries';
 import { useFavoriteTeams } from '@/hooks/useFavoriteTeams';
+import { useDictionary } from '@/lib/i18n/context';
 
 type FavoriteTeamPickerProps = {
   teams: Team[];
@@ -18,20 +19,21 @@ type FavoriteTeamPickerProps = {
  * - 登録済みは選択肢をアクティブ表示＋「✓ 登録済」バッジで明示。
  */
 export function FavoriteTeamPicker({ teams }: FavoriteTeamPickerProps) {
+  const dict = useDictionary().favorites;
   const { isFavorite, toggle, ready } = useFavoriteTeams();
 
   return (
     <TeamSearchCombobox
       className="wc-favorite-picker"
       teams={teams}
-      ariaLabel="お気に入り国を検索"
+      ariaLabel={dict.pickerSearchAria}
       closeOnSelect={false}
       onSelect={(t) => toggle(t.fifaCode)}
       isOptionActive={(t) => ready && isFavorite(t.fifaCode)}
       optionAdornment={(t) =>
         ready && isFavorite(t.fifaCode) ? (
-          <Text component="span" size="xs" c="yellow" fw={700} ml="auto" aria-label="登録済">
-            ✓ 登録済
+          <Text component="span" size="xs" c="yellow" fw={700} ml="auto" aria-label={dict.registeredAria}>
+            {dict.registeredBadge}
           </Text>
         ) : null
       }

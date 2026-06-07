@@ -185,7 +185,7 @@ export function DateFilterBar({
             </button>
           </Popover.Target>
           <Popover.Dropdown>
-            <DatePicker value={activeDate} onChange={handleCalendarChange} />
+            <DatePicker value={activeDate} onChange={handleCalendarChange} highlightToday />
           </Popover.Dropdown>
         </Popover>
 

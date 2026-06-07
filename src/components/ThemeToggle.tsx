@@ -2,6 +2,8 @@
 
 import { ActionIcon, useComputedColorScheme, useMantineColorScheme } from '@mantine/core';
 
+import { useDictionary } from '@/lib/i18n/context';
+
 type ThemeToggleProps = {
   size?: number;
 };
@@ -18,10 +20,12 @@ type ThemeToggleProps = {
  * それが入るまでライト表示はカスタム背景/枠が暗いままになる点に留意。
  */
 export function ThemeToggle({ size = 16 }: ThemeToggleProps) {
+  const t = useDictionary().theme;
   const { setColorScheme } = useMantineColorScheme();
   const computed = useComputedColorScheme('dark', { getInitialValueInEffect: true });
   const isDark = computed === 'dark';
   const next = isDark ? 'light' : 'dark';
+  const label = isDark ? t.switchToLight : t.switchToDark;
 
   return (
     <ActionIcon
@@ -29,8 +33,8 @@ export function ThemeToggle({ size = 16 }: ThemeToggleProps) {
       size="lg"
       radius="md"
       onClick={() => setColorScheme(next)}
-      aria-label={isDark ? 'ライトモードに切り替え' : 'ダークモードに切り替え'}
-      title={isDark ? 'ライトモードに切り替え' : 'ダークモードに切り替え'}
+      aria-label={label}
+      title={label}
     >
       {isDark ? <SunIcon size={size} /> : <MoonIcon size={size} />}
     </ActionIcon>

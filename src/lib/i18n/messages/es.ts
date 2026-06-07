@@ -223,4 +223,76 @@ export const es: Dictionary = {
   timezone: {
     label: 'Zona horaria',
   },
+  errorBoundary: {
+    title: 'Se produjo un problema',
+    body: 'Ocurrió un error al cargar los datos. Espera un momento e inténtalo de nuevo. Si el problema persiste, vuelve más tarde.',
+    errorIdPrefix: 'ID de error: ',
+    retry: 'Reintentar',
+    backHome: 'Volver al inicio',
+  },
+  globalError: {
+    title: 'Ocurrió un error inesperado',
+    body: 'No se pudo cargar la aplicación. Disculpa las molestias. Vuelve a cargar la página.',
+    errorIdPrefix: 'ID de error: ',
+    reload: 'Recargar',
+  },
+  notFound: {
+    title: 'Página no encontrada',
+    body: 'La página que buscas no existe o puede que se haya movido. Verifica la URL o comienza desde la página de inicio.',
+    backHome: 'Volver al inicio',
+    viewGroups: 'Ver fase de grupos',
+  },
+  loading: {
+    text: 'Cargando…',
+  },
+  consent: {
+    dialogAria: 'Consentimiento del uso de cookies y almacenamiento',
+    bodyBefore:
+      'Este sitio usa cookies y el almacenamiento local del navegador para funciones como favoritos y votación. Al seguir usando el sitio, se considera que aceptas su uso. Para más detalles, consulta nuestra',
+    policyLink: 'Política de privacidad',
+    bodyAfter: '.',
+    dismiss: 'Cerrar',
+    accept: 'Aceptar',
+  },
+  addToHome: {
+    label: 'Añadir a la pantalla de inicio',
+    intro: 'Puedes añadir este sitio a tu pantalla de inicio como una app. Sigue estos pasos en Safari.',
+    step1Before: 'Toca el ',
+    shareButton: ' botón Compartir ',
+    step1After: 'en la parte inferior de la pantalla.',
+    step2Before: 'Desplázate por el menú y selecciona ',
+    addToHomeItem: '«Añadir a pantalla de inicio»',
+    step2After: '.',
+    step3Before: 'Toca ',
+    addButton: '«Añadir»',
+    step3After: 'en la parte superior derecha para terminar.',
+  },
+  theme: {
+    switchToLight: 'Cambiar a modo claro',
+    switchToDark: 'Cambiar a modo oscuro',
+  },
+  favorites: {
+    pageTitle: 'Equipos favoritos',
+    pageDescription:
+      'Elige los equipos que te interesan de las 48 naciones con ★ y sus tarjetas de partido en la fase eliminatoria y de grupos tendrán un borde dorado. El filtro «Solo favoritos» te permite verlos rápidamente. Los ajustes se guardan en este navegador.',
+    selectTeamTitle: 'Selecciona equipos',
+    selectTeamDescription:
+      'Busca por nombre en japonés, en inglés o por el código FIFA de 3 letras (p. ej. 日本 / Japan / JPN). Al seleccionar un equipo se añade a tus favoritos y se agrega un borde dorado a sus tarjetas de partido.',
+    currentCount: 'Favoritos actuales ({count})',
+    loading: 'Cargando…',
+    emptyPicker: 'Usa la búsqueda de arriba para elegir los equipos que te interesan.',
+    listAria: 'Lista de equipos favoritos',
+    removeAria: 'Quitar {name} de favoritos',
+    matchesTitle: 'Partidos de equipos favoritos',
+    matchesDescription: 'Muestra los partidos de tus equipos favoritos en orden cronológico.',
+    emptyMatches: 'Aún no tienes equipos favoritos. Elige los que te interesan en la búsqueda de arriba.',
+    noMatches: 'No hay partidos que coincidan.',
+    pickerSearchAria: 'Buscar naciones favoritas',
+    registeredBadge: '✓ Añadido',
+    registeredAria: 'Añadido',
+  },
+  favoriteStar: {
+    addAria: 'Añadir {name} a favoritos',
+    removeAria: 'Quitar {name} de favoritos',
+  },
 };

@@ -2,9 +2,8 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { Badge, Container, Group, Stack, Text, Title } from '@mantine/core';
 
-import { CountryFlag } from '@/components/CountryFlag';
 import { JsonLd } from '@/components/JsonLd';
-import { TeamBadge } from '@/components/TeamBadge';
+import { MatchVersus } from '@/components/MatchVersus';
 import { VenueInfoCard } from '@/components/VenueInfoCard';
 import { getMatchDetail, getVenueMatchSummary } from '@/db/queries';
 import {
@@ -83,6 +82,11 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
   const dict = getDictionary(locale);
   const timeZone = await resolveTimeZone();
   const stageLabel = dict.match.stage[match.stage as MatchStage] ?? match.stage;
+  // グループリーグの試合は「どのグループか（グループA 等）」を併記する。
+  const groupLabel =
+    match.stage === 'group_stage' && match.groupLetter
+      ? dict.groups.groupHeading.replace('{letter}', match.groupLetter)
+      : null;
   const kickoff = formatKickoff(match.kickoffAt, timeZone);
   const kickoffAbbrev = match.kickoffAt ? tzOffset(timeZone, new Date(match.kickoffAt)) : '';
   const venueSummary = await getVenueMatchSummary(match.venueId);
@@ -103,41 +107,23 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
       <Stack gap="lg">
         <Stack gap={6}>
           <Text c="dimmed">{dict.matchDetail.number.replace('{n}', String(match.id))}</Text>
-          <Title order={1}>{stageLabel}</Title>
+          <Title order={1}>{groupLabel ? `${stageLabel} · ${groupLabel}` : stageLabel}</Title>
           <Group gap="sm">
-            <Badge
-              variant="light"
-              leftSection={
-                <CountryFlag
-                  fifaCode={match.venue.countryCode}
-                  size="sm"
-                  ariaLabel={dict.match.venueHostingAria.replace('{country}', match.venue.country)}
-                />
-              }
-            >
-              {formatMatchDateZoned(match, timeZone)}
-            </Badge>
+            <Badge variant="light">{formatMatchDateZoned(match, timeZone)}</Badge>
             {kickoff ? (
               <Badge variant="light" color="blue" title={timeZone}>
                 {kickoff} {kickoffAbbrev}
               </Badge>
             ) : null}
-            <Badge
-              color={
-                match.status === 'finished'
-                  ? 'green'
-                  : match.status === 'in_progress'
-                    ? 'yellow'
-                    : 'gray'
-              }
-            >
-              {dict.match.status[match.status]}
-            </Badge>
+            {match.status !== 'scheduled' ? (
+              <Badge color={match.status === 'finished' ? 'green' : 'yellow'}>
+                {dict.match.status[match.status]}
+              </Badge>
+            ) : null}
           </Group>
         </Stack>
 
         <Stack
-          gap="md"
           p="lg"
           style={{
             border: '1px solid var(--wc-border)',
@@ -145,22 +131,7 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
             background: 'var(--wc-surface)',
           }}
         >
-          <TeamBadge
-            team={match.homeTeam}
-            slot={match.homeSlot}
-            score={match.homeScore}
-            winnerTeamId={match.winnerTeamId}
-            locale={locale}
-            dict={dict}
-          />
-          <TeamBadge
-            team={match.awayTeam}
-            slot={match.awaySlot}
-            score={match.awayScore}
-            winnerTeamId={match.winnerTeamId}
-            locale={locale}
-            dict={dict}
-          />
+          <MatchVersus match={match} nameMode="full" size="md" />
         </Stack>
 
         <VenueInfoCard venue={match.venue} summary={venueSummary} locale={locale} dict={dict} />

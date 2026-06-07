@@ -9,6 +9,7 @@ import { CookieConsent } from '@/components/CookieConsent';
 import { SiteFooter } from '@/components/SiteFooter';
 import { SiteHeader } from '@/components/SiteHeader';
 import { getSiteUrlObject } from '@/lib/env';
+import type { Locale } from '@/lib/i18n/config';
 import { getDictionary } from '@/lib/i18n/dictionary';
 import { resolveLocale, resolveTimeZone } from '@/lib/i18n/server';
 
@@ -53,6 +54,15 @@ export const metadata: Metadata = {
   },
 };
 
+/**
+ * <html lang> 用の BCP-47 タグへ変換する。中国語はグリフが地域差を持つため
+ * 簡体字（zh-Hans）を明示し、CJK 統合漢字が日本語字形で描画されるのを防ぐ。
+ * globals.css の :lang(zh) / html[lang^="zh"] セレクタもこの値に合わせる。
+ */
+function toHtmlLang(locale: Locale): string {
+  return locale === 'zh' ? 'zh-Hans' : locale;
+}
+
 export const viewport: Viewport = {
   // ブラウザ UI 着色。ダーク既定（濃紺）／ライト時はブルー寄りにする。
   themeColor: [
@@ -71,7 +81,7 @@ export default async function RootLayout({
   const timeZone = await resolveTimeZone();
 
   return (
-    <html lang={locale} suppressHydrationWarning>
+    <html lang={toHtmlLang(locale)} suppressHydrationWarning>
       <head>
         <ColorSchemeScript defaultColorScheme="dark" />
       </head>

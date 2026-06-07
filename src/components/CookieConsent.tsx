@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Button } from '@mantine/core';
 
 import { readConsentAccepted, writeConsentAccepted } from '@/lib/consent';
+import { useDictionary } from '@/lib/i18n/context';
 
 import styles from './CookieConsent.module.css';
 
@@ -23,6 +24,7 @@ import styles from './CookieConsent.module.css';
  *   「端末内ストレージ（Cookie/localStorage）を使う」旨の周知を主目的とした一般的な実装にとどめる。
  */
 export function CookieConsent() {
+  const t = useDictionary().consent;
   // 初回は false 固定 → SSR と一致。マウント後に未同意なら true へ。
   const [visible, setVisible] = useState(false);
 
@@ -48,25 +50,23 @@ export function CookieConsent() {
     <div
       className={styles.banner}
       role="dialog"
-      aria-label="Cookie・ストレージ利用への同意"
+      aria-label={t.dialogAria}
       aria-live="polite"
     >
       <div className={styles.inner}>
         <p className={styles.text}>
-          本サイトでは、お気に入り登録や投票などの機能のために Cookie および
-          ブラウザのローカルストレージを使用します。利用を続けることで、これらの使用に同意したものとみなされます。
-          詳しくは{' '}
+          {t.bodyBefore}{' '}
           <Link href="/privacy" className={styles.link}>
-            プライバシーポリシー
+            {t.policyLink}
           </Link>{' '}
-          をご覧ください。
+          {t.bodyAfter}
         </p>
         <div className={styles.actions}>
           <Button variant="subtle" color="gray" size="xs" onClick={dismiss}>
-            閉じる
+            {t.dismiss}
           </Button>
           <Button color="blue" size="xs" onClick={accept}>
-            同意する
+            {t.accept}
           </Button>
         </div>
       </div>

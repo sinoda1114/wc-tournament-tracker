@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from 'react';
 import { ActionIcon, Modal, Text } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 
+import { useDictionary } from '@/lib/i18n/context';
+
 /**
  * スマホ「ホーム画面に追加」ボタン（PWA A2HS = Add To Home Screen）。
  *
@@ -58,6 +60,7 @@ function isIos(): boolean {
 }
 
 export function AddToHomeScreen() {
+  const t = useDictionary().addToHome;
   const [mode, setMode] = useState<Mode>('hidden');
   const [iosOpened, iosModal] = useDisclosure(false);
   // Android のネイティブプロンプト event は再レンダーに依存しないので ref で保持する。
@@ -121,7 +124,7 @@ export function AddToHomeScreen() {
 
   if (mode === 'hidden') return null;
 
-  const label = 'ホーム画面に追加';
+  const label = t.label;
 
   return (
     <>
@@ -147,7 +150,7 @@ export function AddToHomeScreen() {
           size="sm"
         >
           <Text size="sm" c="var(--wc-muted)" mb="md">
-            このサイトをアプリのようにホーム画面へ追加できます。Safari の下記の手順で登録してください。
+            {t.intro}
           </Text>
           <ol className="wc-a2hs-steps">
             <li className="wc-a2hs-step">
@@ -155,8 +158,9 @@ export function AddToHomeScreen() {
                 <ShareIcon size={20} />
               </span>
               <span>
-                画面下部の<Text component="span" fw={700} c="var(--wc-accent)"> 共有ボタン </Text>
-                をタップします。
+                {t.step1Before}
+                <Text component="span" fw={700} c="var(--wc-accent)">{t.shareButton}</Text>
+                {t.step1After}
               </span>
             </li>
             <li className="wc-a2hs-step">
@@ -164,9 +168,9 @@ export function AddToHomeScreen() {
                 <PlusSquareIcon size={20} />
               </span>
               <span>
-                メニューを下にスクロールし
-                <Text component="span" fw={700} c="var(--wc-accent)">「ホーム画面に追加」</Text>
-                を選びます。
+                {t.step2Before}
+                <Text component="span" fw={700} c="var(--wc-accent)">{t.addToHomeItem}</Text>
+                {t.step2After}
               </span>
             </li>
             <li className="wc-a2hs-step">
@@ -174,8 +178,9 @@ export function AddToHomeScreen() {
                 <CheckIcon size={20} />
               </span>
               <span>
-                右上の<Text component="span" fw={700} c="var(--wc-accent)">「追加」</Text>
-                をタップして完了です。
+                {t.step3Before}
+                <Text component="span" fw={700} c="var(--wc-accent)">{t.addButton}</Text>
+                {t.step3After}
               </span>
             </li>
           </ol>

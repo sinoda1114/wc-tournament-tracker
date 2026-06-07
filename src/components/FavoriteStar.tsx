@@ -3,6 +3,7 @@
 import type { MouseEvent } from 'react';
 
 import { useFavoriteTeams } from '@/hooks/useFavoriteTeams';
+import { useDictionary } from '@/lib/i18n/context';
 
 type FavoriteStarProps = {
   fifaCode: string;
@@ -58,6 +59,7 @@ function StarIcon({ size, filled }: StarIconProps) {
  *   ホバーやアクティブ色は CSS 側でまとめて制御している。
  */
 export function FavoriteStar({ fifaCode, teamName, size = 'md' }: FavoriteStarProps) {
+  const t = useDictionary().favoriteStar;
   const { isFavorite, toggle, ready } = useFavoriteTeams();
   const active = ready && isFavorite(fifaCode);
   const pixelSize = SIZE_PX[size];
@@ -69,9 +71,7 @@ export function FavoriteStar({ fifaCode, teamName, size = 'md' }: FavoriteStarPr
   };
 
   const labelTarget = teamName ?? fifaCode;
-  const ariaLabel = active
-    ? `${labelTarget} をお気に入りから削除`
-    : `${labelTarget} をお気に入りに追加`;
+  const ariaLabel = (active ? t.removeAria : t.addAria).replace('{name}', labelTarget);
 
   return (
     <button

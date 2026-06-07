@@ -219,4 +219,76 @@ export const en: Dictionary = {
   timezone: {
     label: 'Time zone',
   },
+  errorBoundary: {
+    title: 'Something went wrong',
+    body: 'An error occurred while loading data. Please wait a moment and try again. If the problem persists, please come back later.',
+    errorIdPrefix: 'Error ID: ',
+    retry: 'Retry',
+    backHome: 'Back to home',
+  },
+  globalError: {
+    title: 'An unexpected error occurred',
+    body: 'The app failed to load. Sorry for the inconvenience. Please reload the page.',
+    errorIdPrefix: 'Error ID: ',
+    reload: 'Reload',
+  },
+  notFound: {
+    title: 'Page not found',
+    body: 'The page you are looking for does not exist or may have moved. Please check the URL or start from the home page.',
+    backHome: 'Back to home',
+    viewGroups: 'View group stage',
+  },
+  loading: {
+    text: 'Loading…',
+  },
+  consent: {
+    dialogAria: 'Consent to Cookie and storage use',
+    bodyBefore:
+      'This site uses cookies and your browser local storage for features such as favorites and voting. By continuing to use the site, you are deemed to have agreed to their use. For details, see our',
+    policyLink: 'Privacy Policy',
+    bodyAfter: '.',
+    dismiss: 'Close',
+    accept: 'Accept',
+  },
+  addToHome: {
+    label: 'Add to Home Screen',
+    intro: 'You can add this site to your home screen like an app. Follow the steps below in Safari.',
+    step1Before: 'Tap the ',
+    shareButton: ' Share button ',
+    step1After: 'at the bottom of the screen.',
+    step2Before: 'Scroll down the menu and select ',
+    addToHomeItem: '“Add to Home Screen”',
+    step2After: '.',
+    step3Before: 'Tap ',
+    addButton: '“Add”',
+    step3After: 'in the top right to finish.',
+  },
+  theme: {
+    switchToLight: 'Switch to light mode',
+    switchToDark: 'Switch to dark mode',
+  },
+  favorites: {
+    pageTitle: 'Favorite teams',
+    pageDescription:
+      'Pick teams you care about from all 48 nations with ★, and their match cards in the knockout and group stage get a gold border. The “Favorites only” filter lets you check them quickly. Settings are saved in this browser.',
+    selectTeamTitle: 'Select teams',
+    selectTeamDescription:
+      'Search by Japanese name, English name, or FIFA 3-letter code (e.g. 日本 / Japan / JPN). Selecting a team adds it to your favorites and adds a gold border to its match cards.',
+    currentCount: 'Current favorites ({count})',
+    loading: 'Loading…',
+    emptyPicker: 'Use the search above to pick teams you care about.',
+    listAria: 'Favorite teams list',
+    removeAria: 'Remove {name} from favorites',
+    matchesTitle: 'Matches of favorite teams',
+    matchesDescription: 'Shows matches involving your favorite teams in chronological order.',
+    emptyMatches: 'You have no favorite teams yet. Pick teams you care about from the search above.',
+    noMatches: 'There are no matching matches.',
+    pickerSearchAria: 'Search favorite nations',
+    registeredBadge: '✓ Added',
+    registeredAria: 'Added',
+  },
+  favoriteStar: {
+    addAria: 'Add {name} to favorites',
+    removeAria: 'Remove {name} from favorites',
+  },
 };

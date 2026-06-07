@@ -238,6 +238,87 @@ export const ja = {
   timezone: {
     label: 'タイムゾーン',
   },
+  // ルートのエラー境界（error.tsx）。{digest}=エラーID。
+  errorBoundary: {
+    title: '問題が発生しました',
+    body: 'データの読み込み中にエラーが発生しました。時間をおいて再度お試しください。問題が続く場合は、しばらくしてからアクセスしてください。',
+    errorIdPrefix: 'エラーID: ',
+    retry: '再試行',
+    backHome: 'トップへ戻る',
+  },
+  // 最上位フォールバック（global-error.tsx）。layout/Providers 非適用のため辞書を直接埋め込む。
+  globalError: {
+    title: '予期しないエラーが発生しました',
+    body: 'アプリの読み込みに失敗しました。お手数ですが、ページを再読み込みしてください。',
+    errorIdPrefix: 'エラーID: ',
+    reload: '再読み込み',
+  },
+  // 404 ページ（not-found.tsx）。
+  notFound: {
+    title: 'ページが見つかりません',
+    body: 'お探しのページは存在しないか、移動した可能性があります。URL をご確認のうえ、トップページからお進みください。',
+    backHome: 'トップへ戻る',
+    viewGroups: 'グループリーグを見る',
+  },
+  // 読み込み中 UI（loading.tsx）。
+  loading: {
+    text: '読み込み中…',
+  },
+  // Cookie/ストレージ同意バナー（CookieConsent）。リンク前後で文を分割。
+  consent: {
+    dialogAria: 'Cookie・ストレージ利用への同意',
+    bodyBefore:
+      '本サイトでは、お気に入り登録や投票などの機能のために Cookie およびブラウザのローカルストレージを使用します。利用を続けることで、これらの使用に同意したものとみなされます。詳しくは',
+    policyLink: 'プライバシーポリシー',
+    bodyAfter: 'をご覧ください。',
+    dismiss: '閉じる',
+    accept: '同意する',
+  },
+  // ホーム画面に追加（AddToHomeScreen）。iOS 手順は太字部分を分割。
+  addToHome: {
+    label: 'ホーム画面に追加',
+    intro: 'このサイトをアプリのようにホーム画面へ追加できます。Safari の下記の手順で登録してください。',
+    step1Before: '画面下部の',
+    shareButton: ' 共有ボタン ',
+    step1After: 'をタップします。',
+    step2Before: 'メニューを下にスクロールし',
+    addToHomeItem: '「ホーム画面に追加」',
+    step2After: 'を選びます。',
+    step3Before: '右上の',
+    addButton: '「追加」',
+    step3After: 'をタップして完了です。',
+  },
+  // ライト/ダーク切替（ThemeToggle）。
+  theme: {
+    switchToLight: 'ライトモードに切り替え',
+    switchToDark: 'ダークモードに切り替え',
+  },
+  // お気に入りページ（/favorites・FavoritesPageView）。{count}=件数・{name}=国名。
+  favorites: {
+    pageTitle: 'お気に入りチーム',
+    pageDescription:
+      '48ヶ国から気になるチームを ★ で選ぶと、決勝T・グループリーグの試合カードに金色の枠が付き、「お気に入りのみ」フィルターで素早く確認できるようになります。設定はこのブラウザに保存されます。',
+    selectTeamTitle: 'チームを選択',
+    selectTeamDescription:
+      '日本語名・英語名・FIFA 3文字コード（例: 日本 / Japan / JPN）で検索できます。選択するとお気に入りに登録され、試合カードに金色の枠が付きます。',
+    currentCount: '現在のお気に入り（{count} 件）',
+    loading: '読み込み中…',
+    emptyPicker: '上の検索で気になる国を選んでください。',
+    listAria: 'お気に入りチーム一覧',
+    removeAria: '{name} をお気に入りから削除',
+    matchesTitle: 'お気に入りチームの試合',
+    matchesDescription: 'お気に入りに登録したチームが関わる試合を時系列で表示します。',
+    emptyMatches: 'まだお気に入りのチームがありません。上の検索から気になる国を選んでください。',
+    noMatches: '該当する試合はありません。',
+    pickerSearchAria: 'お気に入り国を検索',
+    registeredBadge: '✓ 登録済',
+    registeredAria: '登録済',
+  },
+  // お気に入りトグル星（FavoriteStar）。{name}=国名。
+  favoriteStar: {
+    addAria: '{name} をお気に入りに追加',
+    removeAria: '{name} をお気に入りから削除',
+  },
 };
 
 export type Dictionary = typeof ja;

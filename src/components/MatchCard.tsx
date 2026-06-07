@@ -8,7 +8,6 @@ import { useFavoriteTeams } from '@/hooks/useFavoriteTeams';
 import { formatKickoff, formatMatchDateZoned } from '@/lib/bracket';
 import { useDictionary, useTimeZone } from '@/lib/i18n/context';
 
-import { CountryFlag } from './CountryFlag';
 import { MatchVersus } from './MatchVersus';
 
 type MatchCardProps = {
@@ -47,11 +46,6 @@ export function MatchCard({ match }: MatchCardProps) {
             ·
           </span>
           <span className="wc-match-card-venue-inline">
-            <CountryFlag
-              fifaCode={match.venue.countryCode}
-              size="sm"
-              ariaLabel={dict.match.venueHostingAria.replace('{country}', match.venue.country)}
-            />
             <span aria-hidden>🏟️</span>
             <span>{match.venue.stadiumName}</span>
             <span aria-hidden className="wc-venue-sep">
@@ -61,7 +55,8 @@ export function MatchCard({ match }: MatchCardProps) {
               {match.venue.state} / {match.venue.city}
             </span>
           </span>
-          {match.status !== 'scheduled' ? (
+          {/* 「予定(scheduled)」はバッジを出さない。終了/試合中のみ表示する。 */}
+          {match.status === 'finished' || match.status === 'in_progress' ? (
             <Badge
               variant="light"
               size="sm"
@@ -72,7 +67,7 @@ export function MatchCard({ match }: MatchCardProps) {
           ) : null}
         </div>
 
-        <MatchVersus match={match} />
+        <MatchVersus match={match} nameMode="full" />
       </Stack>
     </Link>
   );

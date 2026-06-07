@@ -96,3 +96,34 @@
 - **確認したいこと**: (a) ログイン必須×SEO の二層設計境界＝「公開で見せるルート」の確定リスト（D の W5 公開ランディングと整合）。(b) 72h無料の起点＝Clerk `created_at` 基準でよいか。(c) Stripe実体（商品/価格）の現況（§4-2）。
 
 - （他レーン未記入）
+
+---
+
+## 6. 各エージェント 直近の着手指示（MAIN→ABCD・2026-06-07）
+
+> 着手は WBS の **W番号で固定参照**（[[numbered-choices]]）。各自セッションで本節＋自分の coordination メモリを読んで進める。レビュー由来の修正は出典併記。
+
+### A（SUB-A `3137dfcc`）— データ/足回り：**今すぐ着手可**
+- **W4** `error.tsx`/`global-error.tsx`/`loading.tsx`/`not-found.tsx`/DB障害フォールバック/env起動時バリデーション（新規ファイル中心＝競合なし）
+- **W6** `/api/ingest` 本番化＋AIレビュー指摘：①外部fetchに `AbortController`(5〜10s)（`lib/ingest/thesportsdb.ts`）②`THESPORTSDB_KEY` を本番必須化 ③GET副作用に `Cache-Control: no-store`
+- **W7一部** `updateMatchResult()` 入口に入力検証(zod)：score≥0整数/status許可値/winner=home|away/finished時の勝者要否（AIレビュー **High**）
+
+### B（SUB-B `1344505b`）— UI/認証連動
+- **テーマ** `globals.css` ライトパレット化（[[handoff-theme-light-to-sub-b]]）
+- **#19 i18n** 残り groups/teams/prediction（[[i18n-implementation-status]]）
+- **W8**（C の W1 後）ログイン壁/お気に入りDB同期(localStorage→`user_favorites`)/投票のユーザー紐付け/ペイウォールUI。今は設計のみ、`ensureVoterId` 差替点を C と握る
+
+### C（SUB-C `1cc30e6f`）— 認証/課金：**ブロッカーを MAIN が今解除**
+- MAIN が即実施 → deps(`@clerk/nextjs`,`stripe`,`@stripe/stripe-js`)/`.env.example` 追記/`layout.tsx` に `<ClerkProvider>`（§5 依頼キュー）
+- 解除後 **W1** Clerk 認証基盤（middleware で公開/保護の二層・匿名`wc_voter_id`→user_id）→ **W2** Stripe 買い切り72h無料・entitlements
+- 解除待ちは設計（公開ルート確定リスト/entitlements スキーマ/72h起点=Clerk `created_at`）
+
+### D（SUB-D `c4702514`）— 法務/SEO/インフラ
+- **W3** 法務本文（(legal) ルート実在。中身を起こす・FIFA非公認明記・**公開前に弁護士レビュー**）
+- **W5** SEO：sitemap/robots/manifest/OGP/llms.txt（[[seo-llms-txt]]）。ログイン必須×SEO は公開プレビュー層で二層化
+- **W7** CI：`.github/workflows`（**`npm ci`** + `npm audit --audit-level=high`）。push は `gh auth refresh -s workflow`（ユーザー操作・[[gh-workflow-scope-missing]]）。`next lint`→`eslint .`（AIレビュー Medium）
+
+### MAIN（`4904690c`）— 今やること
+1. **C ブロッカー解除**：deps 追加/`.env.example` env/`layout.tsx` ClerkProvider
+2. 初回コミット（`package-lock.json` 含める＝AIレビュー Medium）
+3. Stripe 実体（商品/価格ID）確認 → C へ `STRIPE_PRICE_ID` 連携

@@ -9,6 +9,8 @@ import { FavoriteTeamPicker } from '@/components/FavoriteTeamPicker';
 import { MatchCard } from '@/components/MatchCard';
 import type { MatchDetail, Team } from '@/db/queries';
 import { useFavoriteTeams } from '@/hooks/useFavoriteTeams';
+import { useI18n } from '@/lib/i18n/context';
+import { localizedTeamName } from '@/lib/i18n/team-name';
 
 type FavoritesPageViewProps = {
   /** サーバー側で英語名アルファベット順に整列済みの全チーム。 */
@@ -28,6 +30,8 @@ function matchHasFavorite(m: MatchDetail, favorites: Set<string>): boolean {
 }
 
 export function FavoritesPageView({ teams, matches }: FavoritesPageViewProps) {
+  const { locale, dict } = useI18n();
+  const t = dict.favorites;
   const { favorites, isFavorite, toggle, ready } = useFavoriteTeams();
 
   // 入力 `teams` は既に英語名アルファベット順に整列済みなので、
@@ -48,10 +52,9 @@ export function FavoritesPageView({ teams, matches }: FavoritesPageViewProps) {
     <Stack gap="xl">
       <section>
         <Stack gap="sm" mb="sm">
-          <Title order={2}>チームを選択</Title>
+          <Title order={2}>{t.selectTeamTitle}</Title>
           <Text c="dimmed" size="sm">
-            日本語名・英語名・FIFA 3文字コード（例: 日本 / Japan / JPN）で検索できます。
-            選択するとお気に入りに登録され、試合カードに金色の枠が付きます。
+            {t.selectTeamDescription}
           </Text>
         </Stack>
 
@@ -59,34 +62,38 @@ export function FavoritesPageView({ teams, matches }: FavoritesPageViewProps) {
 
         <Stack gap="xs" mt="md">
           <Text size="sm" c="dimmed">
-            現在のお気に入り（{ready ? favoriteTeams.length : 0} 件）
+            {t.currentCount.replace('{count}', String(ready ? favoriteTeams.length : 0))}
           </Text>
           {!ready ? (
             <Text c="dimmed" size="sm">
-              読み込み中…
+              {t.loading}
             </Text>
           ) : favoriteTeams.length === 0 ? (
             <Text c="dimmed" size="sm">
-              上の検索で気になる国を選んでください。
+              {t.emptyPicker}
             </Text>
           ) : (
-            <ul className="wc-favorite-list" aria-label="お気に入りチーム一覧">
-              {favoriteTeams.map((t) => (
-                <li key={t.id} className="wc-favorite-list-item">
-                  <CountryFlag fifaCode={t.fifaCode} size="sm" ariaLabel={t.nameJa} />
-                  <span className="wc-favorite-list-name">{t.nameJa}</span>
-                  <span className="wc-favorite-list-code">{t.fifaCode}</span>
-                  <button
-                    type="button"
-                    className="wc-remove"
-                    onClick={() => toggle(t.fifaCode)}
-                    aria-label={`${t.nameJa} をお気に入りから削除`}
-                    title={`${t.nameJa} をお気に入りから削除`}
-                  >
-                    ✕
-                  </button>
-                </li>
-              ))}
+            <ul className="wc-favorite-list" aria-label={t.listAria}>
+              {favoriteTeams.map((team) => {
+                const name = localizedTeamName(team, locale);
+                const removeLabel = t.removeAria.replace('{name}', name);
+                return (
+                  <li key={team.id} className="wc-favorite-list-item">
+                    <CountryFlag fifaCode={team.fifaCode} size="sm" ariaLabel={name} />
+                    <span className="wc-favorite-list-name">{name}</span>
+                    <span className="wc-favorite-list-code">{team.fifaCode}</span>
+                    <button
+                      type="button"
+                      className="wc-remove"
+                      onClick={() => toggle(team.fifaCode)}
+                      aria-label={removeLabel}
+                      title={removeLabel}
+                    >
+                      ✕
+                    </button>
+                  </li>
+                );
+              })}
             </ul>
           )}
         </Stack>
@@ -103,27 +110,27 @@ export function FavoritesPageView({ teams, matches }: FavoritesPageViewProps) {
               flexWrap: 'wrap',
             }}
           >
-            <Title order={2}>お気に入りチームの試合</Title>
+            <Title order={2}>{t.matchesTitle}</Title>
             <FavoriteFilterToggle showHintWhenEmpty={false} />
           </div>
           <Text c="dimmed" size="sm">
-            お気に入りに登録したチームが関わる試合を時系列で表示します。
+            {t.matchesDescription}
           </Text>
         </Stack>
 
         {!ready ? (
           <Text c="dimmed" size="sm">
-            読み込み中…
+            {t.loading}
           </Text>
         ) : favorites.size === 0 ? (
           <div className="wc-favorite-empty">
             <Text c="dimmed">
-              まだお気に入りのチームがありません。上の検索から気になる国を選んでください。
+              {t.emptyMatches}
             </Text>
           </div>
         ) : favoriteMatches.length === 0 ? (
           <Text c="dimmed" size="sm">
-            該当する試合はありません。
+            {t.noMatches}
           </Text>
         ) : (
           <div className="wc-favorites-match-list">

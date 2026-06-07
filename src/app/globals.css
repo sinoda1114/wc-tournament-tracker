@@ -9,6 +9,9 @@
   --wc-accent-soft: rgba(59, 130, 246, 0.16);
   --wc-gold: #fbbf24;
   --wc-emphasis: #fb923c;
+  /* 決勝T 突破=ポジティブを表す緑（順位表の 1-2 位枠・突破ライン）。ダーク用。 */
+  --wc-qualify: #22c55e;
+  --wc-qualify-soft: rgba(34, 197, 94, 0.16);
 }
 
 /*
@@ -29,6 +32,9 @@
   --wc-emphasis: #c2410c;
   --wc-line: rgba(100, 116, 139, 0.45);
   --wc-line-strong: rgba(180, 83, 9, 0.65);
+  /* ライトテーマ: 白地で沈まないよう少し濃い緑にする。 */
+  --wc-qualify: #16a34a;
+  --wc-qualify-soft: rgba(22, 163, 74, 0.12);
 }
 
 /*
@@ -57,6 +63,33 @@ body {
     var(--wc-bg);
   color: var(--wc-text);
   font-family: 'Segoe UI', 'Hiragino Sans', 'Yu Gothic UI', sans-serif;
+}
+
+/*
+ * 簡体字（zh）向け CJK フォント・フォールバック。
+ *
+ * CJK 統合漢字は日本語フォントと簡体字フォントでグリフ（字形）が異なるため、
+ * lang 指定だけだと OS のデフォルト（≒日本語字形）で描かれることがある。
+ * <html lang="zh-Hans"> のとき、OS 標準の簡体字フォントを font-family の先頭に
+ * 据えて正しい字形で表示させる（Web フォントの新規ダウンロードはしない）。
+ *
+ * - Apple:    PingFang SC / Hiragino Sans GB
+ * - Windows:  Microsoft YaHei
+ * - Android/Linux: Noto Sans SC / Source Han Sans SC / WenQuanYi 系
+ * Mantine は --mantine-font-family を参照するコンポーネントがあるため、その変数も
+ * あわせて上書きし、ヘッダ等の Mantine UI でも簡体字字形が適用されるようにする。
+ */
+html[lang^='zh'] body,
+html[lang^='zh'] {
+  font-family:
+    'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans SC',
+    'Source Han Sans SC', 'WenQuanYi Micro Hei', 'Segoe UI', sans-serif;
+}
+
+html[lang^='zh'] {
+  --mantine-font-family:
+    'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans SC',
+    'Source Han Sans SC', 'WenQuanYi Micro Hei', 'Segoe UI', sans-serif;
 }
 
 a {
@@ -1663,17 +1696,21 @@ a {
   justify-content: center;
   min-width: 1.4rem;
 }
+/* 1-2 位＝決勝T 突破枠。順位セルを緑（=ポジティブ）にし、行頭に緑の左罫で枠を示す。 */
 .wc-standings-row.is-advancing .wc-standings-pos {
   font-weight: 700;
-  color: var(--wc-accent);
+  color: var(--wc-qualify);
+}
+.wc-standings-row.is-advancing > td:first-child {
+  box-shadow: inset 3px 0 0 0 var(--wc-qualify);
 }
 .wc-standings-row.is-playoff .wc-standings-pos {
   font-weight: 700;
   color: var(--wc-emphasis);
 }
-/* 2位と3位の境界＝グループ突破ライン（ここまでが確定突破）。 */
+/* 2位と3位の境界＝グループ突破ライン（ここから上が確定突破）。 */
 .wc-standings-row.is-cutoff > td {
-  border-bottom: 2px solid var(--wc-accent);
+  border-bottom: 2px solid var(--wc-qualify);
 }
 
 .wc-standings-legend {
@@ -1692,7 +1729,7 @@ a {
   margin-left: 0.6rem;
 }
 .wc-legend-mark.is-advancing {
-  background: var(--wc-accent);
+  background: var(--wc-qualify);
 }
 .wc-legend-mark.is-playoff {
   background: var(--wc-emphasis);

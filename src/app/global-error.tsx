@@ -1,12 +1,26 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+
+import { DEFAULT_LOCALE, isLocale, LOCALE_COOKIE, type Locale } from '@/lib/i18n/config';
+import { getDictionary } from '@/lib/i18n/dictionary';
+
+/** global-error は Providers 配下に無いため、cookie から直接ロケールを読む。 */
+function readLocaleFromCookie(): Locale {
+  if (typeof document === 'undefined') return DEFAULT_LOCALE;
+  const match = document.cookie
+    .split('; ')
+    .find((c) => c.startsWith(`${LOCALE_COOKIE}=`));
+  const value = match?.split('=')[1];
+  return isLocale(value) ? value : DEFAULT_LOCALE;
+}
 
 /**
  * 最上位のフォールバック。root layout（<html>/<body>）自体のレンダリングが
  * 失敗したときだけ使われる稀なケース用。ここでは layout も Providers も
  * 適用されないため、自前で <html>/<body> を描き、Mantine に依存しない
- * 素のスタイルで最低限の案内＋再試行を出す。
+ * 素のスタイルで最低限の案内＋再試行を出す。Providers 非適用のため辞書は
+ * cookie から解決する（SSR は既定 ja、マウント後に実ロケールへ補正）。
  *
  * 配色はダークの --wc-* パレットに合わせた固定値（CSS 変数は読めない前提）。
  */
@@ -17,12 +31,20 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  // 初回は既定（ja）で SSR と一致させ、マウント後に cookie のロケールへ補正する。
+  const [locale, setLocale] = useState<Locale>(DEFAULT_LOCALE);
+  const t = getDictionary(locale).globalError;
+
   useEffect(() => {
     console.error('[wc] global error boundary:', error);
   }, [error]);
 
+  useEffect(() => {
+    setLocale(readLocaleFromCookie());
+  }, []);
+
   return (
-    <html lang="ja">
+    <html lang={locale === 'zh' ? 'zh-Hans' : locale}>
       <body
         style={{
           margin: 0,
@@ -58,7 +80,7 @@ export default function GlobalError({
               color: '#fbbf24',
             }}
           >
-            予期しないエラーが発生しました
+            {t.title}
           </h1>
           <p
             style={{
@@ -67,7 +89,7 @@ export default function GlobalError({
               lineHeight: 1.7,
             }}
           >
-            アプリの読み込みに失敗しました。お手数ですが、ページを再読み込みしてください。
+            {t.body}
           </p>
           {error.digest ? (
             <p
@@ -77,7 +99,8 @@ export default function GlobalError({
                 color: '#64748b',
               }}
             >
-              エラーID: {error.digest}
+              {t.errorIdPrefix}
+              {error.digest}
             </p>
           ) : null}
           <button
@@ -95,7 +118,7 @@ export default function GlobalError({
               cursor: 'pointer',
             }}
           >
-            再読み込み
+            {t.reload}
           </button>
         </main>
       </body>
