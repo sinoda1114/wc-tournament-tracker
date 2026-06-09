@@ -1,5 +1,5 @@
 import { TextLink } from '@/components/RouterLink';
-import { notFound, redirect } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import { Container, Group, Stack, Text, Title } from '@mantine/core';
 
 import { AdminMatchForm } from '@/components/AdminMatchForm';
@@ -11,7 +11,7 @@ import {
   getParticipantLabel,
   type MatchStage,
 } from '@/lib/bracket';
-import { isAdminAuthenticated } from '@/lib/auth';
+import { isAdmin } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
@@ -20,8 +20,9 @@ type AdminMatchPageProps = {
 };
 
 export default async function AdminMatchPage({ params }: AdminMatchPageProps) {
-  if (!(await isAdminAuthenticated())) {
-    redirect('/admin/login');
+  // 所有者（ADMIN_EMAILS 一致）以外には存在を隠す（404）。
+  if (!(await isAdmin())) {
+    notFound();
   }
 
   const { id } = await params;

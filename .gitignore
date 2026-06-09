@@ -13,3 +13,9 @@ work-summary/
 
 # codegraph local index (per-machine, not pushed)
 .codegraph/
+
+# clerk configuration (can include secrets)
+/.clerk/
+
+# local AI review artifacts (not committed)
+.review-reports/

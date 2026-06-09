@@ -1,16 +1,16 @@
-import { redirect } from 'next/navigation';
-import { Button, Container, Group, Stack, Text, Title } from '@mantine/core';
+import { notFound } from 'next/navigation';
+import { Container, Stack, Text, Title } from '@mantine/core';
 
-import { logoutAdminAction } from '@/app/admin/actions';
 import { AdminMatchTable } from '@/components/AdminMatchTable';
 import { listTournamentMatches } from '@/db/queries';
-import { isAdminAuthenticated } from '@/lib/auth';
+import { isAdmin } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AdminPage() {
-  if (!(await isAdminAuthenticated())) {
-    redirect('/admin/login');
+  // 所有者（ADMIN_EMAILS 一致）以外には存在を隠す（404）。
+  if (!(await isAdmin())) {
+    notFound();
   }
 
   const matches = await listTournamentMatches();
@@ -18,19 +18,10 @@ export default async function AdminPage() {
   return (
     <Container size="xl" py="xl">
       <Stack gap="lg">
-        <Group justify="space-between" align="flex-end">
-          <Stack gap={4}>
-            <Title order={1}>試合結果更新</Title>
-            <Text c="dimmed">
-              スコアと勝者を保存すると、次の試合へ自動反映されます。
-            </Text>
-          </Stack>
-          <form action={logoutAdminAction}>
-            <Button type="submit" variant="default">
-              ログアウト
-            </Button>
-          </form>
-        </Group>
+        <Stack gap={4}>
+          <Title order={1}>試合結果更新</Title>
+          <Text c="dimmed">スコアと勝者を保存すると、次の試合へ自動反映されます。</Text>
+        </Stack>
 
         <AdminMatchTable matches={matches} />
       </Stack>

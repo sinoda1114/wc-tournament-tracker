@@ -1,9 +1,10 @@
 import Link from 'next/link';
 import { UserButton } from '@clerk/nextjs';
-import { auth } from '@clerk/nextjs/server';
+import { auth, currentUser } from '@clerk/nextjs/server';
 import { Container, Group, Title } from '@mantine/core';
 
 import { TextLink } from '@/components/RouterLink';
+import { isAdminUser } from '@/lib/auth';
 import type { Locale } from '@/lib/i18n/config';
 import type { Dictionary } from '@/lib/i18n/dictionary';
 
@@ -16,11 +17,14 @@ import { TimeZonePicker } from './TimeZonePicker';
 type SiteHeaderProps = {
   locale: Locale;
   dict: Dictionary;
-  showAdminLink?: boolean;
 };
 
-export async function SiteHeader({ locale, dict, showAdminLink = true }: SiteHeaderProps) {
+export async function SiteHeader({ locale, dict }: SiteHeaderProps) {
+  // userId は JWT から軽量に取れる。未ログインの公開ページでは currentUser()
+  // （Clerk バックエンド取得）を呼ばず、ログイン時のみ取得してレイテンシを抑える。
   const { userId } = await auth();
+  const user = userId ? await currentUser() : null;
+  const admin = isAdminUser(user);
 
   return (
     <header className="wc-header">
@@ -35,7 +39,7 @@ export async function SiteHeader({ locale, dict, showAdminLink = true }: SiteHea
             <SiteNav labels={dict.nav} />
           </Group>
           <Group gap="sm" align="center" wrap="nowrap">
-            {showAdminLink ? (
+            {admin ? (
               <TextLink href="/admin" c="dimmed" size="sm">
                 {dict.header.admin}
               </TextLink>
@@ -44,7 +48,7 @@ export async function SiteHeader({ locale, dict, showAdminLink = true }: SiteHea
             <TimeZonePicker label={dict.timezone.label} />
             <AddToHomeScreen />
             <ThemeToggle />
-            {userId ? (
+            {user ? (
               <UserButton />
             ) : (
               <TextLink href="/sign-in" c="dimmed" size="sm">
