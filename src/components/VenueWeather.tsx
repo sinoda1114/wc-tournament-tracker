@@ -1,6 +1,7 @@
 import type { Locale } from '@/lib/i18n/config';
 import type { Dictionary } from '@/lib/i18n/dictionary';
 import { getVenueWeather } from '@/lib/weather';
+import { CONDITION_JA } from '@/lib/weather/conditions-ja';
 
 type VenueWeatherProps = {
   venueId: string;
@@ -18,22 +19,27 @@ type VenueWeatherProps = {
  * async server component なので呼び出し側は <Suspense> で包むとページ本体をブロックしない。
  */
 export async function VenueWeather({ venueId, matchDate, dateLabel, locale, dict }: VenueWeatherProps) {
-  const weather = await getVenueWeather(venueId, matchDate, locale);
+  const weather = await getVenueWeather(venueId, matchDate);
   if (!weather) {
     return null;
   }
 
   const t = dict.venue.weather;
+  // データは全言語共通。日本語のときだけ天候コードから日本語表記に変換（未収録は英語表記にフォールバック）。
+  const conditionText =
+    locale === 'ja'
+      ? (CONDITION_JA[weather.conditionCode] ?? weather.conditionText)
+      : weather.conditionText;
   return (
     <section className="wc-venue-weather" aria-label={t.aria}>
-      <h3 className="wc-venue-weather-title">{`${t.title}: ${dateLabel}`}</h3>
+      <h3 className="wc-venue-weather-title">{`${t.title} : ${dateLabel}`}</h3>
       <div className="wc-venue-weather-body">
         {weather.conditionIconUrl ? (
           // 外部 CDN（WeatherAPI）の天候アイコン。寸法固定で CLS を防ぐ。
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={weather.conditionIconUrl}
-            alt={weather.conditionText}
+            alt={conditionText}
             width={56}
             height={56}
             loading="lazy"
@@ -48,8 +54,8 @@ export async function VenueWeather({ venueId, matchDate, dateLabel, locale, dict
           <span className="wc-venue-weather-temp-min">{Math.round(weather.minTempC)}°</span>
         </p>
         <p className="wc-venue-weather-meta">
-          {weather.conditionText ? (
-            <span className="wc-venue-weather-condition">{weather.conditionText}</span>
+          {conditionText ? (
+            <span className="wc-venue-weather-condition">{conditionText}</span>
           ) : null}
           <span className="wc-venue-weather-rain">
             {t.chanceOfRain.replace('{n}', String(weather.chanceOfRain))}

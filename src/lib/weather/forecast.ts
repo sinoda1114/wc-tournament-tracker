@@ -105,12 +105,17 @@ export function parseForecastForDate(
     typeof condition === 'object' && condition !== null
       ? asString((condition as { icon?: unknown }).icon)
       : '';
+  const conditionCode =
+    typeof condition === 'object' && condition !== null
+      ? (asNumber((condition as { code?: unknown }).code) ?? 0)
+      : 0;
   const chanceOfRain = asNumber(d.daily_chance_of_rain) ?? 0;
 
   return {
     date: matchDate,
     maxTempC,
     minTempC,
+    conditionCode,
     conditionText,
     conditionIconUrl: normalizeIconUrl(conditionIcon),
     chanceOfRain,

@@ -112,7 +112,7 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
           <Text c="dimmed">{dict.matchDetail.number.replace('{n}', String(match.id))}</Text>
           <Title order={1}>{groupLabel ? `${stageLabel} · ${groupLabel}` : stageLabel}</Title>
           <Group gap="sm">
-            <Badge variant="light">{formatMatchDateZoned(match, timeZone)}</Badge>
+            <Badge variant="light">{formatMatchDateZoned(match, timeZone, dict.match.weekdays)}</Badge>
             {kickoff ? (
               <Badge variant="light" color="blue" title={timeZone}>
                 {kickoff} {kickoffAbbrev}
@@ -143,7 +143,7 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
           <VenueWeather
             venueId={match.venueId}
             matchDate={match.matchDate}
-            dateLabel={formatMatchDateZoned(match, timeZone)}
+            dateLabel={formatMatchDateZoned(match, timeZone, dict.match.weekdays)}
             locale={locale}
             dict={dict}
           />

@@ -90,6 +90,7 @@ describe('parseForecastForDate', () => {
             mintemp_c: 19.2,
             daily_chance_of_rain: 73,
             condition: {
+              code: 1240,
               text: 'Light rain shower',
               icon: '//cdn.weatherapi.com/weather/64x64/day/353.png',
             },
@@ -114,6 +115,7 @@ describe('parseForecastForDate', () => {
       date: '2026-06-11',
       maxTempC: 28.5,
       minTempC: 19.2,
+      conditionCode: 1240,
       conditionText: 'Light rain shower',
       conditionIconUrl: 'https://cdn.weatherapi.com/weather/64x64/day/353.png',
       chanceOfRain: 73,
