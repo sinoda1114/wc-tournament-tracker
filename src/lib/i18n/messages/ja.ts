@@ -230,6 +230,11 @@ export const ja = {
     pastWorldCups: '過去のW杯',
     mapLink: 'Googleマップで開く',
     mapAria: '{stadium} を Google マップで開く（新しいタブ）',
+    weather: {
+      title: '試合日の天気',
+      aria: '会場の試合日の天気予報',
+      chanceOfRain: '降水確率 {n}%',
+    },
   },
   // 試合詳細ページ（/matches/[id]）。{n}=試合番号。
   matchDetail: {

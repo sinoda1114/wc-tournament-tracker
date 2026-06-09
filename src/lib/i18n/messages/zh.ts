@@ -211,6 +211,11 @@ export const zh: Dictionary = {
     pastWorldCups: 'Past World Cups',
     mapLink: 'Open in Google Maps',
     mapAria: 'Open {stadium} in Google Maps (new tab)',
+    weather: {
+      title: 'Matchday weather',
+      aria: 'Weather forecast for the venue on matchday',
+      chanceOfRain: 'Rain {n}%',
+    },
   },
   matchDetail: {
     number: '第{n}场比赛',

@@ -1370,6 +1370,76 @@ a {
   margin-left: 0;
 }
 
+/* ===== 会場の天気（#24） ===== */
+
+.wc-venue-weather {
+  border: 1px solid var(--wc-border);
+  border-radius: 16px;
+  background: linear-gradient(180deg, var(--wc-surface-elevated), var(--wc-surface));
+  padding: 1rem 1.2rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.wc-venue-weather-title {
+  margin: 0;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--wc-muted);
+}
+
+.wc-venue-weather-body {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+.wc-venue-weather-icon {
+  flex: none;
+  width: 56px;
+  height: 56px;
+}
+
+.wc-venue-weather-temps {
+  margin: 0;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.3rem;
+  font-weight: 700;
+}
+
+.wc-venue-weather-temp-max {
+  font-size: 1.5rem;
+}
+
+.wc-venue-weather-temp-sep {
+  color: var(--wc-muted);
+}
+
+.wc-venue-weather-temp-min {
+  font-size: 1.1rem;
+  color: var(--wc-muted);
+}
+
+.wc-venue-weather-meta {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  font-size: 0.85rem;
+}
+
+.wc-venue-weather-condition {
+  font-weight: 600;
+}
+
+.wc-venue-weather-rain {
+  color: var(--wc-muted);
+  font-size: 0.8rem;
+}
+
 /* ===== 優勝国予想 ===== */
 
 .wc-prediction {

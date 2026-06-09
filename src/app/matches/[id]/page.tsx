@@ -1,3 +1,5 @@
+import { Suspense } from 'react';
+
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { Badge, Container, Group, Stack, Text, Title } from '@mantine/core';
@@ -5,6 +7,7 @@ import { Badge, Container, Group, Stack, Text, Title } from '@mantine/core';
 import { JsonLd } from '@/components/JsonLd';
 import { MatchVersus } from '@/components/MatchVersus';
 import { VenueInfoCard } from '@/components/VenueInfoCard';
+import { VenueWeather } from '@/components/VenueWeather';
 import { getMatchDetail, getVenueMatchSummary } from '@/db/queries';
 import {
   formatKickoff,
@@ -135,6 +138,16 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
         </Stack>
 
         <VenueInfoCard venue={match.venue} summary={venueSummary} locale={locale} dict={dict} />
+
+        <Suspense fallback={null}>
+          <VenueWeather
+            venueId={match.venueId}
+            matchDate={match.matchDate}
+            dateLabel={formatMatchDateZoned(match, timeZone)}
+            locale={locale}
+            dict={dict}
+          />
+        </Suspense>
       </Stack>
     </Container>
   );
