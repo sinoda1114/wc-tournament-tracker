@@ -14,6 +14,7 @@ export const ja = {
   },
   header: {
     admin: '管理画面',
+    signIn: 'ログイン',
     skipToContent: 'メインコンテンツへスキップ',
   },
   language: {

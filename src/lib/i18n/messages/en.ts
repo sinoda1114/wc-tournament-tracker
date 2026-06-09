@@ -12,6 +12,7 @@ export const en: Dictionary = {
   },
   header: {
     admin: 'Admin',
+    signIn: 'Sign in',
     skipToContent: 'Skip to main content',
   },
   language: {

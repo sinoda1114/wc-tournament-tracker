@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import { UserButton } from '@clerk/nextjs';
+import { auth } from '@clerk/nextjs/server';
 import { Container, Group, Title } from '@mantine/core';
 
 import { TextLink } from '@/components/RouterLink';
@@ -17,7 +19,9 @@ type SiteHeaderProps = {
   showAdminLink?: boolean;
 };
 
-export function SiteHeader({ locale, dict, showAdminLink = true }: SiteHeaderProps) {
+export async function SiteHeader({ locale, dict, showAdminLink = true }: SiteHeaderProps) {
+  const { userId } = await auth();
+
   return (
     <header className="wc-header">
       <Container size="xl" py="md">
@@ -40,6 +44,13 @@ export function SiteHeader({ locale, dict, showAdminLink = true }: SiteHeaderPro
             <TimeZonePicker label={dict.timezone.label} />
             <AddToHomeScreen />
             <ThemeToggle />
+            {userId ? (
+              <UserButton />
+            ) : (
+              <TextLink href="/sign-in" c="dimmed" size="sm">
+                {dict.header.signIn}
+              </TextLink>
+            )}
           </Group>
         </Group>
       </Container>

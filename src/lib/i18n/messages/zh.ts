@@ -12,6 +12,7 @@ export const zh: Dictionary = {
   },
   header: {
     admin: '管理',
+    signIn: '登录',
     skipToContent: '跳到主要内容',
   },
   language: {

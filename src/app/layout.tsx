@@ -2,6 +2,7 @@ import '@mantine/core/styles.css';
 import '@mantine/dates/styles.css';
 import 'flag-icons/css/flag-icons.min.css';
 
+import { ClerkProvider } from '@clerk/nextjs';
 import { ColorSchemeScript } from '@mantine/core';
 import type { Metadata, Viewport } from 'next';
 
@@ -81,7 +82,8 @@ export default async function RootLayout({
   const timeZone = await resolveTimeZone();
 
   return (
-    <html lang={toHtmlLang(locale)} suppressHydrationWarning>
+    <ClerkProvider>
+      <html lang={toHtmlLang(locale)} suppressHydrationWarning>
       <head>
         <ColorSchemeScript defaultColorScheme="dark" />
       </head>
@@ -107,6 +109,7 @@ export default async function RootLayout({
           <CookieConsent />
         </Providers>
       </body>
-    </html>
+      </html>
+    </ClerkProvider>
   );
 }
