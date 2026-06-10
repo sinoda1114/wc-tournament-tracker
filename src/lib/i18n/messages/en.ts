@@ -185,6 +185,13 @@ export const en: Dictionary = {
     showAll: 'Show all {count} teams',
   },
   vote: {
+    errors: {
+      closed: 'Voting has closed.',
+      wrong_stage: 'The stage has advanced. Please vote again with the latest state.',
+      invalid_team: 'You cannot vote for that team.',
+      locked: 'You have already voted in this stage.',
+      error: 'Failed to submit your vote. Please try again later.',
+    },
     sectionAria: 'Vote in the crowd prediction',
     title: 'Your title pick',
     closed: 'Voting has closed for all stages. The crowd prediction is now fixed as the final result.',

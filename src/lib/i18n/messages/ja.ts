@@ -201,6 +201,13 @@ export const ja = {
   },
   // みんなの予想に投票（VotePanel）。{stage}=ステージ名・{progression}=進行順。
   vote: {
+    errors: {
+      closed: '投票は終了しました。',
+      wrong_stage: 'ステージが更新されました。最新の状態で投票してください。',
+      invalid_team: 'そのチームには投票できません。',
+      locked: 'このステージはすでに投票済みです。',
+      error: '投票に失敗しました。時間をおいて再度お試しください。',
+    },
     sectionAria: 'みんなの予想に投票',
     title: 'あなたの優勝予想',
     closed: '全ステージの投票が締め切られました。みんなの予想は最終結果として固定されます。',

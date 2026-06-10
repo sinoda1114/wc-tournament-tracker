@@ -54,7 +54,8 @@ export function VotePanel({
       if (result.ok) {
         router.refresh();
       } else {
-        setError(result.message);
+        // サーバーの message は日本語固定なので、reason コードを閲覧言語の辞書に引き直す。
+        setError(t.errors[result.reason] ?? result.message);
         if (result.reason === 'locked' || result.reason === 'wrong_stage') {
           router.refresh();
         }
