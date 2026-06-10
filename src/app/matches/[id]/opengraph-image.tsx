@@ -15,7 +15,7 @@ import { getParticipantLabel, STAGE_LABELS, type MatchStage } from '@/lib/bracke
  */
 export const runtime = 'nodejs';
 
-export const alt = '試合詳細 | WC 2026 決勝トーナメント トラッカー';
+export const alt = '試合詳細 | MatchFav';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -96,7 +96,7 @@ export default async function Image({ params }: Props) {
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
           <div style={{ color: FG, fontSize: 36, fontWeight: 600, display: 'flex' }}>
-            WC 2026 決勝トーナメント トラッカー
+            MatchFav — W杯2026 トラッカー（非公式）
           </div>
           <div style={{ color: SUB, fontSize: 26, display: 'flex' }}>非公式ファンサイト</div>
         </div>

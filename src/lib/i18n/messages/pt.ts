@@ -205,7 +205,7 @@ export const pt: Dictionary = {
     noteNoChange: 'Os votos não podem ser alterados depois de registrados na mesma fase.',
   },
   footer: {
-    brandTitle: 'WC 2026 Knockout Tracker',
+    brandTitle: 'MatchFav — Copa do Mundo 2026: jogos, palpites e favoritos (não oficial)',
     brandDesc:
       'Um site de informações não oficial que organiza o calendário, os resultados e as seleções participantes do torneio internacional de futebol de 2026 para os torcedores.',
     navAria: 'Navegação do rodapé',
@@ -215,7 +215,7 @@ export const pt: Dictionary = {
     disclaimerStrong: 'Este é um site de fãs não oficial e não é endossado pela FIFA.',
     disclaimerBody:
       'Não tem relação de parceria, patrocínio ou endosso com a FIFA, as federações nacionais ou regionais de futebol, os patrocinadores oficiais do torneio ou quaisquer outros detentores de direitos. Nomes, emblemas e logotipos oficiais como «FIFA» e «World Cup» são marcas de seus respectivos proprietários; este site os respeita como tal e não utiliza logotipos ou emblemas oficiais. Os nomes dos estádios podem incluir denominações de direitos de marca com nomes de empresas patrocinadoras, que são marcas dessas empresas. Este site não garante a imediatez nem a exatidão de suas informações.',
-    copyright: '(c) WC 2026 Tracker',
+    copyright: '(c) MatchFav',
     dataNotice: 'Os dados publicados podem mudar sem aviso prévio.',
   },
   venue: {

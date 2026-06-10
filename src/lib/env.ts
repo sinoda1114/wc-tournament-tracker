@@ -43,10 +43,10 @@ function isRemoteTursoUrl(url: string): boolean {
  *   2. `VERCEL_PROJECT_PRODUCTION_URL`（Vercel が本番ドメインを自動注入。ホスト名のみ）
  *   3. フォールバックのプレースホルダ（下記）
  *
- * フォールバックはビルドを通すための仮値。独自ドメイン確定後は必ず
- * `NEXT_PUBLIC_SITE_URL` を設定すること（残課題）。
+ * フォールバックは確定済みの本番ドメイン（matchfav.com / 2026-06-11 ブランド確定）。
+ * 環境ごとに上書きする場合は `NEXT_PUBLIC_SITE_URL` を設定する。
  */
-export const SITE_URL_FALLBACK = 'https://wc-tournament-tracker.example.com';
+export const SITE_URL_FALLBACK = 'https://matchfav.com';
 
 export function getSiteUrl(): string {
   const explicit = process.env.NEXT_PUBLIC_SITE_URL?.trim();

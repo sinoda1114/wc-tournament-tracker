@@ -4,43 +4,86 @@ import Link from 'next/link';
 import styles from '../legal.module.css';
 
 /*
- * 特定商取引法に基づく表記ページ ―― 現時点では「準備中の雛形（枠）」。
+ * 特定商取引法に基づく表記ページ（清書版・弁護士レビュー前ドラフト完成版）。
  *
- * 【重要】
- *   特商法に基づく表記は、有料サービス（買い切り課金等）を提供する事業者にとって
- *   法的に必須の表示です。本サービスは現時点で課金を導入していないため、ここでは
- *   項目の枠だけを用意し、各項目の値は「準備中」としています。
+ * 【法的免責】
+ *   本文面はドラフトであり、法的助言ではありません。公開前に弁護士レビューを受けること。
  *
- *   ▼ 課金実装時に必ず行うこと（このページの本記載）:
- *     - 運営者の氏名/名称・所在地・連絡先（電話番号・メールアドレス）
- *     - 販売価格、商品代金以外の必要料金（消費税・手数料等）
- *     - 支払方法・支払時期、役務（デジタルコンテンツ）の提供時期
- *     - 返品・キャンセル・解約に関する特約（デジタル商品の返金可否を含む）
- *     - 決済代行事業者名 等
- *   上記を確定のうえ、最終的に弁護士・税理士等の確認を得てから公開すること。
- *   （本コメントおよび本文は法的助言ではない。）
+ * 【方針】
+ *   - 事業者は個人。氏名・住所・電話番号はソースコード/サイトに記載せず、
+ *     「請求があったら遅滞なく開示する」方式（消費者庁ガイドラインで個人事業者に
+ *     認められる省略形）を採用。
+ *
+ * 【プレースホルダ（確定後に置換）】
+ *   - 【価格未定】（#14）/info@matchfav.com
+ *   - robots noindex は価格確定・正式公開時に解除を検討すること。
  */
 
 export const metadata: Metadata = {
-  title: '特定商取引法に基づく表記 | WC 2026 トラッカー',
-  description:
-    'WC 2026 トラッカーの特定商取引法に基づく表記です（有料機能の提供開始にあわせて記載します）。',
-  // 準備中ページのためインデックスさせない。課金実装で本記載にする際に robots 指定を見直すこと。
+  title: '特定商取引法に基づく表記 | MatchFav',
+  description: 'MatchFav の特定商取引法に基づく表記です。',
+  // 価格未確定のプレースホルダを含むため暫定で noindex。#14 確定・正式公開時に解除を検討。
   robots: { index: false, follow: false },
 };
 
-/** 課金実装時に値を確定する項目。value=null は「準備中」表示にする。 */
-const ITEMS: { label: string; value: string | null }[] = [
-  { label: '販売事業者', value: null },
-  { label: '運営統括責任者', value: null },
-  { label: '所在地', value: null },
-  { label: 'お問い合わせ先', value: null },
-  { label: '販売価格', value: null },
-  { label: '商品代金以外の必要料金', value: null },
-  { label: '支払方法', value: null },
-  { label: '支払時期', value: null },
-  { label: '役務の提供時期', value: null },
-  { label: '返品・キャンセル', value: null },
+const UPDATED = '2026年6月10日';
+
+/** 特商法の表示項目。価格（#14）・連絡先メールはプレースホルダ。 */
+const ITEMS: { label: string; value: React.ReactNode }[] = [
+  {
+    label: '販売事業者',
+    value:
+      '個人事業者のため、特定商取引法に基づく氏名等の開示は、請求があった場合に遅滞なく電子メール等により開示します。開示をご希望の方は下記お問い合わせ先までご請求ください。',
+  },
+  {
+    label: '所在地',
+    value: '請求があった場合に遅滞なく開示します（上記「販売事業者」参照）。',
+  },
+  {
+    label: '電話番号',
+    value:
+      '請求があった場合に遅滞なく開示します。お問い合わせは原則として下記メールにて受け付けます。',
+  },
+  {
+    label: 'お問い合わせ先（メール）',
+    value: <strong className={styles.placeholder}>info@matchfav.com</strong>,
+  },
+  {
+    label: '販売価格',
+    value: (
+      <>
+        <strong className={styles.placeholder}>【価格未定】</strong>
+        （買い切り・税込価格を購入ページに表示します。月額等の継続課金ではありません）
+      </>
+    ),
+  },
+  {
+    label: '商品代金以外の必要料金',
+    value:
+      'なし。ただし、本サービスの利用に必要なインターネット接続料金・通信料金は利用者の負担となります。',
+  },
+  {
+    label: '支払方法',
+    value: 'クレジットカード決済（決済代行: Stripe）',
+  },
+  {
+    label: '支払時期',
+    value: '購入手続き時に即時決済されます。',
+  },
+  {
+    label: '役務の提供時期',
+    value:
+      '決済完了後、ただちに全機能をご利用いただけます。提供期間は 2026年大会の終了に伴うサービス提供終了時までです。なお、グループステージ期間（2026年6月27日まで）は無料でご利用いただけます。2026年6月28日（決勝トーナメント開始）以降に新規登録された場合は、登録から72時間無料でご利用いただけます。',
+  },
+  {
+    label: '返品・キャンセル（返金方針）',
+    value:
+      'デジタルコンテンツという商品の性質上、決済完了後の利用者都合による返品・キャンセル・返金には原則として応じられません。購入前に無料期間（グループステージ期間、または決勝トーナメント以降の新規登録から72時間）で内容をご確認ください。当方の責に帰すべき事由によりサービスが相当期間利用できなかった場合や二重決済が生じた場合は、上記お問い合わせ先までご連絡ください。個別に対応します。',
+  },
+  {
+    label: '動作環境',
+    value: '最新版の主要ウェブブラウザ（Chrome / Safari / Edge / Firefox 等）を推奨します。',
+  },
 ];
 
 export default function TokushohoPage() {
@@ -48,13 +91,13 @@ export default function TokushohoPage() {
     <article className={styles.page}>
       <header className={styles.header}>
         <h1>特定商取引法に基づく表記</h1>
-        <span className={styles.updated}>現在準備中</span>
+        <span className={styles.updated}>最終改定日: {UPDATED}</span>
       </header>
 
       <p className={styles.notice}>
-        本ページは、有料機能（買い切り課金）の提供開始にあわせて記載する予定の<strong>準備中の枠</strong>です。
-        現時点では本サービスに有料の販売はありません。課金導入時に、下記の各項目を法令に基づいて
-        記載し、弁護士・税理士等の確認を得たうえで公開します。
+        本表記中の <strong>【価格未定】</strong>{' '}
+        は、販売価格・商品名（#14）の確定後に置き換えられる暫定表記です。
+        確定までは有料販売を開始しません。
       </p>
 
       <section className={styles.section}>
@@ -62,15 +105,16 @@ export default function TokushohoPage() {
           {ITEMS.map((item) => (
             <div key={item.label} style={{ display: 'contents' }}>
               <dt>{item.label}</dt>
-              <dd>
-                {item.value ?? (
-                  <span className={styles.placeholder}>準備中（課金開始時に記載）</span>
-                )}
-              </dd>
+              <dd>{item.value}</dd>
             </div>
           ))}
         </dl>
       </section>
+
+      <p className={`${styles.body} ${styles.muted}`}>
+        関連ページ: <Link href="/terms">利用規約</Link> /{' '}
+        <Link href="/privacy">プライバシーポリシー</Link>
+      </p>
 
       <Link href="/" className={styles.backLink}>
         ← トップへ戻る

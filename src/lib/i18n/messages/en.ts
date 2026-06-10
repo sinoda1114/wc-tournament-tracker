@@ -201,7 +201,7 @@ export const en: Dictionary = {
     noteNoChange: 'Votes cannot be changed once cast in the same stage.',
   },
   footer: {
-    brandTitle: 'WC 2026 Knockout Tracker',
+    brandTitle: 'MatchFav — World Cup 2026 match, prediction & favorites tracker (unofficial)',
     brandDesc:
       'An unofficial information site that organizes the schedule, results, and participating nations of the 2026 international football tournament for fans.',
     navAria: 'Footer navigation',
@@ -211,7 +211,7 @@ export const en: Dictionary = {
     disclaimerStrong: 'This is an unofficial fan site and is not endorsed by FIFA.',
     disclaimerBody:
       'It has no partnership, sponsorship, or endorsement relationship with FIFA, national or regional football associations, official tournament sponsors, or any other rights holders. Names, emblems, and official logos such as "FIFA" and "World Cup" are trademarks of their respective owners; this site respects them as such and does not use any official logos or emblems. Stadium names may include naming-rights titles bearing sponsor company names, which are trademarks of those companies. This site does not guarantee the immediacy or accuracy of its information.',
-    copyright: '(c) WC 2026 Tracker',
+    copyright: '(c) MatchFav',
     dataNotice: 'Posted data may change without notice.',
   },
   venue: {

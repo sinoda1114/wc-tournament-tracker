@@ -33,7 +33,7 @@ export async function SiteHeader({ locale, dict }: SiteHeaderProps) {
           <Group gap="lg" align="center" wrap="wrap">
             <Link href="/">
               <Title order={2} c="var(--wc-text)">
-                WC 2026
+                MatchFav
               </Title>
             </Link>
             <SiteNav labels={dict.nav} />

@@ -200,7 +200,7 @@ export const zh: Dictionary = {
     noteNoChange: '同一阶段投票后不可更改。',
   },
   footer: {
-    brandTitle: 'WC 2026 Knockout Tracker',
+    brandTitle: 'MatchFav — 世界杯2026 比赛·夺冠预测·收藏追踪（非官方）',
     brandDesc:
       '面向球迷、汇总2026年国际足球赛事赛程、结果与参赛球队的非官方信息网站。',
     navAria: '页脚导航',
@@ -210,7 +210,7 @@ export const zh: Dictionary = {
     disclaimerStrong: '本网站为非官方球迷网站，未获 FIFA 认可。',
     disclaimerBody:
       '与 FIFA（国际足球联合会）、各国及各地区足球协会、赛事官方赞助商及其他权利人均无任何合作、赞助或推荐关系。「FIFA」「World Cup」等名称、徽标及官方标志均为各自权利人的商标；本网站尊重其商标权，且不使用官方标志或徽标。体育场名称可能包含含赞助企业名称的冠名（冠名权名称），这些名称为相关企业的商标。本网站不保证信息的即时性与准确性。',
-    copyright: '(c) WC 2026 Tracker',
+    copyright: '(c) MatchFav',
     dataNotice: '所刊载数据可能会在不另行通知的情况下变更。',
   },
   venue: {

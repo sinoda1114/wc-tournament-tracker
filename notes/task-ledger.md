@@ -17,6 +17,7 @@
 ## 進行中
 
 - **#20b** 試合イベント・自動tier — **コミット済み**（6/10・`dac6893`・ui-feature実装）。tsc/lint/test 全PASS（295件）。**残: AIレビュー2段ゲート（/ai-review・/security-review）を後追いで実施→push判断**
+- **#21** 法務ページ清書 — (legal) terms/privacy/tokushoho を公開可能水準へ。**legal-seo-infra エージェントが清書中（6/10）**。価格(#14)/ドメイン(#22)はプレースホルダ・事業者情報は開示請求方式・弁護士レビュー前提
 - **#20c** 手動tierの動作確認 — `/admin/matches/1` で追加 → `/matches/1` 表示・5言語ラベル確認。**ユーザー実施予定**
 
 ## 保留（判断・外部要因待ち）
@@ -24,11 +25,12 @@
 - **#7** CI を GitHub へ push — `gh auth refresh -s workflow` がユーザー操作待ち（[[gh-workflow-scope-missing]]）。ワークフローはローカルに保留中
 - **#8** セキュリティ仕上げ — Sentry 導入と CSP 方針の判断待ち
 - **#12** 開幕前の通しQA（W9 と一体。2段ゲート→デプロイ）
-- **#14** Stripe 課金接続 — 商品名・価格が未決（ユーザー判断待ち）
+- **#14** Stripe 課金接続 — 商品名・価格が未決（ユーザー判断待ち）。**課金動線は6/11確定**: グループステージ(〜6/27)無料→決勝T(6/28〜)課金壁・6/28以降の新規登録のみ72h無料・予告バナー（[[launch-monetization-plan]]）。entitlement は日付ゲート方式で実装する
+- **#26** 課金壁の予告バナー — 無料期間中に「決勝トーナメントからは買い切り○円」を表示（6/25頃から強調）。#14 の価格確定後に実装
 - **#19** i18n 残作業の最終確認 — groups/teams/prediction が完了済みか棚卸し（[[i18n-implementation-status]] が古い可能性）
-- **#21** 法務ページ清書 — (legal) terms/privacy/tokushoho の本文確定（公開前に弁護士レビュー推奨）
-- **#22** ドメイン取得 — ブランド名 Pitchnotes26 候補・note/notes 未決（ユーザー判断待ち）
-- **#25** 本番 Clerk 設定 — 本番ドメイン確定（#22）に連動
+- **#22** ドメイン取得 — **ほぼ完了（6/11）**: matchfav.com を Cloudflare で取得済み・info@matchfav.com 受信稼働（Email Routing→Gmail・外部送信元で実証・キャッチオール有効・受信専用）。残: Vercel への DNS 接続（A/CNAME を「DNSのみ(グレー雲)」で追加）＝ #25 とセットで実施
+- **#25** 本番 Clerk 設定 — 本番ドメイン取得（#22）に連動
+- **#27** リブランド一括反映 — **実装完了・未コミット（6/11）**: ヘッダ/metadata/OGP/manifest/llms.txt/i18n5言語brandTitle/OGP画像/法務3ページを MatchFav・matchfav.com・info@matchfav.com で置換。SITE_URL_FALLBACK も matchfav.com に。tsc/test/lint グリーン。残プレースホルダは【価格未定】(#14)のみ
 
 ## 番号の欠番について
 

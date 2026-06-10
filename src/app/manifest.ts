@@ -17,10 +17,10 @@ import type { MetadataRoute } from 'next';
  */
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'WC 2026 決勝トーナメント トラッカー',
-    short_name: 'WC2026 Tracker',
+    name: 'MatchFav — W杯2026 試合・優勝予想・お気に入りトラッカー（非公式）',
+    short_name: 'MatchFav',
     description:
-      '2026年の国際サッカー大会の試合日程・結果・出場国を、ファン向けに見やすくまとめる非公式の情報サイトです。',
+      'MatchFav（マッチファボ）は、ワールドカップ2026の日程・結果・優勝予想・お気に入りをひとつにまとめる非公式ファンサイトです（FIFA非公認）。',
     lang: 'ja',
     start_url: '/',
     scope: '/',
