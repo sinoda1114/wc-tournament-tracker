@@ -159,27 +159,32 @@ export async function replaceAutoMatchEvents(
   matchId: number,
   events: AutoMatchEventInput[],
 ): Promise<void> {
-  await db().execute({
-    sql: `DELETE FROM match_events WHERE match_id = ? AND source = 'auto'`,
-    args: [matchId],
-  });
-  for (const event of events) {
-    await db().execute({
-      sql: `
-        INSERT INTO match_events
-          (match_id, type, minute, team_id, player_name, player_out, sort_order, source, external_id)
-        VALUES (?, ?, ?, ?, ?, ?, ?, 'auto', ?)
-      `,
-      args: [
-        matchId,
-        event.type,
-        event.minute,
-        event.teamId,
-        event.playerName,
-        event.playerOut ?? null,
-        event.sortOrder ?? 0,
-        event.externalId,
-      ],
-    });
-  }
+  // delete→insert を単一トランザクション(batch)で原子化する。途中失敗で
+  // 「autoが消えたまま」の中間状態を作らない（失敗時は次回ingestまで旧データ維持）。
+  await db().batch(
+    [
+      {
+        sql: `DELETE FROM match_events WHERE match_id = ? AND source = 'auto'`,
+        args: [matchId],
+      },
+      ...events.map((event) => ({
+        sql: `
+          INSERT INTO match_events
+            (match_id, type, minute, team_id, player_name, player_out, sort_order, source, external_id)
+          VALUES (?, ?, ?, ?, ?, ?, ?, 'auto', ?)
+        `,
+        args: [
+          matchId,
+          event.type,
+          event.minute,
+          event.teamId,
+          event.playerName,
+          event.playerOut ?? null,
+          event.sortOrder ?? 0,
+          event.externalId,
+        ],
+      })),
+    ],
+    'write',
+  );
 }
