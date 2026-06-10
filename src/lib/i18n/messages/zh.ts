@@ -70,6 +70,19 @@ export const zh: Dictionary = {
       groupThirdTitle: '{g}组之一的第三名',
     },
     weekdays: ['周日', '周一', '周二', '周三', '周四', '周五', '周六'],
+    events: {
+      title: 'Match events',
+      aria: 'Goals, cards and substitutions',
+      assist: 'Assist',
+      type: {
+        goal: 'Goal',
+        own_goal: 'Own goal',
+        penalty_goal: 'Penalty',
+        yellow_card: 'Yellow',
+        red_card: 'Red',
+        substitution: 'Sub',
+      },
+    },
   },
   groups: {
     title: '小组赛',

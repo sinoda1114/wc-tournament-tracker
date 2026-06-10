@@ -2,8 +2,10 @@ import { TextLink } from '@/components/RouterLink';
 import { notFound } from 'next/navigation';
 import { Container, Group, Stack, Text, Title } from '@mantine/core';
 
+import { AdminMatchEvents } from '@/components/AdminMatchEvents';
 import { AdminMatchForm } from '@/components/AdminMatchForm';
 import { VenueBadge } from '@/components/VenueBadge';
+import { getMatchEvents } from '@/db/match-events';
 import { getMatchDetail } from '@/db/queries';
 import {
   STAGE_LABELS,
@@ -38,6 +40,7 @@ export default async function AdminMatchPage({ params }: AdminMatchPageProps) {
     notFound();
   }
 
+  const events = await getMatchEvents(match.id);
   const stageLabel = STAGE_LABELS[match.stage as MatchStage] ?? match.stage;
 
   return (
@@ -63,6 +66,7 @@ export default async function AdminMatchPage({ params }: AdminMatchPageProps) {
 
         <VenueBadge venue={match.venue} />
         <AdminMatchForm match={match} />
+        <AdminMatchEvents match={match} events={events} />
       </Stack>
     </Container>
   );

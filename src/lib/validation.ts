@@ -24,3 +24,37 @@ export const matchUpdateSchema = z.object({
 });
 
 export type MatchUpdateInput = z.infer<typeof matchUpdateSchema>;
+
+/** 試合イベント種別（match_events.type と一致）。 */
+export const matchEventTypeSchema = z.enum([
+  'goal',
+  'own_goal',
+  'penalty_goal',
+  'yellow_card',
+  'red_card',
+  'substitution',
+]);
+
+const matchEventFields = {
+  type: matchEventTypeSchema,
+  minute: z.number().int().min(0).max(130).nullable(),
+  teamId: z.string().trim().min(1).max(64).nullable(),
+  playerName: z.string().trim().min(1).max(120),
+  playerOut: z.string().trim().min(1).max(120).nullable().optional(),
+  sortOrder: z.number().int().min(0).max(1000).optional(),
+};
+
+/** 管理画面からのイベント追加入力。 */
+export const matchEventCreateSchema = z.object({
+  matchId: z.number().int().positive(),
+  ...matchEventFields,
+});
+
+/** イベント更新入力（id 付き・matchId は不変）。 */
+export const matchEventUpdateSchema = z.object({
+  id: z.number().int().positive(),
+  ...matchEventFields,
+});
+
+export type MatchEventCreateInput = z.infer<typeof matchEventCreateSchema>;
+export type MatchEventUpdateInput = z.infer<typeof matchEventUpdateSchema>;

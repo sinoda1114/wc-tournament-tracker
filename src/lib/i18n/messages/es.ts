@@ -70,6 +70,19 @@ export const es: Dictionary = {
       groupThirdTitle: 'Uno de los terceros del Grupo {g}',
     },
     weekdays: ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'],
+    events: {
+      title: 'Match events',
+      aria: 'Goals, cards and substitutions',
+      assist: 'Assist',
+      type: {
+        goal: 'Goal',
+        own_goal: 'Own goal',
+        penalty_goal: 'Penalty',
+        yellow_card: 'Yellow',
+        red_card: 'Red',
+        substitution: 'Sub',
+      },
+    },
   },
   groups: {
     title: 'Fase de grupos',

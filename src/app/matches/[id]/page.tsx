@@ -5,9 +5,11 @@ import { notFound } from 'next/navigation';
 import { Badge, Container, Group, Stack, Text, Title } from '@mantine/core';
 
 import { JsonLd } from '@/components/JsonLd';
+import { MatchEvents } from '@/components/MatchEvents';
 import { MatchVersus } from '@/components/MatchVersus';
 import { VenueInfoCard } from '@/components/VenueInfoCard';
 import { VenueWeather } from '@/components/VenueWeather';
+import { getMatchEvents } from '@/db/match-events';
 import { getMatchDetail, getVenueMatchSummary } from '@/db/queries';
 import {
   formatKickoff,
@@ -93,6 +95,7 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
   const kickoff = formatKickoff(match.kickoffAt, timeZone);
   const kickoffAbbrev = match.kickoffAt ? tzOffset(timeZone, new Date(match.kickoffAt)) : '';
   const venueSummary = await getVenueMatchSummary(match.venueId);
+  const events = await getMatchEvents(match.id);
 
   // 構造化データ: 試合 = SportsEvent、ナビ階層 = BreadcrumbList。
   const baseUrl = getSiteUrl();
@@ -136,6 +139,8 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
         >
           <MatchVersus match={match} nameMode="full" size="md" />
         </Stack>
+
+        <MatchEvents events={events} match={match} dict={dict} />
 
         <VenueInfoCard venue={match.venue} summary={venueSummary} locale={locale} dict={dict} />
 

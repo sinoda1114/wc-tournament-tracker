@@ -78,6 +78,19 @@ export const ja = {
       groupThirdTitle: 'グループ {g} のいずれかの3位',
     },
     weekdays: ['日', '月', '火', '水', '木', '金', '土'],
+    events: {
+      title: '試合のできごと',
+      aria: '試合中の得点・カード・交代',
+      assist: 'アシスト',
+      type: {
+        goal: '得点',
+        own_goal: 'オウンゴール',
+        penalty_goal: 'PK',
+        yellow_card: 'イエロー',
+        red_card: 'レッド',
+        substitution: '交代',
+      },
+    },
   },
   // グループリーグ（一覧・詳細）ページ。{letter}=組記号 を置換。
   groups: {
