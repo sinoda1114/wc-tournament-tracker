@@ -177,13 +177,13 @@ export function AdminMatchEvents({ match, events }: AdminMatchEventsProps) {
           clearable
         />
         <TextInput
-          label="選手"
+          label="選手（交代は入る選手 IN）"
           value={playerName}
           onChange={(event) => setPlayerName(event.currentTarget.value)}
           w={160}
         />
         <TextInput
-          label="アシスト / 交代OUT"
+          label="アシスト / 交代は退く選手 OUT"
           value={playerOut}
           onChange={(event) => setPlayerOut(event.currentTarget.value)}
           w={170}

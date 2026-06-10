@@ -49,10 +49,11 @@ export function MatchEvents({ events, match, dict }: MatchEventsProps) {
               {TYPE_MARK[event.type]}
             </span>
             <span className="wc-match-event-body">
-              <span className="wc-match-event-player">{event.playerName}</span>
-              {event.type === 'substitution' && event.playerOut ? (
-                <span className="wc-match-event-sub">{`↓ ${event.playerOut}`}</span>
-              ) : null}
+              <span className="wc-match-event-player">
+                {event.type === 'substitution' && event.playerOut
+                  ? `${event.playerOut} → ${event.playerName}`
+                  : event.playerName}
+              </span>
               {event.type !== 'substitution' && event.playerOut ? (
                 <span className="wc-match-event-assist">{`${t.assist}: ${event.playerOut}`}</span>
               ) : null}
