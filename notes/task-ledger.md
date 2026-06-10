@@ -16,7 +16,7 @@
 
 ## 進行中
 
-- **#20b** 試合イベント・自動tier — **実装完了・未コミット**（6/10・ui-feature）。tsc/lint/test 全PASS（295件）。タイムライン取得(`lookuptimeline.php`)→マップ→`replaceAutoMatchEvents()`（manual不可侵維持・`src/db/match-events.ts` 無変更）。空タイムラインは既存autoを消さずスキップ＋件数可視化。残: gate-1 `/ai-review`→コミット→gate-2 `/security-review`
+- **#20b** 試合イベント・自動tier — **コミット済み**（6/10・`dac6893`・ui-feature実装）。tsc/lint/test 全PASS（295件）。**残: AIレビュー2段ゲート（/ai-review・/security-review）を後追いで実施→push判断**
 - **#20c** 手動tierの動作確認 — `/admin/matches/1` で追加 → `/matches/1` 表示・5言語ラベル確認。**ユーザー実施予定**
 
 ## 保留（判断・外部要因待ち）
