@@ -27,7 +27,7 @@
 - **#12** 開幕前の通しQA（W9 と一体。2段ゲート→デプロイ）
 - **#14** Stripe 課金接続 — 商品名・価格が未決（ユーザー判断待ち）。**課金動線は6/11確定**: グループステージ(〜6/27)無料→決勝T(6/28〜)課金壁・6/28以降の新規登録のみ72h無料・予告バナー（[[launch-monetization-plan]]）。entitlement は日付ゲート方式で実装する
 - **#26** 課金壁の予告バナー — 無料期間中に「決勝トーナメントからは買い切り○円」を表示（6/25頃から強調）。#14 の価格確定後に実装
-- **#19** i18n 残作業の最終確認 — groups/teams/prediction が完了済みか棚卸し（[[i18n-implementation-status]] が古い可能性）
+- **#19** i18n 棚卸し結果（6/11 実施）— 本文UIは5言語対応済みを確認。修正済み: 投票エラーの多言語化＋es/pt/zhイベントラベル（`23f2d41`）。**残（要設計判断）**: 各ページの metadata（title/description）と OGP 画像文言が全ページ日本語固定（既存設計。generateMetadata の locale 対応はクローラに cookie が無い問題と表裏なので、対応するなら hreflang/URL 戦略とセットで）
 - **#22** ドメイン取得 — **ほぼ完了（6/11）**: matchfav.com を Cloudflare で取得済み・info@matchfav.com 受信稼働（Email Routing→Gmail・外部送信元で実証・キャッチオール有効・受信専用）。残: Vercel への DNS 接続（A/CNAME を「DNSのみ(グレー雲)」で追加）＝ #25 とセットで実施
 - **#25** 本番 Clerk 設定 — 本番ドメイン取得（#22）に連動
 - **#27** リブランド一括反映 — **実装完了・未コミット（6/11）**: ヘッダ/metadata/OGP/manifest/llms.txt/i18n5言語brandTitle/OGP画像/法務3ページを MatchFav・matchfav.com・info@matchfav.com で置換。SITE_URL_FALLBACK も matchfav.com に。tsc/test/lint グリーン。残プレースホルダは【価格未定】(#14)のみ
