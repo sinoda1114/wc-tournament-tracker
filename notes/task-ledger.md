@@ -21,8 +21,7 @@
 
 ## 進行中
 
-- **push** — 全ゲート通過済み・未push 10コミット。**ユーザー判断待ち**
-- **#22残り＋#25** — Vercel DNS接続＋Clerk本番化。手順書 `notes/runbook-domain-clerk-prod.md` をなぞる（ユーザー操作・30〜45分）
+- **#22残り＋#25** — Vercel DNS接続＋Clerk本番化。手順書 `notes/runbook-domain-clerk-prod.md` をなぞる（ユーザー操作・30〜45分）。main へのマージ/push は完了済み（6/11・25コミット・直マージ）
 
 ## 保留（判断・外部要因待ち）
 
