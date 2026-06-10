@@ -5,7 +5,7 @@
 > - セッション内の TaskList はセッション終了/フォークで消えるため、**正本はこのファイル**。セッション開始時にここを読む。
 > - W系（WBS）・AT系（認証）は [launch-task-board.md](launch-task-board.md) 参照。本台帳は日次の #N 系列。
 
-最終更新: 2026-06-10
+最終更新: 2026-06-11（夜間自走分まで反映）
 
 ## 完了
 
@@ -13,12 +13,16 @@
 - ~~#23 管理画面を所有者(Clerkオーナーメール)限定に・旧パスワード方式廃止~~（6/10・`42c6178`）
 - ~~#24 会場天気表示 — WeatherAPI・3hキャッシュ・全言語同一スナップショット~~（6/10・`5d867dc` + fix `5443a61`）
 - ~~#20a 試合イベント表示・手動tier — admin入力CRUD＋時系列表示＋i18n×5~~（6/10・`2be097a`）
+- ~~#20b 試合イベント・自動tier — TheSportsDBタイムライン取込・manual不可侵~~（6/10・`dac6893` + 原子化fix `7134845`）
+- ~~#20c 手動tierの動作確認 — admin入力→表示・ingest後の不可侵までユーザー確認済み~~（6/11）
+- ~~#21 法務ページ清書 — terms/privacy/tokushoho 公開可能水準・新課金設計反映~~（6/10-11・`209f24e`。弁護士レビューは公開前に）
+- ~~#27 リブランド一括反映 — MatchFav/matchfav.com/info@ をサイト全体へ~~（6/11・`209f24e`）
+- ~~セキュリティ/品質ゲート — /security-review 指摘ゼロ・品質fix 1件・i18n fix~~（6/11 夜間・`7134845` `23f2d41`）
 
 ## 進行中
 
-- **#20b** 試合イベント・自動tier — **コミット済み**（6/10・`dac6893`・ui-feature実装）。tsc/lint/test 全PASS（295件）。**残: AIレビュー2段ゲート（/ai-review・/security-review）を後追いで実施→push判断**
-- **#21** 法務ページ清書 — (legal) terms/privacy/tokushoho を公開可能水準へ。**legal-seo-infra エージェントが清書中（6/10）**。価格(#14)/ドメイン(#22)はプレースホルダ・事業者情報は開示請求方式・弁護士レビュー前提
-- **#20c** 手動tierの動作確認 — `/admin/matches/1` で追加 → `/matches/1` 表示・5言語ラベル確認。**ユーザー実施予定**
+- **push** — 全ゲート通過済み・未push 10コミット。**ユーザー判断待ち**
+- **#22残り＋#25** — Vercel DNS接続＋Clerk本番化。手順書 `notes/runbook-domain-clerk-prod.md` をなぞる（ユーザー操作・30〜45分）
 
 ## 保留（判断・外部要因待ち）
 
@@ -30,7 +34,6 @@
 - **#19** i18n 棚卸し結果（6/11 実施）— 本文UIは5言語対応済みを確認。修正済み: 投票エラーの多言語化＋es/pt/zhイベントラベル（`23f2d41`）。**残（要設計判断）**: 各ページの metadata（title/description）と OGP 画像文言が全ページ日本語固定（既存設計。generateMetadata の locale 対応はクローラに cookie が無い問題と表裏なので、対応するなら hreflang/URL 戦略とセットで）
 - **#22** ドメイン取得 — **ほぼ完了（6/11）**: matchfav.com を Cloudflare で取得済み・info@matchfav.com 受信稼働（Email Routing→Gmail・外部送信元で実証・キャッチオール有効・受信専用）。残: Vercel への DNS 接続（A/CNAME を「DNSのみ(グレー雲)」で追加）＝ #25 とセットで実施
 - **#25** 本番 Clerk 設定 — 本番ドメイン取得（#22）に連動
-- **#27** リブランド一括反映 — **実装完了・未コミット（6/11）**: ヘッダ/metadata/OGP/manifest/llms.txt/i18n5言語brandTitle/OGP画像/法務3ページを MatchFav・matchfav.com・info@matchfav.com で置換。SITE_URL_FALLBACK も matchfav.com に。tsc/test/lint グリーン。残プレースホルダは【価格未定】(#14)のみ
 
 ## 番号の欠番について
 
