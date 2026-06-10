@@ -19,3 +19,11 @@ work-summary/
 
 # local AI review artifacts (not committed)
 .review-reports/
+
+# local agent/skill tooling (per-developer, not part of the app)
+.agents/
+.devin/
+.windsurf/
+.claude/skills/
+docs/goals/
+skills-lock.json

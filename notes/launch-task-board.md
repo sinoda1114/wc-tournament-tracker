@@ -127,3 +127,47 @@
 1. **C ブロッカー解除**：deps 追加/`.env.example` env/`layout.tsx` ClerkProvider
 2. 初回コミット（`package-lock.json` 含める＝AIレビュー Medium）
 3. Stripe 実体（商品/価格ID）確認 → C へ `STRIPE_PRICE_ID` 連携
+
+---
+
+## 7. 認証実装タスク（AT系列・Clerk 確定 / 2026-06-08 起票）
+
+> W1 の「基盤決定」は **Clerk で確定**（[[launch-monetization-plan]]）。Clerk ダッシュボードでアプリ登録済み。
+> 実装は W1 を AT1〜AT7 に細分（[[numbered-choices]] 準拠＝番号固定・完了は取り消し線）。
+> **重要訂正**: 本プロジェクトは **Next 16.2.7** のため、ミドルウェアは `middleware.ts` ではなく **`proxy.ts`**（Next 16+ の新名）。WBS 表記の `middleware.ts` は読み替え。
+> 公式支援: **Clerk CLI**（`clerk link`/`clerk env pull` で env 自動配線）＋ **Clerk Skills**（`github.com/clerk/skills`＝AIエージェント用 SKILL.md）を採用。MCP は今回不要。
+
+| # | タスク | 要点 / 触る領域 | 前提 |
+|---|---|---|---|
+| **AT1** | `@clerk/nextjs` 導入＋env 配線 | `clerk auth login`→`clerk link --app <既存app>`→`clerk env pull`（or 手動でキー貼付）。`.env.example` に Clerk キー追記 | 【一部ユーザー操作】Clerk ログイン/キー |
+| **AT2** | root `layout.tsx` に `<ClerkProvider>` | 既存 Mantine/i18n Provider との入れ子順序を保つ。`<html>`直下の階層に配置 | AT1 |
+| **AT3** | `proxy.ts`（≠middleware.ts）でログイン必須化 | `clerkMiddleware`＋`createRouteMatcher`。**公開ルート以外を `auth.protect()`**。matcher は `_next`/静的を除外 | AT1 |
+| **AT4** | `(auth)/sign-in` / `(auth)/sign-up` ルート | catch-all `[[...sign-in]]`/`[[...sign-up]]`。Google ログインは **ダッシュボードで有効化**【ユーザー操作】 | AT2 |
+| **AT5** | `lib/auth/*` ヘルパー | `auth()`/`currentUser()` ラッパ・`isAdmin()`（`ADMIN_EMAILS` 照合）。既存 `admin/login` との整合方針を決める | AT1 |
+| **AT6** | ヘッダー UI 最小配線 | `<UserButton/>`／未ログイン時 Sign in 導線。**B境界**（本格 UI は W8）＝最小限に留め B と握る | AT2 |
+| **AT7** | 検証 | `npx tsc --noEmit`＋`npm run lint`、保護/公開が効くことの動作確認（dev はユーザー管理） | AT1–6 |
+
+**進捗（2026-06-08・goaladv `clerk-auth`）**
+- AT1〜AT4 **完了**（`npx tsc --noEmit` green）: `@clerk/nextjs@7.4.3` 導入・`ClerkProvider`・`src/proxy.ts`・`(auth)/sign-in|sign-up` ルート
+- AT5 **保留＝他チーム調整待ち**: admin の Clerk 統合は **admin 領域担当の別チームと要相談**。着手分（lib/auth.ts ほか5ファイル）は `git restore` で巻き戻し済み・**既存 password 認証は無傷**
+- AT6（ヘッダー UI）は B(UI) 境界のため同様に要調整 / AT7（検証）は AT1〜AT4 について実施済み（tsc green）
+
+**公開ルート確定リスト（AT3 で適用・ログイン不要）**
+- `/sign-in(.*)`・`/sign-up(.*)`
+- `(legal)`: `/privacy`・`/terms`・`/tokushoho`（特商法は未ログイン閲覧が前提）
+- SEO: `sitemap.xml`・`robots.txt`・`/llms.txt`・OGP・manifest
+- `/api/ingest`（**CRON_SECRET で別保護**＝Clerk 保護から除外。[[commercial-data-constraints]]）
+- `/api/webhooks(.*)`（Clerk/Stripe webhook）
+- `/`（トップ）＝**要判断**: 72h 無料モデルなら「見せて登録誘導」で公開が自然 / 厳格運用なら保護
+
+**ユーザー操作ブロッカー（MAIN では完結できない）**
+- ⓐ Clerk CLI ログイン（`clerk auth login` はブラウザ）または publishable/secret キーの手動受領
+- ⓑ ダッシュボードで **Google OAuth 有効化**
+- ⓒ `.env.local` への実キー投入（本人）
+
+**要確認（実装分岐に効く）**
+1. トップ `/` を公開 or 保護どちらにするか（既定案＝公開・登録誘導）
+2. env 配線は Clerk CLI（推奨・自動）か手動か
+3. 既存 `admin/login` を Clerk に寄せるか当面共存か（既定案＝`ADMIN_EMAILS` 照合で Clerk に寄せる）
+
+> 並行チーム配慮: `layout.tsx`(AT2) と ヘッダー(AT6) は B（ui-feature）と接触面。最小差分で入れ、本格 UI は W8 で B に委ねる。`globals.css` は触らない（B 正本）。
