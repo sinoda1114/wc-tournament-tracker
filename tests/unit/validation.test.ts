@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { adminPasswordSchema, matchUpdateSchema } from '@/lib/validation';
+import { matchUpdateSchema } from '@/lib/validation';
 
 const valid = {
   matchId: 5,
@@ -50,17 +50,5 @@ describe('matchUpdateSchema', () => {
 
   it('matchId が非正なら拒否する', () => {
     expect(matchUpdateSchema.safeParse({ ...valid, matchId: 0 }).success).toBe(false);
-  });
-});
-
-describe('adminPasswordSchema', () => {
-  it('非空文字列を受理する', () => {
-    expect(adminPasswordSchema.safeParse('hunter2').success).toBe(true);
-  });
-  it('空文字を拒否する', () => {
-    expect(adminPasswordSchema.safeParse('').success).toBe(false);
-  });
-  it('長すぎる入力を拒否する', () => {
-    expect(adminPasswordSchema.safeParse('x'.repeat(201)).success).toBe(false);
   });
 });

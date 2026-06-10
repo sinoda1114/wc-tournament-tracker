@@ -24,6 +24,3 @@ export const matchUpdateSchema = z.object({
 });
 
 export type MatchUpdateInput = z.infer<typeof matchUpdateSchema>;
-
-/** 管理パスワード: 非空・最大長で防御（異常入力対策の一部）。 */
-export const adminPasswordSchema = z.string().min(1).max(200);
