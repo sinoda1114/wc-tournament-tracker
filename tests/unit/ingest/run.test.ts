@@ -19,6 +19,13 @@ vi.mock('@/db/queries/round-of-32', () => ({
   resolveAndPersistRoundOf32: () => resolveAndPersistRoundOf32(),
 }));
 
+// イベント置き換え（auto のみ delete→insert）は DB 層。ここでは呼び出し内容を検証する。
+const replaceAutoMatchEvents = vi.fn();
+vi.mock('@/db/match-events', () => ({
+  replaceAutoMatchEvents: (matchId: number, events: unknown[]) =>
+    replaceAutoMatchEvents(matchId, events),
+}));
+
 import type { ResultProvider } from '@/lib/ingest/types';
 import { runIngestion } from '@/lib/ingest/run';
 
@@ -61,6 +68,8 @@ beforeEach(() => {
   updateMatchResult.mockReset();
   resolveAndPersistRoundOf32.mockReset();
   resolveAndPersistRoundOf32.mockResolvedValue({ updated: 0 });
+  replaceAutoMatchEvents.mockReset();
+  replaceAutoMatchEvents.mockResolvedValue(undefined);
 });
 
 describe('runIngestion', () => {
@@ -132,6 +141,98 @@ describe('runIngestion', () => {
     expect(summary.failures).toEqual([{ matchId: 1, message: 'boom' }]);
     // 失敗があっても全 update が試行される（途中で止まらない）。
     expect(updateMatchResult).toHaveBeenCalledTimes(2);
+  });
+
+  it('fetchMatchEvents を持つ provider はイベントタイムラインも同期する', async () => {
+    listTournamentMatches.mockResolvedValue([matchRow(1, 'mex', 'rsa')]);
+    listAllTeams.mockResolvedValue(TEAMS);
+    updateMatchResult.mockResolvedValue(undefined);
+
+    const fetchMatchEvents = vi.fn(async () => [
+      { type: 'goal' as const, minute: 23, isHome: true, playerName: 'A', playerOut: null, externalId: 't1' },
+      { type: 'yellow_card' as const, minute: 51, isHome: false, playerName: 'B', playerOut: null, externalId: 't2' },
+    ]);
+    const summary = await runIngestion({
+      fetchResults: async () =>
+        [{ dateEvent: '2026-06-11', homeName: 'Mexico', awayName: 'South Africa', homeScore: 2, awayScore: 1, finished: true, externalEventId: '100' }] as never,
+      fetchMatchEvents,
+    });
+
+    expect(fetchMatchEvents).toHaveBeenCalledWith('100');
+    expect(replaceAutoMatchEvents).toHaveBeenCalledTimes(1);
+    expect(replaceAutoMatchEvents).toHaveBeenCalledWith(1, [
+      expect.objectContaining({ type: 'goal', teamId: 'mex', playerName: 'A', sortOrder: 0, externalId: 't1' }),
+      expect.objectContaining({ type: 'yellow_card', teamId: 'rsa', playerName: 'B', sortOrder: 1, externalId: 't2' }),
+    ]);
+    expect(summary.events).toEqual({
+      planned: 1,
+      synced: 1,
+      inserted: 2,
+      empty: 0,
+      perMatch: [{ matchId: 1, count: 2 }],
+      failures: [],
+    });
+  });
+
+  it('タイムラインが空の試合は既存 auto を消さずスキップし、empty として可視化する', async () => {
+    listTournamentMatches.mockResolvedValue([matchRow(1, 'mex', 'rsa')]);
+    listAllTeams.mockResolvedValue(TEAMS);
+    updateMatchResult.mockResolvedValue(undefined);
+
+    const summary = await runIngestion({
+      fetchResults: async () =>
+        [{ dateEvent: '2026-06-11', homeName: 'Mexico', awayName: 'South Africa', homeScore: 2, awayScore: 1, finished: true, externalEventId: '100' }] as never,
+      fetchMatchEvents: async () => [],
+    });
+
+    expect(replaceAutoMatchEvents).not.toHaveBeenCalled();
+    expect(summary.events).toMatchObject({
+      planned: 1,
+      synced: 0,
+      inserted: 0,
+      empty: 1,
+      perMatch: [{ matchId: 1, count: 0 }],
+    });
+  });
+
+  it('イベント同期の失敗はスコア反映の成功を覆さず events.failures に集約する', async () => {
+    listTournamentMatches.mockResolvedValue([matchRow(1, 'mex', 'rsa')]);
+    listAllTeams.mockResolvedValue(TEAMS);
+    updateMatchResult.mockResolvedValue(undefined);
+
+    const summary = await runIngestion({
+      fetchResults: async () =>
+        [{ dateEvent: '2026-06-11', homeName: 'Mexico', awayName: 'South Africa', homeScore: 2, awayScore: 1, finished: true, externalEventId: '100' }] as never,
+      fetchMatchEvents: async () => {
+        throw new Error('timeline down');
+      },
+    });
+
+    expect(summary.updated).toBe(1);
+    expect(summary.events.failures).toEqual([{ matchId: 1, message: 'timeline down' }]);
+    expect(replaceAutoMatchEvents).not.toHaveBeenCalled();
+  });
+
+  it('fetchMatchEvents を持たない provider はイベント同期をスキップする（後方互換）', async () => {
+    listTournamentMatches.mockResolvedValue([matchRow(1, 'mex', 'rsa')]);
+    listAllTeams.mockResolvedValue(TEAMS);
+    updateMatchResult.mockResolvedValue(undefined);
+
+    const summary = await runIngestion(
+      provider([
+        { dateEvent: '2026-06-11', homeName: 'Mexico', awayName: 'South Africa', homeScore: 2, awayScore: 1, finished: true, externalEventId: '100' },
+      ]),
+    );
+
+    expect(replaceAutoMatchEvents).not.toHaveBeenCalled();
+    expect(summary.events).toEqual({
+      planned: 0,
+      synced: 0,
+      inserted: 0,
+      empty: 0,
+      perMatch: [],
+      failures: [],
+    });
   });
 
   it('fetchResults のネットワーク失敗は呼び出し側に投げる（cron 再試行に委ねる）', async () => {

@@ -1,14 +1,31 @@
+import { replaceAutoMatchEvents } from '@/db/match-events';
 import { listAllTeams, listTournamentMatches, updateMatchResult } from '@/db/queries';
 import { resolveAndPersistRoundOf32 } from '@/db/queries/round-of-32';
 
-import { planMatchUpdates } from './reconcile';
-import type { ResultProvider } from './types';
+import { planMatchEventSyncs, planMatchUpdates, toAutoMatchEvents } from './reconcile';
+import type { MatchEventProvider, ResultProvider } from './types';
 
 export type IngestionFailure = {
   /** 反映に失敗した試合 id。 */
   matchId: number;
   /** 失敗理由（ログ/監視用）。 */
   message: string;
+};
+
+/** イベントタイムライン同期の集約結果（取込の可視化用）。 */
+export type MatchEventsSummary = {
+  /** タイムライン取得を試みた試合数。 */
+  planned: number;
+  /** auto イベントの置き換えまで成功した試合数。 */
+  synced: number;
+  /** 挿入したイベント総数（無料キーでは約5件/試合に切り詰められる）。 */
+  inserted: number;
+  /** タイムラインが空/欠落で置き換えを見送った試合数（既存 auto は保持）。 */
+  empty: number;
+  /** 試合ごとの取込イベント件数（空・欠落も 0 件として可視化）。 */
+  perMatch: { matchId: number; count: number }[];
+  /** 同期に失敗した試合（スコア反映の成否には影響しない）。 */
+  failures: IngestionFailure[];
 };
 
 export type IngestionSummary = {
@@ -24,6 +41,8 @@ export type IngestionSummary = {
   failures: IngestionFailure[];
   /** グループ順位確定で R32 入口（home/away_team_id）を埋めたスロット数。 */
   roundOf32Updated: number;
+  /** イベントタイムライン同期の集約。provider 非対応時は全て 0。 */
+  events: MatchEventsSummary;
 };
 
 /**
@@ -39,7 +58,7 @@ export type IngestionSummary = {
  * - fetchResults 自体（ネットワーク失敗）は呼び出し側に投げて 500 とし、cron の再試行に委ねる。
  */
 export async function runIngestion(
-  provider: ResultProvider,
+  provider: ResultProvider & Partial<MatchEventProvider>,
 ): Promise<IngestionSummary> {
   const [results, matches, teams] = await Promise.all([
     provider.fetchResults(),
@@ -75,6 +94,43 @@ export async function runIngestion(
     }
   }
 
+  // イベントタイムライン同期（任意機能）。
+  // - スコア更新と独立に計画する（手入力済み試合のイベント補完にも効く）。
+  // - 空タイムラインは既存 auto を消さずスキップ（無料キーの欠落で蓄積を失わない）。
+  // - 失敗は events.failures に集約し、スコア反映の成功を覆さない。
+  const events: MatchEventsSummary = {
+    planned: 0,
+    synced: 0,
+    inserted: 0,
+    empty: 0,
+    perMatch: [],
+    failures: [],
+  };
+  if (typeof provider.fetchMatchEvents === 'function') {
+    const syncs = planMatchEventSyncs(results, matches, teams);
+    events.planned = syncs.length;
+    for (const sync of syncs) {
+      try {
+        const normalized = await provider.fetchMatchEvents(sync.externalEventId);
+        const auto = toAutoMatchEvents(normalized, sync);
+        if (auto.length === 0) {
+          events.empty += 1;
+          events.perMatch.push({ matchId: sync.matchId, count: 0 });
+          continue;
+        }
+        await replaceAutoMatchEvents(sync.matchId, auto);
+        events.synced += 1;
+        events.inserted += auto.length;
+        events.perMatch.push({ matchId: sync.matchId, count: auto.length });
+      } catch (error) {
+        events.failures.push({
+          matchId: sync.matchId,
+          message: error instanceof Error ? error.message : 'event sync failed',
+        });
+      }
+    }
+  }
+
   return {
     fetched: results.length,
     planned: updates.length,
@@ -82,5 +138,6 @@ export async function runIngestion(
     matchIds,
     failures,
     roundOf32Updated,
+    events,
   };
 }
