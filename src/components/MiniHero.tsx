@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import { auth } from '@clerk/nextjs/server';
-import { Button } from '@mantine/core';
 
 import type { Dictionary } from '@/lib/i18n/dictionary';
 
@@ -28,9 +27,11 @@ export async function MiniHero({ dict }: MiniHeroProps) {
         <h2 className="wc-mini-hero-title">{t.heroTitle}</h2>
         <p className="wc-mini-hero-lead">{t.heroLead}</p>
       </div>
-      <Button component={Link} href="/sign-in" size="md" radius="md">
+      {/* Server Component から Mantine Button(client) へ component={Link}（関数）は
+          渡せない（RSC のシリアライズ制約）ため、素の Link に CSS でボタン見た目を付ける。 */}
+      <Link href="/sign-in" className="wc-mini-hero-cta">
         {t.heroCta}
-      </Button>
+      </Link>
     </section>
   );
 }
