@@ -21,7 +21,7 @@ const theme = createTheme({
     // 表示開始を 1 秒に統一する（全 Tooltip 共通の既定値）。
     Tooltip: Tooltip.extend({
       defaultProps: {
-        openDelay: 1000,
+        openDelay: 500,
         withArrow: true,
       },
     }),
