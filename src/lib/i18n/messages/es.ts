@@ -172,6 +172,8 @@ export const es: Dictionary = {
     positionOther: 'Otros',
     ageSuffix: ' años',
     groupCount: '{label} ({count})',
+    noteArg:
+      'Nota: Argentina aparece con 25 jugadores. Leonardo Balerdi se retiró por lesión y, al 11 de junio de 2026, no se ha anunciado un reemplazo. Lo actualizaremos en cuanto se confirme una convocatoria.',
   },
   prediction: {
     title: 'Pronóstico del campeón',

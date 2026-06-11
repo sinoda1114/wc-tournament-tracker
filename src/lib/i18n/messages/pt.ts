@@ -172,6 +172,8 @@ export const pt: Dictionary = {
     positionOther: 'Outros',
     ageSuffix: ' anos',
     groupCount: '{label} ({count})',
+    noteArg:
+      'Nota: a Argentina aparece com 25 jogadores. Leonardo Balerdi foi cortado por lesão e, em 11 de junho de 2026, nenhum substituto foi anunciado. Vamos atualizar assim que uma convocação for confirmada.',
   },
   prediction: {
     title: 'Palpite do campeão',

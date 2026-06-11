@@ -1249,7 +1249,7 @@ a {
 
 .wc-squad-player {
   display: grid;
-  grid-template-columns: 1.8rem 1fr auto;
+  grid-template-columns: 1.8rem minmax(0, 1fr) auto;
   align-items: baseline;
   gap: 0.5rem;
   padding: 0.3rem 0.2rem;
@@ -2065,4 +2065,24 @@ a {
 
 .wc-calendar-saturday[data-outside] {
   opacity: 0.4;
+}
+
+/* スカッドの選手行: 在籍クラブ（#38）。小旗＋クラブ名を控えめに表示。 */
+/* クラブ名は2行目（背番号列の下を空けて名前位置に揃える）。 */
+.wc-squad-club {
+  grid-column: 2 / -1;
+  font-size: 0.74rem;
+  line-height: 1.3;
+  color: var(--wc-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* スカッドの注釈（#38・現状ARGのみ）。控えめに、上に細い区切り。 */
+.wc-squad-note {
+  margin-top: 0.4rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--wc-border);
+  line-height: 1.5;
 }

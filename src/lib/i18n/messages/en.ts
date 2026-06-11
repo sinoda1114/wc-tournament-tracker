@@ -171,6 +171,8 @@ export const en: Dictionary = {
     positionOther: 'Other',
     ageSuffix: '',
     groupCount: '{label} ({count})',
+    noteArg:
+      'Note: Argentina is shown with 25 players. Leonardo Balerdi withdrew through injury and, as of 11 June 2026, no replacement has been announced. We will update this as soon as a call-up is confirmed.',
   },
   prediction: {
     title: 'Champion prediction',

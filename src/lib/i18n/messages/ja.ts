@@ -185,6 +185,8 @@ export const ja = {
     positionOther: 'その他',
     ageSuffix: '歳',
     groupCount: '{label}（{count}）',
+    noteArg:
+      '※ アルゼンチン代表は Leonardo Balerdi 選手が負傷のため辞退し、2026年6月11日時点で代替選手が未発表のため25名で表示しています。追加召集が発表され次第、反映します。',
   },
   // 優勝国予想（ChampionPrediction）。{count}=チーム数・{name}=国名。
   prediction: {
