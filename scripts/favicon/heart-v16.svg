@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  MatchFav favicon — bold heart v16 (T-41)
+  ブランド配色: 濃紺背景(#0b1220) + ブルー基調ハート(#3b82f6) + ゴールド縁取り(#fbbf24)
+  - 大胆に塗りつぶしたハートを中央へ。16px でもシルエットが潰れない。
+  - maskable 安全領域(中央80%)にハート本体を収める。
+  viewBox は 512x512。
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" fill="none">
+  <!-- 濃紺の角丸スクエア背景 -->
+  <rect width="512" height="512" rx="112" fill="#0b1220"/>
+  <!-- ブランドブルーの淡い放射グラデで奥行き -->
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="40%" r="75%">
+      <stop offset="0%" stop-color="#1e3a8a" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#0b1220" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="heart" x1="128" y1="128" x2="384" y2="416" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#60a5fa"/>
+      <stop offset="55%" stop-color="#3b82f6"/>
+      <stop offset="100%" stop-color="#1d4ed8"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+
+  <!-- bold heart 本体: 太く塗りつぶし。ゴールドの縁取りで W杯らしさ。 -->
+  <path
+    d="M256 432
+       C256 432 96 332 96 216
+       C96 156 142 116 196 116
+       C232 116 252 138 256 150
+       C260 138 280 116 316 116
+       C370 116 416 156 416 216
+       C416 332 256 432 256 432 Z"
+    fill="url(#heart)"
+    stroke="#fbbf24"
+    stroke-width="22"
+    stroke-linejoin="round"/>
+
+  <!-- ハート上部に控えめなハイライト（光沢） -->
+  <path
+    d="M196 150
+       C168 150 144 170 142 200
+       C141 214 152 222 162 214
+       C176 188 196 176 214 176
+       C228 176 230 154 214 150
+       C208 148 202 150 196 150 Z"
+    fill="#ffffff"
+    fill-opacity="0.28"/>
+</svg>
