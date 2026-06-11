@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   description: 'MatchFav（FIFA非公認の非公式ファンサイト）の利用規約です。',
 };
 
-const UPDATED = '2026年6月10日';
+const UPDATED = '2026年6月11日';
 
 export default function TermsPage() {
   return (
@@ -114,7 +114,7 @@ export default function TermsPage() {
           <li>
             無料期間中に支払いがなされない場合でも、自動的に課金されることはありません。
           </li>
-          <li>決済は、決済代行事業者である Stripe, Inc. の提供するシステムを通じて行われます。</li>
+          <li>決済は、外部の決済代行事業者の提供するシステムを通じて行われます。</li>
           <li>料金は表示された時点の消費税を含む総額で表示します。</li>
         </ul>
       </section>
@@ -146,9 +146,9 @@ export default function TermsPage() {
         <ul className={styles.list}>
           <li>
             本サービスが提供する試合日程・結果・順位・選手情報・天気予報その他の情報は、
-            外部の公開データソース（試合データ: TheSportsDB、天気: WeatherAPI.com 等）に
-            基づいています。当方は可能な範囲で正確性に努めますが、これらは無料・公開の
-            データソースという性質上、<strong>欠落・遅延・誤りが生じることがあり</strong>、
+            外部の公開データソースに基づいています。当方は可能な範囲で正確性に努めますが、
+            これらは無料・公開のデータソースという性質上、
+            <strong>欠落・遅延・誤りが生じることがあり</strong>、
             その完全性・正確性・最新性・有用性を保証しません。
           </li>
           <li>
@@ -174,7 +174,7 @@ export default function TermsPage() {
         <h2 className={styles.sectionTitle}>第7条（データの保存・Cookie 等）</h2>
         <p className={styles.body}>
           本サービスは、お気に入りチームの登録、予想投票、言語・表示設定などの機能のために、
-          利用者の端末内の Cookie およびローカルストレージ、ならびに当方のデータベースを使用します。
+          利用者の端末内に Cookie 等を保存し、また当方のデータベースに情報を保存します。
           取得する情報および取り扱いの詳細は
           <Link href="/privacy">プライバシーポリシー</Link>に定めるとおりです。
         </p>
