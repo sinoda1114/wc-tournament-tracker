@@ -23,7 +23,7 @@ export const pt: Dictionary = {
     description:
       'Quando um resultado é atualizado, o vencedor avança automaticamente para a próxima partida. No celular, deslize na horizontal para ver todas as fases.',
     heroTitle: 'Tudo o que você quer ver da Copa 2026, em um só lugar.',
-    heroTagline: 'Pela primeira vez na história, três países-sede: EUA, Canadá e México. "Esse jogo é em qual país, em qual estádio?" — justamente por ser tão confuso, reuni em um só lugar calendário, resultados, classificação, estádios e elencos. Um rastreador não oficial feito por um fã.',
+    heroTagline: 'Pela primeira vez na história, três países-sede: EUA, Canadá e México. "Esse jogo é em qual país, em qual estádio?" — justamente por ser tão confuso, reuni em um só lugar calendário, resultados, classificação, estádios e elencos.',
     heroPoint1: 'Salve seus times favoritos e os jogos deles aparecem na hora',
     heroPoint2: 'Qual país, qual estádio? Informações das sedes e elencos em uma só tela',
     heroPoint3: 'E de bônus: preveja o campeão com todo mundo',
@@ -225,7 +225,7 @@ export const pt: Dictionary = {
       'O mata-mata (a partir de 28 de junho) é uma compra única de {price}. A fase de grupos é gratuita agora mesmo.',
   },
   footer: {
-    brandTitle: 'MatchFav — Tudo o que você quer ver da Copa 2026, em um só lugar (site não oficial de fãs)',
+    brandTitle: 'MatchFav — Tudo o que você quer ver da Copa 2026, em um só lugar',
     brandDesc:
       'Um site de informações não oficial que organiza o calendário, os resultados e as seleções participantes do torneio internacional de futebol de 2026 para os torcedores.',
     navAria: 'Navegação do rodapé',
@@ -237,6 +237,7 @@ export const pt: Dictionary = {
       'Não tem relação de parceria, patrocínio ou endosso com a FIFA, as federações nacionais ou regionais de futebol, os patrocinadores oficiais do torneio ou quaisquer outros detentores de direitos. Nomes, emblemas e logotipos oficiais como «FIFA» e «World Cup» são marcas de seus respectivos proprietários; este site os respeita como tal e não utiliza logotipos ou emblemas oficiais. Os nomes dos estádios podem incluir denominações de direitos de marca com nomes de empresas patrocinadoras, que são marcas dessas empresas. Este site não garante a imediatez nem a exatidão de suas informações.',
     copyright: '(c) MatchFav',
     dataNotice: 'Os dados publicados podem mudar sem aviso prévio.',
+    unofficialNote: 'Site não oficial de fãs (sem afiliação com a FIFA)',
   },
   venue: {
     cardAria: '{stadium} venue info',
