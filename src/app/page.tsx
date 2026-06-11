@@ -11,9 +11,9 @@ import {
   listGroupStageMatches,
   listTournamentMatches,
 } from '@/db/queries';
-import { parseDatesParam } from '@/lib/date-filter';
+import { parseDatesParam, parseQuickDayParam, resolveQuickDay } from '@/lib/date-filter';
 import { getDictionary } from '@/lib/i18n/dictionary';
-import { resolveLocale } from '@/lib/i18n/server';
+import { resolveLocale, resolveTimeZone } from '@/lib/i18n/server';
 import { isFreePeriod } from '@/lib/pricing';
 
 export const dynamic = 'force-dynamic';
@@ -21,7 +21,7 @@ export const dynamic = 'force-dynamic';
 const GROUP_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'] as const;
 
 type HomePageProps = {
-  searchParams: Promise<{ date?: string | string[]; view?: string | string[] }>;
+  searchParams: Promise<{ date?: string | string[]; day?: string | string[]; view?: string | string[] }>;
 };
 
 function pickDateParam(value: string | string[] | undefined): string | null {
@@ -38,7 +38,15 @@ function pickDateParam(value: string | string[] | undefined): string | null {
  */
 export default async function HomePage({ searchParams }: HomePageProps) {
   const params = await searchParams;
-  const selectedDates = parseDatesParam(pickDateParam(params.date));
+  // バッジ(?day=相対)とカレンダー(?date=絶対リスト)は相互排他（DateFilterBar と対）。
+  const quickDay = parseQuickDayParam(pickDateParam(params.day));
+  const calendarDates = parseDatesParam(pickDateParam(params.date));
+  const selectedDates =
+    calendarDates.length > 0
+      ? calendarDates
+      : quickDay
+        ? [resolveQuickDay(quickDay, await resolveTimeZone())]
+        : [];
   const dict = getDictionary(await resolveLocale());
   const isDate = selectedDates.length > 0;
   // 無料期間＝グループステージ期間（lib/pricing と同一境界）。PaywallBanner と同じ判定方法。

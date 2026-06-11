@@ -221,3 +221,42 @@ export function filterMatchesByDates<
   const set = new Set(dates);
   return matches.filter((m) => set.has(toJstYmd(m.kickoffAt) ?? m.matchDate));
 }
+
+/**
+ * クイックバッジ（昨日/今日/明日/明後日）の相対指定キー（#37 フィードバック）。
+ * バッジは `?day=<key>`、カレンダーは `?date=<YYYY-MM-DD,...>` と URL を分離し、
+ * 「カレンダーで明日に当たる日を選んだらバッジ側が点灯する」干渉を断つ。
+ */
+export type QuickDayKey = 'yesterday' | 'today' | 'tomorrow' | 'day-after-tomorrow';
+
+const QUICK_DAY_KEYS: ReadonlySet<string> = new Set([
+  'yesterday',
+  'today',
+  'tomorrow',
+  'day-after-tomorrow',
+]);
+
+/** URL クエリ `?day=` をパースする。不正値は null（=指定なし）。 */
+export function parseQuickDayParam(param: string | null | undefined): QuickDayKey | null {
+  if (!param || !QUICK_DAY_KEYS.has(param)) return null;
+  return param as QuickDayKey;
+}
+
+/** 相対キーを指定TZ基準の暦日 YYYY-MM-DD に解決する。 */
+export function resolveQuickDay(
+  key: QuickDayKey,
+  timeZone: string,
+  now: Date = new Date(),
+): string {
+  const today = todayInZone(timeZone, now);
+  switch (key) {
+    case 'yesterday':
+      return addDays(today, -1);
+    case 'today':
+      return today;
+    case 'tomorrow':
+      return addDays(today, 1);
+    case 'day-after-tomorrow':
+      return addDays(today, 2);
+  }
+}

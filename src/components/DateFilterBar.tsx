@@ -9,8 +9,10 @@ import { formatMatchDate } from '@/lib/bracket';
 import {
   addDays,
   parseDatesParam,
+  parseQuickDayParam,
   serializeDatesParam,
   todayInZone,
+  type QuickDayKey,
 } from '@/lib/date-filter';
 import { useDictionary, useTimeZone } from '@/lib/i18n/context';
 
@@ -86,17 +88,18 @@ export function DateFilterBar({
     });
   }, [timeZone]);
 
-  const dateParam = searchParams.get('date');
-  // 複数日対応（#37）: ?date=a,b,c をカレンダーの複数選択と同期する。
-  const urlDates = parseDatesParam(dateParam);
+  // バッジ(?day=相対キー)とカレンダー(?date=絶対日付リスト)は別パラメータ・相互排他。
+  // 同じパラメータを共有すると「カレンダーで明日に当たる日を選ぶとバッジが点灯する」
+  // 干渉が起き、体験が壊れる（#37 フィードバック）。
+  const urlDates = parseDatesParam(searchParams.get('date'));
+  const activeQuickDay = parseQuickDayParam(searchParams.get('day'));
   // 連続クリック対策: router.push の反映（サーバー往復）を待つ間も最新の選択を
-  // 即時反映するため楽観値を表示・計算の基準にする。これが無いと、遷移完了前の
-  // クリックが古いURL基準で計算されて選択が巻き戻る/消えない不整合が起きる。
+  // 即時反映するため楽観値を表示・計算の基準にする。
   const [activeDates, setOptimisticDates] = useOptimistic(urlDates);
-  const activeDate = activeDates.length === 1 ? activeDates[0] : null;
 
   const badges = useMemo(() => buildBadges(anchors), [anchors]);
 
+  /** カレンダー側の更新。?day はリセットする（相互排他）。 */
   const updateDates = (next: string[]) => {
     const normalized = parseDatesParam(next.join(','));
     const params = new URLSearchParams(searchParams.toString());
@@ -106,6 +109,7 @@ export function DateFilterBar({
     } else {
       params.delete('date');
     }
+    params.delete('day');
     const query = params.toString();
     const href = query ? `${pathname}?${query}` : pathname;
     startTransition(() => {
@@ -114,27 +118,25 @@ export function DateFilterBar({
     });
   };
 
-  const updateDate = (next: string | null) => {
-    updateDates(next ? [next] : []);
+  /** バッジ側の更新。?date はリセットする（相互排他）。 */
+  const updateQuickDay = (key: QuickDayKey | null) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (key) {
+      params.set('day', key);
+    } else {
+      params.delete('day');
+    }
+    params.delete('date');
+    const query = params.toString();
+    const href = query ? `${pathname}?${query}` : pathname;
+    startTransition(() => {
+      setOptimisticDates([]);
+      router.push(href, { scroll: false });
+    });
   };
 
   const handleBadgeClick = (badge: QuickBadge) => {
-    // アンカー未確定（mount 前）はクリックしてもユーザの意図する日付を計算できないので、
-    // クリック時に都度算出する。
-    if (badge.key === 'all') {
-      updateDate(null);
-      return;
-    }
-    const today = todayInZone(timeZone);
-    const target =
-      badge.key === 'yesterday'
-        ? addDays(today, -1)
-        : badge.key === 'today'
-          ? today
-          : badge.key === 'tomorrow'
-            ? addDays(today, 1)
-            : addDays(today, 2);
-    updateDate(target);
+    updateQuickDay(badge.key === 'all' ? null : badge.key);
   };
 
   // DatePicker(type="multiple") の値は string[](YYYY-MM-DD)。そのまま URL クエリに使える。
@@ -144,21 +146,12 @@ export function DateFilterBar({
   };
 
   const isBadgeActive = (badge: QuickBadge): boolean => {
-    if (badge.key === 'all') return activeDates.length === 0;
-    if (!badge.targetDate) return false;
-    // クイックバッジは「その1日だけ選択中」のときにアクティブ。
-    return activeDate === badge.targetDate;
+    if (badge.key === 'all') return activeQuickDay === null && activeDates.length === 0;
+    return activeQuickDay === badge.key;
   };
 
-  // クイックバッジで表現できない選択（バッジ外の単日 or 複数日）はチップ群で表示する。
-  const chipDates =
-    activeDates.length > 1
-      ? activeDates
-      : activeDate &&
-          (!showQuickBadges ||
-            !badges.some((b) => b.key !== 'all' && b.targetDate === activeDate))
-        ? [activeDate]
-        : [];
+  // カレンダー選択は（バッジと独立に）常にチップ群で表示する。
+  const chipDates = activeDates;
 
   const removeDate = (date: string) => {
     updateDates(activeDates.filter((d) => d !== date));

@@ -227,3 +227,29 @@ describe('filterMatchesByDates', () => {
     expect(filterMatchesByDates(ms, [])).toHaveLength(3);
   });
 });
+
+describe('parseQuickDayParam / resolveQuickDay（バッジとカレンダーの分離）', () => {
+  it('有効なキーをそのまま返す', async () => {
+    const { parseQuickDayParam } = await import('@/lib/date-filter');
+    expect(parseQuickDayParam('today')).toBe('today');
+    expect(parseQuickDayParam('yesterday')).toBe('yesterday');
+    expect(parseQuickDayParam('tomorrow')).toBe('tomorrow');
+    expect(parseQuickDayParam('day-after-tomorrow')).toBe('day-after-tomorrow');
+  });
+
+  it('不正・空は null', async () => {
+    const { parseQuickDayParam } = await import('@/lib/date-filter');
+    expect(parseQuickDayParam('nope')).toBeNull();
+    expect(parseQuickDayParam(null)).toBeNull();
+    expect(parseQuickDayParam('')).toBeNull();
+  });
+
+  it('キーをTZ基準の暦日に解決する', async () => {
+    const { resolveQuickDay } = await import('@/lib/date-filter');
+    const now = new Date('2026-06-11T12:00:00+09:00');
+    expect(resolveQuickDay('today', 'Asia/Tokyo', now)).toBe('2026-06-11');
+    expect(resolveQuickDay('yesterday', 'Asia/Tokyo', now)).toBe('2026-06-10');
+    expect(resolveQuickDay('tomorrow', 'Asia/Tokyo', now)).toBe('2026-06-12');
+    expect(resolveQuickDay('day-after-tomorrow', 'Asia/Tokyo', now)).toBe('2026-06-13');
+  });
+});

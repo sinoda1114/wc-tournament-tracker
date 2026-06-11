@@ -7,9 +7,9 @@ import { DateFilterBar } from '@/components/DateFilterBar';
 import { FavoriteFilterToggle } from '@/components/FavoriteFilterToggle';
 import { GroupCard } from '@/components/GroupCard';
 import { getGroupTeams, listGroupMatches } from '@/db/queries';
-import { filterMatchesByDates, parseDatesParam } from '@/lib/date-filter';
+import { filterMatchesByDates, parseDatesParam, parseQuickDayParam, resolveQuickDay } from '@/lib/date-filter';
 import { getDictionary } from '@/lib/i18n/dictionary';
-import { resolveLocale } from '@/lib/i18n/server';
+import { resolveLocale, resolveTimeZone } from '@/lib/i18n/server';
 
 export const dynamic = 'force-dynamic';
 
@@ -30,7 +30,7 @@ const VALID_GROUPS = new Set([
 
 type PageProps = {
   params: Promise<{ group: string }>;
-  searchParams: Promise<{ date?: string | string[] }>;
+  searchParams: Promise<{ date?: string | string[]; day?: string | string[] }>;
 };
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -65,7 +65,14 @@ export default async function GroupDetailPage({ params, searchParams }: PageProp
   }
   const letter = lower.toUpperCase();
 
-  const selectedDates = parseDatesParam(pickDateParam(sp.date));
+  const quickDay = parseQuickDayParam(pickDateParam(sp.day));
+  const calendarDates = parseDatesParam(pickDateParam(sp.date));
+  const selectedDates =
+    calendarDates.length > 0
+      ? calendarDates
+      : quickDay
+        ? [resolveQuickDay(quickDay, await resolveTimeZone())]
+        : [];
 
   const [teams, matches] = await Promise.all([
     getGroupTeams(letter),
