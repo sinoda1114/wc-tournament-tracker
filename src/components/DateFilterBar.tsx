@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState, useTransition } from 'react';
+import { useEffect, useMemo, useOptimistic, useState, useTransition } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Popover } from '@mantine/core';
 import { DatePicker } from '@mantine/dates';
@@ -88,14 +88,19 @@ export function DateFilterBar({
 
   const dateParam = searchParams.get('date');
   // 複数日対応（#37）: ?date=a,b,c をカレンダーの複数選択と同期する。
-  const activeDates = parseDatesParam(dateParam);
+  const urlDates = parseDatesParam(dateParam);
+  // 連続クリック対策: router.push の反映（サーバー往復）を待つ間も最新の選択を
+  // 即時反映するため楽観値を表示・計算の基準にする。これが無いと、遷移完了前の
+  // クリックが古いURL基準で計算されて選択が巻き戻る/消えない不整合が起きる。
+  const [activeDates, setOptimisticDates] = useOptimistic(urlDates);
   const activeDate = activeDates.length === 1 ? activeDates[0] : null;
 
   const badges = useMemo(() => buildBadges(anchors), [anchors]);
 
   const updateDates = (next: string[]) => {
+    const normalized = parseDatesParam(next.join(','));
     const params = new URLSearchParams(searchParams.toString());
-    const serialized = serializeDatesParam(parseDatesParam(next.join(',')));
+    const serialized = serializeDatesParam(normalized);
     if (serialized) {
       params.set('date', serialized);
     } else {
@@ -104,6 +109,7 @@ export function DateFilterBar({
     const query = params.toString();
     const href = query ? `${pathname}?${query}` : pathname;
     startTransition(() => {
+      setOptimisticDates(normalized);
       router.push(href, { scroll: false });
     });
   };
