@@ -9,6 +9,27 @@ export const es: Dictionary = {
     teams: 'Selecciones',
     prediction: 'Pronóstico',
     favorites: 'Favoritos',
+    rankings: 'Ranking',
+  },
+  rankings: {
+    title: 'Ranking',
+    description: 'Goleadores y tarjetas del torneo, agregados de los partidos registrados.',
+    scorersTitle: 'Goleadores',
+    cardsTitle: 'Tarjetas',
+    cardsNote:
+      'Dos amarillas suponen un partido de sanción. Una roja supone un partido de sanción. Las amarillas se reinician dos veces: tras la fase de grupos y tras los cuartos de final.',
+    colRank: '#',
+    colPlayer: 'Jugador',
+    colTeam: 'Selección',
+    colGoals: 'Goles',
+    colYellow: 'A',
+    colYellowAria: 'Tarjetas amarillas',
+    colRed: 'R',
+    colRedAria: 'Tarjetas rojas',
+    colStatus: 'Estado',
+    suspended: 'Sancionado',
+    tbd: 'Por definir',
+    empty: 'Aún no hay registros. Los goles y las tarjetas se contarán aquí a medida que se jueguen los partidos.',
   },
   header: {
     admin: 'Admin',
@@ -22,6 +43,13 @@ export const es: Dictionary = {
     title: 'Cuadro de eliminatorias',
     description:
       'Cuando se actualiza un resultado, el ganador avanza automáticamente al siguiente partido. En el móvil, desliza en horizontal para ver todas las rondas.',
+    heroTitle: 'Todo lo que quieres ver del Mundial 2026, en un solo lugar.',
+    heroTagline: 'Por primera vez en la historia, tres países anfitriones: EE. UU., Canadá y México. "¿En qué país y en qué estadio es este partido?" — justo porque es tan confuso, reuní en un solo lugar el calendario, los resultados, las posiciones, los estadios y las plantillas.',
+    heroPoint1: 'Guarda tus equipos favoritos y sus partidos aparecen al instante',
+    heroPoint2: '¿Qué país, qué estadio? Información de sedes y plantillas en una sola vista',
+    heroPoint3: 'Y de regalo: predice al campeón con todos',
+    heroLead: 'La fase de grupos se disfruta gratis.',
+    heroCta: 'Inicia sesión para empezar',
   },
   tournament: {
     viewLabel: 'Vista',
@@ -121,7 +149,7 @@ export const es: Dictionary = {
     goalDiffAria: 'Diferencia de goles',
     points: 'Pts',
     pointsAria: 'Puntos',
-    legendAdvancing: 'Clasifican (2 primeros)',
+    legendAdvancing: 'Clasifica a eliminatorias',
     legendPlayoff: 'Plaza de mejor tercero',
     noMatches: 'Aún no hay datos de partidos para este grupo.',
     noMatchesFilter: 'Aún no hay partidos que coincidan con este filtro.',
@@ -165,6 +193,8 @@ export const es: Dictionary = {
     positionOther: 'Otros',
     ageSuffix: ' años',
     groupCount: '{label} ({count})',
+    noteArg:
+      'Nota: Argentina aparece con 25 jugadores. Leonardo Balerdi se retiró por lesión y, al 11 de junio de 2026, no se ha anunciado un reemplazo. Lo actualizaremos en cuanto se confirme una convocatoria.',
   },
   prediction: {
     title: 'Pronóstico del campeón',
@@ -218,7 +248,7 @@ export const es: Dictionary = {
       'La fase eliminatoria (desde el 29 de junio) cuesta un único pago de {price}. La fase de grupos es gratis ahora mismo.',
   },
   footer: {
-    brandTitle: 'MatchFav — Mundial 2026: partidos, pronósticos y favoritos (no oficial)',
+    brandTitle: 'MatchFav — Todo lo que quieres ver del Mundial 2026, en un solo lugar',
     brandDesc:
       'Un sitio informativo no oficial que organiza el calendario, los resultados y las selecciones participantes del torneo internacional de fútbol de 2026 para los aficionados.',
     navAria: 'Navegación del pie de página',
@@ -230,6 +260,7 @@ export const es: Dictionary = {
       'No tiene relación de asociación, patrocinio ni respaldo con la FIFA, las federaciones nacionales o regionales de fútbol, los patrocinadores oficiales del torneo ni ningún otro titular de derechos. Nombres, emblemas y logotipos oficiales como «FIFA» y «World Cup» son marcas de sus respectivos propietarios; este sitio los respeta como tales y no utiliza logotipos ni emblemas oficiales. Los nombres de los estadios pueden incluir denominaciones de derechos de marca con nombres de empresas patrocinadoras, que son marcas de dichas empresas. Este sitio no garantiza la inmediatez ni la exactitud de su información.',
     copyright: '(c) MatchFav',
     dataNotice: 'Los datos publicados pueden cambiar sin previo aviso.',
+    unofficialNote: 'Sitio no oficial de fans (sin afiliación con la FIFA)',
   },
   venue: {
     cardAria: '{stadium} venue info',

@@ -9,6 +9,27 @@ export const pt: Dictionary = {
     teams: 'Seleções',
     prediction: 'Palpite',
     favorites: 'Favoritos',
+    rankings: 'Ranking',
+  },
+  rankings: {
+    title: 'Ranking',
+    description: 'Artilharia e cartões do torneio, agregados das partidas registradas.',
+    scorersTitle: 'Artilharia',
+    cardsTitle: 'Cartões',
+    cardsNote:
+      'Dois amarelos resultam em um jogo de suspensão. Um vermelho resulta em um jogo de suspensão. Os amarelos zeram duas vezes: após a fase de grupos e após as quartas de final.',
+    colRank: '#',
+    colPlayer: 'Jogador',
+    colTeam: 'Seleção',
+    colGoals: 'Gols',
+    colYellow: 'A',
+    colYellowAria: 'Cartões amarelos',
+    colRed: 'V',
+    colRedAria: 'Cartões vermelhos',
+    colStatus: 'Status',
+    suspended: 'Suspenso',
+    tbd: 'A definir',
+    empty: 'Ainda não há registros. Gols e cartões serão contabilizados aqui conforme as partidas forem disputadas.',
   },
   header: {
     admin: 'Admin',
@@ -22,6 +43,13 @@ export const pt: Dictionary = {
     title: 'Chave do mata-mata',
     description:
       'Quando um resultado é atualizado, o vencedor avança automaticamente para a próxima partida. No celular, deslize na horizontal para ver todas as fases.',
+    heroTitle: 'Tudo o que você quer ver da Copa 2026, em um só lugar.',
+    heroTagline: 'Pela primeira vez na história, três países-sede: EUA, Canadá e México. "Esse jogo é em qual país, em qual estádio?" — justamente por ser tão confuso, reuni em um só lugar calendário, resultados, classificação, estádios e elencos.',
+    heroPoint1: 'Salve seus times favoritos e os jogos deles aparecem na hora',
+    heroPoint2: 'Qual país, qual estádio? Informações das sedes e elencos em uma só tela',
+    heroPoint3: 'E de bônus: preveja o campeão com todo mundo',
+    heroLead: 'A fase de grupos é grátis para curtir.',
+    heroCta: 'Entrar para começar',
   },
   tournament: {
     viewLabel: 'Visualização',
@@ -121,7 +149,7 @@ export const pt: Dictionary = {
     goalDiffAria: 'Saldo de gols',
     points: 'Pts',
     pointsAria: 'Pontos',
-    legendAdvancing: 'Classificam (2 primeiros)',
+    legendAdvancing: 'Avança às eliminatórias',
     legendPlayoff: 'Vaga de melhor terceiro',
     noMatches: 'Ainda não há dados de partidas para este grupo.',
     noMatchesFilter: 'Ainda não há partidas que correspondam a este filtro.',
@@ -165,6 +193,8 @@ export const pt: Dictionary = {
     positionOther: 'Outros',
     ageSuffix: ' anos',
     groupCount: '{label} ({count})',
+    noteArg:
+      'Nota: a Argentina aparece com 25 jogadores. Leonardo Balerdi foi cortado por lesão e, em 11 de junho de 2026, nenhum substituto foi anunciado. Vamos atualizar assim que uma convocação for confirmada.',
   },
   prediction: {
     title: 'Palpite do campeão',
@@ -218,7 +248,7 @@ export const pt: Dictionary = {
       'O mata-mata (a partir de 29 de junho) é uma compra única de {price}. A fase de grupos é gratuita agora mesmo.',
   },
   footer: {
-    brandTitle: 'MatchFav — Copa do Mundo 2026: jogos, palpites e favoritos (não oficial)',
+    brandTitle: 'MatchFav — Tudo o que você quer ver da Copa 2026, em um só lugar',
     brandDesc:
       'Um site de informações não oficial que organiza o calendário, os resultados e as seleções participantes do torneio internacional de futebol de 2026 para os torcedores.',
     navAria: 'Navegação do rodapé',
@@ -230,6 +260,7 @@ export const pt: Dictionary = {
       'Não tem relação de parceria, patrocínio ou endosso com a FIFA, as federações nacionais ou regionais de futebol, os patrocinadores oficiais do torneio ou quaisquer outros detentores de direitos. Nomes, emblemas e logotipos oficiais como «FIFA» e «World Cup» são marcas de seus respectivos proprietários; este site os respeita como tal e não utiliza logotipos ou emblemas oficiais. Os nomes dos estádios podem incluir denominações de direitos de marca com nomes de empresas patrocinadoras, que são marcas dessas empresas. Este site não garante a imediatez nem a exatidão de suas informações.',
     copyright: '(c) MatchFav',
     dataNotice: 'Os dados publicados podem mudar sem aviso prévio.',
+    unofficialNote: 'Site não oficial de fãs (sem afiliação com a FIFA)',
   },
   venue: {
     cardAria: '{stadium} venue info',

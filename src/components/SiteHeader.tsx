@@ -5,6 +5,7 @@ import { Container, Group, Title } from '@mantine/core';
 
 import { TextLink } from '@/components/RouterLink';
 import { isAdminUser } from '@/lib/auth';
+import { isFreePeriod } from '@/lib/pricing';
 import type { Locale } from '@/lib/i18n/config';
 import type { Dictionary } from '@/lib/i18n/dictionary';
 
@@ -36,7 +37,7 @@ export async function SiteHeader({ locale, dict }: SiteHeaderProps) {
                 MatchFav
               </Title>
             </Link>
-            <SiteNav labels={dict.nav} />
+            <SiteNav labels={dict.nav} groupPhase={isFreePeriod(new Date())} />
           </Group>
           <Group gap="sm" align="center" wrap="nowrap">
             {admin ? (
@@ -48,13 +49,9 @@ export async function SiteHeader({ locale, dict }: SiteHeaderProps) {
             <TimeZonePicker label={dict.timezone.label} />
             <AddToHomeScreen />
             <ThemeToggle />
-            {user ? (
-              <UserButton />
-            ) : (
-              <TextLink href="/sign-in" c="dimmed" size="sm">
-                {dict.header.signIn}
-              </TextLink>
-            )}
+            {/* 未ログイン時のログイン導線はヒーローのCTA（トップ）と各保護ページの
+                リダイレクトが担うため、ヘッダには出さない（#37 フィードバック）。 */}
+            {user ? <UserButton /> : null}
           </Group>
         </Group>
       </Container>

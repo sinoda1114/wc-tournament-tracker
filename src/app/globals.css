@@ -1011,6 +1011,12 @@ a {
   gap: 0.3rem;
 }
 
+/* 中身がSVGだけだと文字バッジより背が低くなるため、ゼロ幅スペースで
+   他のナビバッジと同じ行ボックス（高さ）を持たせる。 */
+.wc-nav-favorites::before {
+  content: '\200b';
+}
+
 .wc-nav-favorites svg {
   display: block;
 }
@@ -1243,7 +1249,7 @@ a {
 
 .wc-squad-player {
   display: grid;
-  grid-template-columns: 1.8rem 1fr auto;
+  grid-template-columns: 1.8rem minmax(0, 1fr) auto;
   align-items: baseline;
   gap: 0.5rem;
   padding: 0.3rem 0.2rem;
@@ -1850,16 +1856,30 @@ a {
   outline-offset: 2px;
 }
 
-/* ===== 順位表の突破表現 =====
+/* ===== 順位表の突破表現（#33） =====
    方針: グループステージ中（順位未確定）は色分け・線・行の沈めを一切しない＝完全フラット
-   （まだ何も確定していないのに色が付くのは不自然なため）。突破/敗退が「確定した時点」で
-   フラグ駆動で色を付けて見分けるのは #33 で実装する。is-advancing/is-playoff/is-out の
-   クラスは #33 のフックとして付与だけ残す（現状はスタイル無し）。 */
+   （まだ何も確定していないのに色が付くのは不自然なため）。グループステージが「確定した時点」で
+   初めて結果整合で着色する。確定の付与は GroupsFilterableGrid（全12組から判定）→ GroupCard が
+   行い、進出チーム（1-2位＋ベスト3位上位8の3位）に is-advancing を付ける。未確定の間は
+   is-advancing が付かない＝フラット。 */
 .wc-standings-pos {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   min-width: 1.4rem;
+}
+
+/* 確定後の進出チーム（緑）。左に細いアクセントバー＋淡い緑の地。淡色なのでテキスト可読性は維持。 */
+.wc-standings-row.is-advancing td {
+  background: var(--wc-qualify-soft);
+}
+.wc-standings-row.is-advancing td:first-child {
+  box-shadow: inset 3px 0 0 var(--wc-qualify);
+}
+/* 視認性のため順位番号(#)自体も緑＋太字に（背景＋アクセントバーと重ねる）。 */
+.wc-standings-row.is-advancing .wc-standings-pos {
+  color: var(--wc-qualify);
+  font-weight: 700;
 }
 
 .wc-standings-legend {
@@ -1939,4 +1959,166 @@ a {
   position: relative; /* 光沢(::after)より前面に置く */
   z-index: 1;
   max-width: 60rem;
+}
+
+/* ===== 未ログイン訪問者向けヒーロー（#37・トップのみ） ===== */
+/* 独立LPの代替。パレット変数でライト/ダーク両対応。 */
+.wc-mini-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  padding: 1.7rem 1.9rem;
+  border: 1px solid rgba(59, 130, 246, 0.45);
+  border-left: 6px solid var(--wc-accent);
+  border-radius: 14px;
+  background:
+    radial-gradient(ellipse at top right, rgba(250, 204, 21, 0.10), transparent 55%),
+    linear-gradient(135deg, rgba(59, 130, 246, 0.28), rgba(59, 130, 246, 0.06) 70%);
+  box-shadow: 0 6px 28px rgba(59, 130, 246, 0.18);
+}
+
+.wc-mini-hero-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  min-width: 0;
+  flex: 1 1 24rem;
+}
+
+.wc-mini-hero-title {
+  margin: 0;
+  font-size: clamp(1.3rem, 1.05rem + 1.2vw, 1.7rem);
+  font-weight: 800;
+  line-height: 1.3;
+  letter-spacing: 0.01em;
+}
+
+.wc-mini-hero-tagline {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: var(--wc-text);
+  opacity: 0.92;
+}
+
+.wc-mini-hero-points {
+  margin: 0.2rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.92rem;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.wc-mini-hero-points li::before {
+  content: '✓';
+  margin-right: 0.55rem;
+  font-size: 1rem;
+  font-weight: 900;
+  color: #fbbf24; /* ゴールド: 青背景上でアクセント青より視認性が高い */
+  text-shadow: 0 0 6px rgba(251, 191, 36, 0.4);
+}
+
+.wc-mini-hero-action {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.wc-mini-hero-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.8rem 2rem;
+  border-radius: 12px;
+  background: var(--wc-accent);
+  color: #fff;
+  font-size: 1.02rem;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
+  transition: filter 150ms ease, transform 150ms ease;
+}
+
+.wc-mini-hero-cta:hover,
+.wc-mini-hero-cta:focus-visible {
+  filter: brightness(1.12);
+  transform: translateY(-1px);
+  text-decoration: none;
+}
+
+.wc-mini-hero-lead {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--wc-muted);
+  text-align: center;
+}
+
+@media (max-width: 640px) {
+  .wc-mini-hero {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .wc-mini-hero-action {
+    align-items: stretch;
+  }
+}
+
+/* カレンダーの土曜日を青に（日曜は Mantine の weekend 既定で赤）。 */
+.wc-calendar-saturday {
+  color: var(--wc-accent);
+}
+
+.wc-calendar-saturday[data-outside] {
+  opacity: 0.4;
+}
+
+/* スカッドの選手行: 在籍クラブ（#38）。小旗＋クラブ名を控えめに表示。 */
+/* クラブ名は2行目（背番号列の下を空けて名前位置に揃える）。 */
+.wc-squad-club {
+  grid-column: 2 / -1;
+  font-size: 0.74rem;
+  line-height: 1.3;
+  color: var(--wc-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* スカッドの注釈（#38・現状ARGのみ）。控えめに、上に細い区切り。 */
+.wc-squad-note {
+  margin-top: 0.4rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--wc-border);
+  line-height: 1.5;
+}
+
+/* ===== ランキング/スタッツ（T-40） ===== */
+/* 国旗＋国名を1行に。 */
+.wc-ranking-team {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+/* 出場停止セル: 赤バッジ＋次戦(M/D vs 相手)を横並び。狭い時は折り返す。 */
+.wc-ranking-susp {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+/* 記録がまだ無いときの空状態。控えめに枠で囲って中央寄せ。 */
+.wc-ranking-empty {
+  padding: 2rem 1rem;
+  text-align: center;
+  border: 1px dashed var(--wc-border);
+  border-radius: 10px;
 }

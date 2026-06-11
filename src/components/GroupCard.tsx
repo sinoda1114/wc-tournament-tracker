@@ -22,6 +22,17 @@ type GroupCardProps = {
    * 呼び出し側で全試合配列を渡せるようにしている。
    */
   standingsMatches?: MatchDetail[];
+  /**
+   * グループステージが結果として確定したか（#33）。false の間は完全フラット（色なし）。
+   * 確定後にだけ進出チームを着色する（「未確定なのに色が付くのは不自然」という方針）。
+   */
+  confirmed?: boolean;
+  /**
+   * 確定後、このグループの3位が「ベスト3位上位8」で決勝T進出したか（#33）。
+   * 他グループとの比較が必要なため、全12組を持つ親（GroupsFilterableGrid）が算出して渡す。
+   * confirmed が false の間は参照されない。
+   */
+  thirdPlaceQualified?: boolean;
 };
 
 function teamLookup(teams: Team[]): Map<string, Team> {
@@ -33,6 +44,8 @@ export function GroupCard({
   teams,
   matches,
   standingsMatches,
+  confirmed = false,
+  thirdPlaceQualified = false,
 }: GroupCardProps) {
   const { locale, dict } = useI18n();
   const t = dict.standings;
@@ -70,16 +83,22 @@ export function GroupCard({
         </thead>
         <tbody>
           {standings.map((row) => (
-            <StandingRow key={row.teamId} row={row} team={lookup.get(row.teamId)} locale={locale} />
+            <StandingRow
+              key={row.teamId}
+              row={row}
+              team={lookup.get(row.teamId)}
+              locale={locale}
+              confirmed={confirmed}
+              thirdPlaceQualified={thirdPlaceQualified}
+            />
           ))}
         </tbody>
       </table>
 
+      {/* 凡例（コンパクト）。緑＝決勝トーナメント進出。確定後に進出チームの行が緑になる（#33）。 */}
       <p className="wc-standings-legend">
         <span className="wc-legend-mark is-advancing" aria-hidden />
         {t.legendAdvancing}
-        <span className="wc-legend-mark is-playoff" aria-hidden />
-        {t.legendPlayoff}
       </p>
 
       <div className="wc-group-matches" aria-label={t.matchesAria.replace('{letter}', letter)}>
@@ -95,20 +114,38 @@ export function GroupCard({
   );
 }
 
+/**
+ * 行に付ける確定カラーのクラス（#33）。
+ * - 未確定（confirmed=false）の間は空＝完全フラット（色なし）。
+ * - 確定後: 1-2位＝進出（緑）、3位はベスト3位上位8なら進出（緑）、それ以外はフラット。
+ */
+function confirmedRowClass(
+  position: number,
+  confirmed: boolean,
+  thirdPlaceQualified: boolean,
+): string {
+  if (!confirmed) return '';
+  if (position <= 2) return 'is-advancing';
+  if (position === 3 && thirdPlaceQualified) return 'is-advancing';
+  return '';
+}
+
 function StandingRow({
   row,
   team,
   locale,
+  confirmed,
+  thirdPlaceQualified,
 }: {
   row: GroupStanding;
   team: Team | undefined;
   locale: Locale;
+  confirmed: boolean;
+  thirdPlaceQualified: boolean;
 }) {
-  // 1-2 位＝グループ突破、3 位＝ベスト3位通過の枠（上位8グループのみ R32 進出）、4 位＝敗退。
-  const qualification =
-    row.position <= 2 ? 'advancing' : row.position === 3 ? 'playoff' : 'out';
+  const rowClass = confirmedRowClass(row.position, confirmed, thirdPlaceQualified);
   return (
-    <tr className={`wc-standings-row is-${qualification}`}>
+    <tr className={`wc-standings-row ${rowClass}`.trim()}>
       <td>
         <span className="wc-standings-pos">{row.position}</span>
       </td>

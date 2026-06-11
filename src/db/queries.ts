@@ -35,6 +35,11 @@ export type SquadPlayer = {
   position: string | null;
   dateBorn: string | null;
   number: string | null;
+  /** 在籍クラブ（#38。未取得・無所属は null）。 */
+  clubName: string | null;
+  clubNameJa: string | null;
+  /** クラブ所属リーグ国の旗用 ISO2。 */
+  clubCountryIso: string | null;
 };
 
 export type Coach = {
@@ -495,10 +500,12 @@ export async function getTeamSquad(fifaCode: string): Promise<TeamSquad | null> 
     }),
     db().execute({
       sql: `
-        SELECT id, name, name_en, name_ja, position, date_born, number
-        FROM players
-        WHERE team_id = ?
-        ORDER BY sort_order ASC, name ASC
+        SELECT p.id, p.name, p.name_en, p.name_ja, p.position, p.date_born, p.number,
+               c.name_en AS club_name, c.name_ja AS club_name_ja, c.country_iso AS club_country_iso
+        FROM players p
+        LEFT JOIN clubs c ON c.id = p.club_id
+        WHERE p.team_id = ?
+        ORDER BY p.sort_order ASC, p.name ASC
       `,
       args: [team.id],
     }),
@@ -535,6 +542,9 @@ export async function getTeamSquad(fifaCode: string): Promise<TeamSquad | null> 
       position: string | null;
       date_born: string | null;
       number: string | null;
+      club_name: string | null;
+      club_name_ja: string | null;
+      club_country_iso: string | null;
     }>(row);
     return {
       id: p.id,
@@ -544,6 +554,9 @@ export async function getTeamSquad(fifaCode: string): Promise<TeamSquad | null> 
       position: p.position,
       dateBorn: p.date_born,
       number: p.number,
+      clubName: p.club_name,
+      clubNameJa: p.club_name_ja,
+      clubCountryIso: p.club_country_iso,
     };
   });
 

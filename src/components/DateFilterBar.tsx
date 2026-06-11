@@ -1,12 +1,19 @@
 'use client';
 
-import { useEffect, useMemo, useState, useTransition } from 'react';
+import { useEffect, useMemo, useOptimistic, useState, useTransition } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Popover } from '@mantine/core';
 import { DatePicker } from '@mantine/dates';
 
 import { formatMatchDate } from '@/lib/bracket';
-import { addDays, parseDateParam, todayInZone } from '@/lib/date-filter';
+import {
+  addDays,
+  parseDatesParam,
+  parseQuickDayParam,
+  serializeDatesParam,
+  todayInZone,
+  type QuickDayKey,
+} from '@/lib/date-filter';
 import { useDictionary, useTimeZone } from '@/lib/i18n/context';
 
 type QuickBadge = {
@@ -81,64 +88,74 @@ export function DateFilterBar({
     });
   }, [timeZone]);
 
-  const dateParam = searchParams.get('date');
-  const filter = parseDateParam(dateParam);
-  const activeDate = filter.kind === 'date' ? filter.date : null;
+  // バッジ(?day=相対キー)とカレンダー(?date=絶対日付リスト)は別パラメータ・相互排他。
+  // 同じパラメータを共有すると「カレンダーで明日に当たる日を選ぶとバッジが点灯する」
+  // 干渉が起き、体験が壊れる（#37 フィードバック）。
+  const urlDates = parseDatesParam(searchParams.get('date'));
+  const activeQuickDay = parseQuickDayParam(searchParams.get('day'));
+  // 連続クリック対策: router.push の反映（サーバー往復）を待つ間も最新の選択を
+  // 即時反映するため楽観値を表示・計算の基準にする。
+  const [activeDates, setOptimisticDates] = useOptimistic(urlDates);
 
   const badges = useMemo(() => buildBadges(anchors), [anchors]);
 
-  const updateDate = (next: string | null) => {
+  /** カレンダー側の更新。?day はリセットする（相互排他）。 */
+  const updateDates = (next: string[]) => {
+    const normalized = parseDatesParam(next.join(','));
     const params = new URLSearchParams(searchParams.toString());
-    if (next) {
-      params.set('date', next);
+    const serialized = serializeDatesParam(normalized);
+    if (serialized) {
+      params.set('date', serialized);
     } else {
       params.delete('date');
     }
+    params.delete('day');
     const query = params.toString();
     const href = query ? `${pathname}?${query}` : pathname;
     startTransition(() => {
+      setOptimisticDates(normalized);
+      router.push(href, { scroll: false });
+    });
+  };
+
+  /** バッジ側の更新。?date はリセットする（相互排他）。 */
+  const updateQuickDay = (key: QuickDayKey | null) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (key) {
+      params.set('day', key);
+    } else {
+      params.delete('day');
+    }
+    params.delete('date');
+    const query = params.toString();
+    const href = query ? `${pathname}?${query}` : pathname;
+    startTransition(() => {
+      setOptimisticDates([]);
       router.push(href, { scroll: false });
     });
   };
 
   const handleBadgeClick = (badge: QuickBadge) => {
-    // アンカー未確定（mount 前）はクリックしてもユーザの意図する日付を計算できないので、
-    // クリック時に都度算出する。
-    if (badge.key === 'all') {
-      updateDate(null);
-      return;
-    }
-    const today = todayInZone(timeZone);
-    const target =
-      badge.key === 'yesterday'
-        ? addDays(today, -1)
-        : badge.key === 'today'
-          ? today
-          : badge.key === 'tomorrow'
-            ? addDays(today, 1)
-            : addDays(today, 2);
-    updateDate(target);
+    updateQuickDay(badge.key === 'all' ? null : badge.key);
   };
 
-  // Mantine 8 の DatePicker は値が string(YYYY-MM-DD)。そのまま URL クエリに使える。
-  const handleCalendarChange = (value: string | null) => {
-    updateDate(value);
-    setPopoverOpen(false);
+  // DatePicker(type="multiple") の値は string[](YYYY-MM-DD)。そのまま URL クエリに使える。
+  // 複数日を選び続けられるよう、選択してもポップオーバーは閉じない（外側クリックで閉じる）。
+  const handleCalendarChange = (value: string[]) => {
+    updateDates(value);
   };
 
   const isBadgeActive = (badge: QuickBadge): boolean => {
-    if (badge.key === 'all') return activeDate === null;
-    if (!badge.targetDate) return false;
-    return activeDate === badge.targetDate;
+    if (badge.key === 'all') return activeQuickDay === null && activeDates.length === 0;
+    return activeQuickDay === badge.key;
   };
 
-  // アクティブな日付がクイックバッジに該当しない場合、独立した「pill + ×」を表示する。
-  const customActiveDate =
-    activeDate &&
-    (!showQuickBadges ||
-      !badges.some((b) => b.key !== 'all' && b.targetDate === activeDate))
-      ? activeDate
-      : null;
+  // カレンダー選択は（バッジと独立に）常にチップ群で表示する。
+  const chipDates = activeDates;
+
+  const removeDate = (date: string) => {
+    updateDates(activeDates.filter((d) => d !== date));
+  };
 
   return (
     <div className="wc-date-filter-bar" role="group" aria-label={t.groupAria}>
@@ -185,23 +202,38 @@ export function DateFilterBar({
             </button>
           </Popover.Target>
           <Popover.Dropdown>
-            <DatePicker value={activeDate} onChange={handleCalendarChange} highlightToday />
+            {/* 日曜始まり＋3文字曜日（Sun/Mon…）。日曜=赤(weekend既定)・土曜=青(CSS)。 */}
+            <DatePicker
+              type="multiple"
+              value={activeDates}
+              onChange={handleCalendarChange}
+              highlightToday
+              firstDayOfWeek={0}
+              weekendDays={[0]}
+              weekdayFormat="ddd"
+              getDayProps={(date) => {
+                if (new Date(date).getDay() === 6) {
+                  return { className: 'wc-calendar-saturday' };
+                }
+                return {};
+              }}
+            />
           </Popover.Dropdown>
         </Popover>
 
-        {customActiveDate ? (
-          <span className="wc-date-filter-active-chip" aria-live="polite">
-            <span>{formatMatchDate(customActiveDate, dict.match.weekdays)}</span>
+        {chipDates.map((date) => (
+          <span key={date} className="wc-date-filter-active-chip" aria-live="polite">
+            <span>{formatMatchDate(date, dict.match.weekdays)}</span>
             <button
               type="button"
               className="wc-date-filter-reset"
-              onClick={() => updateDate(null)}
+              onClick={() => removeDate(date)}
               aria-label={t.reset}
             >
               ×
             </button>
           </span>
-        ) : null}
+        ))}
       </div>
     </div>
   );

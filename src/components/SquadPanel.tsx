@@ -84,6 +84,12 @@ export function SquadPanel({ squad }: SquadPanelProps) {
                       {locale === 'ja' ? (p.nameJa ?? p.nameEn) : p.nameEn}
                     </span>
                     <span className="wc-squad-age">{ageLabel(p.dateBorn, dict.squad.ageSuffix)}</span>
+                    {/* クラブは2行目に小さく（1行目に入れると選手名が潰れる・旗はノイズなので出さない）。 */}
+                    {p.clubName ? (
+                      <span className="wc-squad-club">
+                        {locale === 'ja' ? (p.clubNameJa ?? p.clubName) : p.clubName}
+                      </span>
+                    ) : null}
                   </li>
                 ))}
               </ul>
@@ -106,6 +112,14 @@ export function SquadPanel({ squad }: SquadPanelProps) {
                 {locale === 'ja' ? (coach.nameJa ?? coach.nameEn) : coach.nameEn}
               </Text>
             </Group>
+          ) : null}
+
+          {/* 現実の名簿事情の注釈（#38）。今は ARG のみ（Balerdi 負傷辞退・補充未発表）。
+              補充が確定して26名になったら、この注釈と辞書キー noteArg を撤去する。 */}
+          {team.fifaCode === 'ARG' ? (
+            <Text size="xs" c="dimmed" className="wc-squad-note">
+              {dict.squad.noteArg}
+            </Text>
           ) : null}
         </Stack>
       )}

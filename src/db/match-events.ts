@@ -1,3 +1,5 @@
+import type { RankingEvent } from '@/lib/rankings';
+
 import { getDb } from './client';
 
 const db = () => getDb();
@@ -187,4 +189,51 @@ export async function replaceAutoMatchEvents(
     ],
     'write',
   );
+}
+
+/**
+ * ランキング集計用に、得点・カードのイベントを所属チーム情報つきで取得する（T-40）。
+ * 集計（選手別の合算・並べ替え）は純関数 `lib/rankings` 側で行う。
+ * 交代・オウンゴールは取得対象外（得点者/カード集計に不要）。
+ */
+export async function getRankingEvents(): Promise<RankingEvent[]> {
+  const result = await db().execute(`
+    SELECT e.type AS type,
+           e.player_name AS player_name,
+           e.team_id AS team_id,
+           e.match_id AS match_id,
+           m.match_date AS match_date,
+           m.stage AS stage,
+           t.fifa_code AS fifa_code,
+           t.name_en AS name_en,
+           t.name_ja AS name_ja
+    FROM match_events e
+    JOIN matches m ON m.id = e.match_id
+    LEFT JOIN teams t ON t.id = e.team_id
+    WHERE e.type IN ('goal', 'penalty_goal', 'yellow_card', 'red_card')
+  `);
+  return result.rows.map((row) => {
+    const r = row as unknown as {
+      type: MatchEventType;
+      player_name: string;
+      team_id: string | null;
+      match_id: number;
+      match_date: string;
+      stage: string;
+      fifa_code: string | null;
+      name_en: string | null;
+      name_ja: string | null;
+    };
+    return {
+      type: r.type,
+      playerName: r.player_name,
+      teamId: r.team_id ?? null,
+      teamFifaCode: r.fifa_code ?? null,
+      teamNameEn: r.name_en ?? null,
+      teamNameJa: r.name_ja ?? null,
+      matchId: Number(r.match_id),
+      matchDate: r.match_date,
+      stage: r.stage,
+    };
+  });
 }

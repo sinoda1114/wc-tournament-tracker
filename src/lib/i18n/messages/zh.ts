@@ -9,6 +9,27 @@ export const zh: Dictionary = {
     teams: '参赛球队',
     prediction: '夺冠预测',
     favorites: '收藏',
+    rankings: '排行榜',
+  },
+  rankings: {
+    title: '排行榜',
+    description: '本届赛事的射手榜与红黄牌统计，根据已记录的比赛自动汇总。',
+    scorersTitle: '射手榜',
+    cardsTitle: '红黄牌',
+    cardsNote:
+      '黄牌累计2张即停赛1场。红牌停赛1场。黄牌在小组赛后与1/4决赛后各清零一次。',
+    colRank: '#',
+    colPlayer: '球员',
+    colTeam: '球队',
+    colGoals: '进球',
+    colYellow: '黄',
+    colYellowAria: '黄牌',
+    colRed: '红',
+    colRedAria: '红牌',
+    colStatus: '状态',
+    suspended: '停赛',
+    tbd: '待定',
+    empty: '暂无记录。随着比赛进行，进球和红黄牌将在此汇总。',
   },
   header: {
     admin: '管理',
@@ -22,6 +43,13 @@ export const zh: Dictionary = {
     title: '淘汰赛对阵图',
     description:
       '更新比赛结果后，胜者会自动晋级到下一场比赛。在手机上可左右滑动查看所有轮次。',
+    heroTitle: '2026世界杯你想看的一切，都在这一处。',
+    heroTagline: '史上首次由美国、加拿大、墨西哥三国联合主办。"这场比赛在哪个国家、哪个球场？"——正因为如此难搞清，我把分散的赛程、比分、积分榜、球场和球员名单整合到了一处。',
+    heroPoint1: '收藏喜爱的球队，想看的比赛立刻呈现',
+    heroPoint2: '哪个国家、哪个球场？球场信息与球员名单一并查看',
+    heroPoint3: '还可以和大家一起预测冠军',
+    heroLead: '小组赛阶段免费畅享。',
+    heroCta: '登录开始',
   },
   tournament: {
     viewLabel: '视图',
@@ -121,7 +149,7 @@ export const zh: Dictionary = {
     goalDiffAria: '净胜球',
     points: '积分',
     pointsAria: '积分',
-    legendAdvancing: '晋级（前2名）',
+    legendAdvancing: '晋级淘汰赛',
     legendPlayoff: '最佳第三名席位',
     noMatches: '该小组暂无比赛数据。',
     noMatchesFilter: '暂无符合该筛选的比赛。',
@@ -164,6 +192,8 @@ export const zh: Dictionary = {
     positionOther: '其他',
     ageSuffix: '岁',
     groupCount: '{label}（{count}）',
+    noteArg:
+      '注：阿根廷目前显示25名球员。莱昂纳多·巴莱尔迪因伤退出，截至2026年6月11日尚未公布替补人选。一旦确认补招，我们将及时更新。',
   },
   prediction: {
     title: '夺冠预测',
@@ -213,7 +243,7 @@ export const zh: Dictionary = {
       '淘汰赛阶段（6月29日起）为一次性买断 {price}。小组赛阶段现在即可免费畅享。',
   },
   footer: {
-    brandTitle: 'MatchFav — 世界杯2026 比赛·夺冠预测·收藏追踪（非官方）',
+    brandTitle: 'MatchFav — 2026世界杯你想看的一切，尽在一处',
     brandDesc:
       '面向球迷、汇总2026年国际足球赛事赛程、结果与参赛球队的非官方信息网站。',
     navAria: '页脚导航',
@@ -225,6 +255,7 @@ export const zh: Dictionary = {
       '与 FIFA（国际足球联合会）、各国及各地区足球协会、赛事官方赞助商及其他权利人均无任何合作、赞助或推荐关系。「FIFA」「World Cup」等名称、徽标及官方标志均为各自权利人的商标；本网站尊重其商标权，且不使用官方标志或徽标。体育场名称可能包含含赞助企业名称的冠名（冠名权名称），这些名称为相关企业的商标。本网站不保证信息的即时性与准确性。',
     copyright: '(c) MatchFav',
     dataNotice: '所刊载数据可能会在不另行通知的情况下变更。',
+    unofficialNote: '非官方球迷网站（与FIFA无关）',
   },
   venue: {
     cardAria: '{stadium} venue info',

@@ -11,6 +11,27 @@ export const ja = {
     teams: '出場国',
     prediction: '優勝予想',
     favorites: 'お気に入り',
+    rankings: 'ランキング',
+  },
+  rankings: {
+    title: 'ランキング',
+    description: '大会の得点ランキングとカード数。記録のある試合から集計します。',
+    scorersTitle: '得点ランキング',
+    cardsTitle: 'カード',
+    cardsNote:
+      'イエローカードは累積2枚で次戦出場停止。レッドカードは次戦出場停止。イエローカードの累積はグループステージ終了後と準々決勝終了後の2回リセット。',
+    colRank: '#',
+    colPlayer: '選手',
+    colTeam: '国',
+    colGoals: '得点',
+    colYellow: '黄',
+    colYellowAria: 'イエローカード',
+    colRed: '赤',
+    colRedAria: 'レッドカード',
+    colStatus: '状態',
+    suspended: '出場停止',
+    tbd: '未定',
+    empty: 'まだ記録がありません。試合が進むと得点・カードがここに集計されます。',
   },
   header: {
     admin: '管理画面',
@@ -25,6 +46,13 @@ export const ja = {
     title: '決勝トーナメント表',
     description:
       '試合結果を更新すると、勝者が次の試合へ自動反映されます。スマホでは横スクロールで全ラウンドを確認できます。',
+    heroTitle: 'W杯2026の「見たい」を、ぜんぶ1か所に。',
+    heroTagline: '史上初、アメリカ・カナダ・メキシコの3か国共催。「この試合、どの国のどのスタジアム？」が分かりにくい大会だからこそ、日程・結果・順位・会場・出場選手の散らばった情報をひとつにまとめました。',
+    heroPoint1: 'お気に入りチームを登録すると、見たい試合がパッと出てくる',
+    heroPoint2: '「どの国の、どのスタジアム？」——会場情報や出場選手もまとめてチェック',
+    heroPoint3: 'おまけに、みんなで優勝予想も',
+    heroLead: 'グループステージは無料で楽しめます。',
+    heroCta: 'ログインして始める',
   },
   // トーナメント表示の切替・見出し（決勝/3位決定戦）。
   tournament: {
@@ -131,7 +159,7 @@ export const ja = {
     goalDiffAria: '得失点差',
     points: '勝点',
     pointsAria: '勝点',
-    legendAdvancing: '突破（上位2）',
+    legendAdvancing: '決勝トーナメント出場',
     legendPlayoff: '3位通過枠',
     noMatches: 'このグループの試合データはまだありません。',
     noMatchesFilter: 'この条件に合致する試合はまだありません。',
@@ -178,6 +206,8 @@ export const ja = {
     positionOther: 'その他',
     ageSuffix: '歳',
     groupCount: '{label}（{count}）',
+    noteArg:
+      '※ アルゼンチン代表は Leonardo Balerdi 選手が負傷のため辞退し、2026年6月11日時点で代替選手が未発表のため25名で表示しています。追加召集が発表され次第、反映します。',
   },
   // 優勝国予想（ChampionPrediction）。{count}=チーム数・{name}=国名。
   prediction: {
@@ -232,7 +262,7 @@ export const ja = {
       '決勝トーナメント（6/29）から有料 買い切り {price}。グループリーグは無料でお楽しみいただけます。',
   },
   footer: {
-    brandTitle: 'MatchFav — W杯2026 試合・優勝予想・お気に入りトラッカー（非公式）',
+    brandTitle: 'MatchFav — W杯2026の「見たい」を、ぜんぶ1か所に',
     brandDesc:
       '2026年に開催される国際サッカー大会の試合日程・結果・出場国を、ファン向けに見やすくまとめる非公式の情報サイトです。',
     navAria: 'フッターナビゲーション',
@@ -244,6 +274,7 @@ export const ja = {
       'FIFA（国際サッカー連盟）、各国・各地域のサッカー協会、大会の公式スポンサーその他の権利者とは、一切の提携・後援・推奨関係にありません。「FIFA」「ワールドカップ」その他の名称・エンブレム・公式ロゴは各権利者の商標であり、本サイトではこれらを権利者の商標として尊重し、公式ロゴ・エンブレムは使用していません。また、スタジアム等の会場名としてスポンサー企業名を冠した通称（ネーミングライツ名）が用いられる場合がありますが、これらの名称は各社の商標です。本サイトの情報は速報性・正確性を保証するものではありません。',
     copyright: '(c) MatchFav',
     dataNotice: '掲載データは予告なく変更される場合があります。',
+    unofficialNote: '非公式ファンサイト（FIFA非公認）',
   },
   // 会場情報カード（VenueInfoCard）。{stadium}=会場名。値（屋根/芝等）は lib/venue。
   venue: {

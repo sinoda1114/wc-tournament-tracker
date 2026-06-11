@@ -248,8 +248,11 @@ function parseCoach(section: string): ParsedCoach | null {
 
 function parsePlayers(section: string): ParsedPlayer[] {
   const players: ParsedPlayer[] = [];
+  // age テンプレは表記揺れがある: 先頭大文字 "Birth date and age2"、
+  // 生年月日の後ろに |df=y などの追加引数が付く場合がある（例: AUT の Ljubičić）。
+  // これらを取りこぼさないよう、先頭大小文字を許容し末尾の追加引数を吸収する。
   const re =
-    /no=([\d–-]*)\|pos=([A-Z]{2})\|name=(\[\[[^\]]+\]\]).*?age=\{\{\s*birth date and age2\s*\|\s*\d+\|\d+\|\d+\|(\d+)\|(\d+)\|(\d+)\s*\}\}/g;
+    /no=([\d–-]*)\|pos=([A-Z]{2})\|name=(\[\[[^\]]+\]\]).*?age=\{\{\s*[Bb]irth date and age2\s*\|\s*\d+\|\d+\|\d+\|(\d+)\|(\d+)\|(\d+)(?:\s*\|[^}]*)?\s*\}\}/g;
   let m: RegExpExecArray | null;
   while ((m = re.exec(section)) !== null) {
     const [, no, pos, name, by, bm, bd] = m;
@@ -291,7 +294,16 @@ async function main() {
   let totalCoaches = 0;
   const noData: string[] = [];
 
-  for (const team of seedTeams) {
+  // 引数で国を絞れる（例: `tsx scripts/fetch-squads.ts AUT`）。指定なしは全48か国。
+  const onlyCodes = process.argv
+    .slice(2)
+    .map((c) => c.toUpperCase())
+    .filter((c) => /^[A-Z]{3}$/.test(c));
+  const targetTeams = onlyCodes.length
+    ? seedTeams.filter((t) => onlyCodes.includes(t.fifaCode))
+    : seedTeams;
+
+  for (const team of targetTeams) {
     const sectionName = WIKI_SECTION_OVERRIDE[team.fifaCode] ?? team.nameEn;
     const section = sliceSection(wikitext, sectionName);
 
@@ -378,7 +390,7 @@ async function main() {
   }
 
   console.log('\n=== サマリ ===');
-  console.log(`データ取得国: ${resolvedCountries} / ${seedTeams.length}`);
+  console.log(`データ取得国: ${resolvedCountries} / ${targetTeams.length}`);
   console.log(`総選手数: ${totalPlayers}  総監督数: ${totalCoaches}`);
   console.log(`データ無し: ${noData.length ? noData.join(', ') : 'なし'}`);
 }
