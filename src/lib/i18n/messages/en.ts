@@ -128,7 +128,7 @@ export const en: Dictionary = {
     goalDiffAria: 'Goal difference',
     points: 'Pts',
     pointsAria: 'Points',
-    legendAdvancing: 'Advance (top 2)',
+    legendAdvancing: 'Advances to knockout',
     legendPlayoff: '3rd-place slot',
     noMatches: 'No match data for this group yet.',
     noMatchesFilter: 'No matches match this filter yet.',

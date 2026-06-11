@@ -128,7 +128,7 @@ export const zh: Dictionary = {
     goalDiffAria: '净胜球',
     points: '积分',
     pointsAria: '积分',
-    legendAdvancing: '晋级（前2名）',
+    legendAdvancing: '晋级淘汰赛',
     legendPlayoff: '最佳第三名席位',
     noMatches: '该小组暂无比赛数据。',
     noMatchesFilter: '暂无符合该筛选的比赛。',
