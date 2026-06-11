@@ -37,6 +37,7 @@
 
 - **#38** 出場選手の在籍クラブ表示 — **設計確定（notes/design-38-player-clubs.md）**。データ源は既存の Wikipedia squads wikitext（club=/clubnat= が全選手分あり・追加APIほぼ不要・TheSportsDB不要と判明）。clubs マスタ（wiki_title名寄せ・name_ja は langlinks ~8リクエスト）＋ players.club_id（migration 0011）。UI は SquadPanel にクラブ名＋小旗。実装待ち。data-squad 領域
 - **#39** ログアウト後にローカルお気に入りの残骸が見える違和感の本対策 — 現状はナビの★件数を未ログイン時に非表示にする暫定対応のみ(#37内)。試合カードの金枠など他の表示にもローカル残骸が効くため、ログアウト時にローカルお気に入りをクリアするか、表示全体をログイン状態でゲートするかを設計して統一する。#30/#35 と関連。ui-feature 領域
+- **#40** ランキング（スタッツ）ページ — 得点ランキング＋カード(黄/赤)数を表示。**トップナビに1項目追加**（出場国・決勝T と同列。ラベル＝**「ランキング / Rankings」**推奨〔にわか層に直感的・中身が順位リストなので意味も一致〕。将来possession等の非順位指標を足す時は「スタッツ」改名を検討）。**データ源は既存 `match_events` を集計＝新API不要**：得点=`type IN (goal,penalty_goal)` を player_name で集計(own_goal除外)、カード=`yellow_card/red_card` を選手・チーム別。**単一ページ内に 得点/カード のセクション or タブ**（ナビは増やさない）。試合前は0件→**空状態をグレースフル表示**。player_name は文字列集計（自動/手動の表記揺れはMVP許容・将来 players 紐付けは YAGNI）。i18n×5・ログイン必須は他ページと統一。ui-feature/data-squad 領域
 
 ## 保留（判断・外部要因待ち）
 
