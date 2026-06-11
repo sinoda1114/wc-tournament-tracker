@@ -190,7 +190,11 @@ export function AddToHomeScreen() {
   );
 }
 
-/** ヘッダボタン用アイコン: 端末にダウンロード/追加するイメージ（下向き矢印＋トレイ）。 */
+/**
+ * ヘッダボタン用アイコン: 端末（スマートフォン）にアプリを「追加/インストール」する
+ * イメージ（スマホの図形＋プラス）。ファイル DL に見えていた旧アイコン（下向き矢印＋
+ * トレイ）から、A2HS の意図が伝わる図柄に差し替えた。
+ */
 function InstallIcon({ size }: { size: number }) {
   return (
     <svg
@@ -206,9 +210,12 @@ function InstallIcon({ size }: { size: number }) {
       aria-hidden
       focusable={false}
     >
-      <path d="M12 3v12" />
-      <path d="m7 10 5 5 5-5" />
-      <path d="M5 21h14" />
+      {/* スマートフォン本体（角丸の縦長長方形） */}
+      <rect x="5" y="2" width="14" height="20" rx="2.5" />
+      {/* ホームインジケータ（下部の短い横線） */}
+      <path d="M10 18.5h4" />
+      {/* 追加を表すプラス記号（画面中央に配置） */}
+      <path d="M12 8v5M9.5 10.5h5" />
     </svg>
   );
 }
