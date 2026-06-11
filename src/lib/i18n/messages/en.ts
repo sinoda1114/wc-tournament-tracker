@@ -221,7 +221,7 @@ export const en: Dictionary = {
       'The knockout stage (from June 28) is a one-time {price}. The group stage is free to enjoy right now.',
   },
   footer: {
-    brandTitle: 'MatchFav — World Cup 2026 match, prediction & favorites tracker (unofficial)',
+    brandTitle: 'MatchFav — Everything you want to see about World Cup 2026, in one place (unofficial fan site)',
     brandDesc:
       'An unofficial information site that organizes the schedule, results, and participating nations of the 2026 international football tournament for fans.',
     navAria: 'Footer navigation',

@@ -225,7 +225,7 @@ export const pt: Dictionary = {
       'O mata-mata (a partir de 28 de junho) é uma compra única de {price}. A fase de grupos é gratuita agora mesmo.',
   },
   footer: {
-    brandTitle: 'MatchFav — Copa do Mundo 2026: jogos, palpites e favoritos (não oficial)',
+    brandTitle: 'MatchFav — Tudo o que você quer ver da Copa 2026, em um só lugar (site não oficial de fãs)',
     brandDesc:
       'Um site de informações não oficial que organiza o calendário, os resultados e as seleções participantes do torneio internacional de futebol de 2026 para os torcedores.',
     navAria: 'Navegação do rodapé',

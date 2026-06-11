@@ -220,7 +220,7 @@ export const zh: Dictionary = {
       '淘汰赛阶段（6月28日起）为一次性买断 {price}。小组赛阶段现在即可免费畅享。',
   },
   footer: {
-    brandTitle: 'MatchFav — 世界杯2026 比赛·夺冠预测·收藏追踪（非官方）',
+    brandTitle: 'MatchFav — 2026世界杯你想看的一切，尽在一处（非官方球迷网站）',
     brandDesc:
       '面向球迷、汇总2026年国际足球赛事赛程、结果与参赛球队的非官方信息网站。',
     navAria: '页脚导航',
