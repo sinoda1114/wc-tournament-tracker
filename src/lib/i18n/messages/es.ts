@@ -212,6 +212,11 @@ export const es: Dictionary = {
       'Puedes votar una vez por fase a medida que avanza el torneo ({progression}), y el último voto de cada usuario se refleja en el pronóstico de la gente.',
     noteNoChange: 'Los votos no se pueden cambiar una vez emitidos en la misma fase.',
   },
+  paywall: {
+    bannerAria: 'Aviso de precio',
+    bannerMessage:
+      'La fase eliminatoria (desde el 28 de junio) cuesta un único pago de {price}. La fase de grupos es gratis ahora mismo.',
+  },
   footer: {
     brandTitle: 'MatchFav — Mundial 2026: partidos, pronósticos y favoritos (no oficial)',
     brandDesc:

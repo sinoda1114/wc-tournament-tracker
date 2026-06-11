@@ -212,6 +212,11 @@ export const pt: Dictionary = {
       'Você pode votar uma vez por fase conforme o torneio avança ({progression}), e o último voto de cada usuário é refletido no palpite do público.',
     noteNoChange: 'Os votos não podem ser alterados depois de registrados na mesma fase.',
   },
+  paywall: {
+    bannerAria: 'Aviso de preço',
+    bannerMessage:
+      'O mata-mata (a partir de 28 de junho) é uma compra única de {price}. A fase de grupos é gratuita agora mesmo.',
+  },
   footer: {
     brandTitle: 'MatchFav — Copa do Mundo 2026: jogos, palpites e favoritos (não oficial)',
     brandDesc:

@@ -34,8 +34,8 @@
 - **#7** CI を GitHub へ push — `gh auth refresh -s workflow` がユーザー操作待ち（[[gh-workflow-scope-missing]]）。ワークフローはローカルに保留中
 - **#8** セキュリティ仕上げ — Sentry 導入と CSP 方針の判断待ち
 - **#12** 開幕前の通しQA（W9 と一体。2段ゲート→デプロイ）
-- **#14** Stripe 課金接続 — 商品名・価格が未決（ユーザー判断待ち）。**課金動線は6/11確定**: グループステージ(〜6/27)無料→決勝T(6/28〜)課金壁・6/28以降の新規登録のみ72h無料・予告バナー（[[launch-monetization-plan]]）。entitlement は日付ゲート方式で実装する
-- **#26** 課金壁の予告バナー — 無料期間中に「決勝トーナメントからは買い切り○円」を表示（6/25頃から強調）。#14 の価格確定後に実装
+- **#14** Stripe 課金接続 — 商品名・価格が未決（ユーザー判断待ち）。**課金動線は6/11確定**: グループステージ(〜6/27)無料→決勝T(6/28〜)課金壁・6/28以降の新規登録のみ72h無料・予告バナー（[[launch-monetization-plan]]）。entitlement は日付ゲート方式で実装する / **#26 バナーを entitlement 保有者(購入者)に非表示にする**（PaywallBanner の表示条件に `entitlement未保有` を1行追加・seam はコメントで明示済み）
+- **#26** 課金壁の予告バナー — **実装(feat/paywall-banner・PRレビュー待ち)**。確定要件: 無料期間（決勝T開始=6/28 JST より前）のみヘッダ直下に細い帯で表示。文言「決勝トーナメント(6/28〜)は買い切り {price}。グループステージは無料」を5言語。**価格は確定済み（日本¥980/海外$10・[[launch-monetization-plan]]）で `src/lib/pricing.ts` の定数1箇所に集約**（UI直書きせず・#14で課金通貨振り分けにこの定数を流用）。日付ゲート判定 `isFreePeriod()` は純粋関数＋テスト済み。Server Component（リクエスト時評価・6/28で自動的に非表示）。dismissible は未実装(将来)
 - **#19** i18n 棚卸し結果（6/11 実施）— 本文UIは5言語対応済みを確認。修正済み: 投票エラーの多言語化＋es/pt/zhイベントラベル（`23f2d41`）。**残（要設計判断）**: 各ページの metadata（title/description）と OGP 画像文言が全ページ日本語固定（既存設計。generateMetadata の locale 対応はクローラに cookie が無い問題と表裏なので、対応するなら hreflang/URL 戦略とセットで）
 - **#22** ドメイン取得 — **ほぼ完了（6/11）**: matchfav.com を Cloudflare で取得済み・info@matchfav.com 受信稼働（Email Routing→Gmail・外部送信元で実証・キャッチオール有効・受信専用）。**本番は `wc-tournament-tracker.vercel.app` で稼働・Pro契約済・env11件投入済（Clerkはdev）・git自動デプロイ確立（feature push→Preview / mainマージ→Production・手動デプロイ卒業）**（[[vercel-deploy-ops]]）。残: Vercel への独自ドメインDNS接続（A/CNAME を「DNSのみ(グレー雲)」で追加）＝ #25 とセットで実施
 - **#25** 本番 Clerk 設定 — 本番ドメイン取得（#22）に連動

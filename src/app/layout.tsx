@@ -7,6 +7,7 @@ import { ColorSchemeScript } from '@mantine/core';
 import type { Metadata, Viewport } from 'next';
 
 import { CookieConsent } from '@/components/CookieConsent';
+import { PaywallBanner } from '@/components/PaywallBanner';
 import { SiteFooter } from '@/components/SiteFooter';
 import { SiteHeader } from '@/components/SiteHeader';
 import { getSiteUrlObject } from '@/lib/env';
@@ -103,6 +104,7 @@ export default async function RootLayout({
           </a>
           <div className="wc-shell" style={{ display: 'flex', flexDirection: 'column' }}>
             <SiteHeader locale={locale} dict={dict} />
+            <PaywallBanner locale={locale} dict={dict} />
             <main id="main-content" style={{ flex: 1 }}>
               {children}
             </main>
