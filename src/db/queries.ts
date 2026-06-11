@@ -385,6 +385,35 @@ export async function getMyVotes(voterId: string): Promise<Record<string, string
   return map;
 }
 
+/** 指定ユーザーのお気に入り FIFA コード一覧（大文字・追加順）を返す。 */
+export async function getUserFavorites(userId: string): Promise<string[]> {
+  const result = await db().execute({
+    sql: 'SELECT fifa_code FROM user_favorites WHERE user_id = ? ORDER BY created_at ASC, fifa_code ASC',
+    args: [userId],
+  });
+  return result.rows.map((row) => rowAs<{ fifa_code: string }>(row).fifa_code);
+}
+
+/**
+ * 指定ユーザーのお気に入りを与えられた集合で完全置換する（delete→insert を batch で原子化）。
+ * クライアントは常に全件を送るため add/remove の競合が起きない。コードは大文字前提。
+ */
+export async function setUserFavorites(userId: string, codes: readonly string[]): Promise<void> {
+  const normalized = Array.from(
+    new Set(codes.map((c) => c.trim().toUpperCase()).filter(Boolean)),
+  );
+  await db().batch(
+    [
+      { sql: 'DELETE FROM user_favorites WHERE user_id = ?', args: [userId] },
+      ...normalized.map((code) => ({
+        sql: 'INSERT INTO user_favorites (user_id, fifa_code) VALUES (?, ?)',
+        args: [userId, code],
+      })),
+    ],
+    'write',
+  );
+}
+
 export async function getGroupTeams(group: string): Promise<Team[]> {
   const result = await db().execute({
     sql: `

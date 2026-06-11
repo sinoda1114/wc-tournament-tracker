@@ -192,6 +192,7 @@ export const pt: Dictionary = {
       invalid_team: 'Você não pode votar nesse time.',
       locked: 'Você já votou nesta fase.',
       error: 'Não foi possível enviar seu voto. Tente novamente mais tarde.',
+      auth: 'Entre para votar.',
     },
     sectionAria: 'Votar no palpite do público',
     title: 'Seu palpite de campeão',

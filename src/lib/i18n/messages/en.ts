@@ -191,6 +191,7 @@ export const en: Dictionary = {
       invalid_team: 'You cannot vote for that team.',
       locked: 'You have already voted in this stage.',
       error: 'Failed to submit your vote. Please try again later.',
+      auth: 'Sign in to cast your vote.',
     },
     sectionAria: 'Vote in the crowd prediction',
     title: 'Your title pick',

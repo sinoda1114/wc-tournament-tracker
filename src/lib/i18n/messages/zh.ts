@@ -190,6 +190,7 @@ export const zh: Dictionary = {
       invalid_team: '不能投票给该队伍。',
       locked: '本阶段已投过票。',
       error: '投票失败，请稍后再试。',
+      auth: '登录后即可投票。',
     },
     sectionAria: '为大家的预测投票',
     title: '你的夺冠预测',

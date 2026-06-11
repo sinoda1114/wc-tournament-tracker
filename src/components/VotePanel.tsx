@@ -1,8 +1,9 @@
 'use client';
 
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
-import { Button, Text } from '@mantine/core';
+import { Anchor, Button, Text } from '@mantine/core';
 
 import { CountryFlag } from '@/components/CountryFlag';
 import { TeamSearchCombobox } from '@/components/TeamSearchCombobox';
@@ -40,6 +41,7 @@ export function VotePanel({
   const router = useRouter();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [needsAuth, setNeedsAuth] = useState(false);
   const [pending, startTransition] = useTransition();
 
   const myTeam = myVoteTeamId
@@ -49,6 +51,7 @@ export function VotePanel({
   function submit() {
     if (!stage || !selectedId) return;
     setError(null);
+    setNeedsAuth(false);
     startTransition(async () => {
       const result = await castVoteAction(stage, selectedId);
       if (result.ok) {
@@ -56,6 +59,7 @@ export function VotePanel({
       } else {
         // サーバーの message は日本語固定なので、reason コードを閲覧言語の辞書に引き直す。
         setError(t.errors[result.reason] ?? result.message);
+        setNeedsAuth(result.reason === 'auth');
         if (result.reason === 'locked' || result.reason === 'wrong_stage') {
           router.refresh();
         }
@@ -130,6 +134,14 @@ export function VotePanel({
           {error ? (
             <Text c="red" size="sm">
               {error}
+              {needsAuth ? (
+                <>
+                  {' '}
+                  <Anchor component={Link} href="/sign-in">
+                    {dict.header.signIn}
+                  </Anchor>
+                </>
+              ) : null}
             </Text>
           ) : null}
         </div>

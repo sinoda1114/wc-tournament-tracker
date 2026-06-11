@@ -103,15 +103,12 @@ export function writeFilterEnabled(on: boolean): void {
 }
 
 /**
- * クラウド同期への移行 seam（#11 準備 / 本体は #13 認証導入後）。
+ * 端末間同期のマージ関数（実装済み）。
  *
- * 移行計画:
- *  1. 認証導入後、お気に入りは `user_favorites(user_id, fifa_code)` に持つ。
- *  2. 読み書きは、未ログイン時はこの localStorage 実装、ログイン時はサーバ実装へ
- *     差し替える（useFavoriteTeams が依存するのは read/write/toggle なので 1 箇所差替で済む。
- *     voter.ts の readVoterId/ensureVoterId 拡張と同じ方針）。
- *  3. **初回ログイン時**、匿名 localStorage の分を失わないよう、この `mergeFavoriteCodes`
- *     でサーバ側と統合してから永続化する。
+ * - 保存: ログイン時は `user_favorites(user_id, fifa_code)`（src/app/favorites/actions.ts）。
+ *   未ログイン時はこの localStorage 実装。useFavoriteTeams が両者を束ねる。
+ * - **初回ログイン時**、匿名 localStorage の分を失わないよう、この `mergeFavoriteCodes` で
+ *   サーバ側と統合してから永続化する（syncFavoritesAction が利用）。
  *
  * ローカルとリモートのお気に入りコードを正規化（大文字・空白除去・重複排除）して和集合で返す。
  * リモートの並びを優先し、ローカル固有分を後ろに足す純関数（テスト可能・DOM 非依存）。

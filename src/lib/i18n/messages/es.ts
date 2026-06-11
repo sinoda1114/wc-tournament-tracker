@@ -192,6 +192,7 @@ export const es: Dictionary = {
       invalid_team: 'No puedes votar por ese equipo.',
       locked: 'Ya has votado en esta fase.',
       error: 'No se pudo enviar tu voto. Inténtalo de nuevo más tarde.',
+      auth: 'Inicia sesión para votar.',
     },
     sectionAria: 'Votar en el pronóstico de la gente',
     title: 'Tu pronóstico de campeón',

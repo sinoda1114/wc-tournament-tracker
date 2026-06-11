@@ -1,38 +1,27 @@
-import { randomUUID } from 'node:crypto';
-
+import { auth } from '@clerk/nextjs/server';
 import { cookies } from 'next/headers';
 
-/** 匿名投票者IDを保持する cookie 名。 */
+/** 旧・匿名投票者IDを保持していた cookie 名（読み取りのみ。新規投票はログイン必須）。 */
 export const VOTER_COOKIE = 'wc_voter_id';
 
-/** cookie 有効期限（1年）。 */
-const MAX_AGE_SECONDS = 60 * 60 * 24 * 365;
-
 /**
- * 既存の匿名投票者IDを読む（無ければ null）。RSC のレンダリング中でも呼べる。
- * 将来 Google 認証を入れたら「ログイン中はアカウントID」を優先して返すよう拡張する。
+ * 投票者IDを読む（UI で「自分の票」を表示するため）。
+ * ログイン中は **Clerk userId** を返す（端末をまたいで同一＝不正な多重投票を防ぐ）。
+ * 未ログイン時は、過去に匿名投票した cookie があればそれを返す（後方互換の閲覧用）。
+ * RSC のレンダリング中でも呼べる。
  */
 export async function readVoterId(): Promise<string | null> {
+  const { userId } = await auth();
+  if (userId) return userId;
   const store = await cookies();
   return store.get(VOTER_COOKIE)?.value ?? null;
 }
 
 /**
- * 匿名投票者IDを確実に得る。無ければ UUID を発行して httpOnly cookie に保存する。
- * cookie を書くため **Server Action / Route Handler 内でのみ**呼ぶこと。
+ * 投票に使うアカウントIDを返す（Clerk userId）。未ログインなら null。
+ * 投票はログイン必須にしたため、cookie によるID発行は廃止した。
  */
-export async function ensureVoterId(): Promise<string> {
-  const store = await cookies();
-  const existing = store.get(VOTER_COOKIE)?.value;
-  if (existing) return existing;
-
-  const id = randomUUID();
-  store.set(VOTER_COOKIE, id, {
-    httpOnly: true,
-    sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production',
-    path: '/',
-    maxAge: MAX_AGE_SECONDS,
-  });
-  return id;
+export async function requireVoterId(): Promise<string | null> {
+  const { userId } = await auth();
+  return userId ?? null;
 }

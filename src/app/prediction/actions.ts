@@ -4,13 +4,13 @@ import { revalidatePath } from 'next/cache';
 
 import { castCrowdVote, listTournamentMatches } from '@/db/queries';
 import { aliveTeamIdsForStage, currentVotingStage } from '@/lib/crowd';
-import { ensureVoterId } from '@/lib/voter';
+import { requireVoterId } from '@/lib/voter';
 
 export type VoteActionResult =
   | { ok: true }
   | {
       ok: false;
-      reason: 'closed' | 'wrong_stage' | 'invalid_team' | 'locked' | 'error';
+      reason: 'closed' | 'wrong_stage' | 'invalid_team' | 'locked' | 'auth' | 'error';
       message: string;
     };
 
@@ -40,7 +40,11 @@ export async function castVoteAction(
       return { ok: false, reason: 'invalid_team', message: 'そのチームには投票できません。' };
     }
 
-    const voterId = await ensureVoterId();
+    // 投票はログイン必須。識別子は Clerk userId（端末をまたいで同一＝多重投票を防ぐ）。
+    const voterId = await requireVoterId();
+    if (!voterId) {
+      return { ok: false, reason: 'auth', message: 'ログインすると投票できます。' };
+    }
     const result = await castCrowdVote({ voterId, stage: current, teamId });
     if (result === 'locked') {
       return {
