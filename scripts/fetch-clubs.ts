@@ -82,6 +82,54 @@ function slugify(title: string): string {
   );
 }
 
+/**
+ * clubs.name_ja を未設定のクラブについて Wikipedia の言語間リンク（en→ja）で解決する。
+ * 50 件/バッチ。クラブ記事の日本語版タイトルがそのまま日本語クラブ名になる
+ * （選手名と違い「姓名スペース」処理は不要）。取れないクラブは NULL のまま（UI は英語名表示）。
+ */
+async function resolveJaClubNames(
+  db: ReturnType<typeof getDb>,
+): Promise<number> {
+  const result = await db.execute('SELECT wiki_title FROM clubs WHERE name_ja IS NULL');
+  const titles = (result.rows as unknown as { wiki_title: string }[]).map(
+    (r) => r.wiki_title,
+  );
+  if (titles.length === 0) return 0;
+
+  let updated = 0;
+  for (let i = 0; i < titles.length; i += 50) {
+    const batch = titles.slice(i, i + 50);
+    const url =
+      'https://en.wikipedia.org/w/api.php?action=query&format=json&prop=langlinks&lllang=ja&lllimit=500&titles=' +
+      encodeURIComponent(batch.join('|'));
+    const json = await fetchJsonWithRetry<{
+      query?: {
+        normalized?: { from: string; to: string }[];
+        pages?: Record<
+          string,
+          { title: string; langlinks?: { lang: string; '*': string }[] }
+        >;
+      };
+    }>(url, { headers: { 'User-Agent': 'wc-tournament-tracker/1.0 (club importer)' } });
+
+    // API は入力タイトルを正規化する。normalized(to->from) で DB の wiki_title へ戻す。
+    const toOriginal = new Map<string, string>();
+    for (const n of json.query?.normalized ?? []) toOriginal.set(n.to, n.from);
+
+    for (const page of Object.values(json.query?.pages ?? {})) {
+      const ja = page.langlinks?.[0]?.['*'];
+      if (!ja) continue;
+      const wikiTitle = toOriginal.get(page.title) ?? page.title;
+      await db.execute({
+        sql: 'UPDATE clubs SET name_ja = ? WHERE wiki_title = ?',
+        args: [ja, wikiTitle],
+      });
+      updated += 1;
+    }
+  }
+  return updated;
+}
+
 /** 国セクションの wikitext から「選手名 → クラブ」行を抽出する。 */
 function parseClubRows(section: string): ParsedClubRow[] {
   const rows: ParsedClubRow[] = [];
@@ -207,8 +255,12 @@ async function main() {
   }
 
   console.log(
-    `完了: players ${playersLinked} 件に club_id 設定 / clubs upsert ${clubsUpserted} 回 / 突合失敗 ${unmatched} 件`,
+    `クラブ紐付け完了: players ${playersLinked} 件に club_id 設定 / clubs upsert ${clubsUpserted} 回 / 突合失敗 ${unmatched} 件`,
   );
+
+  console.log('日本語クラブ名を解決中…（langlinks en→ja）');
+  const jaResolved = await resolveJaClubNames(db);
+  console.log(`日本語クラブ名: ${jaResolved} 件解決`);
 }
 
 main().catch((e) => {

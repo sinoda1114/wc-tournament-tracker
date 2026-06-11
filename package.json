@@ -10,6 +10,8 @@
     "db:migrate": "tsx scripts/migrate.ts",
     "db:seed": "tsx src/db/seed.ts",
     "db:fetch-squads": "tsx scripts/fetch-squads.ts",
+    "db:fetch-clubs": "tsx scripts/fetch-clubs.ts",
+    "db:export-clubs": "tsx scripts/export-squad-clubs.ts",
     "ingest": "tsx scripts/fetch-results.ts",
     "test": "vitest run",
     "test:watch": "vitest"
