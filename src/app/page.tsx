@@ -46,10 +46,10 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   const wantsKt = pickDateParam(params.view) === 'kt';
   const isKnockoutPhase = wantsKt || !isFreePeriod(new Date());
 
-  // 日付選択時は GL＋決勝T 横断の「その日の全試合」一覧（フェーズ問わず共通）。
-  const dayMatches = isDate
-    ? [...(await listGroupStageMatches()), ...(await listTournamentMatches())]
-    : [];
+  // 日付選択時は「その日の全試合」一覧（フェーズ問わず共通）。
+  // NOTE: listTournamentMatches() は全試合（GL含む）を返すため、GL一覧と連結しない
+  //（連結すると GL の試合が二重表示になる）。
+  const dayMatches = isDate ? await listTournamentMatches() : [];
 
   // 未選択時: フェーズに応じた既定ビューのデータだけ取得する。
   const knockoutMatches = !isDate && isKnockoutPhase ? await listTournamentMatches() : [];

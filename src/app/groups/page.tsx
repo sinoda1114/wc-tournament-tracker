@@ -53,10 +53,9 @@ export default async function GroupsPage({ searchParams }: GroupsPageProps) {
   const dict = getDictionary(await resolveLocale());
   const isDate = selectedDates.length > 0;
 
-  // 日付選択時は GL＋決勝T 横断の「その日の全試合」。未選択時は順位表グリッド（全グループ）。
-  const dayMatches = isDate
-    ? [...(await listGroupStageMatches()), ...(await listTournamentMatches())]
-    : [];
+  // 日付選択時は「その日の全試合」。未選択時は順位表グリッド（全グループ）。
+  // NOTE: listTournamentMatches() は全試合（GL含む）。GL一覧と連結すると二重表示になる。
+  const dayMatches = isDate ? await listTournamentMatches() : [];
 
   const allGroupMatches = isDate ? [] : await listGroupStageMatches();
   const groupData = isDate
