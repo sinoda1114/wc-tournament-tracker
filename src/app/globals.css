@@ -1850,34 +1850,16 @@ a {
   outline-offset: 2px;
 }
 
-/* ===== 順位表の突破表現（1-2位=グループ突破 / 3位=ベスト3位通過枠）=====
-   方針: 主張の強い縦線・横カットオフ線は使わず、突破組（上位2）の順位番号を緑にし、
-   非突破行（3位以下）を薄くグレーアウトすることで、コントラストで上位2行を自然に際立たせる。 */
+/* ===== 順位表の突破表現 =====
+   方針: グループステージ中（順位未確定）は色分け・線・行の沈めを一切しない＝完全フラット
+   （まだ何も確定していないのに色が付くのは不自然なため）。突破/敗退が「確定した時点」で
+   フラグ駆動で色を付けて見分けるのは #33 で実装する。is-advancing/is-playoff/is-out の
+   クラスは #33 のフックとして付与だけ残す（現状はスタイル無し）。 */
 .wc-standings-pos {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   min-width: 1.4rem;
-}
-/* 1-2 位＝決勝T 突破枠。順位セルを緑（=ポジティブ）にして突破を示す（縦線・横線は使わない）。 */
-.wc-standings-row.is-advancing .wc-standings-pos {
-  font-weight: 700;
-  color: var(--wc-qualify);
-}
-.wc-standings-row.is-playoff .wc-standings-pos {
-  font-weight: 700;
-  color: var(--wc-emphasis);
-}
-/* 非突破行（3位=ベスト3位通過枠 / 4位=敗退）はわずかに沈ませて、上位2行を相対的に強調する。
-   可読性を損なわない程度の控えめなトーンダウンに留める（ライト/ダーク両対応）。 */
-.wc-standings-row.is-playoff > td,
-.wc-standings-row.is-out > td {
-  color: var(--wc-muted);
-  opacity: 0.92;
-}
-/* 順位番号など色を明示している要素は上のトーンダウンで上書きしない。 */
-.wc-standings-row.is-playoff .wc-standings-pos {
-  opacity: 1;
 }
 
 .wc-standings-legend {
