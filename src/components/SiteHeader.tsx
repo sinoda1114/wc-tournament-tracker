@@ -49,13 +49,9 @@ export async function SiteHeader({ locale, dict }: SiteHeaderProps) {
             <TimeZonePicker label={dict.timezone.label} />
             <AddToHomeScreen />
             <ThemeToggle />
-            {user ? (
-              <UserButton />
-            ) : (
-              <TextLink href="/sign-in" c="dimmed" size="sm">
-                {dict.header.signIn}
-              </TextLink>
-            )}
+            {/* 未ログイン時のログイン導線はヒーローのCTA（トップ）と各保護ページの
+                リダイレクトが担うため、ヘッダには出さない（#37 フィードバック）。 */}
+            {user ? <UserButton /> : null}
           </Group>
         </Group>
       </Container>

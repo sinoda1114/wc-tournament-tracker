@@ -3,6 +3,7 @@
 import { Suspense } from 'react';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
+import { useAuth } from '@clerk/nextjs';
 import { Group } from '@mantine/core';
 
 import { useFavoriteTeams } from '@/hooks/useFavoriteTeams';
@@ -45,8 +46,11 @@ function SiteNavInner({ labels, groupPhase }: SiteNavProps) {
   const pathname = usePathname() ?? '/';
   const searchParams = useSearchParams();
   const { favorites, ready } = useFavoriteTeams();
+  const { isSignedIn } = useAuth();
   const isFavoritesActive = pathname.startsWith('/favorites');
-  const favCount = ready ? favorites.size : 0;
+  // 未ログイン時はローカルに残った旧データの件数を出さない（「ログイン前なのに★9」の
+  // 違和感対策・#37 フィードバック）。データ自体は消さず、表示だけ抑制する。
+  const favCount = ready && isSignedIn ? favorites.size : 0;
   const hasFavorites = favCount > 0;
 
   const isKtView = pathname === '/' && searchParams.get('view') === 'kt';

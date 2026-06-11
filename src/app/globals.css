@@ -1977,9 +1977,10 @@ a {
 
 .wc-mini-hero-tagline {
   margin: 0;
-  font-size: 0.9rem;
-  line-height: 1.65;
-  color: var(--wc-muted);
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: var(--wc-text);
+  opacity: 0.92;
 }
 
 .wc-mini-hero-points {
@@ -1988,16 +1989,19 @@ a {
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 0.3rem;
-  font-size: 0.88rem;
+  gap: 0.35rem;
+  font-size: 0.92rem;
+  font-weight: 500;
   line-height: 1.5;
 }
 
 .wc-mini-hero-points li::before {
   content: '✓';
-  margin-right: 0.5rem;
-  font-weight: 700;
-  color: var(--wc-accent);
+  margin-right: 0.55rem;
+  font-size: 1rem;
+  font-weight: 900;
+  color: #fbbf24; /* ゴールド: 青背景上でアクセント青より視認性が高い */
+  text-shadow: 0 0 6px rgba(251, 191, 36, 0.4);
 }
 
 .wc-mini-hero-action {
