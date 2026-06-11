@@ -211,7 +211,7 @@ export const en: Dictionary = {
   paywall: {
     bannerAria: 'Pricing notice',
     bannerMessage:
-      'The knockout stage (from June 28) is a one-time {price}. The group stage is free to enjoy right now.',
+      'The knockout stage (from June 29) is a one-time {price}. The group stage is free to enjoy right now.',
   },
   footer: {
     brandTitle: 'MatchFav — World Cup 2026 match, prediction & favorites tracker (unofficial)',

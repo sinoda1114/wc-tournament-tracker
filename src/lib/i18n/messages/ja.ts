@@ -229,7 +229,7 @@ export const ja = {
   paywall: {
     bannerAria: '課金のお知らせ',
     bannerMessage:
-      '決勝トーナメント（6月28日〜）は買い切り {price}。グループステージは今すぐ無料でお楽しみいただけます。',
+      '決勝トーナメント（6/29）から有料 買い切り {price}。グループリーグは無料でお楽しみいただけます。',
   },
   footer: {
     brandTitle: 'MatchFav — W杯2026 試合・優勝予想・お気に入りトラッカー（非公式）',

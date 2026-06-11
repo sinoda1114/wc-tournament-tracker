@@ -14,21 +14,21 @@ import styles from '../legal.module.css';
  *     「請求があったら遅滞なく開示する」方式（消費者庁ガイドラインで個人事業者に
  *     認められる省略形）を採用。
  *
- * 【プレースホルダ（確定後に置換）】
- *   - 【価格未定】（#14）/info@matchfav.com
- *   - robots noindex は価格確定・正式公開時に解除を検討すること。
+ * 【未確定事項】
+ *   - 販売価格は購入手続き画面（Stripe Checkout）に表示する方式。決済導線の実装は #14。
+ *   - robots noindex は正式な販売開始（#14）時に解除を検討すること。
  */
 
 export const metadata: Metadata = {
   title: '特定商取引法に基づく表記 | MatchFav',
   description: 'MatchFav の特定商取引法に基づく表記です。',
-  // 価格未確定のプレースホルダを含むため暫定で noindex。#14 確定・正式公開時に解除を検討。
+  // 販売開始前のため暫定で noindex。正式な販売開始（#14）時に解除を検討。
   robots: { index: false, follow: false },
 };
 
 const UPDATED = '2026年6月10日';
 
-/** 特商法の表示項目。価格（#14）・連絡先メールはプレースホルダ。 */
+/** 特商法の表示項目。販売価格は購入手続き画面（Stripe Checkout）に表示する方式（#14）。 */
 const ITEMS: { label: string; value: React.ReactNode }[] = [
   {
     label: '販売事業者',
@@ -46,16 +46,12 @@ const ITEMS: { label: string; value: React.ReactNode }[] = [
   },
   {
     label: 'お問い合わせ先（メール）',
-    value: <strong className={styles.placeholder}>info@matchfav.com</strong>,
+    value: <strong>info@matchfav.com</strong>,
   },
   {
     label: '販売価格',
-    value: (
-      <>
-        <strong className={styles.placeholder}>【価格未定】</strong>
-        （買い切り・税込価格を購入ページに表示します。月額等の継続課金ではありません）
-      </>
-    ),
+    value:
+      '各プランの購入手続き画面に表示します（買い切り・税込価格。月額等の継続課金ではありません）。',
   },
   {
     label: '商品代金以外の必要料金',
@@ -64,7 +60,7 @@ const ITEMS: { label: string; value: React.ReactNode }[] = [
   },
   {
     label: '支払方法',
-    value: 'クレジットカード決済（決済代行サービスを利用）',
+    value: 'クレジットカード決済',
   },
   {
     label: '支払時期',
@@ -73,7 +69,7 @@ const ITEMS: { label: string; value: React.ReactNode }[] = [
   {
     label: '役務の提供時期',
     value:
-      '決済完了後、ただちに全機能をご利用いただけます。提供期間は 2026年9月30日（予定・変更時はサイト上で事前告知）までです。本サービスは大会に関連した期間限定サービスであり、買い切り料金は同日までの利用権の対価です。なお、グループステージ期間（2026年6月27日まで）は無料でご利用いただけます。2026年6月28日（決勝トーナメント開始）以降に新規登録された場合は、登録から72時間無料でご利用いただけます。',
+      '決済完了後、ただちに全機能をご利用いただけます。提供期間は 2026年9月30日（予定・変更時はサイト上で事前告知）までです。本サービスは大会に関連した期間限定サービスであり、買い切り料金は同日までの利用権の対価です。なお、グループステージ期間（2026年6月28日まで）は無料でご利用いただけます。2026年6月29日（決勝トーナメント開始）以降に新規登録された場合は、登録から72時間無料でご利用いただけます。',
   },
   {
     label: '返品・キャンセル（返金方針）',
@@ -82,7 +78,7 @@ const ITEMS: { label: string; value: React.ReactNode }[] = [
   },
   {
     label: '動作環境',
-    value: '最新版の主要ウェブブラウザ（Chrome / Safari / Edge / Firefox 等）を推奨します。',
+    value: '最新版の Google Chrome を推奨します。',
   },
 ];
 
@@ -93,12 +89,6 @@ export default function TokushohoPage() {
         <h1>特定商取引法に基づく表記</h1>
         <span className={styles.updated}>最終改定日: {UPDATED}</span>
       </header>
-
-      <p className={styles.notice}>
-        本表記中の <strong>【価格未定】</strong>{' '}
-        は、販売価格・商品名（#14）の確定後に置き換えられる暫定表記です。
-        確定までは有料販売を開始しません。
-      </p>
 
       <section className={styles.section}>
         <dl className={styles.defList}>
