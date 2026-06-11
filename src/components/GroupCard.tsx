@@ -108,9 +108,7 @@ function StandingRow({
   const qualification =
     row.position <= 2 ? 'advancing' : row.position === 3 ? 'playoff' : 'out';
   return (
-    <tr
-      className={`wc-standings-row is-${qualification}${row.position === 2 ? ' is-cutoff' : ''}`}
-    >
+    <tr className={`wc-standings-row is-${qualification}`}>
       <td>
         <span className="wc-standings-pos">{row.position}</span>
       </td>

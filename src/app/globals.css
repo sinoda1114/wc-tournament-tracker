@@ -1850,28 +1850,16 @@ a {
   outline-offset: 2px;
 }
 
-/* ===== 順位表の突破ライン（1-2位=グループ突破 / 3位=ベスト3位通過枠）===== */
+/* ===== 順位表の突破表現 =====
+   方針: グループステージ中（順位未確定）は色分け・線・行の沈めを一切しない＝完全フラット
+   （まだ何も確定していないのに色が付くのは不自然なため）。突破/敗退が「確定した時点」で
+   フラグ駆動で色を付けて見分けるのは #33 で実装する。is-advancing/is-playoff/is-out の
+   クラスは #33 のフックとして付与だけ残す（現状はスタイル無し）。 */
 .wc-standings-pos {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   min-width: 1.4rem;
-}
-/* 1-2 位＝決勝T 突破枠。順位セルを緑（=ポジティブ）にし、行頭に緑の左罫で枠を示す。 */
-.wc-standings-row.is-advancing .wc-standings-pos {
-  font-weight: 700;
-  color: var(--wc-qualify);
-}
-.wc-standings-row.is-advancing > td:first-child {
-  box-shadow: inset 3px 0 0 0 var(--wc-qualify);
-}
-.wc-standings-row.is-playoff .wc-standings-pos {
-  font-weight: 700;
-  color: var(--wc-emphasis);
-}
-/* 2位と3位の境界＝グループ突破ライン（ここから上が確定突破）。 */
-.wc-standings-row.is-cutoff > td {
-  border-bottom: 2px solid var(--wc-qualify);
 }
 
 .wc-standings-legend {
