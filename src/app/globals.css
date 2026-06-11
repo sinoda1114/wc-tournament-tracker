@@ -1856,16 +1856,30 @@ a {
   outline-offset: 2px;
 }
 
-/* ===== 順位表の突破表現 =====
+/* ===== 順位表の突破表現（#33） =====
    方針: グループステージ中（順位未確定）は色分け・線・行の沈めを一切しない＝完全フラット
-   （まだ何も確定していないのに色が付くのは不自然なため）。突破/敗退が「確定した時点」で
-   フラグ駆動で色を付けて見分けるのは #33 で実装する。is-advancing/is-playoff/is-out の
-   クラスは #33 のフックとして付与だけ残す（現状はスタイル無し）。 */
+   （まだ何も確定していないのに色が付くのは不自然なため）。グループステージが「確定した時点」で
+   初めて結果整合で着色する。確定の付与は GroupsFilterableGrid（全12組から判定）→ GroupCard が
+   行い、進出チーム（1-2位＋ベスト3位上位8の3位）に is-advancing を付ける。未確定の間は
+   is-advancing が付かない＝フラット。 */
 .wc-standings-pos {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   min-width: 1.4rem;
+}
+
+/* 確定後の進出チーム（緑）。左に細いアクセントバー＋淡い緑の地。淡色なのでテキスト可読性は維持。 */
+.wc-standings-row.is-advancing td {
+  background: var(--wc-qualify-soft);
+}
+.wc-standings-row.is-advancing td:first-child {
+  box-shadow: inset 3px 0 0 var(--wc-qualify);
+}
+/* 視認性のため順位番号(#)自体も緑＋太字に（背景＋アクセントバーと重ねる）。 */
+.wc-standings-row.is-advancing .wc-standings-pos {
+  color: var(--wc-qualify);
+  font-weight: 700;
 }
 
 .wc-standings-legend {

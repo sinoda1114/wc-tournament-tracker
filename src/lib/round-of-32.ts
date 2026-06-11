@@ -146,3 +146,41 @@ export function resolveRoundOf32Assignments(
 /** 3位スロットを持つ R32 試合IDの集合（lib/third-place 由来）。参照用に再エクスポート。 */
 export const THIRD_PLACE_R32_MATCH_IDS: readonly number[] =
   THIRD_PLACE_HOST_MATCHES.map((h) => h.matchId);
+
+/**
+ * グループステージが「全12組とも消化済み」かどうか（＝順位が結果として確定したか）。
+ * 各グループ4チームがそれぞれ3試合を終えていれば確定とみなす（#33 の着色トリガー）。
+ */
+export function isGroupStageComplete(groups: readonly GroupStandingsEntry[]): boolean {
+  if (groups.length < 12) return false;
+  return groups.every(
+    (g) => g.standings.length === 4 && g.standings.every((s) => s.played >= 3),
+  );
+}
+
+/**
+ * 各グループの3位が「ベスト3位上位8」に入って決勝T進出が確定したかを返す（#33）。
+ *
+ * - グループステージ未確定（全消化前）は判定不能として**全グループ null**。
+ * - 確定後は上位8グループの3位が `true`（進出）、残り4グループが `false`（敗退）。
+ *
+ * 3位の通過は他グループとの比較（{@link rankThirdPlacedTeams}）でしか決まらないため、
+ * 全消化後にのみ結果整合で確定する。1位/2位は各グループ内で確定するので本関数では扱わない
+ * （呼び出し側が「確定後は position<=2 を進出」として着色する）。
+ */
+export function resolveThirdPlaceQualification(
+  groups: readonly GroupStandingsEntry[],
+): Map<GroupLetter, boolean | null> {
+  const result = new Map<GroupLetter, boolean | null>();
+  if (!isGroupStageComplete(groups)) {
+    for (const g of groups) result.set(g.group, null);
+    return result;
+  }
+  const top8 = new Set(
+    rankThirdPlacedTeams(groups)
+      .slice(0, 8)
+      .map((r) => r.group),
+  );
+  for (const g of groups) result.set(g.group, top8.has(g.group));
+  return result;
+}

@@ -138,7 +138,7 @@ export const ja = {
     goalDiffAria: '得失点差',
     points: '勝点',
     pointsAria: '勝点',
-    legendAdvancing: '突破（上位2）',
+    legendAdvancing: '決勝トーナメント出場',
     legendPlayoff: '3位通過枠',
     noMatches: 'このグループの試合データはまだありません。',
     noMatchesFilter: 'この条件に合致する試合はまだありません。',

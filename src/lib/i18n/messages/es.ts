@@ -128,7 +128,7 @@ export const es: Dictionary = {
     goalDiffAria: 'Diferencia de goles',
     points: 'Pts',
     pointsAria: 'Puntos',
-    legendAdvancing: 'Clasifican (2 primeros)',
+    legendAdvancing: 'Clasifica a eliminatorias',
     legendPlayoff: 'Plaza de mejor tercero',
     noMatches: 'Aún no hay datos de partidos para este grupo.',
     noMatchesFilter: 'Aún no hay partidos que coincidan con este filtro.',

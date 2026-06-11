@@ -128,7 +128,7 @@ export const pt: Dictionary = {
     goalDiffAria: 'Saldo de gols',
     points: 'Pts',
     pointsAria: 'Pontos',
-    legendAdvancing: 'Classificam (2 primeiros)',
+    legendAdvancing: 'Avança às eliminatórias',
     legendPlayoff: 'Vaga de melhor terceiro',
     noMatches: 'Ainda não há dados de partidas para este grupo.',
     noMatchesFilter: 'Ainda não há partidas que correspondam a este filtro.',

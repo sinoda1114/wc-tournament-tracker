@@ -1,11 +1,18 @@
 'use client';
 
+import { useMemo } from 'react';
 import { Stack, Text } from '@mantine/core';
 
 import { GroupCard } from '@/components/GroupCard';
 import type { MatchDetail, Team } from '@/db/queries';
 import { useFavoriteFilter, useFavoriteTeams } from '@/hooks/useFavoriteTeams';
 import { useDictionary } from '@/lib/i18n/context';
+import {
+  resolveThirdPlaceQualification,
+  type GroupStandingsEntry,
+} from '@/lib/round-of-32';
+import { calculateGroupStandings } from '@/lib/standings';
+import type { GroupLetter } from '@/lib/third-place';
 
 export type GroupDataItem = {
   letter: string;
@@ -35,6 +42,19 @@ export function GroupsFilterableGrid({ groupData }: GroupsFilterableGridProps) {
   const { favorites, ready: favReady } = useFavoriteTeams();
   const t = useDictionary().groups;
 
+  // #33: 全12組の順位から「グループステージ確定」と「各組3位の決勝T進出」を算出。
+  // お気に入りフィルターで一部が非表示でも、確定判定は必ず全組（groupData）で行う。
+  const thirdPlaceQualified = useMemo(() => {
+    const entries: GroupStandingsEntry[] = groupData.map((g) => ({
+      group: g.letter as GroupLetter,
+      standings: calculateGroupStandings(g.teams, g.standingsMatches ?? g.matches),
+    }));
+    return resolveThirdPlaceQualification(entries);
+  }, [groupData]);
+
+  // 確定 = 3位判定が null でない（全組消化済み）こと。null=未確定の間は全カード フラット。
+  const confirmed = [...thirdPlaceQualified.values()].some((v) => v !== null);
+
   const activeFilter = filterReady && favReady && filterOn && favorites.size > 0;
   const visible = activeFilter
     ? groupData.filter((g) => groupHasFavorite(g, favorites))
@@ -57,6 +77,8 @@ export function GroupsFilterableGrid({ groupData }: GroupsFilterableGridProps) {
           teams={g.teams}
           matches={g.matches}
           standingsMatches={g.standingsMatches}
+          confirmed={confirmed}
+          thirdPlaceQualified={thirdPlaceQualified.get(g.letter as GroupLetter) === true}
         />
       ))}
     </div>
