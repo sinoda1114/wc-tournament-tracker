@@ -2,6 +2,13 @@ import type { Dictionary } from './ja';
 
 /** 英語メッセージ辞書。型 Dictionary によりキー欠落は tsc で弾かれる。 */
 export const en: Dictionary = {
+  meta: {
+    home: {
+      title: 'World Cup 2026 fixtures, results & predictions (unofficial)',
+      description:
+        'Schedules, results, standings, venues and squads for World Cup 2026, plus everyone’s champion predictions — all in one place. Save your favorite nations and find your matches fast. An unofficial fan site (not affiliated with FIFA).',
+    },
+  },
   nav: {
     label: 'Main navigation',
     groups: 'Groups',

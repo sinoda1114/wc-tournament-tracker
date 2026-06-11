@@ -2,6 +2,8 @@ import type { MetadataRoute } from 'next';
 
 import { listAllTeams, listTournamentMatches } from '@/db/queries';
 import { getSiteUrl } from '@/lib/env';
+import { buildAlternates, localeUrl } from '@/lib/i18n/alternates';
+import { LOCALES } from '@/lib/i18n/config';
 
 /**
  * サイトマップ（動的生成）。
@@ -39,9 +41,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = getSiteUrl();
   const now = new Date();
 
-  // 公開トップ・主要一覧ページ（常に存在）。
+  // 公開トップは #19 でロケール別URL（ja=`/`・en/es/pt/zh=`/<loc>`）を持つ。各エントリに
+  // hreflang(alternates) を付与して相互リンクにする（Google 推奨の reciprocal 形式）。
+  const homeLanguages = buildAlternates('home', 'ja').languages;
+  const homeEntries: MetadataRoute.Sitemap = LOCALES.map((locale) => ({
+    url: localeUrl('home', locale),
+    lastModified: now,
+    changeFrequency: 'hourly',
+    priority: locale === 'ja' ? 1 : 0.9,
+    alternates: { languages: homeLanguages },
+  }));
+
+  // その他の主要一覧ページ（常に存在）。
   const staticEntries: MetadataRoute.Sitemap = [
-    { url: `${base}/`, lastModified: now, changeFrequency: 'hourly', priority: 1 },
     { url: `${base}/groups`, lastModified: now, changeFrequency: 'daily', priority: 0.9 },
     { url: `${base}/teams`, lastModified: now, changeFrequency: 'weekly', priority: 0.8 },
     {
@@ -108,5 +120,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     dynamicEntries = [];
   }
 
-  return [...staticEntries, ...groupEntries, ...dynamicEntries];
+  return [...homeEntries, ...staticEntries, ...groupEntries, ...dynamicEntries];
 }

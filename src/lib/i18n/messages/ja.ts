@@ -4,6 +4,14 @@
  * 文字列は段階的に増やしていく（まずは nav / header / language）。
  */
 export const ja = {
+  // 公開トップの metadata（title/description）。#19 でロケール別URLが各言語の <title>/<meta> を返す。
+  meta: {
+    home: {
+      title: 'ワールドカップ2026 試合日程・結果・優勝予想（非公式）',
+      description:
+        'ワールドカップ2026の日程・結果・順位・会場・出場選手と、みんなの優勝予想をひとつにまとめた非公式ファンサイト。お気に入りの国を登録して、見たい試合をすぐチェックできます（FIFA非公認）。',
+    },
+  },
   nav: {
     label: '主要ページ',
     groups: 'グループリーグ',

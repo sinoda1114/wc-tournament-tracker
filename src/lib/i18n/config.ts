@@ -12,6 +12,12 @@ export const DEFAULT_LOCALE: Locale = 'ja';
 /** 選択ロケールを保持する cookie 名。 */
 export const LOCALE_COOKIE = 'wc_locale';
 
+/**
+ * middleware がロケール別URL（/en 等）で付与し、resolveLocale が最優先で読むリクエストヘッダ名。
+ * proxy.ts（書き込み）と i18n/server.ts（読み取り）で共有するため、dep 無しの config に置く。
+ */
+export const LOCALE_HEADER = 'x-wc-locale';
+
 /** スイッチャー表示用ラベル（その言語自身の表記）。 */
 export const LOCALE_LABELS: Record<Locale, string> = {
   ja: '日本語',
