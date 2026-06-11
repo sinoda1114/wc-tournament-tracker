@@ -186,3 +186,38 @@ function addDaysJst(ymd: string, days: number): string {
   const d = String(base.getUTCDate()).padStart(2, '0');
   return `${y}-${m}-${d}`;
 }
+
+/** 複数日選択の上限（URL長と描画コストの抑制）。 */
+const MAX_SELECTED_DATES = 14;
+
+/**
+ * URL クエリ `?date=YYYY-MM-DD,YYYY-MM-DD,...` を日付配列にパースする（#37 複数日対応）。
+ * 不正な要素は捨て、重複除去・昇順ソート・上限 MAX_SELECTED_DATES 件に正規化する。
+ * 単一日付（従来形式）も要素1の配列として扱える後方互換。
+ */
+export function parseDatesParam(param: string | null | undefined): string[] {
+  if (!param) return [];
+  const valid = param
+    .split(',')
+    .map((p) => p.trim())
+    .filter((p) => parseDateParam(p).kind === 'date');
+  return [...new Set(valid)].sort().slice(0, MAX_SELECTED_DATES);
+}
+
+/** 日付配列を URL クエリ値へ。空配列は null（`?date=` を削除する想定）。 */
+export function serializeDatesParam(dates: string[]): string | null {
+  if (dates.length === 0) return null;
+  return dates.join(',');
+}
+
+/**
+ * 試合配列を複数の暦日（JST基準・`filterMatchesByDate` と同じ規則）で絞り込む。
+ * 空配列は「すべて」を意味しそのまま返す。
+ */
+export function filterMatchesByDates<
+  T extends { matchDate: string; kickoffAt?: string | null },
+>(matches: T[], dates: string[]): T[] {
+  if (dates.length === 0) return matches;
+  const set = new Set(dates);
+  return matches.filter((m) => set.has(toJstYmd(m.kickoffAt) ?? m.matchDate));
+}

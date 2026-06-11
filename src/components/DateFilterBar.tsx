@@ -6,7 +6,12 @@ import { Popover } from '@mantine/core';
 import { DatePicker } from '@mantine/dates';
 
 import { formatMatchDate } from '@/lib/bracket';
-import { addDays, parseDateParam, todayInZone } from '@/lib/date-filter';
+import {
+  addDays,
+  parseDatesParam,
+  serializeDatesParam,
+  todayInZone,
+} from '@/lib/date-filter';
 import { useDictionary, useTimeZone } from '@/lib/i18n/context';
 
 type QuickBadge = {
@@ -82,15 +87,17 @@ export function DateFilterBar({
   }, [timeZone]);
 
   const dateParam = searchParams.get('date');
-  const filter = parseDateParam(dateParam);
-  const activeDate = filter.kind === 'date' ? filter.date : null;
+  // 複数日対応（#37）: ?date=a,b,c をカレンダーの複数選択と同期する。
+  const activeDates = parseDatesParam(dateParam);
+  const activeDate = activeDates.length === 1 ? activeDates[0] : null;
 
   const badges = useMemo(() => buildBadges(anchors), [anchors]);
 
-  const updateDate = (next: string | null) => {
+  const updateDates = (next: string[]) => {
     const params = new URLSearchParams(searchParams.toString());
-    if (next) {
-      params.set('date', next);
+    const serialized = serializeDatesParam(parseDatesParam(next.join(',')));
+    if (serialized) {
+      params.set('date', serialized);
     } else {
       params.delete('date');
     }
@@ -99,6 +106,10 @@ export function DateFilterBar({
     startTransition(() => {
       router.push(href, { scroll: false });
     });
+  };
+
+  const updateDate = (next: string | null) => {
+    updateDates(next ? [next] : []);
   };
 
   const handleBadgeClick = (badge: QuickBadge) => {
@@ -120,25 +131,32 @@ export function DateFilterBar({
     updateDate(target);
   };
 
-  // Mantine 8 の DatePicker は値が string(YYYY-MM-DD)。そのまま URL クエリに使える。
-  const handleCalendarChange = (value: string | null) => {
-    updateDate(value);
-    setPopoverOpen(false);
+  // DatePicker(type="multiple") の値は string[](YYYY-MM-DD)。そのまま URL クエリに使える。
+  // 複数日を選び続けられるよう、選択してもポップオーバーは閉じない（外側クリックで閉じる）。
+  const handleCalendarChange = (value: string[]) => {
+    updateDates(value);
   };
 
   const isBadgeActive = (badge: QuickBadge): boolean => {
-    if (badge.key === 'all') return activeDate === null;
+    if (badge.key === 'all') return activeDates.length === 0;
     if (!badge.targetDate) return false;
+    // クイックバッジは「その1日だけ選択中」のときにアクティブ。
     return activeDate === badge.targetDate;
   };
 
-  // アクティブな日付がクイックバッジに該当しない場合、独立した「pill + ×」を表示する。
-  const customActiveDate =
-    activeDate &&
-    (!showQuickBadges ||
-      !badges.some((b) => b.key !== 'all' && b.targetDate === activeDate))
-      ? activeDate
-      : null;
+  // クイックバッジで表現できない選択（バッジ外の単日 or 複数日）はチップ群で表示する。
+  const chipDates =
+    activeDates.length > 1
+      ? activeDates
+      : activeDate &&
+          (!showQuickBadges ||
+            !badges.some((b) => b.key !== 'all' && b.targetDate === activeDate))
+        ? [activeDate]
+        : [];
+
+  const removeDate = (date: string) => {
+    updateDates(activeDates.filter((d) => d !== date));
+  };
 
   return (
     <div className="wc-date-filter-bar" role="group" aria-label={t.groupAria}>
@@ -187,7 +205,8 @@ export function DateFilterBar({
           <Popover.Dropdown>
             {/* 日曜始まり＋3文字曜日（Sun/Mon…）。日曜=赤(weekend既定)・土曜=青(CSS)。 */}
             <DatePicker
-              value={activeDate}
+              type="multiple"
+              value={activeDates}
               onChange={handleCalendarChange}
               highlightToday
               firstDayOfWeek={0}
@@ -203,19 +222,19 @@ export function DateFilterBar({
           </Popover.Dropdown>
         </Popover>
 
-        {customActiveDate ? (
-          <span className="wc-date-filter-active-chip" aria-live="polite">
-            <span>{formatMatchDate(customActiveDate, dict.match.weekdays)}</span>
+        {chipDates.map((date) => (
+          <span key={date} className="wc-date-filter-active-chip" aria-live="polite">
+            <span>{formatMatchDate(date, dict.match.weekdays)}</span>
             <button
               type="button"
               className="wc-date-filter-reset"
-              onClick={() => updateDate(null)}
+              onClick={() => removeDate(date)}
               aria-label={t.reset}
             >
               ×
             </button>
           </span>
-        ) : null}
+        ))}
       </div>
     </div>
   );

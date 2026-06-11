@@ -11,7 +11,7 @@ import {
   listGroupStageMatches,
   listTournamentMatches,
 } from '@/db/queries';
-import { parseDateParam } from '@/lib/date-filter';
+import { parseDatesParam } from '@/lib/date-filter';
 import { getDictionary } from '@/lib/i18n/dictionary';
 import { resolveLocale } from '@/lib/i18n/server';
 import { isFreePeriod } from '@/lib/pricing';
@@ -38,9 +38,9 @@ function pickDateParam(value: string | string[] | undefined): string | null {
  */
 export default async function HomePage({ searchParams }: HomePageProps) {
   const params = await searchParams;
-  const filter = parseDateParam(pickDateParam(params.date));
+  const selectedDates = parseDatesParam(pickDateParam(params.date));
   const dict = getDictionary(await resolveLocale());
-  const isDate = filter.kind === 'date';
+  const isDate = selectedDates.length > 0;
   // 無料期間＝グループステージ期間（lib/pricing と同一境界）。PaywallBanner と同じ判定方法。
   // ?view=kt はグループステージ中でもブラケットを見るための明示指定（ナビ「決勝T」用）。
   const wantsKt = pickDateParam(params.view) === 'kt';
@@ -84,7 +84,9 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         </div>
 
         {isDate ? (
-          <MatchDayList matches={dayMatches} date={filter.date} />
+          selectedDates.map((date) => (
+            <MatchDayList key={date} matches={dayMatches} date={date} />
+          ))
         ) : isKnockoutPhase ? (
           <TournamentViewToggle matches={knockoutMatches} />
         ) : (

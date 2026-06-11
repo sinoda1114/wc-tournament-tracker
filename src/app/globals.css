@@ -1011,6 +1011,12 @@ a {
   gap: 0.3rem;
 }
 
+/* 中身がSVGだけだと文字バッジより背が低くなるため、ゼロ幅スペースで
+   他のナビバッジと同じ行ボックス（高さ）を持たせる。 */
+.wc-nav-favorites::before {
+  content: '\200b';
+}
+
 .wc-nav-favorites svg {
   display: block;
 }

@@ -10,7 +10,7 @@ import {
   listGroupStageMatches,
   listTournamentMatches,
 } from '@/db/queries';
-import { parseDateParam } from '@/lib/date-filter';
+import { parseDatesParam } from '@/lib/date-filter';
 import { getDictionary } from '@/lib/i18n/dictionary';
 import { resolveLocale } from '@/lib/i18n/server';
 
@@ -49,9 +49,9 @@ function pickDateParam(value: string | string[] | undefined): string | null {
 
 export default async function GroupsPage({ searchParams }: GroupsPageProps) {
   const params = await searchParams;
-  const filter = parseDateParam(pickDateParam(params.date));
+  const selectedDates = parseDatesParam(pickDateParam(params.date));
   const dict = getDictionary(await resolveLocale());
-  const isDate = filter.kind === 'date';
+  const isDate = selectedDates.length > 0;
 
   // 日付選択時は GL＋決勝T 横断の「その日の全試合」。未選択時は順位表グリッド（全グループ）。
   const dayMatches = isDate
@@ -84,8 +84,10 @@ export default async function GroupsPage({ searchParams }: GroupsPageProps) {
           <DateFilterBar />
         </div>
 
-        {filter.kind === 'date' ? (
-          <MatchDayList matches={dayMatches} date={filter.date} />
+        {isDate ? (
+          selectedDates.map((date) => (
+            <MatchDayList key={date} matches={dayMatches} date={date} />
+          ))
         ) : (
           <GroupsFilterableGrid groupData={groupData} />
         )}
