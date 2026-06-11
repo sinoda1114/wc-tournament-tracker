@@ -1,6 +1,6 @@
 # タスク台帳（永続・セッション横断）
 
-**🕒 最終更新: 2026-06-12 00:13 JST**
+**🕒 最終更新: 2026-06-12 02:04 JST**
 
 > **運用**（[[numbered-choices]] 準拠）
 > - 番号 **T-N は固定**。振り直さない。新規は「台帳の最大+1」を台帳に追記して確保。
@@ -15,7 +15,7 @@
 
 ## 📊 いまの状態
 
-- **本番**: https://wc-tournament-tracker.vercel.app （独自ドメイン未接続 = T-22）
+- **本番**: **https://matchfav.com** ✅（独自ドメイン接続済・www→apex 308・本番 Clerk live・2026-06-12）。旧 `*.vercel.app` も生存
 - **デプロイ**: git 自動（feature push→Preview / main マージ→Production・手動禁止）
 - **オープンPR**: `gh pr list --state open` で確認（これが正本）
 
@@ -32,7 +32,6 @@
 - 全ページ・全言語を通しで触って確認 → 2段ゲート → デプロイ。
 
 ### ⏳ 待ち（ユーザー操作 / 外部要因）
-- **T-22残り + T-25** — matchfav.com 接続 ＋ 本番 Clerk(live化)。runbook あり・要 DNS/Clerk 操作（番人＋ユーザー）。
 - **T-8** — セキュリティ仕上げ（Sentry / CSP 方針）。作業中・方針判断。
 - **T-7** — CI を GitHub へ（`gh auth refresh -s workflow`・ユーザー操作）。
 - **T-35** — お気に入り端末間同期の実機 E2E（`notes/e2e-checklist-30-sync.md` をログインで確認）。
@@ -42,7 +41,7 @@
 
 ## ✅ 最近完了（詳細は下）
 
-T-40 ランキング/スタッツ(PR#28) / T-41 favicon v16(#27) / T-33 順位表の確定カラー(PR#23) / T-39 ログアウト時お気に入り一掃(PR#19) / T-38 在籍クラブ表示(PR#16) / T-37 ミニヒーロー(PR#14) / T-36 favicon(PR#12) / T-34 法務簡素化(PR#7) / T-32 順位表フラット(PR#6) / T-31 A2HSラベル(PR#8) / T-26 予告バナー(PR#5)
+T-22/T-25 本番ドメイン matchfav.com＋本番Clerk live(6/12) / T-40 ランキング/スタッツ(PR#28) / T-41 favicon v16(#27) / T-33 順位表の確定カラー(PR#23) / T-39 ログアウト時お気に入り一掃(PR#19) / T-38 在籍クラブ表示(PR#16) / T-37 ミニヒーロー(PR#14) / T-36 favicon(PR#12) / T-34 法務簡素化(PR#7) / T-32 順位表フラット(PR#6) / T-31 A2HSラベル(PR#8) / T-26 予告バナー(PR#5)
 
 ---
 
@@ -53,7 +52,6 @@ T-40 ランキング/スタッツ(PR#28) / T-41 favicon v16(#27) / T-33 順位�
 - **T-14** Stripe 課金接続（**P1**）— 商品名・価格が未決（ユーザー判断待ち）。**課金動線は6/11確定**: グループステージ(〜6/27)無料→決勝T(6/28〜)課金壁・6/28以降の新規登録のみ72h無料・予告バナー（[[launch-monetization-plan]]）。entitlement は日付ゲート方式で実装。**ぶら下がり**: #26補足（バナーを entitlement 保有者に非表示・PaywallBanner.tsx の TODO(T-14) seam に1行）／T-29。
 - **T-19** i18n B-lite（**P2・実行待ち**）— 本文UIは5言語対応済（投票エラー/es・pt・zh イベントラベルは `23f2d41` で修正済）。**残**: 各ページ metadata（title/description）と OGP 画像文言が日本語固定 → 多言語化。**B-lite 案あり・GO で夜間自走**。hreflang/URL 戦略とセットで設計（クローラに cookie が無い問題の裏返し）。
 - **T-12** サイト全体の最終動作チェック（**P3**）— 全ページ・全言語を通しで触って確認。実装が出揃ってから実施 → 2段ゲート → デプロイ。
-- **T-22残り＋T-25** — Vercel への独自ドメイン DNS 接続＋Clerk 本番化。手順書 `notes/runbook-domain-clerk-prod.md`（ユーザー操作・30〜45分）。本番は `*.vercel.app` 稼働・git 自動デプロイ確立済（[[vercel-deploy-ops]]）。残: matchfav.com の DNS を Vercel へ（A/CNAME を「DNSのみ(グレー雲)」）＋ Clerk live キー/自前 Google OAuth。
 - **T-8** — セキュリティ仕上げ（Sentry 導入と CSP 方針）。作業中・方針判断。
 - **T-7** — CI を GitHub へ push（`gh auth refresh -s workflow` がユーザー操作待ち・[[gh-workflow-scope-missing]]）。
 - **T-35** — お気に入り端末間同期の実機 E2E 確認（`notes/e2e-checklist-30-sync.md` をログイン状態で。T-30/T-39 関連）。
@@ -83,6 +81,8 @@ T-40 ランキング/スタッツ(PR#28) / T-41 favicon v16(#27) / T-33 順位�
 - ~~T-33 順位表の確定カラー — 数学的に突破/敗退が確定したチームだけ緑/グレー（round-of-32.ts でタイブレーク判定）~~（6/11・PR #23）
 - ~~T-41 favicon を heart bold v16 へ差し替え — icon.png/apple-icon.png を v16（深緑+ゴールドのハート・透過）へ・v16アセットも assets/ にコミット・T-36/v5 を上書き~~（6/11・番人直接実装・PR #27）
 - ~~T-40 ランキング/スタッツページ — /rankings に得点ランキング＋カード(黄/赤)＋出場停止集計。match_events 集計（新API不要）・空状態グレースフル・i18n×5・ログイン必須・テスト同梱~~（6/12・PR #28）
+- ~~T-22 独自ドメイン接続 — matchfav.com を Vercel に apex 正準で接続・www→apex 308・Cloudflare DNS は全グレー雲・メール(MX/SPF/DKIM)不可侵維持。apex200/www308/法務SEO全200 確認~~（6/12・実機確認済）
+- ~~T-25 本番 Clerk — 本番インスタンス＋Clerk用CNAME5件 Verified/SSL・専用GCPで Google OAuth(自前クレデンシャル・審査不要スコープ)・Vercel Production に pk_live/sk_live/SITE_URL 投入・Redeploy・アプリ名MatchFav。シークレットでGoogleログイン成功(dev badge無)・/admin OK~~（6/12・実機確認済）
 
 ## 番号の欠番について
 
