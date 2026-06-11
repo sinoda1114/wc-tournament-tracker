@@ -83,6 +83,19 @@ export function SquadPanel({ squad }: SquadPanelProps) {
                     <span className="wc-squad-name">
                       {locale === 'ja' ? (p.nameJa ?? p.nameEn) : p.nameEn}
                     </span>
+                    {/* クラブ未取得の行でも grid 列ズレしないよう span は常に置く。 */}
+                    <span className="wc-squad-club">
+                      {p.clubName ? (
+                        <>
+                          {p.clubCountryIso ? (
+                            <CountryFlag iso={p.clubCountryIso} size="sm" ariaLabel={p.clubName} />
+                          ) : null}
+                          <span className="wc-squad-club-name">
+                            {locale === 'ja' ? (p.clubNameJa ?? p.clubName) : p.clubName}
+                          </span>
+                        </>
+                      ) : null}
+                    </span>
                     <span className="wc-squad-age">{ageLabel(p.dateBorn, dict.squad.ageSuffix)}</span>
                   </li>
                 ))}
