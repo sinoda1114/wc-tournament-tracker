@@ -74,6 +74,11 @@ function SiteNavInner({ labels, groupPhase }: SiteNavProps) {
       key: 'prediction' as const,
       active: pathname.startsWith('/prediction'),
     },
+    {
+      href: '/rankings',
+      key: 'rankings' as const,
+      active: pathname.startsWith('/rankings'),
+    },
   ];
 
   return (
