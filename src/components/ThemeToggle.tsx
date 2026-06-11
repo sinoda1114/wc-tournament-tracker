@@ -1,6 +1,6 @@
 'use client';
 
-import { ActionIcon, useComputedColorScheme, useMantineColorScheme } from '@mantine/core';
+import { ActionIcon, Tooltip, useComputedColorScheme, useMantineColorScheme } from '@mantine/core';
 
 import { useDictionary } from '@/lib/i18n/context';
 
@@ -28,16 +28,17 @@ export function ThemeToggle({ size = 16 }: ThemeToggleProps) {
   const label = isDark ? t.switchToLight : t.switchToDark;
 
   return (
-    <ActionIcon
-      variant="default"
-      size="lg"
-      radius="md"
-      onClick={() => setColorScheme(next)}
-      aria-label={label}
-      title={label}
-    >
-      {isDark ? <SunIcon size={size} /> : <MoonIcon size={size} />}
-    </ActionIcon>
+    <Tooltip label={label}>
+      <ActionIcon
+        variant="default"
+        size="lg"
+        radius="md"
+        onClick={() => setColorScheme(next)}
+        aria-label={label}
+      >
+        {isDark ? <SunIcon size={size} /> : <MoonIcon size={size} />}
+      </ActionIcon>
+    </Tooltip>
   );
 }
 

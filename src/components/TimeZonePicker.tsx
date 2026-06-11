@@ -1,7 +1,7 @@
 'use client';
 
 import { useTransition } from 'react';
-import { Button, Menu } from '@mantine/core';
+import { Button, Menu, Tooltip } from '@mantine/core';
 import { useRouter } from 'next/navigation';
 
 import { useTimeZone } from '@/lib/i18n/context';
@@ -33,18 +33,19 @@ export function TimeZonePicker({ label }: { label: string }) {
   return (
     <Menu position="bottom-end" withinPortal>
       <Menu.Target>
-        <Button
-          variant="default"
-          size="xs"
-          radius="md"
-          h={34}
-          loading={pending}
-          aria-label={label}
-          title={`${label}: ${current}`}
-          leftSection={<ClockIcon size={14} />}
-        >
-          {tzCityLabel(current).split(' / ')[0]}
-        </Button>
+        <Tooltip label={`${label}: ${current}`}>
+          <Button
+            variant="default"
+            size="xs"
+            radius="md"
+            h={34}
+            loading={pending}
+            aria-label={label}
+            leftSection={<ClockIcon size={14} />}
+          >
+            {tzCityLabel(current).split(' / ')[0]}
+          </Button>
+        </Tooltip>
       </Menu.Target>
       <Menu.Dropdown>
         {COMMON_TIME_ZONES.map((tz) => (

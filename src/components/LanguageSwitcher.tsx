@@ -1,7 +1,7 @@
 'use client';
 
 import { useTransition } from 'react';
-import { ActionIcon, Menu } from '@mantine/core';
+import { ActionIcon, Menu, Tooltip } from '@mantine/core';
 import { useRouter } from 'next/navigation';
 
 import { LOCALE_COOKIE, LOCALE_LABELS, LOCALES, type Locale } from '@/lib/i18n/config';
@@ -31,16 +31,17 @@ export function LanguageSwitcher({ locale, label }: { locale: Locale; label: str
   return (
     <Menu position="bottom-end" withinPortal>
       <Menu.Target>
-        <ActionIcon
-          variant="default"
-          size="lg"
-          radius="md"
-          aria-label={label}
-          title={label}
-          loading={pending}
-        >
-          <GlobeIcon size={16} />
-        </ActionIcon>
+        <Tooltip label={label}>
+          <ActionIcon
+            variant="default"
+            size="lg"
+            radius="md"
+            aria-label={label}
+            loading={pending}
+          >
+            <GlobeIcon size={16} />
+          </ActionIcon>
+        </Tooltip>
       </Menu.Target>
       <Menu.Dropdown>
         {LOCALES.map((l) => (

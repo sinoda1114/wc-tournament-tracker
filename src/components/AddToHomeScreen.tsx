@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { ActionIcon, Modal, Text } from '@mantine/core';
+import { ActionIcon, Modal, Text, Tooltip } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 
 import { useDictionary } from '@/lib/i18n/context';
@@ -128,17 +128,18 @@ export function AddToHomeScreen() {
 
   return (
     <>
-      <ActionIcon
-        variant="default"
-        size="lg"
-        radius="md"
-        onClick={handleClick}
-        aria-label={label}
-        title={label}
-        aria-haspopup={mode === 'ios' ? 'dialog' : undefined}
-      >
-        <InstallIcon size={16} />
-      </ActionIcon>
+      <Tooltip label={label}>
+        <ActionIcon
+          variant="default"
+          size="lg"
+          radius="md"
+          onClick={handleClick}
+          aria-label={label}
+          aria-haspopup={mode === 'ios' ? 'dialog' : undefined}
+        >
+          <InstallIcon size={16} />
+        </ActionIcon>
+      </Tooltip>
 
       {mode === 'ios' ? (
         <Modal

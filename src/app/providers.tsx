@@ -1,6 +1,6 @@
 'use client';
 
-import { MantineProvider, createTheme } from '@mantine/core';
+import { MantineProvider, Tooltip, createTheme } from '@mantine/core';
 import { DatesProvider } from '@mantine/dates';
 import dayjs from 'dayjs';
 import 'dayjs/locale/ja';
@@ -15,6 +15,17 @@ const theme = createTheme({
   primaryColor: 'blue',
   fontFamily: "'Segoe UI', 'Hiragino Sans', 'Yu Gothic UI', sans-serif",
   defaultRadius: 'md',
+  components: {
+    // ヘッダ右上アイコン等のツールチップ表示を 1 箇所で制御。
+    // ブラウザ標準の title 属性（遅延が約2秒で変更不可）の代わりに Mantine Tooltip を使い、
+    // 表示開始を 1 秒に統一する（全 Tooltip 共通の既定値）。
+    Tooltip: Tooltip.extend({
+      defaultProps: {
+        openDelay: 1000,
+        withArrow: true,
+      },
+    }),
+  },
 });
 
 type ProvidersProps = {
