@@ -1,26 +1,22 @@
 'use client';
 
+import { Suspense } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { Group } from '@mantine/core';
 
 import { useFavoriteTeams } from '@/hooks/useFavoriteTeams';
 import type { Dictionary } from '@/lib/i18n/dictionary';
 
-type NavItem = {
-  href: string;
-  /** nav 辞書のキー。ラベルは labels[key] から引く。 */
-  key: 'groups' | 'knockout' | 'teams' | 'prediction';
-  /** 完全一致でなくこのプレフィックスならアクティブとみなす場合に使う。 */
-  match: (pathname: string) => boolean;
+type SiteNavProps = {
+  labels: Dictionary['nav'];
+  /**
+   * グループステージ期間か（サーバーで isFreePeriod 判定して渡す）。
+   * 期間中はトップ(/)がグループリーグ表示になるため、ナビのハイライトと
+   * 「決勝T」のリンク先(/?view=kt)をフェーズに合わせて切り替える（#37）。
+   */
+  groupPhase: boolean;
 };
-
-const NAV_ITEMS: NavItem[] = [
-  { href: '/groups', key: 'groups', match: (p) => p.startsWith('/groups') },
-  { href: '/', key: 'knockout', match: (p) => p === '/' || p.startsWith('/matches') },
-  { href: '/teams', key: 'teams', match: (p) => p.startsWith('/teams') },
-  { href: '/prediction', key: 'prediction', match: (p) => p.startsWith('/prediction') },
-];
 
 const STAR_PATH =
   'M12 2.5l2.92 6.51 7.08.62-5.34 4.73 1.62 7.04L12 17.77l-6.28 3.63 1.62-7.04L2 9.63l7.08-.62L12 2.5z';
@@ -45,28 +41,49 @@ function NavStarIcon({ filled }: { filled: boolean }) {
   );
 }
 
-export function SiteNav({ labels }: { labels: Dictionary['nav'] }) {
+function SiteNavInner({ labels, groupPhase }: SiteNavProps) {
   const pathname = usePathname() ?? '/';
+  const searchParams = useSearchParams();
   const { favorites, ready } = useFavoriteTeams();
   const isFavoritesActive = pathname.startsWith('/favorites');
   const favCount = ready ? favorites.size : 0;
   const hasFavorites = favCount > 0;
 
+  const isKtView = pathname === '/' && searchParams.get('view') === 'kt';
+
+  // フェーズで「トップ(/)が何の画面か」が変わるため、ハイライトもそれに追従させる。
+  const items = [
+    {
+      href: '/groups',
+      key: 'groups' as const,
+      active: pathname.startsWith('/groups') || (groupPhase && pathname === '/' && !isKtView),
+    },
+    {
+      href: groupPhase ? '/?view=kt' : '/',
+      key: 'knockout' as const,
+      active:
+        pathname.startsWith('/matches') || (pathname === '/' && (groupPhase ? isKtView : true)),
+    },
+    { href: '/teams', key: 'teams' as const, active: pathname.startsWith('/teams') },
+    {
+      href: '/prediction',
+      key: 'prediction' as const,
+      active: pathname.startsWith('/prediction'),
+    },
+  ];
+
   return (
     <Group gap="xs" className="wc-site-nav" role="navigation" aria-label={labels.label}>
-      {NAV_ITEMS.map((item) => {
-        const isActive = item.match(pathname);
-        return (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={`wc-nav-link${isActive ? ' is-active' : ''}`}
-            aria-current={isActive ? 'page' : undefined}
-          >
-            {labels[item.key]}
-          </Link>
-        );
-      })}
+      {items.map((item) => (
+        <Link
+          key={item.key}
+          href={item.href}
+          className={`wc-nav-link${item.active ? ' is-active' : ''}`}
+          aria-current={item.active ? 'page' : undefined}
+        >
+          {labels[item.key]}
+        </Link>
+      ))}
 
       <Link
         href="/favorites"
@@ -83,5 +100,14 @@ export function SiteNav({ labels }: { labels: Dictionary['nav'] }) {
         ) : null}
       </Link>
     </Group>
+  );
+}
+
+export function SiteNav(props: SiteNavProps) {
+  // useSearchParams は Suspense 境界が必要（Next.js の CSR bailout 対策）。
+  return (
+    <Suspense fallback={null}>
+      <SiteNavInner {...props} />
+    </Suspense>
   );
 }

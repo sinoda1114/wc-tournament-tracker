@@ -21,7 +21,7 @@ export const dynamic = 'force-dynamic';
 const GROUP_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'] as const;
 
 type HomePageProps = {
-  searchParams: Promise<{ date?: string | string[] }>;
+  searchParams: Promise<{ date?: string | string[]; view?: string | string[] }>;
 };
 
 function pickDateParam(value: string | string[] | undefined): string | null {
@@ -42,7 +42,9 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   const dict = getDictionary(await resolveLocale());
   const isDate = filter.kind === 'date';
   // 無料期間＝グループステージ期間（lib/pricing と同一境界）。PaywallBanner と同じ判定方法。
-  const isKnockoutPhase = !isFreePeriod(new Date());
+  // ?view=kt はグループステージ中でもブラケットを見るための明示指定（ナビ「決勝T」用）。
+  const wantsKt = pickDateParam(params.view) === 'kt';
+  const isKnockoutPhase = wantsKt || !isFreePeriod(new Date());
 
   // 日付選択時は GL＋決勝T 横断の「その日の全試合」一覧（フェーズ問わず共通）。
   const dayMatches = isDate

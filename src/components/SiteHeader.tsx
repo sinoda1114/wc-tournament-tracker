@@ -5,6 +5,7 @@ import { Container, Group, Title } from '@mantine/core';
 
 import { TextLink } from '@/components/RouterLink';
 import { isAdminUser } from '@/lib/auth';
+import { isFreePeriod } from '@/lib/pricing';
 import type { Locale } from '@/lib/i18n/config';
 import type { Dictionary } from '@/lib/i18n/dictionary';
 
@@ -36,7 +37,7 @@ export async function SiteHeader({ locale, dict }: SiteHeaderProps) {
                 MatchFav
               </Title>
             </Link>
-            <SiteNav labels={dict.nav} />
+            <SiteNav labels={dict.nav} groupPhase={isFreePeriod(new Date())} />
           </Group>
           <Group gap="sm" align="center" wrap="nowrap">
             {admin ? (
