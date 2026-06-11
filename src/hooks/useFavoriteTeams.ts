@@ -42,6 +42,8 @@ export function useFavoriteTeams(): {
   const [ready, setReady] = useState(false);
   // 同一ログインセッションで初回同期を一度だけ走らせるためのフラグ。
   const syncedRef = useRef(false);
+  // 直前にログイン済みだったか（ログアウト遷移の検知用）。
+  const wasSignedInRef = useRef(false);
 
   useEffect(() => {
     setFavorites(toSet(readFavorites()));
@@ -64,24 +66,39 @@ export function useFavoriteTeams(): {
     };
   }, []);
 
-  // ログイン状態が確定したらサーバとマージ同期する（ログアウトでフラグを戻す）。
+  // ログイン状態に応じてサーバ同期 / ログアウト時の端末クリーンアップを行う。
   useEffect(() => {
-    if (!isSignedIn) {
-      syncedRef.current = false;
-      return;
-    }
-    if (syncedRef.current) return;
-    syncedRef.current = true;
+    // Clerk 読み込み前（isSignedIn === undefined）は確定していないので何もしない。
+    if (isSignedIn === undefined) return;
 
-    let cancelled = false;
-    void syncFavoritesAction(readFavorites()).then(({ codes }) => {
-      if (cancelled) return;
-      writeFavorites(codes); // localStorage を権威（マージ後）に更新＝他コンポーネントへも伝播。
-      setFavorites(toSet(codes));
-    });
-    return () => {
-      cancelled = true;
-    };
+    if (isSignedIn) {
+      wasSignedInRef.current = true;
+      if (syncedRef.current) return;
+      syncedRef.current = true;
+
+      let cancelled = false;
+      void syncFavoritesAction(readFavorites()).then(({ codes }) => {
+        if (cancelled) return;
+        writeFavorites(codes); // localStorage を権威（マージ後）に更新＝他コンポーネントへも伝播。
+        setFavorites(toSet(codes));
+      });
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    // 未ログイン確定。次回ログイン時に再同期できるようフラグを戻す。
+    syncedRef.current = false;
+
+    // 直前までログインしていたなら「ログアウト」確定（#39）。
+    // ログイン中はサーバの user_favorites を localStorage へ書き戻すため、ログアウト後も
+    // 端末に★が残り、同じ端末の次の匿名訪問者に他人のお気に入りが見えてしまう。
+    // ここで端末ローカルのみ一掃する（サーバ側は消さない＝次回ログインで本人の分は復元される）。
+    if (wasSignedInRef.current) {
+      wasSignedInRef.current = false;
+      writeFavorites([]); // CustomEvent 発火で同タブの他コンポーネント表示も即クリア。
+      setFavorites(new Set());
+    }
   }, [isSignedIn]);
 
   const persist = useCallback(
