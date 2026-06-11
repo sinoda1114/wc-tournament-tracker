@@ -1,12 +1,13 @@
 # #38 照合データ: 出場国 × 選手 × 所属クラブ
 
-生成日時(UTC): 2026-06-11T10:59:27.769Z
+生成日時(UTC): 2026-06-11T11:05:04.691Z
 総選手数: 1247 / 出場国: 48
 データ源: English Wikipedia「2026 FIFA World Cup squads」wikitext（club= / clubnat=）
 基準: 大会登録名簿時点（≒ 2026-06-01）。直前の移籍は反映されない場合があります。
 
 > このファイルは検証対象（＝当方の主張）です。各行を独立ソースと突き合わせてください。
-> 手順は `notes/factcheck-38/REQUEST.md` を参照。
+> 手順は `notes/factcheck-38/REQUEST.md` を参照。検証対応は `resolution.md`。
+> 既知の正当な例外: ARG=25名（Balerdi が 2026-06-06 負傷辞退・補充未発表のため現状の正）。
 
 ## ALG — Algeria（アルジェリア）  [26名]
 
