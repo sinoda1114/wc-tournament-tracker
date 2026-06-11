@@ -85,7 +85,9 @@ export default async function RootLayout({
   const timeZone = await resolveTimeZone();
 
   return (
-    <ClerkProvider>
+    // afterSignOutUrl: サインアウト後は Clerk の Account Portal を経由せず自前の公開トップ（/）へ
+    // 直接戻す。未設定だと account portal 経由でハング/スピンし続ける事象があるため明示する。
+    <ClerkProvider afterSignOutUrl="/">
       <html lang={toHtmlLang(locale)} suppressHydrationWarning>
       <head>
         <ColorSchemeScript defaultColorScheme="dark" />
