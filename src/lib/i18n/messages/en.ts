@@ -278,7 +278,7 @@ export const en: Dictionary = {
     accept: 'Accept',
   },
   addToHome: {
-    label: 'Add to Home Screen',
+    label: 'Add a shortcut to your phone',
     intro: 'You can add this site to your home screen like an app. Follow the steps below in Safari.',
     step1Before: 'Tap the ',
     shareButton: ' Share button ',

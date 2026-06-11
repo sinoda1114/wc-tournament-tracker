@@ -303,7 +303,7 @@ export const ja = {
   },
   // ホーム画面に追加（AddToHomeScreen）。iOS 手順は太字部分を分割。
   addToHome: {
-    label: 'ホーム画面に追加',
+    label: 'スマートフォンにショートカットを追加',
     intro: 'このサイトをアプリのようにホーム画面へ追加できます。Safari の下記の手順で登録してください。',
     step1Before: '画面下部の',
     shareButton: ' 共有ボタン ',

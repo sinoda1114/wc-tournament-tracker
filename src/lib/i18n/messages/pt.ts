@@ -282,7 +282,7 @@ export const pt: Dictionary = {
     accept: 'Aceitar',
   },
   addToHome: {
-    label: 'Adicionar à tela de início',
+    label: 'Adicionar um atalho ao telefone',
     intro: 'Você pode adicionar este site à sua tela de início como um app. Siga os passos abaixo no Safari.',
     step1Before: 'Toque no ',
     shareButton: ' botão Compartilhar ',
