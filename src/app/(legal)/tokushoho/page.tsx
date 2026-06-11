@@ -4,7 +4,7 @@ import Link from 'next/link';
 import styles from '../legal.module.css';
 
 /*
- * 特定商取引法に基づく表記ページ（清書版・弁護士レビュー前ドラフト完成版）。
+ * 特定商取引法に基づく表記ページ（清書版・弁護士レビュー前ドラフト）。
  *
  * 【法的免責】
  *   本文面はドラフトであり、法的助言ではありません。公開前に弁護士レビューを受けること。
@@ -13,22 +13,23 @@ import styles from '../legal.module.css';
  *   - 事業者は個人。氏名・住所・電話番号はソースコード/サイトに記載せず、
  *     「請求があったら遅滞なく開示する」方式（消費者庁ガイドラインで個人事業者に
  *     認められる省略形）を採用。
+ *   - 必須項目（価格/付帯費用/支払方法・時期/引渡時期/返品特約/事業者情報）のみ記載し
+ *     説明的な記述は最小化する。
  *
- * 【プレースホルダ（確定後に置換）】
- *   - 【価格未定】（#14）/info@matchfav.com
- *   - robots noindex は価格確定・正式公開時に解除を検討すること。
+ * 【残プレースホルダ】info@matchfav.com（事業用メール確定後に置換）。
+ * 【noindex】robots noindex は実販売開始（#14 Stripe 接続）まで維持。開始時に解除。
  */
 
 export const metadata: Metadata = {
   title: '特定商取引法に基づく表記 | MatchFav',
   description: 'MatchFav の特定商取引法に基づく表記です。',
-  // 価格未確定のプレースホルダを含むため暫定で noindex。#14 確定・正式公開時に解除を検討。
+  // 実販売開始（#14 Stripe 接続）まで暫定で noindex。開始時に解除する。
   robots: { index: false, follow: false },
 };
 
-const UPDATED = '2026年6月10日';
+const UPDATED = '2026年6月11日';
 
-/** 特商法の表示項目。価格（#14）・連絡先メールはプレースホルダ。 */
+/** 特商法の表示項目。連絡先メールのみプレースホルダ（価格は確定）。 */
 const ITEMS: { label: string; value: React.ReactNode }[] = [
   {
     label: '販売事業者',
@@ -50,12 +51,8 @@ const ITEMS: { label: string; value: React.ReactNode }[] = [
   },
   {
     label: '販売価格',
-    value: (
-      <>
-        <strong className={styles.placeholder}>【価格未定】</strong>
-        （買い切り・税込価格を購入ページに表示します。月額等の継続課金ではありません）
-      </>
-    ),
+    value:
+      '980円（税込）。買い切り（一度の支払いで提供期間中ご利用いただけます）。月額等の継続課金ではありません。',
   },
   {
     label: '商品代金以外の必要料金',
@@ -64,7 +61,7 @@ const ITEMS: { label: string; value: React.ReactNode }[] = [
   },
   {
     label: '支払方法',
-    value: 'クレジットカード決済（決済代行サービスを利用）',
+    value: 'クレジットカード決済',
   },
   {
     label: '支払時期',
@@ -93,12 +90,6 @@ export default function TokushohoPage() {
         <h1>特定商取引法に基づく表記</h1>
         <span className={styles.updated}>最終改定日: {UPDATED}</span>
       </header>
-
-      <p className={styles.notice}>
-        本表記中の <strong>【価格未定】</strong>{' '}
-        は、販売価格・商品名（#14）の確定後に置き換えられる暫定表記です。
-        確定までは有料販売を開始しません。
-      </p>
 
       <section className={styles.section}>
         <dl className={styles.defList}>
