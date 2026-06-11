@@ -8,6 +8,7 @@ import {
   FAVORITES_CHANGED_EVENT,
   FAVORITES_KEY,
   FILTER_KEY,
+  mergeFavoriteCodes,
   readFavorites,
   readFilterEnabled,
   toggleFavorite as toggleFavoriteStorage,
@@ -18,6 +19,15 @@ import {
 function toSet(list: readonly string[]): Set<string> {
   return new Set(list);
 }
+
+/**
+ * 初回サーバ同期をページロード内で「1回だけ」走らせるためのモジュールレベル・ガード。
+ * useFavoriteTeams は FavoriteStar ごとに多数インスタンス化されるため、per-instance の
+ * ref だとインスタンス数ぶん syncFavoritesAction が走り、各々が古いスナップショットで
+ * localStorage を上書きして、押したばかりのトグルを巻き戻す競合（「すぐ戻る」）を起こす。
+ * モジュールスコープで集約し、ログアウト時にリセットする。
+ */
+let globalSyncDone = false;
 
 /**
  * お気に入りチーム集合をクライアント側で扱う Hook。
@@ -40,8 +50,6 @@ export function useFavoriteTeams(): {
   const { isSignedIn } = useAuth();
   const [favorites, setFavorites] = useState<Set<string>>(() => new Set());
   const [ready, setReady] = useState(false);
-  // 同一ログインセッションで初回同期を一度だけ走らせるためのフラグ。
-  const syncedRef = useRef(false);
   // 直前にログイン済みだったか（ログアウト遷移の検知用）。
   const wasSignedInRef = useRef(false);
 
@@ -73,22 +81,26 @@ export function useFavoriteTeams(): {
 
     if (isSignedIn) {
       wasSignedInRef.current = true;
-      if (syncedRef.current) return;
-      syncedRef.current = true;
+      // 多数の FavoriteStar が同時マウントしても同期は1回だけ（モジュールレベルで集約）。
+      if (globalSyncDone) return;
+      globalSyncDone = true;
 
       let cancelled = false;
       void syncFavoritesAction(readFavorites()).then(({ codes }) => {
-        if (cancelled) return;
-        writeFavorites(codes); // localStorage を権威（マージ後）に更新＝他コンポーネントへも伝播。
-        setFavorites(toSet(codes));
+        // 同期の往復中にユーザーがトグルした分を失わないよう、解決「時点」のローカル最新と
+        // 和集合してから書き戻す（古いスナップショットでの上書き＝巻き戻りを防ぐ）。
+        // ※ 同期中の「削除」は和集合では戻りうるが、窓は一往復ぶんと短いため許容する。
+        const merged = mergeFavoriteCodes(codes, readFavorites());
+        writeFavorites(merged); // localStorage を更新＝全 FavoriteStar へイベント伝播。
+        if (!cancelled) setFavorites(toSet(merged));
       });
       return () => {
         cancelled = true;
       };
     }
 
-    // 未ログイン確定。次回ログイン時に再同期できるようフラグを戻す。
-    syncedRef.current = false;
+    // 未ログイン確定。次回ログイン時に再同期できるようガードを戻す。
+    globalSyncDone = false;
 
     // 直前までログインしていたなら「ログアウト」確定（#39）。
     // ログイン中はサーバの user_favorites を localStorage へ書き戻すため、ログアウト後も
