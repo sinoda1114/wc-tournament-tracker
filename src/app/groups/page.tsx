@@ -10,9 +10,9 @@ import {
   listGroupStageMatches,
   listTournamentMatches,
 } from '@/db/queries';
-import { parseDateParam } from '@/lib/date-filter';
+import { parseDatesParam, parseQuickDayParam, resolveQuickDay } from '@/lib/date-filter';
 import { getDictionary } from '@/lib/i18n/dictionary';
-import { resolveLocale } from '@/lib/i18n/server';
+import { resolveLocale, resolveTimeZone } from '@/lib/i18n/server';
 
 export const dynamic = 'force-dynamic';
 
@@ -39,7 +39,7 @@ const GROUP_LETTERS = [
 ] as const;
 
 type GroupsPageProps = {
-  searchParams: Promise<{ date?: string | string[] }>;
+  searchParams: Promise<{ date?: string | string[]; day?: string | string[] }>;
 };
 
 function pickDateParam(value: string | string[] | undefined): string | null {
@@ -49,14 +49,20 @@ function pickDateParam(value: string | string[] | undefined): string | null {
 
 export default async function GroupsPage({ searchParams }: GroupsPageProps) {
   const params = await searchParams;
-  const filter = parseDateParam(pickDateParam(params.date));
+  const quickDay = parseQuickDayParam(pickDateParam(params.day));
+  const calendarDates = parseDatesParam(pickDateParam(params.date));
+  const selectedDates =
+    calendarDates.length > 0
+      ? calendarDates
+      : quickDay
+        ? [resolveQuickDay(quickDay, await resolveTimeZone())]
+        : [];
   const dict = getDictionary(await resolveLocale());
-  const isDate = filter.kind === 'date';
+  const isDate = selectedDates.length > 0;
 
-  // 日付選択時は GL＋決勝T 横断の「その日の全試合」。未選択時は順位表グリッド（全グループ）。
-  const dayMatches = isDate
-    ? [...(await listGroupStageMatches()), ...(await listTournamentMatches())]
-    : [];
+  // 日付選択時は「その日の全試合」。未選択時は順位表グリッド（全グループ）。
+  // NOTE: listTournamentMatches() は全試合（GL含む）。GL一覧と連結すると二重表示になる。
+  const dayMatches = isDate ? await listTournamentMatches() : [];
 
   const allGroupMatches = isDate ? [] : await listGroupStageMatches();
   const groupData = isDate
@@ -84,8 +90,10 @@ export default async function GroupsPage({ searchParams }: GroupsPageProps) {
           <DateFilterBar />
         </div>
 
-        {filter.kind === 'date' ? (
-          <MatchDayList matches={dayMatches} date={filter.date} />
+        {isDate ? (
+          selectedDates.map((date) => (
+            <MatchDayList key={date} matches={dayMatches} date={date} />
+          ))
         ) : (
           <GroupsFilterableGrid groupData={groupData} />
         )}

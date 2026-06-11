@@ -6,7 +6,7 @@ import { isFreePeriod, KNOCKOUT_START_UTC, priceDisplayForLocale } from '@/lib/p
 
 describe('KNOCKOUT_START_UTC', () => {
   it('決勝T開始=6/28 00:00 JST(=6/27 15:00Z)に固定されている', () => {
-    expect(new Date(KNOCKOUT_START_UTC).toISOString()).toBe('2026-06-27T15:00:00.000Z');
+    expect(new Date(KNOCKOUT_START_UTC).toISOString()).toBe('2026-06-28T15:00:00.000Z');
   });
 });
 
@@ -36,7 +36,7 @@ describe('バナー文言のプレースホルダ置換', () => {
 describe('isFreePeriod', () => {
   it('決勝トーナメント開始(6/28 JST)より前は無料期間', () => {
     // 6/27 23:59 JST = 6/27 14:59Z（境界の1分前）
-    expect(isFreePeriod(new Date('2026-06-27T14:59:00Z'))).toBe(true);
+    expect(isFreePeriod(new Date('2026-06-28T14:59:00Z'))).toBe(true);
     // グループステージ初日
     expect(isFreePeriod(new Date('2026-06-11T00:00:00Z'))).toBe(true);
   });
@@ -45,7 +45,7 @@ describe('isFreePeriod', () => {
     // 6/28 00:00 JST = 6/27 15:00Z（境界ちょうど）
     expect(isFreePeriod(new Date(KNOCKOUT_START_UTC))).toBe(false);
     // R32 期間中
-    expect(isFreePeriod(new Date('2026-06-28T03:00:00Z'))).toBe(false);
+    expect(isFreePeriod(new Date('2026-06-28T15:00:00Z'))).toBe(false);
     // 決勝
     expect(isFreePeriod(new Date('2026-07-19T00:00:00Z'))).toBe(false);
   });

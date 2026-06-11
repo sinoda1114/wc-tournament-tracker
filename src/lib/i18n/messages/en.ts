@@ -22,6 +22,13 @@ export const en: Dictionary = {
     title: 'Knockout bracket',
     description:
       'When a result is updated, the winner advances to the next match automatically. On mobile, scroll sideways to see every round.',
+    heroTitle: 'Everything you want to see about World Cup 2026, in one place.',
+    heroTagline: 'For the first time ever, three host nations: USA, Canada and Mexico. "Which country, which stadium is this match in?" — exactly because it is so confusing, I gathered the scattered schedules, results, standings, venues and squads into one place.',
+    heroPoint1: 'Save your favorite teams and their matches pop right up',
+    heroPoint2: 'Which country, which stadium? Venue info and squads in one view',
+    heroPoint3: 'And for fun: predict the champion with everyone',
+    heroLead: 'The group stage is free to enjoy.',
+    heroCta: 'Sign in to start',
   },
   tournament: {
     viewLabel: 'View',
@@ -211,10 +218,10 @@ export const en: Dictionary = {
   paywall: {
     bannerAria: 'Pricing notice',
     bannerMessage:
-      'The knockout stage (from June 28) is a one-time {price}. The group stage is free to enjoy right now.',
+      'From the knockout stage (June 29), a one-time purchase of {price}. The group stage is free to enjoy right now.',
   },
   footer: {
-    brandTitle: 'MatchFav — World Cup 2026 match, prediction & favorites tracker (unofficial)',
+    brandTitle: 'MatchFav — Everything you want to see about World Cup 2026, in one place',
     brandDesc:
       'An unofficial information site that organizes the schedule, results, and participating nations of the 2026 international football tournament for fans.',
     navAria: 'Footer navigation',
@@ -226,6 +233,7 @@ export const en: Dictionary = {
       'It has no partnership, sponsorship, or endorsement relationship with FIFA, national or regional football associations, official tournament sponsors, or any other rights holders. Names, emblems, and official logos such as "FIFA" and "World Cup" are trademarks of their respective owners; this site respects them as such and does not use any official logos or emblems. Stadium names may include naming-rights titles bearing sponsor company names, which are trademarks of those companies. This site does not guarantee the immediacy or accuracy of its information.',
     copyright: '(c) MatchFav',
     dataNotice: 'Posted data may change without notice.',
+    unofficialNote: 'Unofficial fan site (not affiliated with FIFA)',
   },
   venue: {
     cardAria: '{stadium} venue info',

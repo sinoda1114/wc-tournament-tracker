@@ -172,3 +172,84 @@ describe('filterMatchesByDate', () => {
     ).toEqual([103]);
   });
 });
+
+describe('parseDatesParam (複数日)', () => {
+  it('カンマ区切りを配列で返す（重複除去・昇順）', async () => {
+    const { parseDatesParam } = await import('@/lib/date-filter');
+    expect(parseDatesParam('2026-06-19,2026-06-18,2026-06-19')).toEqual([
+      '2026-06-18',
+      '2026-06-19',
+    ]);
+  });
+
+  it('単一日も配列で返す', async () => {
+    const { parseDatesParam } = await import('@/lib/date-filter');
+    expect(parseDatesParam('2026-06-11')).toEqual(['2026-06-11']);
+  });
+
+  it('不正な日付は捨てて有効分のみ返す', async () => {
+    const { parseDatesParam } = await import('@/lib/date-filter');
+    expect(parseDatesParam('invalid,2026-06-18,2026-13-50')).toEqual(['2026-06-18']);
+  });
+
+  it('null/空文字は空配列', async () => {
+    const { parseDatesParam } = await import('@/lib/date-filter');
+    expect(parseDatesParam(null)).toEqual([]);
+    expect(parseDatesParam('')).toEqual([]);
+  });
+
+  it('上限14日で切り詰める', async () => {
+    const { parseDatesParam } = await import('@/lib/date-filter');
+    const many = Array.from({ length: 20 }, (_, i) =>
+      `2026-06-${String(i + 1).padStart(2, '0')}`,
+    ).join(',');
+    expect(parseDatesParam(many)).toHaveLength(14);
+  });
+});
+
+describe('serializeDatesParam', () => {
+  it('配列をカンマ区切りへ・空はnull', async () => {
+    const { serializeDatesParam } = await import('@/lib/date-filter');
+    expect(serializeDatesParam(['2026-06-18', '2026-06-19'])).toBe('2026-06-18,2026-06-19');
+    expect(serializeDatesParam([])).toBeNull();
+  });
+});
+
+describe('filterMatchesByDates', () => {
+  it('複数日のいずれかに一致する試合を返す', async () => {
+    const { filterMatchesByDates } = await import('@/lib/date-filter');
+    const ms = [
+      { matchDate: '2026-06-18', kickoffAt: null },
+      { matchDate: '2026-06-19', kickoffAt: null },
+      { matchDate: '2026-06-20', kickoffAt: null },
+    ];
+    expect(filterMatchesByDates(ms, ['2026-06-18', '2026-06-20'])).toHaveLength(2);
+    expect(filterMatchesByDates(ms, [])).toHaveLength(3);
+  });
+});
+
+describe('parseQuickDayParam / resolveQuickDay（バッジとカレンダーの分離）', () => {
+  it('有効なキーをそのまま返す', async () => {
+    const { parseQuickDayParam } = await import('@/lib/date-filter');
+    expect(parseQuickDayParam('today')).toBe('today');
+    expect(parseQuickDayParam('yesterday')).toBe('yesterday');
+    expect(parseQuickDayParam('tomorrow')).toBe('tomorrow');
+    expect(parseQuickDayParam('day-after-tomorrow')).toBe('day-after-tomorrow');
+  });
+
+  it('不正・空は null', async () => {
+    const { parseQuickDayParam } = await import('@/lib/date-filter');
+    expect(parseQuickDayParam('nope')).toBeNull();
+    expect(parseQuickDayParam(null)).toBeNull();
+    expect(parseQuickDayParam('')).toBeNull();
+  });
+
+  it('キーをTZ基準の暦日に解決する', async () => {
+    const { resolveQuickDay } = await import('@/lib/date-filter');
+    const now = new Date('2026-06-11T12:00:00+09:00');
+    expect(resolveQuickDay('today', 'Asia/Tokyo', now)).toBe('2026-06-11');
+    expect(resolveQuickDay('yesterday', 'Asia/Tokyo', now)).toBe('2026-06-10');
+    expect(resolveQuickDay('tomorrow', 'Asia/Tokyo', now)).toBe('2026-06-12');
+    expect(resolveQuickDay('day-after-tomorrow', 'Asia/Tokyo', now)).toBe('2026-06-13');
+  });
+});

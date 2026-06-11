@@ -32,6 +32,8 @@ export function SiteFooter({ t }: { t: Dictionary['footer'] }) {
       ),
     })),
     { key: 'notice', node: <span>{t.dataNotice}</span> },
+    // 非公式の明示は目立たせず、法務リンクと同じ薄い小書き行に置く（詳細は利用規約）。
+    { key: 'unofficial', node: <span>{t.unofficialNote}</span> },
   ];
 
   return (
