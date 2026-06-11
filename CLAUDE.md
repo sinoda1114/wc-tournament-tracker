@@ -32,6 +32,16 @@
 - 本番: https://wc-tournament-tracker.vercel.app （独自ドメイン `matchfav.com` 接続は #22）
 - 絶対 URL は env `NEXT_PUBLIC_SITE_URL`（=`https://matchfav.com`）経由。ハードコード禁止。
 
+### PR 状態は GitHub が正本（記憶・伝聞で語らない）
+
+PR の「マージした/してない」は**記憶や伝聞で判断しない**。GitHub が常に最新の唯一の正本。
+
+- マージ依頼・状態言及の前に必ず **`gh pr list --state open`** を実行し、その出力を正とする。
+- 番人はマージ前に **`gh pr view <N> --json state,mergedAt`** で確認（**MERGED なら何もしない**）。
+- 番人はマージ後に **`gh pr list --state open` の残数を報告**（＝常にライブの残量を共有）。
+- 依頼側も「PR #N マージして」の前に `gh pr list` で番号と未マージを確認する。
+- ＝ タスク台帳と同じ「正本一本化」。状態の手書き管理はドリフトの元なので作らない。
+
 ---
 
 ## 参照
