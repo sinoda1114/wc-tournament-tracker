@@ -64,7 +64,7 @@ const ITEMS: { label: string; value: React.ReactNode }[] = [
   },
   {
     label: '支払方法',
-    value: 'クレジットカード決済（決済代行: Stripe）',
+    value: 'クレジットカード決済（決済代行サービスを利用）',
   },
   {
     label: '支払時期',
