@@ -2,9 +2,10 @@
 
 import { useTransition } from 'react';
 import { ActionIcon, Menu, Tooltip } from '@mantine/core';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
-import { LOCALE_COOKIE, LOCALE_LABELS, LOCALES, type Locale } from '@/lib/i18n/config';
+import { localePath } from '@/lib/i18n/alternates';
+import { isLocale, LOCALE_COOKIE, LOCALE_LABELS, LOCALES, type Locale } from '@/lib/i18n/config';
 
 const ONE_YEAR = 60 * 60 * 24 * 365;
 
@@ -14,18 +15,33 @@ function persistLocale(next: Locale): void {
 }
 
 /**
- * 右上の言語スイッチャー（dep 無し・Cookie 方式）。
- * 選択を `wc_locale` cookie に保存し、router.refresh() でサーバ再レンダリング
- * （= cookie を読み直して新ロケールの辞書で描画）。ページ遷移はしない。
+ * 現在パスが公開トップ（`/` または `/en` 等）かを判定する。
+ * トップはロケール別URLを持つ（#19）ため、言語切替で **URL 遷移**する。
+ */
+function isHomePath(pathname: string): boolean {
+  const segments = pathname.split('/').filter(Boolean);
+  if (segments.length === 0) return true; // '/'
+  return segments.length === 1 && isLocale(segments[0]) && segments[0] !== 'ja'; // '/en' 等
+}
+
+/**
+ * 右上の言語スイッチャー（dep 無し）。
+ * - 公開トップ上: 選択ロケールの **URL へ遷移**（`router.push`）＋ cookie 保存（#19）。
+ * - それ以外（内部ページ）: cookie 保存＋ `router.refresh()`（URL 変種が無いため従来通り）。
  */
 export function LanguageSwitcher({ locale, label }: { locale: Locale; label: string }) {
   const router = useRouter();
+  const pathname = usePathname();
   const [pending, startTransition] = useTransition();
 
   function choose(next: Locale) {
     if (next === locale) return;
     persistLocale(next);
-    startTransition(() => router.refresh());
+    if (isHomePath(pathname)) {
+      startTransition(() => router.push(localePath('home', next)));
+    } else {
+      startTransition(() => router.refresh());
+    }
   }
 
   return (

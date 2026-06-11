@@ -38,7 +38,8 @@ export const metadata: Metadata = {
   applicationName: SITE_NAME,
   // manifest.ts を参照（PWA）。
   manifest: '/manifest.webmanifest',
-  alternates: { canonical: '/' },
+  // canonical/hreflang は各ページの generateMetadata で出す（layout に置くと全ページ
+  // canonical='/' になり得るため。トップは #19 でロケール別 canonical＋hreflang を出力）。
   openGraph: {
     type: 'website',
     siteName: SITE_NAME,

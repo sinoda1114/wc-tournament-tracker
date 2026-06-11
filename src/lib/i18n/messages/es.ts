@@ -2,6 +2,13 @@ import type { Dictionary } from './ja';
 
 /** スペイン語メッセージ辞書。型 Dictionary によりキー欠落は tsc + parity テストで弾かれる。 */
 export const es: Dictionary = {
+  meta: {
+    home: {
+      title: 'Mundial 2026: calendario, resultados y pronósticos (no oficial)',
+      description:
+        'Calendario, resultados, clasificaciones, sedes y plantillas del Mundial 2026, además de los pronósticos de todos, en un solo lugar. Guarda tus selecciones favoritas y encuentra tus partidos al instante. Sitio de aficionados no oficial (sin afiliación con la FIFA).',
+    },
+  },
   nav: {
     label: 'Navegación principal',
     groups: 'Grupos',
