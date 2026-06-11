@@ -10,10 +10,8 @@ import styles from '../legal.module.css';
  *   本文面は本サービスの実態（ログイン必須・買い切り課金・グループステージ無料／決勝トーナメント以降有料・期間中新規登録は72時間無料）に沿って
  *   作成したドラフトであり、法的助言ではありません。公開前に必ず弁護士のレビューを受けること。
  *
- * 【プレースホルダ（確定後に置換）】
- *   - 【価格未定】     … タスク #14（価格・商品名）確定後
- *   - matchfav.com … タスク #22（独自ドメイン / ブランド名）確定後
- *   - info@matchfav.com … 事業用メールアドレス確定後
+ * 【未確定事項】
+ *   - 販売価格は購入手続き画面（Stripe Checkout）に表示する方式。決済導線の実装は #14。
  */
 
 export const metadata: Metadata = {
@@ -30,11 +28,6 @@ export default function TermsPage() {
         <h1>利用規約</h1>
         <span className={styles.updated}>最終改定日: {UPDATED}</span>
       </header>
-
-      <p className={styles.notice}>
-        本規約中の <strong>【価格未定】</strong>{' '}
-        は、価格・商品名（#14）の確定後に置き換えられる暫定表記です。
-      </p>
 
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>第1条（適用）</h2>
@@ -96,9 +89,8 @@ export default function TermsPage() {
         <ul className={styles.list}>
           <li>
             本サービスは、<strong>買い切り型</strong>の有料サービスです。利用者は、所定の料金
-            （<strong>【価格未定】</strong>。確定後に本規約および
-            <Link href="/tokushoho">特定商取引法に基づく表記</Link>に明示します）を一度支払う
-            ことにより、本大会終了に伴うサービス提供終了時まで本サービスを利用できます。
+            （各プランの購入手続き画面に表示します）を一度支払うことにより、本大会終了に伴う
+            サービス提供終了時まで本サービスを利用できます。
             月額・年額等の継続課金（サブスクリプション）ではありません。
           </li>
           <li>

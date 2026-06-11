@@ -245,7 +245,7 @@ export const pt: Dictionary = {
   paywall: {
     bannerAria: 'Aviso de preço',
     bannerMessage:
-      'A partir do mata-mata (29 de junho), é uma compra única de {price}. A fase de grupos é gratuita agora mesmo.',
+      'O mata-mata (a partir de 29 de junho) é uma compra única de {price}. A fase de grupos é gratuita agora mesmo.',
   },
   footer: {
     brandTitle: 'MatchFav — Tudo o que você quer ver da Copa 2026, em um só lugar',

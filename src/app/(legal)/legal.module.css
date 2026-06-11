@@ -22,17 +22,6 @@
   color: var(--wc-muted);
 }
 
-/* 「これは雛形であり弁護士確認が必要」等の注意書きを目立たせる枠。 */
-.notice {
-  border: 1px solid rgba(251, 191, 36, 0.5);
-  background: rgba(251, 191, 36, 0.1);
-  border-radius: 12px;
-  padding: 0.85rem 1rem;
-  font-size: 0.82rem;
-  line-height: 1.7;
-  color: var(--wc-text);
-}
-
 .section {
   display: flex;
   flex-direction: column;
@@ -110,11 +99,6 @@
     border-bottom: 0;
     padding-bottom: 0.2rem;
   }
-}
-
-.placeholder {
-  color: var(--wc-muted);
-  font-style: italic;
 }
 
 .backLink {
