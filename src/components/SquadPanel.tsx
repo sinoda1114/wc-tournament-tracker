@@ -113,6 +113,14 @@ export function SquadPanel({ squad }: SquadPanelProps) {
               </Text>
             </Group>
           ) : null}
+
+          {/* 現実の名簿事情の注釈（#38）。今は ARG のみ（Balerdi 負傷辞退・補充未発表）。
+              補充が確定して26名になったら、この注釈と辞書キー noteArg を撤去する。 */}
+          {team.fifaCode === 'ARG' ? (
+            <Text size="xs" c="dimmed" className="wc-squad-note">
+              {dict.squad.noteArg}
+            </Text>
+          ) : null}
         </Stack>
       )}
     </div>

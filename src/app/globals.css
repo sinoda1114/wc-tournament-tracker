@@ -2078,3 +2078,11 @@ a {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* スカッドの注釈（#38・現状ARGのみ）。控えめに、上に細い区切り。 */
+.wc-squad-note {
+  margin-top: 0.4rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--wc-border);
+  line-height: 1.5;
+}

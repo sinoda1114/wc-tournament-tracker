@@ -171,6 +171,8 @@ export const zh: Dictionary = {
     positionOther: '其他',
     ageSuffix: '岁',
     groupCount: '{label}（{count}）',
+    noteArg:
+      '注：阿根廷目前显示25名球员。莱昂纳多·巴莱尔迪因伤退出，截至2026年6月11日尚未公布替补人选。一旦确认补招，我们将及时更新。',
   },
   prediction: {
     title: '夺冠预测',
