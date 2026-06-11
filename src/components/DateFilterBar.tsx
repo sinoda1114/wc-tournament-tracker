@@ -185,7 +185,21 @@ export function DateFilterBar({
             </button>
           </Popover.Target>
           <Popover.Dropdown>
-            <DatePicker value={activeDate} onChange={handleCalendarChange} highlightToday />
+            {/* 日曜始まり＋3文字曜日（Sun/Mon…）。日曜=赤(weekend既定)・土曜=青(CSS)。 */}
+            <DatePicker
+              value={activeDate}
+              onChange={handleCalendarChange}
+              highlightToday
+              firstDayOfWeek={0}
+              weekendDays={[0]}
+              weekdayFormat="ddd"
+              getDayProps={(date) => {
+                if (new Date(date).getDay() === 6) {
+                  return { className: 'wc-calendar-saturday' };
+                }
+                return {};
+              }}
+            />
           </Popover.Dropdown>
         </Popover>
 

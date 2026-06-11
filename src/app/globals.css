@@ -2051,3 +2051,12 @@ a {
     align-items: stretch;
   }
 }
+
+/* カレンダーの土曜日を青に（日曜は Mantine の weekend 既定で赤）。 */
+.wc-calendar-saturday {
+  color: var(--wc-accent);
+}
+
+.wc-calendar-saturday[data-outside] {
+  opacity: 0.4;
+}
