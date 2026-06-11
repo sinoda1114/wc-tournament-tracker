@@ -1,0 +1,14 @@
+# Vercel CLI アップロード時に除外するローカル専用ファイル群。
+# git 連携デプロイは GitHub の内容（=.gitignore 適用済み）を使うため無関係。
+# CLI で `vercel --prod` する際に、ローカルのデーモンソケットや索引・ツール類を
+# アップロードしようとして失敗するのを防ぐ。
+.codegraph
+.agents
+.devin
+.windsurf
+.claude
+.review-reports
+work-summary
+docs/goals
+local.db
+local.db-*
