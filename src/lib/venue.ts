@@ -100,8 +100,11 @@ export function formatPastWorldCups(
 
 /**
  * 会場のステージ別試合数を整形する。
- * ja: 「全6試合（グループリーグ 4・ラウンド32 1・決勝 1）」/ en: 「6 matches (Group stage 4, Round of 32 1, Final 1)」。
+ * ja: 「全6試合（グループリーグ 4試合・ラウンド32 1試合・決勝 1試合）」/
+ * en: 「6 matches (Group stage 4, Round of 32 1, Final 1)」。
  * ステージ名はロケール辞書から引く。0 試合なら null。
+ * ja は各ステージの件数にも「試合」を付けて「1」が何の数字か明確にする
+ *（ラウンド32 等ラベル末尾が数字のため、件数前の半角スペースは残す）。
  */
 export function formatVenueStageSummary(
   summary: VenueMatchSummary,
@@ -109,11 +112,11 @@ export function formatVenueStageSummary(
 ): string | null {
   if (summary.total === 0) return null;
   const stageLabels = getDictionary(locale).match.stage;
-  const parts = summary.byStage.map(
-    (s) => `${stageLabels[s.stage as MatchStage] ?? s.stage} ${s.count}`,
-  );
+  const label = (s: { stage: string }) => stageLabels[s.stage as MatchStage] ?? s.stage;
   if (locale === 'ja') {
+    const parts = summary.byStage.map((s) => `${label(s)} ${s.count}試合`);
     return `全${summary.total}試合（${parts.join('・')}）`;
   }
+  const parts = summary.byStage.map((s) => `${label(s)} ${s.count}`);
   return `${summary.total} matches (${parts.join(', ')})`;
 }

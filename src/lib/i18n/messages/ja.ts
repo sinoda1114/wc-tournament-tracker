@@ -247,8 +247,8 @@ export const ja = {
     pitch: 'ピッチ',
     elevation: '標高',
     highAltitude: '高地',
-    stageSummary: 'この大会での担当',
-    pastWorldCups: '過去のW杯',
+    stageSummary: '開催試合',
+    pastWorldCups: 'W杯開催実績',
     mapLink: 'Googleマップで開く',
     mapAria: '{stadium} を Google マップで開く（新しいタブ）',
     weather: {

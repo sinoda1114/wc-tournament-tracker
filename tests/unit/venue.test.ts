@@ -107,7 +107,7 @@ describe('formatVenueStageSummary', () => {
       ],
     };
     expect(formatVenueStageSummary(summary)).toBe(
-      '全6試合（グループリーグ 4・ラウンド32 1・決勝 1）',
+      '全6試合（グループリーグ 4試合・ラウンド32 1試合・決勝 1試合）',
     );
   });
 
