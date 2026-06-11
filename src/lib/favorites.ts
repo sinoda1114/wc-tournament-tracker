@@ -8,6 +8,8 @@
  *   - フィルタートグルは boolean を `"1"` / `"0"` の文字列で保存する（JSON より軽量）。
  */
 
+import type { MatchDetail } from '@/db/queries';
+
 export const FAVORITES_KEY = 'wc:favorite-teams';
 export const FILTER_KEY = 'wc:favorite-filter';
 
@@ -77,6 +79,19 @@ export function toggleFavorite(code: string): string[] {
 
 export function isFavorite(code: string, set: ReadonlySet<string>): boolean {
   return set.has(normalizeCode(code));
+}
+
+/**
+ * 試合の home / away のいずれかがお気に入り集合に含まれるか（純関数・DOM 非依存）。
+ * 試合カードのお気に入りフィルター（FilterableMatchList / MatchDayList）で共用する。
+ */
+export function matchHasFavorite(match: MatchDetail, favorites: ReadonlySet<string>): boolean {
+  const home = match.homeTeam?.fifaCode;
+  const away = match.awayTeam?.fifaCode;
+  return (
+    (home ? isFavorite(home, favorites) : false) ||
+    (away ? isFavorite(away, favorites) : false)
+  );
 }
 
 export function readFilterEnabled(): boolean {

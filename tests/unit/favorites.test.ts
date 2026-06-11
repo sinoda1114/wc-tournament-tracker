@@ -1,9 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import type { MatchDetail } from '@/db/queries';
 import {
   FAVORITES_KEY,
   FILTER_KEY,
   isFavorite,
+  matchHasFavorite,
   readFavorites,
   readFilterEnabled,
   toggleFavorite,
@@ -151,5 +153,39 @@ describe('favorites storage (SSR: window 未定義)', () => {
 
   it('readFilterEnabled は window 未定義でも false を返す', () => {
     expect(readFilterEnabled()).toBe(false);
+  });
+});
+
+/** MatchDetail のうち matchHasFavorite が見るのは home/away の fifaCode だけ。 */
+function fixtureMatch(homeCode: string | null, awayCode: string | null): MatchDetail {
+  return {
+    homeTeam: homeCode ? { fifaCode: homeCode } : null,
+    awayTeam: awayCode ? { fifaCode: awayCode } : null,
+  } as unknown as MatchDetail;
+}
+
+describe('matchHasFavorite（試合カードのお気に入りフィルター共用ロジック）', () => {
+  it('home がお気に入りなら true', () => {
+    expect(matchHasFavorite(fixtureMatch('JPN', 'BRA'), new Set(['JPN']))).toBe(true);
+  });
+
+  it('away がお気に入りなら true', () => {
+    expect(matchHasFavorite(fixtureMatch('JPN', 'BRA'), new Set(['BRA']))).toBe(true);
+  });
+
+  it('home/away どちらもお気に入りでなければ false', () => {
+    expect(matchHasFavorite(fixtureMatch('JPN', 'BRA'), new Set(['GER']))).toBe(false);
+  });
+
+  it('小文字 fifaCode でも大文字に正規化して判定する', () => {
+    expect(matchHasFavorite(fixtureMatch('jpn', null), new Set(['JPN']))).toBe(true);
+  });
+
+  it('チーム未確定（null）でもクラッシュせず false', () => {
+    expect(matchHasFavorite(fixtureMatch(null, null), new Set(['JPN']))).toBe(false);
+  });
+
+  it('お気に入りが空集合なら常に false', () => {
+    expect(matchHasFavorite(fixtureMatch('JPN', 'BRA'), new Set())).toBe(false);
   });
 });

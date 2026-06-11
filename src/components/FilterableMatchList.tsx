@@ -4,6 +4,7 @@ import { Text } from '@mantine/core';
 
 import type { MatchDetail } from '@/db/queries';
 import { useFavoriteFilter, useFavoriteTeams } from '@/hooks/useFavoriteTeams';
+import { matchHasFavorite } from '@/lib/favorites';
 import { useDictionary } from '@/lib/i18n/context';
 
 import { MatchCard } from './MatchCard';
@@ -15,12 +16,6 @@ type FilterableMatchListProps = {
   /** 配列が空のときに何も描画したくない場合は true。 */
   hideWhenEmpty?: boolean;
 };
-
-function matchHasFavorite(match: MatchDetail, favorites: Set<string>): boolean {
-  const home = match.homeTeam?.fifaCode.toUpperCase();
-  const away = match.awayTeam?.fifaCode.toUpperCase();
-  return (home ? favorites.has(home) : false) || (away ? favorites.has(away) : false);
-}
 
 /**
  * お気に入りフィルター対応の試合カードリスト。
