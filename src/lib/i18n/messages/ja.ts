@@ -225,6 +225,12 @@ export const ja = {
     noteNoChange: '同じステージでは投票後の変更はできません。',
   },
   // サイト共通フッタ（SiteFooter）。{year}=西暦。
+  // 課金壁の予告バナー（PaywallBanner・#26）。{price}=ロケール別価格。
+  paywall: {
+    bannerAria: '課金のお知らせ',
+    bannerMessage:
+      '決勝トーナメント（6月28日〜）は買い切り {price}。グループステージは今すぐ無料でお楽しみいただけます。',
+  },
   footer: {
     brandTitle: 'MatchFav — W杯2026 試合・優勝予想・お気に入りトラッカー（非公式）',
     brandDesc:

@@ -208,6 +208,11 @@ export const en: Dictionary = {
       'You can vote once per stage as the tournament progresses ({progression}), and the latest vote from each user is reflected in the crowd prediction.',
     noteNoChange: 'Votes cannot be changed once cast in the same stage.',
   },
+  paywall: {
+    bannerAria: 'Pricing notice',
+    bannerMessage:
+      'The knockout stage (from June 28) is a one-time {price}. The group stage is free to enjoy right now.',
+  },
   footer: {
     brandTitle: 'MatchFav — World Cup 2026 match, prediction & favorites tracker (unofficial)',
     brandDesc:

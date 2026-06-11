@@ -1895,3 +1895,21 @@ a {
 .wc-legend-mark.is-playoff {
   background: var(--wc-emphasis);
 }
+
+/* 課金壁の予告バナー（PaywallBanner・#26）。ヘッダ直下の細い帯。金色アクセントで控えめに目を引く。 */
+.wc-paywall-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: var(--wc-accent-soft);
+  border-bottom: 1px solid var(--wc-border);
+  color: var(--wc-text);
+  font-size: 0.82rem;
+  line-height: 1.4;
+  text-align: center;
+}
+.wc-paywall-banner-text {
+  max-width: 60rem;
+}

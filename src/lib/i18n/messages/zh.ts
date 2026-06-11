@@ -207,6 +207,11 @@ export const zh: Dictionary = {
       '随着赛事推进（{progression}），每个阶段可投票1次，每位用户的最新一票会反映到大家的预测中。',
     noteNoChange: '同一阶段投票后不可更改。',
   },
+  paywall: {
+    bannerAria: '收费提示',
+    bannerMessage:
+      '淘汰赛阶段（6月28日起）为一次性买断 {price}。小组赛阶段现在即可免费畅享。',
+  },
   footer: {
     brandTitle: 'MatchFav — 世界杯2026 比赛·夺冠预测·收藏追踪（非官方）',
     brandDesc:
