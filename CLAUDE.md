@@ -36,7 +36,9 @@
 
 ## 参照
 
-- **タスク台帳（正本）**: `notes/task-ledger.md`（着手/完了をここへ。完了は取り消し線＋SHA）
+- **タスク台帳（WHATの単一正本）**: `notes/task-ledger.md`（着手/完了をここへ。完了は取り消し線＋SHA）。
+  ⚠️ **セッション/ハーネスの TaskList 表示は揮発・ドリフトするので信用しない**。
+  タスクの内容・番号・状態は**必ずこのファイルを読んで**判断する（一覧と食い違ったら台帳が正）。
 - **運用ルール詳細**: `notes/dev-workflow-multiagent.md`
 - **ドメイン接続/本番 Clerk 手順**: `notes/runbook-domain-clerk-prod.md`（#22 / #25）
 - **デプロイ運用の状態**: memory `vercel-deploy-ops`
