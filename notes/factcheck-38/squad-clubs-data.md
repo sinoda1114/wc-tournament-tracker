@@ -1,7 +1,7 @@
 # #38 照合データ: 出場国 × 選手 × 所属クラブ
 
-生成日時(UTC): 2026-06-11T08:28:25.920Z
-総選手数: 1246 / 出場国: 48
+生成日時(UTC): 2026-06-11T10:59:27.769Z
+総選手数: 1247 / 出場国: 48
 データ源: English Wikipedia「2026 FIFA World Cup squads」wikitext（club= / clubnat=）
 基準: 大会登録名簿時点（≒ 2026-06-01）。直前の移籍は反映されない場合があります。
 
@@ -100,7 +100,7 @@
 | 25 | Lucas Herrington |  | DF | Colorado Rapids | コロラド・ラピッズ | us |
 | 26 | Tete Yengi |  | FW | Machida Zelvia | FC町田ゼルビア | jp |
 
-## AUT — Austria（オーストリア）  [25名]
+## AUT — Austria（オーストリア）  [26名]
 
 | # | 選手(EN) | 選手(JA) | Pos | 所属クラブ(EN) | クラブ(JA) | リーグ国 |
 |--:|---|---|---|---|---|---|
@@ -122,6 +122,7 @@
 | 16 | Phillipp Mwene |  | DF | Mainz 05 | 1.FSVマインツ05 | de |
 | 17 | Carney Chukwuemeka |  | MF | Borussia Dortmund | ボルシア・ドルトムント | de |
 | 18 | Romano Schmid |  | MF | Werder Bremen | ヴェルダー・ブレーメン | de |
+| 19 | Dejan Ljubičić |  | MF | Schalke 04 | シャルケ04 | de |
 | 20 | Konrad Laimer |  | MF | Bayern Munich | FCバイエルン・ミュンヘン | de |
 | 21 | Patrick Wimmer |  | FW | VfL Wolfsburg | VfLヴォルフスブルク | de |
 | 22 | Alexander Prass |  | MF | TSG Hoffenheim | TSG1899ホッフェンハイム | de |
