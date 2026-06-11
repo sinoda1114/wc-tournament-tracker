@@ -222,7 +222,7 @@ export const es: Dictionary = {
   paywall: {
     bannerAria: 'Aviso de precio',
     bannerMessage:
-      'La fase eliminatoria (desde el 28 de junio) cuesta un único pago de {price}. La fase de grupos es gratis ahora mismo.',
+      'Desde la fase eliminatoria (29 de junio), un único pago de {price}. La fase de grupos es gratis ahora mismo.',
   },
   footer: {
     brandTitle: 'MatchFav — Todo lo que quieres ver del Mundial 2026, en un solo lugar',

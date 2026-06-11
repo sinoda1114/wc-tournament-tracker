@@ -217,7 +217,7 @@ export const zh: Dictionary = {
   paywall: {
     bannerAria: '收费提示',
     bannerMessage:
-      '淘汰赛阶段（6月28日起）为一次性买断 {price}。小组赛阶段现在即可免费畅享。',
+      '从淘汰赛阶段（6月29日）起为一次性买断 {price}。小组赛阶段现在即可免费畅享。',
   },
   footer: {
     brandTitle: 'MatchFav — 2026世界杯你想看的一切，尽在一处',
