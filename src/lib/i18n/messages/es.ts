@@ -282,7 +282,7 @@ export const es: Dictionary = {
     accept: 'Aceptar',
   },
   addToHome: {
-    label: 'Añadir a la pantalla de inicio',
+    label: 'Añadir un acceso directo al teléfono',
     intro: 'Puedes añadir este sitio a tu pantalla de inicio como una app. Sigue estos pasos en Safari.',
     step1Before: 'Toca el ',
     shareButton: ' botón Compartir ',

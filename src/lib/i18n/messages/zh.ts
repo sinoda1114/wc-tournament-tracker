@@ -277,7 +277,7 @@ export const zh: Dictionary = {
     accept: '同意',
   },
   addToHome: {
-    label: '添加到主屏幕',
+    label: '将快捷方式添加到手机',
     intro: '您可以像应用一样将本网站添加到主屏幕。请在 Safari 中按以下步骤操作。',
     step1Before: '点按屏幕底部的',
     shareButton: '分享按钮',
