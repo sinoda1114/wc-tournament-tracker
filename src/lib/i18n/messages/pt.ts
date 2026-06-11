@@ -22,6 +22,9 @@ export const pt: Dictionary = {
     title: 'Chave do mata-mata',
     description:
       'Quando um resultado é atualizado, o vencedor avança automaticamente para a próxima partida. No celular, deslize na horizontal para ver todas as fases.',
+    heroTitle: 'Calendário, resultados e classificação da Copa 2026, tudo em uma tela',
+    heroLead: 'A fase de grupos é grátis: basta fazer login. Salve seus times favoritos e preveja o campeão.',
+    heroCta: 'Entrar para começar',
   },
   tournament: {
     viewLabel: 'Visualização',

@@ -3,6 +3,7 @@ import { Container, Group, Stack, Text, Title } from '@mantine/core';
 import { DateFilterBar } from '@/components/DateFilterBar';
 import { FavoriteFilterToggle } from '@/components/FavoriteFilterToggle';
 import { MatchDayList } from '@/components/MatchDayList';
+import { MiniHero } from '@/components/MiniHero';
 import { TournamentViewToggle } from '@/components/TournamentViewToggle';
 import { listGroupStageMatches, listTournamentMatches } from '@/db/queries';
 import { parseDateParam } from '@/lib/date-filter';
@@ -35,6 +36,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   return (
     <Container size="xl" py="xl">
       <Stack gap="lg">
+        <MiniHero dict={dict} />
         <Stack gap={4}>
           <Group align="center" wrap="wrap" gap="sm">
             <Title order={1}>{dict.home.title}</Title>

@@ -22,6 +22,9 @@ export const es: Dictionary = {
     title: 'Cuadro de eliminatorias',
     description:
       'Cuando se actualiza un resultado, el ganador avanza automáticamente al siguiente partido. En el móvil, desliza en horizontal para ver todas las rondas.',
+    heroTitle: 'Calendario, resultados y posiciones del Mundial 2026, todo en una pantalla',
+    heroLead: 'La fase de grupos es gratis: solo inicia sesión. Guarda tus equipos favoritos y predice al campeón.',
+    heroCta: 'Inicia sesión para empezar',
   },
   tournament: {
     viewLabel: 'Vista',

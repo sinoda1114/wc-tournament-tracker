@@ -22,6 +22,9 @@ export const zh: Dictionary = {
     title: '淘汰赛对阵图',
     description:
       '更新比赛结果后，胜者会自动晋级到下一场比赛。在手机上可左右滑动查看所有轮次。',
+    heroTitle: '2026世界杯赛程、比分与积分榜，一屏全览',
+    heroLead: '小组赛阶段免费，登录即可使用。还能收藏喜爱的球队、预测冠军。',
+    heroCta: '登录开始使用',
   },
   tournament: {
     viewLabel: '视图',

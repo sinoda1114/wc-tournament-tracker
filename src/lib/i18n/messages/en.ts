@@ -22,6 +22,9 @@ export const en: Dictionary = {
     title: 'Knockout bracket',
     description:
       'When a result is updated, the winner advances to the next match automatically. On mobile, scroll sideways to see every round.',
+    heroTitle: 'World Cup 2026 schedule, results and standings — all in one place',
+    heroLead: 'The group stage is free — just sign in. Save your favorite teams and predict the champion.',
+    heroCta: 'Sign in to get started',
   },
   tournament: {
     viewLabel: 'View',
