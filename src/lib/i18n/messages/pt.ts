@@ -23,9 +23,9 @@ export const pt: Dictionary = {
     description:
       'Quando um resultado é atualizado, o vencedor avança automaticamente para a próxima partida. No celular, deslize na horizontal para ver todas as fases.',
     heroTitle: 'Tudo o que você quer ver da Copa 2026, em um só lugar.',
-    heroTagline: 'Calendário, resultados, classificação, estádios, elencos — as informações estão espalhadas por toda parte e nenhum site as reúne. Então eu construí um. Um rastreador não oficial feito por um fã.',
+    heroTagline: 'Pela primeira vez na história, três países-sede: EUA, Canadá e México. "Esse jogo é em qual país, em qual estádio?" — justamente por ser tão confuso, reuni em um só lugar calendário, resultados, classificação, estádios e elencos. Um rastreador não oficial feito por um fã.',
     heroPoint1: 'Salve seus times favoritos e os jogos deles aparecem na hora',
-    heroPoint2: 'Informações dos estádios e elencos, tudo em uma tela',
+    heroPoint2: 'Qual país, qual estádio? Informações das sedes e elencos em uma só tela',
     heroPoint3: 'E de bônus: preveja o campeão com todo mundo',
     heroLead: 'A fase de grupos é grátis para curtir.',
     heroCta: 'Entrar para começar',

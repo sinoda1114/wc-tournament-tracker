@@ -23,9 +23,9 @@ export const en: Dictionary = {
     description:
       'When a result is updated, the winner advances to the next match automatically. On mobile, scroll sideways to see every round.',
     heroTitle: 'Everything you want to see about World Cup 2026, in one place.',
-    heroTagline: 'Schedules, results, standings, venues, squads — tournament info is scattered everywhere, and no site brings it together. So I built one. An unofficial tracker by a fan.',
+    heroTagline: 'For the first time ever, three host nations: USA, Canada and Mexico. "Which country, which stadium is this match in?" — exactly because it is so confusing, I gathered the scattered schedules, results, standings, venues and squads into one place. An unofficial tracker by a fan.',
     heroPoint1: 'Save your favorite teams and their matches pop right up',
-    heroPoint2: 'Venue info and squads, all in one view',
+    heroPoint2: 'Which country, which stadium? Venue info and squads in one view',
     heroPoint3: 'And for fun: predict the champion with everyone',
     heroLead: 'The group stage is free to enjoy.',
     heroCta: 'Sign in to start',

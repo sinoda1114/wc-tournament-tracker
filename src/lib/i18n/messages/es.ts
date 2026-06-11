@@ -23,9 +23,9 @@ export const es: Dictionary = {
     description:
       'Cuando se actualiza un resultado, el ganador avanza automáticamente al siguiente partido. En el móvil, desliza en horizontal para ver todas las rondas.',
     heroTitle: 'Todo lo que quieres ver del Mundial 2026, en un solo lugar.',
-    heroTagline: 'Calendario, resultados, posiciones, estadios, plantillas: la información está dispersa por todas partes y ningún sitio la reúne. Por eso lo construí. Un rastreador no oficial hecho por un fan.',
+    heroTagline: 'Por primera vez en la historia, tres países anfitriones: EE. UU., Canadá y México. "¿En qué país y en qué estadio es este partido?" — justo porque es tan confuso, reuní en un solo lugar el calendario, los resultados, las posiciones, los estadios y las plantillas. Un rastreador no oficial hecho por un fan.',
     heroPoint1: 'Guarda tus equipos favoritos y sus partidos aparecen al instante',
-    heroPoint2: 'Información de estadios y plantillas, todo en una vista',
+    heroPoint2: '¿Qué país, qué estadio? Información de sedes y plantillas en una sola vista',
     heroPoint3: 'Y de regalo: predice al campeón con todos',
     heroLead: 'La fase de grupos se disfruta gratis.',
     heroCta: 'Inicia sesión para empezar',
