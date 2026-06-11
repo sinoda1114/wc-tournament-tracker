@@ -1898,6 +1898,8 @@ a {
 
 /* 課金壁の予告バナー（PaywallBanner・#26）。ヘッダ直下の細い帯。金色アクセントで控えめに目を引く。 */
 .wc-paywall-banner {
+  position: relative;
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1910,6 +1912,43 @@ a {
   line-height: 1.4;
   text-align: center;
 }
+/* 控えめな光沢スイープ: 薄い光の帯が数秒に一度だけ左→右に横切る（文字は静止＝可読性維持）。
+   compositor-friendly な transform のみでアニメ。reduced-motion では無効化（WCAG 2.2.2）。 */
+.wc-paywall-banner::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 40%;
+  height: 100%;
+  pointer-events: none;
+  background: linear-gradient(
+    100deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    transparent 100%
+  );
+  transform: translateX(-150%);
+  animation: wc-paywall-sheen 7s ease-in-out infinite;
+}
+@keyframes wc-paywall-sheen {
+  0% {
+    transform: translateX(-150%);
+  }
+  /* 帯が横切るのは前半の短時間だけ。残りは静止して“たまに光る”控えめさにする。 */
+  28%,
+  100% {
+    transform: translateX(360%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wc-paywall-banner::after {
+    animation: none;
+    opacity: 0;
+  }
+}
 .wc-paywall-banner-text {
+  position: relative; /* 光沢(::after)より前面に置く */
+  z-index: 1;
   max-width: 60rem;
 }

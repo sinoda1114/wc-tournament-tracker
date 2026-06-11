@@ -20,6 +20,10 @@ type PaywallBannerProps = {
  */
 export async function PaywallBanner({ locale, dict }: PaywallBannerProps) {
   await connection();
+  // TODO(#14): 課金(entitlement)実装後、購入者にはこのバナーを出さない。
+  //   ここに「entitlement 未保有のときだけ表示」の条件を1つ足す:
+  //   const hasEntitlement = await getEntitlement(); if (hasEntitlement) return null;
+  //   現状は決済導線が無く購入者ゼロのため、無料期間中は全員に表示するのが正しい。
   if (!isFreePeriod(new Date())) return null;
 
   const t = dict.paywall;
