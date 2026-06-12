@@ -40,9 +40,11 @@
 
 ### 🟢 着手可（設計確定）
 - **T-48** ADMIN 投票リセット機能 — `/admin` に isAdmin 限定の投票リセット（ステージ別＋全リセット・確認ダイアログ・`crowd_votes` DELETE・migration不要）。test→reset で各ステージの投票動作確認を回すため。**実行中（ui-feature・worktree feat/admin-vote-reset）**。（2026-06-13 起票）
-- **T-49** 無効ロケールのソフト404を HTTP 200→404 化（SEO・任意/バックログ）— `/zzz` 等は not-found 画面は出るがステータス200。Next dev/prod で挙動差あり＝本番モード再現が要る。GSC に「ソフト404」警告が出たら着手で十分。（2026-06-13 起票）
 - **T-47** ヒーローセクションの文言変更 — トップの見出し/説明（`home.title`/`home.description`・`src/lib/i18n/messages/*.ts` ×5言語）を変更。**変更後テキスト未定（ユーザー指定待ち）**。ui-feature 領域・worktree→PR。（2026-06-13 起票）
 - **T-50** 勝利チームの表示色を見直す — 試合カード/スコアで勝者（チーム名＋スコア）が `var(--wc-accent)`（青）の流用で表示され「微妙・地味」との指摘（スクショ 2026-06-13: MEX 2-0 RSA / KOR 2-1 CZE の勝者が青）。`src/app/globals.css` の `.is-winner` 群（`.wc-team-row.is-winner` 付近 / `.wc-mini-team.is-winner` / `.wc-versus-name.is-winner` / 勝者スコア `strong.is-winner`）が `--wc-accent` を流用中。**勝利が映える専用色（例: ゴールド/グリーン系の勝者トークン `--wc-win` を新設）へ**。判定は `MatchVersus.tsx` の `isWinner`（既存・触らない）。ライト/ダーク両テーマでコントラスト確認。ui-feature 領域・worktree→PR。（2026-06-13 起票）
+
+### 🧊 バックログ（低優先・任意｜今は着手しなくてよい）
+- **T-49** 無効ロケールのソフト404を HTTP 200→404 化（SEO・任意）— `/zzz` 等は not-found 画面は出るがステータス200。Next dev/prod で挙動差あり＝本番モード再現が要る。**GSC に「ソフト404」警告が出たら着手で十分**（出るまで放置可）。（2026-06-13 起票）
 
 ### ⏳ 待ち（ユーザー操作 / 外部要因）
 - ~~**T-46 R32再充填バグ修正**~~（6/13 完了・本番実機OK）— 原因は **0012未適用ではなく**、`resolveRoundOf32Assignments` に「グループ全消化」ゲートが無く、ingest cron が未確定グループの暫定順位で R32 を埋め戻していた前倒し充填。修正＝`isGroupStageComplete()` ゲート追加（全12組消化まで R32 は NULL/スロット表示）＋ **migration 0015** で本番R32を再NULL化。本番確認(2026-06-13): R32 が `Group A runners-up` 等のスロット表示に復帰・round_of_32 投票も閉じた。PR #56・migration 0015 本番適用済。
