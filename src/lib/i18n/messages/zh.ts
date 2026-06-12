@@ -263,6 +263,7 @@ export const zh: Dictionary = {
     copyright: '(c) MatchFav',
     dataNotice: '所刊载数据可能会在不另行通知的情况下变更。',
     unofficialNote: '非官方球迷网站（与FIFA无关）',
+    dataAttribution: '部分比赛数据基于维基百科（CC BY-SA）。',
   },
   venue: {
     cardAria: '{stadium} venue info',

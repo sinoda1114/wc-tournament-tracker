@@ -2,7 +2,7 @@ import type { AutoMatchEventInput } from '@/db/match-events';
 import type { MatchStatus, UpdateMatchResultInput } from '@/db/queries';
 
 import { resolveTeamId, type ResolverTeam } from './team-resolver';
-import type { NormalizedMatchEvent, NormalizedResult } from './types';
+import type { MatchEventContext, NormalizedMatchEvent, NormalizedResult } from './types';
 
 /** 突き合わせに必要な試合行の最小情報。 */
 export type ReconcileMatch = {
@@ -14,6 +14,8 @@ export type ReconcileMatch = {
   awayScore: number | null;
   status: MatchStatus;
   stage: string;
+  /** グループ文字（'A'..'L'）。決勝T等は null。Wikipedia の記事特定に使う。 */
+  groupLetter: string | null;
 };
 
 /** 取得元（クラウドソース）の日付が公式から ±1 日ずれる事があるため許容する。 */
@@ -109,11 +111,13 @@ export function planMatchUpdates(
   return updates;
 }
 
-/** 1試合分のイベント同期計画。homeTeamId/awayTeamId は **取得元の向き** で持つ。 */
-export type MatchEventSync = {
+/**
+ * 1試合分のイベント同期計画。homeTeamId/awayTeamId は **取得元の向き** で持つ。
+ * MatchEventContext（provider が必要とする文脈）を内包するので、そのまま
+ * provider.fetchMatchEvents に渡せる（homeCode/awayCode は home/awayTeamId の FIFAコード）。
+ */
+export type MatchEventSync = MatchEventContext & {
   matchId: number;
-  /** 取得元の試合ID（タイムライン取得キー）。 */
-  externalEventId: string;
   /** 取得元の home に対応する我々の teamId（タイムラインの strHome 解決用）。 */
   homeTeamId: string;
   /** 取得元の away に対応する我々の teamId。 */
@@ -137,6 +141,8 @@ export function planMatchEventSyncs(
 ): MatchEventSync[] {
   const byPair = buildPairIndex(matches);
   const seen = new Set<number>();
+  // teamId → FIFAコード（大文字）。Wikipedia の football box 特定/向き解決に渡す。
+  const codeById = new Map(teams.map((t) => [t.id, t.fifaCode.toUpperCase()]));
 
   const syncs: MatchEventSync[] = [];
   for (const r of results) {
@@ -155,6 +161,11 @@ export function planMatchEventSyncs(
       externalEventId: r.externalEventId,
       homeTeamId: homeId,
       awayTeamId: awayId,
+      // MatchEventContext: 取得元の home/away の向きで FIFAコード・stage・group を持つ。
+      homeCode: codeById.get(homeId) ?? homeId.toUpperCase(),
+      awayCode: codeById.get(awayId) ?? awayId.toUpperCase(),
+      stage: m.stage,
+      groupLetter: m.groupLetter,
     });
   }
   return syncs;

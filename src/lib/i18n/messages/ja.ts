@@ -283,6 +283,7 @@ export const ja = {
     copyright: '(c) MatchFav',
     dataNotice: '掲載データは予告なく変更される場合があります。',
     unofficialNote: '非公式ファンサイト（FIFA非公認）',
+    dataAttribution: '試合データの一部は Wikipedia（CC BY-SA）に基づきます。',
   },
   // 会場情報カード（VenueInfoCard）。{stadium}=会場名。値（屋根/芝等）は lib/venue。
   venue: {

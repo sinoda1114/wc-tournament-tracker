@@ -158,7 +158,16 @@ describe('runIngestion', () => {
       fetchMatchEvents,
     });
 
-    expect(fetchMatchEvents).toHaveBeenCalledWith('100');
+    // provider には sync（MatchEventContext を内包）が渡る。
+    expect(fetchMatchEvents).toHaveBeenCalledWith(
+      expect.objectContaining({
+        externalEventId: '100',
+        homeCode: 'MEX',
+        awayCode: 'RSA',
+        stage: 'group_stage',
+        groupLetter: 'A',
+      }),
+    );
     expect(replaceAutoMatchEvents).toHaveBeenCalledTimes(1);
     expect(replaceAutoMatchEvents).toHaveBeenCalledWith(1, [
       expect.objectContaining({ type: 'goal', teamId: 'mex', playerName: 'A', sortOrder: 0, externalId: 't1' }),

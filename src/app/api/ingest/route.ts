@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 
 import { runIngestion } from '@/lib/ingest/run';
 import { createTheSportsDbProvider } from '@/lib/ingest/thesportsdb';
+import { createWikipediaMatchEventProvider, withWikipediaEvents } from '@/lib/ingest/wikipedia';
 
 export const dynamic = 'force-dynamic';
 // タイムライン取得は試合ごとに 1 リクエスト＋レート制限ペーシングがあるため、
@@ -25,7 +26,13 @@ export async function GET(request: Request) {
   }
 
   try {
-    const summary = await runIngestion(createTheSportsDbProvider());
+    // 結果/スコア/日程は TheSportsDB が正。イベント（得点・カード・交代）は Wikipedia を
+    // 優先し、空/失敗なら TheSportsDB タイムラインへフォールバックする（無料キーの切り詰め対策）。
+    const provider = withWikipediaEvents(
+      createTheSportsDbProvider(),
+      createWikipediaMatchEventProvider(),
+    );
+    const summary = await runIngestion(provider);
     if (summary.updated > 0) {
       revalidatePath('/prediction');
       revalidatePath('/');
