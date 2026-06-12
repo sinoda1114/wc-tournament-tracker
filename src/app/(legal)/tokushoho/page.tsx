@@ -1,6 +1,9 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
+import { getDictionary } from '@/lib/i18n/dictionary';
+import { resolveLocale } from '@/lib/i18n/server';
+
 import styles from '../legal.module.css';
 
 /*
@@ -19,12 +22,16 @@ import styles from '../legal.module.css';
  *   - robots noindex は正式な販売開始（#14）時に解除を検討すること。
  */
 
-export const metadata: Metadata = {
-  title: '特定商取引法に基づく表記 | MatchFav',
-  description: 'MatchFav の特定商取引法に基づく表記です。',
-  // 販売開始前のため暫定で noindex。正式な販売開始（#14）時に解除を検討。
-  robots: { index: false, follow: false },
-};
+// T-19: metadata はロケール対応（本文の多言語化は別タスク）。noindex は維持（#14 で解除検討）。
+export async function generateMetadata(): Promise<Metadata> {
+  const { title, description } = getDictionary(await resolveLocale()).meta.tokushoho;
+  return {
+    title,
+    description,
+    // 販売開始前のため暫定で noindex。正式な販売開始（#14）時に解除を検討。
+    robots: { index: false, follow: false },
+  };
+}
 
 const UPDATED = '2026年6月10日';
 

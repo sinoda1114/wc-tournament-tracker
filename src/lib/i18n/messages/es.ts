@@ -8,6 +8,60 @@ export const es: Dictionary = {
       description:
         'Calendario, resultados, clasificaciones, sedes y plantillas del Mundial 2026, además de los pronósticos de todos, en un solo lugar. Guarda tus selecciones favoritas y encuentra tus partidos al instante. Sitio de aficionados no oficial (sin afiliación con la FIFA).',
     },
+    groups: {
+      title: 'Fase de grupos',
+      description:
+        'Clasificaciones y los 72 partidos de 48 selecciones en 12 grupos. Explora la fase de grupos del Mundial 2026 con calendario y resultados.',
+    },
+    groupDetail: {
+      title: 'Grupo {group}',
+      description:
+        'Clasificación y resultados del Grupo {group} del Mundial 2026. Selecciones, partidos y calendario en un solo lugar.',
+    },
+    teams: {
+      title: 'Selecciones',
+      description:
+        'Explora y busca todas las selecciones del Mundial 2026. Consulta su plantilla, su seleccionador y su grupo.',
+    },
+    teamDetail: {
+      title: '{name}',
+      description:
+        'Plantilla y seleccionador de {name}. La convocatoria completa para el Mundial 2026 en un solo lugar.',
+      fallback: 'Selección',
+    },
+    matchDetail: {
+      title: '{home} vs {away} ({stage})',
+      description:
+        '{stage}: «{home} vs {away}» — calendario, sede y resultado. Disputado en {stadium} ({city}).',
+      fallback: 'Detalle del partido',
+    },
+    prediction: {
+      title: 'Pronóstico del campeón',
+      description:
+        'Combinamos el rendimiento en Mundiales anteriores, el ranking FIFA, los resultados del Mundial 2026 y los votos de todos para estimar las opciones de título de cada selección. Activa o desactiva los factores para cambiar el pronóstico.',
+    },
+    rankings: {
+      title: 'Clasificaciones',
+      description:
+        'Máximos goleadores y tarjetas del Mundial 2026, calculados automáticamente a partir de los partidos registrados.',
+    },
+    favorites: {
+      title: 'Favoritos',
+      description:
+        'Reúne tus selecciones favoritas y sus partidos en una sola vista. No te pierdas las selecciones que te importan en el Mundial 2026.',
+    },
+    terms: {
+      title: 'Términos de servicio | MatchFav',
+      description: 'Términos de servicio de MatchFav, un sitio de aficionados no oficial (sin afiliación con la FIFA).',
+    },
+    privacy: {
+      title: 'Política de privacidad | MatchFav',
+      description: 'Política de privacidad de MatchFav, un sitio de aficionados no oficial (sin afiliación con la FIFA).',
+    },
+    tokushoho: {
+      title: 'Aviso de la Ley de Transacciones Comerciales | MatchFav',
+      description: 'Aviso de MatchFav conforme a la Ley japonesa sobre Transacciones Comerciales Especificadas.',
+    },
   },
   nav: {
     label: 'Navegación principal',

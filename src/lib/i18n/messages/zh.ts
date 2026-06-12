@@ -8,6 +8,60 @@ export const zh: Dictionary = {
       description:
         '2026世界杯的赛程、比分、积分榜、球场与阵容，以及大家的夺冠预测，全部集中在一处。收藏你喜欢的球队，快速找到想看的比赛。非官方球迷网站（与FIFA无关）。',
     },
+    groups: {
+      title: '小组赛',
+      description:
+        '48支球队、12个小组的积分榜与全部72场比赛。按赛程与比分浏览2026世界杯小组赛。',
+    },
+    groupDetail: {
+      title: '{group}组',
+      description:
+        '2026世界杯{group}组的积分榜与比赛结果，汇集参赛球队与赛程。',
+    },
+    teams: {
+      title: '参赛球队',
+      description:
+        '浏览并搜索2026世界杯的全部参赛球队，查看各队阵容、主教练与所属小组。',
+    },
+    teamDetail: {
+      title: '{name}',
+      description:
+        '{name} 的参赛阵容与主教练，集中呈现2026世界杯的完整名单。',
+      fallback: '参赛球队',
+    },
+    matchDetail: {
+      title: '{home} vs {away}（{stage}）',
+      description:
+        '{stage}「{home} 对 {away}」的赛程、球场与结果。在{stadium}（{city}）举行。',
+      fallback: '比赛详情',
+    },
+    prediction: {
+      title: '夺冠预测',
+      description:
+        '结合历届世界杯战绩、FIFA排名、2026世界杯成绩与大家的预测，估算各队夺冠概率。开关各项指标即可改变预测。',
+    },
+    rankings: {
+      title: '排行榜',
+      description:
+        '2026世界杯的射手榜与红黄牌统计，依据已记录的比赛自动汇总。',
+    },
+    favorites: {
+      title: '收藏',
+      description:
+        '把你收藏的球队及其比赛集中在一个视图里。不错过你在2026世界杯关注的球队。',
+    },
+    terms: {
+      title: '服务条款 | MatchFav',
+      description: 'MatchFav（与FIFA无关的非官方球迷网站）的服务条款。',
+    },
+    privacy: {
+      title: '隐私政策 | MatchFav',
+      description: 'MatchFav（与FIFA无关的非官方球迷网站）的隐私政策。',
+    },
+    tokushoho: {
+      title: '日本特定商业交易法标示 | MatchFav',
+      description: 'MatchFav 依据日本《特定商业交易法》的标示。',
+    },
   },
   nav: {
     label: '主导航',

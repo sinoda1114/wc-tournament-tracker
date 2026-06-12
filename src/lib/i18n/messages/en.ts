@@ -8,6 +8,60 @@ export const en: Dictionary = {
       description:
         'Schedules, results, standings, venues and squads for World Cup 2026, plus everyone’s champion predictions — all in one place. Save your favorite nations and find your matches fast. An unofficial fan site (not affiliated with FIFA).',
     },
+    groups: {
+      title: 'Group stage',
+      description:
+        'Standings and all 72 matches across 48 nations and 12 groups. Browse the WC 2026 group stage with schedules and results.',
+    },
+    groupDetail: {
+      title: 'Group {group}',
+      description:
+        'Standings and results for WC 2026 Group {group}. Teams, fixtures and schedule in one place.',
+    },
+    teams: {
+      title: 'Teams',
+      description:
+        'Browse and search every nation at WC 2026. Check each squad, head coach and group.',
+    },
+    teamDetail: {
+      title: '{name}',
+      description:
+        '{name} squad and head coach. The full WC 2026 roster in one place.',
+      fallback: 'Team',
+    },
+    matchDetail: {
+      title: '{home} vs {away} ({stage})',
+      description:
+        '{stage}: “{home} vs {away}” — schedule, venue and result. Played at {stadium} ({city}).',
+      fallback: 'Match details',
+    },
+    prediction: {
+      title: 'Champion prediction',
+      description:
+        'We combine past World Cup form, FIFA ranking, WC 2026 results and everyone’s votes to estimate each nation’s title odds. Toggle the factors to reshape the forecast.',
+    },
+    rankings: {
+      title: 'Rankings',
+      description:
+        'Top scorers and card counts for WC 2026, tallied automatically from recorded matches.',
+    },
+    favorites: {
+      title: 'Favorites',
+      description:
+        'Keep your favorite nations and their matches in one view. Never miss the teams you care about at WC 2026.',
+    },
+    terms: {
+      title: 'Terms of Service | MatchFav',
+      description: 'Terms of Service for MatchFav, an unofficial fan site (not affiliated with FIFA).',
+    },
+    privacy: {
+      title: 'Privacy Policy | MatchFav',
+      description: 'Privacy Policy for MatchFav, an unofficial fan site (not affiliated with FIFA).',
+    },
+    tokushoho: {
+      title: 'Commercial Transactions Act Notice | MatchFav',
+      description: 'MatchFav notice based on Japan’s Act on Specified Commercial Transactions.',
+    },
   },
   nav: {
     label: 'Main navigation',

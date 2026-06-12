@@ -4,12 +4,71 @@
  * 文字列は段階的に増やしていく（まずは nav / header / language）。
  */
 export const ja = {
-  // 公開トップの metadata（title/description）。#19 でロケール別URLが各言語の <title>/<meta> を返す。
+  // 公開ページの metadata（title/description）。#19/T-19 でロケール別の <title>/<meta>/OGP を返す。
+  // 動的ページ（groupDetail/teamDetail/matchDetail）は {group} 等のプレースホルダをページ側で置換する。
   meta: {
     home: {
       title: 'ワールドカップ2026 試合日程・結果・優勝予想（非公式）',
       description:
         'ワールドカップ2026の日程・結果・順位・会場・出場選手と、みんなの優勝予想をひとつにまとめた非公式ファンサイト。お気に入りの国を登録して、見たい試合をすぐチェックできます（FIFA非公認）。',
+    },
+    groups: {
+      title: 'グループリーグ',
+      description:
+        '48ヶ国 × 12 グループの順位表と全 72 試合。WC 2026 のグループリーグを日程・結果つきで一覧できます。',
+    },
+    groupDetail: {
+      // {group} = グループの文字（A〜L）。
+      title: 'グループ{group}',
+      description:
+        'WC 2026 グループ{group}の順位表と試合結果。出場国と日程をまとめています。',
+    },
+    teams: {
+      title: '出場国一覧',
+      description:
+        'WC 2026 の出場国を一覧・検索できます。各国の代表メンバーや監督、所属グループを確認できます。',
+    },
+    teamDetail: {
+      // {name} = 国名（表示言語）、{nameEn} = 英語名。
+      title: '{name} 代表',
+      description:
+        '{name}（{nameEn}）の出場メンバー・監督。WC 2026 の代表スカッドをまとめています。',
+      fallback: '出場国',
+    },
+    matchDetail: {
+      // {home}/{away} = 対戦カード、{stage} = ステージ名、{stadium}/{city} = 会場。
+      title: '{home} vs {away}（{stage}）',
+      description:
+        '{stage}「{home} 対 {away}」の日程・会場・結果。{stadium}（{city}）で開催。',
+      fallback: '試合詳細',
+    },
+    prediction: {
+      title: '優勝国予想',
+      description:
+        '過去W杯成績・FIFAランク・WC2026成績・みんなの予想を掛け合わせて優勝確率を算出します。指標のON/OFFで予想が変わります。',
+    },
+    rankings: {
+      title: 'ランキング',
+      description:
+        'WC 2026 の得点ランキングとカード数。記録のある試合から自動集計します。',
+    },
+    favorites: {
+      title: 'お気に入り',
+      description:
+        'お気に入りに登録した国と、その試合だけをまとめてチェック。WC 2026 の気になる国を見逃しません。',
+    },
+    terms: {
+      title: '利用規約 | MatchFav',
+      description: 'MatchFav（FIFA非公認の非公式ファンサイト）の利用規約です。',
+    },
+    privacy: {
+      title: 'プライバシーポリシー | MatchFav',
+      description:
+        'MatchFav（FIFA非公認の非公式ファンサイト）のプライバシーポリシーです。',
+    },
+    tokushoho: {
+      title: '特定商取引法に基づく表記 | MatchFav',
+      description: 'MatchFav の特定商取引法に基づく表記です。',
     },
   },
   nav: {

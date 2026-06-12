@@ -7,8 +7,10 @@ import { JsonLd } from '@/components/JsonLd';
 import { SquadPanel } from '@/components/SquadPanel';
 import { getTeamSquad } from '@/db/queries';
 import { getSiteUrl } from '@/lib/env';
+import { ogLocale } from '@/lib/i18n/alternates';
 import { getDictionary } from '@/lib/i18n/dictionary';
 import { resolveLocale } from '@/lib/i18n/server';
+import { localizedTeamName } from '@/lib/i18n/team-name';
 import { buildBreadcrumbList } from '@/lib/structured-data';
 
 export const dynamic = 'force-dynamic';
@@ -17,28 +19,36 @@ type PageProps = {
   params: Promise<{ code: string }>;
 };
 
-/** チーム名を反映した動的メタデータ。OGP 画像（opengraph-image.tsx）と整合させる。 */
+/**
+ * チーム名を反映した動的メタデータ。OGP 画像（opengraph-image.tsx）と整合させる。
+ * T-19: 表示言語に応じたチーム名（localizedTeamName）と各言語テンプレを使う。
+ * canonical は単一URL（/teams/<code>）固定で hreflang は付けない。
+ */
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { code } = await params;
+  const locale = await resolveLocale();
+  const meta = getDictionary(locale).meta;
   if (!/^[A-Za-z]{3}$/.test(code)) {
-    return { title: '出場国' };
+    return { title: meta.teamDetail.fallback };
   }
 
   const squad = await getTeamSquad(code.toUpperCase());
   if (!squad) {
-    return { title: '出場国' };
+    return { title: meta.teamDetail.fallback };
   }
 
-  const { nameJa, nameEn } = squad.team;
-  const title = `${nameJa} 代表`;
-  const description = `${nameJa}（${nameEn}）の出場メンバー・監督。WC 2026 の代表スカッドをまとめています。`;
+  const name = localizedTeamName(squad.team, locale);
+  const title = meta.teamDetail.title.replace('{name}', name);
+  const description = meta.teamDetail.description
+    .replace('{name}', name)
+    .replace('{nameEn}', squad.team.nameEn);
   const canonical = `/teams/${code.toLowerCase()}`;
 
   return {
     title,
     description,
     alternates: { canonical },
-    openGraph: { title, description, url: canonical, type: 'profile' },
+    openGraph: { title, description, url: canonical, type: 'profile', locale: ogLocale(locale) },
     twitter: { card: 'summary_large_image', title, description },
   };
 }

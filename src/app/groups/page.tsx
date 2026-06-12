@@ -11,17 +11,25 @@ import {
   listTournamentMatches,
 } from '@/db/queries';
 import { parseDatesParam, parseQuickDayParam, resolveQuickDay } from '@/lib/date-filter';
+import { ogLocale } from '@/lib/i18n/alternates';
 import { getDictionary } from '@/lib/i18n/dictionary';
 import { resolveLocale, resolveTimeZone } from '@/lib/i18n/server';
 
 export const dynamic = 'force-dynamic';
 
-export const metadata: Metadata = {
-  title: 'グループリーグ',
-  description:
-    '48ヶ国 × 12 グループの順位表と全 72 試合。WC 2026 のグループリーグを日程・結果つきで一覧できます。',
-  alternates: { canonical: '/groups' },
-};
+// T-19: ロケール対応 metadata。canonical は単一URL（/groups）固定で hreflang は付けない
+// （非トップページのロケール別URLは B-full スコープ外。cookie 無しのクローラには既定 ja で見える）。
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await resolveLocale();
+  const { title, description } = getDictionary(locale).meta.groups;
+  return {
+    title,
+    description,
+    alternates: { canonical: '/groups' },
+    openGraph: { title, description, url: '/groups', locale: ogLocale(locale) },
+    twitter: { title, description },
+  };
+}
 
 const GROUP_LETTERS = [
   'A',
