@@ -315,7 +315,9 @@ export function parseWikipediaGroupArticle(wikitext: string): WikiMatch[] {
  */
 function extractLineupTables(region: string): string[] {
   const tables: string[] = [];
-  const startRe = /\{\| style="font-size:90%/g;
+  // 属性順に依存せず「font-size:90% を含むテーブル開始」にマッチさせる（class= が先頭に
+  // 来る等の編集ゆれに強くする）。先頭2つ＝両チームのXI。3つ目以降（試合ルール表など）は捨てる。
+  const startRe = /\{\|[^|]*font-size:90%/g;
   let m: RegExpExecArray | null;
   while ((m = startRe.exec(region)) !== null && tables.length < 2) {
     const from = m.index;
@@ -336,14 +338,25 @@ const WIKI_API = 'https://en.wikipedia.org/w/api.php';
 // Wikimedia の API ポリシーは「連絡先を含む説明的な User-Agent」を要求する
 // （汎用/欠落 UA はブロックされ得る）。サービス名と連絡手段を明示する。
 const WIKI_USER_AGENT = 'MatchFav/1.0 (https://matchfav.com; info@matchfav.com)';
+// 1記事あたりの取得タイムアウト（ms）。Wikipedia 応答遅延で ingest 全体（maxDuration=60s）が
+// 無言で枯れるのを防ぐ。超過時は throw → withWikipediaEvents が TheSportsDB にフォールバック。
+const WIKI_FETCH_TIMEOUT_MS = 10_000;
 
 async function defaultFetchWikitext(articleTitle: string): Promise<string | null> {
   const url =
     `${WIKI_API}?action=parse&page=${encodeURIComponent(articleTitle)}` +
     `&prop=wikitext&format=json&formatversion=2&redirects=1`;
-  const res = await fetch(url, {
-    headers: { Accept: 'application/json', 'User-Agent': WIKI_USER_AGENT },
-  });
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), WIKI_FETCH_TIMEOUT_MS);
+  let res: Response;
+  try {
+    res = await fetch(url, {
+      headers: { Accept: 'application/json', 'User-Agent': WIKI_USER_AGENT },
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(timer);
+  }
   if (!res.ok) {
     throw new Error(`Wikipedia fetch failed (${articleTitle}): ${res.status} ${res.statusText}`);
   }
