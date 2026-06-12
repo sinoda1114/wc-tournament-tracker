@@ -21,6 +21,7 @@ function match(partial: Partial<ReconcileMatch> & { id: number }): ReconcileMatc
     awayScore: null,
     status: 'scheduled',
     stage: 'group_stage',
+    groupLetter: 'A',
     ...partial,
   };
 }

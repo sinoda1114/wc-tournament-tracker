@@ -111,7 +111,7 @@ export async function runIngestion(
     events.planned = syncs.length;
     for (const sync of syncs) {
       try {
-        const normalized = await provider.fetchMatchEvents(sync.externalEventId);
+        const normalized = await provider.fetchMatchEvents(sync);
         const auto = toAutoMatchEvents(normalized, sync);
         if (auto.length === 0) {
           events.empty += 1;

@@ -20,6 +20,7 @@ function matchRow(id: number, home: string | null, away: string | null, over: Pa
     awayScore: null,
     status: 'scheduled',
     stage: 'group_stage',
+    groupLetter: 'A',
     ...over,
   };
 }
@@ -41,7 +42,16 @@ describe('planMatchEventSyncs', () => {
   it('終了試合×externalEventId あり → 突き合った試合の同期計画を返す', () => {
     const plans = planMatchEventSyncs([result()], [matchRow(1, 'mex', 'rsa')], TEAMS);
     expect(plans).toEqual([
-      { matchId: 1, externalEventId: '100', homeTeamId: 'mex', awayTeamId: 'rsa' },
+      {
+        matchId: 1,
+        externalEventId: '100',
+        homeTeamId: 'mex',
+        awayTeamId: 'rsa',
+        homeCode: 'MEX',
+        awayCode: 'RSA',
+        stage: 'group_stage',
+        groupLetter: 'A',
+      },
     ]);
   });
 
@@ -52,7 +62,16 @@ describe('planMatchEventSyncs', () => {
     const finished = matchRow(1, 'mex', 'rsa', { status: 'finished', homeScore: 1, awayScore: 2 });
     const plans = planMatchEventSyncs([reversed], [finished], TEAMS);
     expect(plans).toEqual([
-      { matchId: 1, externalEventId: '100', homeTeamId: 'rsa', awayTeamId: 'mex' },
+      {
+        matchId: 1,
+        externalEventId: '100',
+        homeTeamId: 'rsa',
+        awayTeamId: 'mex',
+        homeCode: 'RSA',
+        awayCode: 'MEX',
+        stage: 'group_stage',
+        groupLetter: 'A',
+      },
     ]);
   });
 

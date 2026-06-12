@@ -44,9 +44,28 @@ export interface ResultProvider {
 }
 
 /**
+ * 1試合分のイベント取得に必要な文脈。取得元ごとに使うフィールドが異なる:
+ *  - TheSportsDB は `externalEventId`（lookuptimeline のキー）だけを使う。
+ *  - Wikipedia は `stage`/`groupLetter`/`homeCode`/`awayCode`（記事と試合の特定）を使う。
+ * これにより「取得元が必要とする情報」を1型に集約し、provider を差し替えても run 層は無改修。
+ */
+export type MatchEventContext = {
+  /** TheSportsDB の試合ID（lookuptimeline 用）。 */
+  externalEventId: string;
+  /** 'group_stage' | 'round_of_32' など。Wikipedia の記事選択に使う。 */
+  stage: string;
+  /** グループ文字（'A'..'L'）。グループステージ以外は null。 */
+  groupLetter: string | null;
+  /** 我々の home チームの FIFAコード（大文字）。Wikipedia の football box 特定/向き解決に使う。 */
+  homeCode: string;
+  /** 我々の away チームの FIFAコード（大文字）。 */
+  awayCode: string;
+};
+
+/**
  * 試合イベント（タイムライン）の取得元。実装は任意（Partial 連携）で、
  * 持たない provider はイベント同期がスキップされるだけで結果取込は従来どおり動く。
  */
 export interface MatchEventProvider {
-  fetchMatchEvents(externalEventId: string): Promise<NormalizedMatchEvent[]>;
+  fetchMatchEvents(context: MatchEventContext): Promise<NormalizedMatchEvent[]>;
 }

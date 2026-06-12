@@ -1,4 +1,5 @@
 import type {
+  MatchEventContext,
   MatchEventProvider,
   NormalizedMatchEvent,
   NormalizedResult,
@@ -232,7 +233,8 @@ export function createTheSportsDbProvider(
       return all;
     },
 
-    async fetchMatchEvents(externalEventId: string) {
+    async fetchMatchEvents(context: MatchEventContext) {
+      const externalEventId = context.externalEventId;
       if (timelineFetched) await sleep(TIMELINE_REQUEST_INTERVAL_MS);
       timelineFetched = true;
 
