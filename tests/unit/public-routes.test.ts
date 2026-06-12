@@ -38,7 +38,9 @@ describe('isPublicRoute', () => {
     expect(isPublicRoute('/sign-up')).toBe(true);
   });
 
-  it('admin と未知ルートは非公開（将来ログイン必須）', () => {
+  // 公開カタログ上は false（/admin は page 側 isAdmin()→notFound() で施錠。proxy は
+  // 公開ブラウズ方針で本モジュールに依存せず、ここの false でページをブロックはしない）。
+  it('admin と未知ルートは公開カタログ外（false）', () => {
     expect(isPublicRoute('/admin')).toBe(false);
     expect(isPublicRoute('/admin/login')).toBe(false);
     expect(isPublicRoute('/admin/matches/5')).toBe(false);
