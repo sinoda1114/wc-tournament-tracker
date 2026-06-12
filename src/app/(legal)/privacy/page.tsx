@@ -1,6 +1,9 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
+import { getDictionary } from '@/lib/i18n/dictionary';
+import { resolveLocale } from '@/lib/i18n/server';
+
 import styles from '../legal.module.css';
 
 /*
@@ -16,11 +19,11 @@ import styles from '../legal.module.css';
  *   - info@matchfav.com … 事業用メールアドレス確定後に置換
  */
 
-export const metadata: Metadata = {
-  title: 'プライバシーポリシー | MatchFav',
-  description:
-    'MatchFav（FIFA非公認の非公式ファンサイト）のプライバシーポリシーです。',
-};
+// T-19: metadata はロケール対応（本文の多言語化は別タスク）。
+export async function generateMetadata(): Promise<Metadata> {
+  const { title, description } = getDictionary(await resolveLocale()).meta.privacy;
+  return { title, description };
+}
 
 const UPDATED = '2026年6月11日';
 

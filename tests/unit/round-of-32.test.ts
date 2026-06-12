@@ -177,16 +177,13 @@ describe('resolveRoundOf32Assignments', () => {
     expect(thirdTeamIds).toEqual(['A3', 'B3', 'C3', 'D3', 'E3', 'F3', 'G3', 'H3']);
   });
 
-  it('3位が8グループ未満なら third place スロットは全て null（部分適用）', () => {
-    // 9グループだけ順位表を与える → 3位は9だが、ここでは敢えて3位を8未満に絞る:
-    // 4グループのみ3位を持たせる。
+  it('グループが12組に満たない（4組のみ）なら確定ゲートで全スロット null', () => {
+    // T-46 ゲート導入前は「与えたグループの 1位/2位だけ部分適用」だったが、
+    // 全12組消化が確定単位になったため、12組未満では一切 bind しない。
     const partial: GroupStandingsEntry[] = ALL_GROUPS.slice(0, 4).map((g) => groupStandings(g));
     const result = resolveRoundOf32Assignments(R32_SLOTS, partial);
-    const thirds = result.filter((r) => /third place$/i.test(r.slot));
-    expect(thirds.length).toBe(8);
-    expect(thirds.every((r) => r.teamId === null)).toBe(true);
-    // ただし与えたグループの 1位/2位は解決される（部分適用の確認）。
-    expect(result.find((r) => r.matchId === 73 && r.side === 'home')!.teamId).toBe('A2');
+    expect(result.length).toBe(R32_SLOTS.length);
+    expect(result.every((r) => r.teamId === null)).toBe(true);
   });
 
   it('結果は入力スロットと1:1（件数・matchId/side 保持）', () => {
@@ -195,5 +192,48 @@ describe('resolveRoundOf32Assignments', () => {
     expect(result.map((r) => `${r.matchId}-${r.side}`)).toEqual(
       R32_SLOTS.map((s) => `${s.matchId}-${s.side}`),
     );
+  });
+
+  // ---- T-46: グループ未確定なら R32 を前倒し充填しない（確定ゲート） ----
+
+  /** 全グループ4チームを played=0 にした「グループステージ未消化」状態の12組。 */
+  function twelveGroupsUnplayed(): GroupStandingsEntry[] {
+    return ALL_GROUPS.map((g) => ({
+      group: g,
+      standings: [1, 2, 3, 4].map((pos) => standing(g, pos, { played: 0 })),
+    }));
+  }
+
+  it('グループ未消化（played=0）なら全スロット null（前倒し充填しない）', () => {
+    const result = resolveRoundOf32Assignments(R32_SLOTS, twelveGroupsUnplayed());
+    expect(result.length).toBe(R32_SLOTS.length);
+    expect(result.every((r) => r.teamId === null)).toBe(true);
+  });
+
+  it('一部グループだけ消化済み（全組未完）でも全スロット null（確定単位は全グループ）', () => {
+    // A 組だけ played=3、残りは played=0。全組消化前なので bind しない。
+    const groups: GroupStandingsEntry[] = ALL_GROUPS.map((g) => ({
+      group: g,
+      standings: [1, 2, 3, 4].map((pos) =>
+        standing(g, pos, { played: g === 'A' ? 3 : 0 }),
+      ),
+    }));
+    const result = resolveRoundOf32Assignments(R32_SLOTS, groups);
+    expect(result.every((r) => r.teamId === null)).toBe(true);
+    // A 組の暫定首位 A1 も R32(79 home = Group A winners) に出てはいけない。
+    expect(result.find((r) => r.matchId === 79 && r.side === 'home')!.teamId).toBe(null);
+  });
+
+  it('グループが12組未満（取込途中）でも全スロット null', () => {
+    const partial = ALL_GROUPS.slice(0, 11).map((g) => groupStandings(g));
+    const result = resolveRoundOf32Assignments(R32_SLOTS, partial);
+    expect(result.every((r) => r.teamId === null)).toBe(true);
+  });
+
+  it('全12組消化完了で初めて 1位/2位/3位を解決する（ゲート解除）', () => {
+    // twelveGroups() は played=3（消化済み）。従来挙動どおり bind される。
+    const result = resolveRoundOf32Assignments(R32_SLOTS, twelveGroups());
+    expect(result.find((r) => r.matchId === 79 && r.side === 'home')!.teamId).toBe('A1');
+    expect(result.find((r) => r.matchId === 73 && r.side === 'home')!.teamId).toBe('A2');
   });
 });

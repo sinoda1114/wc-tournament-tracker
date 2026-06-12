@@ -1,6 +1,9 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
+import { getDictionary } from '@/lib/i18n/dictionary';
+import { resolveLocale } from '@/lib/i18n/server';
+
 import styles from '../legal.module.css';
 
 /*
@@ -14,10 +17,11 @@ import styles from '../legal.module.css';
  *   - 販売価格は購入手続き画面（Stripe Checkout）に表示する方式。決済導線の実装は #14。
  */
 
-export const metadata: Metadata = {
-  title: '利用規約 | MatchFav',
-  description: 'MatchFav（FIFA非公認の非公式ファンサイト）の利用規約です。',
-};
+// T-19: metadata はロケール対応（本文の多言語化は別タスク）。
+export async function generateMetadata(): Promise<Metadata> {
+  const { title, description } = getDictionary(await resolveLocale()).meta.terms;
+  return { title, description };
+}
 
 const UPDATED = '2026年6月11日';
 

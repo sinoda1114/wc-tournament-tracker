@@ -8,6 +8,60 @@ export const pt: Dictionary = {
       description:
         'Jogos, resultados, classificações, sedes e elencos da Copa do Mundo 2026, além dos palpites de todos, em um só lugar. Salve suas seleções favoritas e encontre seus jogos rapidamente. Site de fãs não oficial (sem vínculo com a FIFA).',
     },
+    groups: {
+      title: 'Fase de grupos',
+      description:
+        'Classificações e todos os 72 jogos de 48 seleções em 12 grupos. Explore a fase de grupos da Copa 2026 com jogos e resultados.',
+    },
+    groupDetail: {
+      title: 'Grupo {group}',
+      description:
+        'Classificação e resultados do Grupo {group} da Copa 2026. Seleções, jogos e calendário em um só lugar.',
+    },
+    teams: {
+      title: 'Seleções',
+      description:
+        'Explore e pesquise todas as seleções da Copa 2026. Confira o elenco, o técnico e o grupo de cada uma.',
+    },
+    teamDetail: {
+      title: '{name}',
+      description:
+        'Elenco e técnico de {name}. A convocação completa para a Copa 2026 em um só lugar.',
+      fallback: 'Seleção',
+    },
+    matchDetail: {
+      title: '{home} vs {away} ({stage})',
+      description:
+        '{stage}: “{home} vs {away}” — jogo, sede e resultado. Realizado em {stadium} ({city}).',
+      fallback: 'Detalhes do jogo',
+    },
+    prediction: {
+      title: 'Palpite do campeão',
+      description:
+        'Combinamos o desempenho em Copas anteriores, o ranking da FIFA, os resultados da Copa 2026 e os votos de todos para estimar as chances de título de cada seleção. Ligue ou desligue os fatores para mudar o palpite.',
+    },
+    rankings: {
+      title: 'Classificações',
+      description:
+        'Artilheiros e cartões da Copa 2026, somados automaticamente a partir dos jogos registrados.',
+    },
+    favorites: {
+      title: 'Favoritos',
+      description:
+        'Reúna suas seleções favoritas e os jogos delas em uma só tela. Não perca as seleções que você acompanha na Copa 2026.',
+    },
+    terms: {
+      title: 'Termos de Uso | MatchFav',
+      description: 'Termos de Uso do MatchFav, um site de fãs não oficial (sem vínculo com a FIFA).',
+    },
+    privacy: {
+      title: 'Política de Privacidade | MatchFav',
+      description: 'Política de Privacidade do MatchFav, um site de fãs não oficial (sem vínculo com a FIFA).',
+    },
+    tokushoho: {
+      title: 'Aviso da Lei de Transações Comerciais | MatchFav',
+      description: 'Aviso do MatchFav com base na Lei japonesa sobre Transações Comerciais Especificadas.',
+    },
   },
   nav: {
     label: 'Navegação principal',
@@ -202,6 +256,8 @@ export const pt: Dictionary = {
     groupCount: '{label} ({count})',
     noteArg:
       'Nota: a Argentina aparece com 25 jogadores. Leonardo Balerdi foi cortado por lesão e, em 11 de junho de 2026, nenhum substituto foi anunciado. Vamos atualizar assim que uma convocação for confirmada.',
+    noteJpn:
+      'Nota: Wataru Endo deixou a convocação após o agravamento da lesão no pé esquerdo e anunciou sua aposentadoria da seleção. Shuto Machino (FW) foi convocado em seu lugar e assume a camisa 6.',
   },
   prediction: {
     title: 'Palpite do campeão',
@@ -219,6 +275,7 @@ export const pt: Dictionary = {
     onlyWc2026:
       'Calculado apenas com o desempenho na WC2026. No início do torneio há poucas partidas, então pequenos resultados mexem muito nos números e geram viés. A precisão melhora conforme as partidas avançam; veja como uma tendência aproximada por enquanto.',
     teamSquadAria: 'Ver o elenco de {name}',
+    eliminatedAria: '{name} está eliminado (não é mais candidato ao título)',
     showTop: 'Mostrar somente os primeiros',
     showAll: 'Mostrar as {count} seleções',
   },
@@ -249,6 +306,11 @@ export const pt: Dictionary = {
     noteLine1:
       'Você pode votar uma vez por fase conforme o torneio avança ({progression}), e o último voto de cada usuário é refletido no palpite do público.',
     noteNoChange: 'Os votos não podem ser alterados depois de registrados na mesma fase.',
+    archiveTitle: 'Resultados de fases anteriores (arquivo)',
+    archiveDesc: 'Os resultados das fases encerradas são mantidos, não reiniciados. Veja as seleções mais votadas de cada fase.',
+    archiveTotal: '{count} votos no total',
+    archiveVotes: '{count} votos',
+    archiveEmpty: 'Não houve votos nesta fase.',
   },
   paywall: {
     bannerAria: 'Aviso de preço',

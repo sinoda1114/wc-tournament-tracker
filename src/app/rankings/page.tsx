@@ -3,19 +3,27 @@ import type { Metadata } from 'next';
 import { RankingsView } from '@/components/RankingsView';
 import { getRankingEvents } from '@/db/match-events';
 import { listTournamentMatches } from '@/db/queries';
+import { ogLocale } from '@/lib/i18n/alternates';
+import { getDictionary } from '@/lib/i18n/dictionary';
+import { resolveLocale } from '@/lib/i18n/server';
 import { aggregateCards, aggregateScorers, playerTeamKey } from '@/lib/rankings';
 import { computeSuspensions, type SuspensionFixture } from '@/lib/suspensions';
 
 // 試合結果・カードが入るたびに集計が変わるので毎回最新を出す。
 export const dynamic = 'force-dynamic';
 
-// metadata は他ページと同じく日本語固定（多言語化は T-19 で別途対応）。
-export const metadata: Metadata = {
-  title: 'ランキング',
-  description:
-    'WC 2026 の得点ランキングとカード数。記録のある試合から自動集計します。',
-  alternates: { canonical: '/rankings' },
-};
+// T-19: ロケール対応 metadata。canonical は単一URL（/rankings）固定で hreflang は付けない。
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await resolveLocale();
+  const { title, description } = getDictionary(locale).meta.rankings;
+  return {
+    title,
+    description,
+    alternates: { canonical: '/rankings' },
+    openGraph: { title, description, url: '/rankings', locale: ogLocale(locale) },
+    twitter: { title, description },
+  };
+}
 
 export default async function RankingsPage() {
   const [events, matches] = await Promise.all([

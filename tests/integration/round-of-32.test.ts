@@ -10,6 +10,9 @@ import { resolveAndPersistRoundOf32 } from '@/db/queries/round-of-32';
 let testClient: Client;
 const MIGRATIONS_DIR = resolve(process.cwd(), 'src/db/migrations');
 
+const ALL_GROUPS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'] as const;
+type GroupLetter = (typeof ALL_GROUPS)[number];
+
 async function runMigrations(client: Client) {
   const files = readdirSync(MIGRATIONS_DIR)
     .filter((file) => file.endsWith('.sql'))
@@ -29,53 +32,85 @@ async function truncate(client: Client) {
   await client.execute('DELETE FROM teams');
 }
 
-/** Group A の4チームと、順位が t1>t2>t3>t4 に確定する総当たり6試合（全 finished）を投入。 */
-async function seedGroupA(client: Client) {
+async function ensureVenue(client: Client) {
   await client.execute({
-    sql: `INSERT INTO venues (id, stadium_name, city, state, country, country_code, country_flag)
+    sql: `INSERT OR IGNORE INTO venues (id, stadium_name, city, state, country, country_code, country_flag)
           VALUES (?, ?, ?, ?, ?, ?, ?)`,
     args: ['v1', 'Stadium', 'City', 'State', 'USA', 'USA', '🇺🇸'],
   });
+}
 
-  const teams: [string, string, string, string][] = [
-    ['t1', 'チーム1', 'Team One', 'TG1'],
-    ['t2', 'チーム2', 'Team Two', 'TG2'],
-    ['t3', 'チーム3', 'Team Three', 'TG3'],
-    ['t4', 'チーム4', 'Team Four', 'TG4'],
-  ];
-  for (const [id, ja, en, code] of teams) {
+let nextMatchId = 1;
+
+/**
+ * 1グループ（4チーム）と、順位が t1>t2>t3>t4 に一意確定する総当たり6試合を投入。
+ * @param played true: 全6試合 finished（順位確定）/ false: 全6試合 scheduled（未消化）。
+ */
+async function seedGroup(client: Client, group: GroupLetter, played: boolean) {
+  const ids = [1, 2, 3, 4].map((n) => `${group.toLowerCase()}${n}`);
+  for (let i = 0; i < ids.length; i += 1) {
     await client.execute({
       sql: `INSERT INTO teams (id, name_ja, name_en, fifa_code, flag, group_name)
             VALUES (?, ?, ?, ?, ?, ?)`,
-      args: [id, ja, en, code, '🏳️', 'Group A'],
+      args: [ids[i], `チーム${ids[i]}`, `Team ${ids[i]}`, `${group}${i + 1}`, '🏳️', `Group ${group}`],
     });
   }
 
-  // 各 [id, home, away, homeScore, awayScore]。勝者が常にホーム1-0。
-  // 結果: t1=3勝(9), t2=2勝(6), t3=1勝(3), t4=0勝(0) で順位一意。
-  const groupMatches: [number, string, string, number, number][] = [
-    [1, 't1', 't2', 1, 0],
-    [2, 't1', 't3', 1, 0],
-    [3, 't1', 't4', 1, 0],
-    [4, 't2', 't3', 1, 0],
-    [5, 't2', 't4', 1, 0],
-    [6, 't3', 't4', 1, 0],
+  // 各 [home, away]。勝者が常にホーム 1-0。t1=3勝, t2=2勝, t3=1勝, t4=0勝 で一意。
+  const pairs: [string, string][] = [
+    [ids[0], ids[1]],
+    [ids[0], ids[2]],
+    [ids[0], ids[3]],
+    [ids[1], ids[2]],
+    [ids[1], ids[3]],
+    [ids[2], ids[3]],
   ];
-  for (const [id, home, away, hs, as_] of groupMatches) {
-    await client.execute({
-      sql: `INSERT INTO matches
-              (id, stage, match_date, venue_id, home_slot, away_slot, status,
-               home_team_id, away_team_id, home_score, away_score, winner_team_id, group_letter)
-            VALUES (?, 'group_stage', '2026-06-11', 'v1', '-', '-', 'finished', ?, ?, ?, ?, ?, 'A')`,
-      args: [id, home, away, hs, as_, home], // 全試合ホーム 1-0 勝ち → winner=home
-    });
+  for (const [home, away] of pairs) {
+    const id = nextMatchId;
+    nextMatchId += 1;
+    if (played) {
+      await client.execute({
+        sql: `INSERT INTO matches
+                (id, stage, match_date, venue_id, home_slot, away_slot, status,
+                 home_team_id, away_team_id, home_score, away_score, winner_team_id, group_letter)
+              VALUES (?, 'group_stage', '2026-06-11', 'v1', '-', '-', 'finished', ?, ?, 1, 0, ?, ?)`,
+        args: [id, home, away, home, group],
+      });
+    } else {
+      await client.execute({
+        sql: `INSERT INTO matches
+                (id, stage, match_date, venue_id, home_slot, away_slot, status,
+                 home_team_id, away_team_id, group_letter)
+              VALUES (?, 'group_stage', '2026-06-11', 'v1', '-', '-', 'scheduled', ?, ?, ?)`,
+        args: [id, home, away, group],
+      });
+    }
   }
+}
 
-  // R32: Group A の 1位/2位スロットを持つ試合（入口は未確定）。
+/** R32 試合（入口は未確定 = team_id NULL）を1件追加。 */
+async function seedR32Match(
+  client: Client,
+  id: number,
+  homeSlot: string,
+  awaySlot: string,
+) {
   await client.execute({
     sql: `INSERT INTO matches (id, stage, match_date, venue_id, home_slot, away_slot, status)
-          VALUES (200, 'round_of_32', '2026-06-28', 'v1', 'Group A winners', 'Group A runners-up', 'scheduled')`,
+          VALUES (?, 'round_of_32', '2026-06-28', 'v1', ?, ?, 'scheduled')`,
+    args: [id, homeSlot, awaySlot],
   });
+}
+
+/**
+ * 12グループ全てを投入。`completedGroups` に含まれるグループだけ finished（順位確定）、
+ * 残りは scheduled（未消化）。全組 played なら isGroupStageComplete=true。
+ */
+async function seedAllGroups(client: Client, completedGroups: readonly GroupLetter[]) {
+  await ensureVenue(client);
+  for (const g of ALL_GROUPS) {
+    await seedGroup(client, g, completedGroups.includes(g));
+  }
 }
 
 async function slotsOf(matchId: number): Promise<{ home: string | null; away: string | null }> {
@@ -99,36 +134,69 @@ afterAll(() => {
 
 beforeEach(async () => {
   await truncate(testClient);
-  await seedGroupA(testClient);
+  nextMatchId = 1;
 });
 
 describe('resolveAndPersistRoundOf32', () => {
-  it('グループ順位から R32 の winners(1位)/runners-up(2位) を埋める', async () => {
+  it('全12組消化済みなら R32 の winners(1位)/runners-up(2位) を埋める', async () => {
+    await seedAllGroups(testClient, ALL_GROUPS);
+    // Group A の 1位/2位スロット試合。
+    await seedR32Match(testClient, 200, 'Group A winners', 'Group A runners-up');
+
     const { updated } = await resolveAndPersistRoundOf32();
     expect(updated).toBe(2);
 
     const slots = await slotsOf(200);
-    expect(slots.home).toBe('t1'); // Group A winners = 1位
-    expect(slots.away).toBe('t2'); // Group A runners-up = 2位
+    expect(slots.home).toBe('a1'); // Group A winners = 1位
+    expect(slots.away).toBe('a2'); // Group A runners-up = 2位
   });
 
   it('冪等: 一度埋めた後の再実行は更新しない（updated=0）', async () => {
+    await seedAllGroups(testClient, ALL_GROUPS);
+    await seedR32Match(testClient, 200, 'Group A winners', 'Group A runners-up');
+
     await resolveAndPersistRoundOf32();
     const { updated } = await resolveAndPersistRoundOf32();
     expect(updated).toBe(0);
   });
 
-  it('3位スロットは8グループ未満では埋めない（null のまま）', async () => {
-    // third place スロットを持つ R32 試合を追加。Group A だけなので割当不能。
-    await testClient.execute({
-      sql: `INSERT INTO matches (id, stage, match_date, venue_id, home_slot, away_slot, status)
-            VALUES (201, 'round_of_32', '2026-06-28', 'v1', 'Group A winners', 'Group A/B/C/D third place', 'scheduled')`,
-    });
+  // ---- T-46: グループ未確定なら前倒し充填しない（確定ゲート） ----
+
+  it('全組未消化（played=0）なら R32 入口を一切埋めない（updated=0・NULL のまま）', async () => {
+    await seedAllGroups(testClient, []); // どのグループも未消化
+    await seedR32Match(testClient, 200, 'Group A winners', 'Group A runners-up');
+
+    const { updated } = await resolveAndPersistRoundOf32();
+    expect(updated).toBe(0);
+
+    const slots = await slotsOf(200);
+    expect(slots.home).toBeNull();
+    expect(slots.away).toBeNull();
+  });
+
+  it('一部グループだけ消化済み（A 組のみ）でも確定単位は全組なので埋めない', async () => {
+    await seedAllGroups(testClient, ['A']); // A 組だけ finished、残りは scheduled
+    await seedR32Match(testClient, 200, 'Group A winners', 'Group A runners-up');
+
+    const { updated } = await resolveAndPersistRoundOf32();
+    expect(updated).toBe(0);
+
+    const slots = await slotsOf(200);
+    // A 組は順位確定しているが、全組確定までは前倒し bind しない。
+    expect(slots.home).toBeNull();
+    expect(slots.away).toBeNull();
+  });
+
+  it('全12組消化済みなら third place スロットも実チームで埋まる', async () => {
+    await seedAllGroups(testClient, ALL_GROUPS);
+    // FIFA 公式の third-place ホスト試合 id=74（Group E winners / 3位）。
+    // 3位割当は host 試合 id をキーにするため、実 id(74) を使う。
+    await seedR32Match(testClient, 74, 'Group E winners', 'Group A/B/C/D/F third place');
 
     await resolveAndPersistRoundOf32();
 
-    const slots = await slotsOf(201);
-    expect(slots.home).toBe('t1'); // winners は埋まる
-    expect(slots.away).toBeNull(); // 3位は8グループ揃わないと割り当てない
+    const slots = await slotsOf(74);
+    expect(slots.home).toBe('e1'); // winners は埋まる
+    expect(slots.away).not.toBeNull(); // 全組確定済みなので3位も割り当て済み
   });
 });

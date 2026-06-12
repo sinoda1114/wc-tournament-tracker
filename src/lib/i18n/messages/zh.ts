@@ -8,6 +8,60 @@ export const zh: Dictionary = {
       description:
         '2026世界杯的赛程、比分、积分榜、球场与阵容，以及大家的夺冠预测，全部集中在一处。收藏你喜欢的球队，快速找到想看的比赛。非官方球迷网站（与FIFA无关）。',
     },
+    groups: {
+      title: '小组赛',
+      description:
+        '48支球队、12个小组的积分榜与全部72场比赛。按赛程与比分浏览2026世界杯小组赛。',
+    },
+    groupDetail: {
+      title: '{group}组',
+      description:
+        '2026世界杯{group}组的积分榜与比赛结果，汇集参赛球队与赛程。',
+    },
+    teams: {
+      title: '参赛球队',
+      description:
+        '浏览并搜索2026世界杯的全部参赛球队，查看各队阵容、主教练与所属小组。',
+    },
+    teamDetail: {
+      title: '{name}',
+      description:
+        '{name} 的参赛阵容与主教练，集中呈现2026世界杯的完整名单。',
+      fallback: '参赛球队',
+    },
+    matchDetail: {
+      title: '{home} vs {away}（{stage}）',
+      description:
+        '{stage}「{home} 对 {away}」的赛程、球场与结果。在{stadium}（{city}）举行。',
+      fallback: '比赛详情',
+    },
+    prediction: {
+      title: '夺冠预测',
+      description:
+        '结合历届世界杯战绩、FIFA排名、2026世界杯成绩与大家的预测，估算各队夺冠概率。开关各项指标即可改变预测。',
+    },
+    rankings: {
+      title: '排行榜',
+      description:
+        '2026世界杯的射手榜与红黄牌统计，依据已记录的比赛自动汇总。',
+    },
+    favorites: {
+      title: '收藏',
+      description:
+        '把你收藏的球队及其比赛集中在一个视图里。不错过你在2026世界杯关注的球队。',
+    },
+    terms: {
+      title: '服务条款 | MatchFav',
+      description: 'MatchFav（与FIFA无关的非官方球迷网站）的服务条款。',
+    },
+    privacy: {
+      title: '隐私政策 | MatchFav',
+      description: 'MatchFav（与FIFA无关的非官方球迷网站）的隐私政策。',
+    },
+    tokushoho: {
+      title: '日本特定商业交易法标示 | MatchFav',
+      description: 'MatchFav 依据日本《特定商业交易法》的标示。',
+    },
   },
   nav: {
     label: '主导航',
@@ -201,6 +255,8 @@ export const zh: Dictionary = {
     groupCount: '{label}（{count}）',
     noteArg:
       '注：阿根廷目前显示25名球员。莱昂纳多·巴莱尔迪因伤退出，截至2026年6月11日尚未公布替补人选。一旦确认补招，我们将及时更新。',
+    noteJpn:
+      '注：远藤航因左脚伤势加重退出本届大赛名单，并宣布从日本国家队退役。町野修斗（FW）获得递补征召，接过6号球衣。',
   },
   prediction: {
     title: '夺冠预测',
@@ -217,6 +273,7 @@ export const zh: Dictionary = {
     onlyWc2026:
       '仅根据WC2026表现计算。赛事初期场次较少，少量结果会使数字大幅波动并产生偏差。随着比赛推进精度会提高，目前请作为大致趋势参考。',
     teamSquadAria: '查看{name}的球员',
+    eliminatedAria: '{name}已淘汰（不再是夺冠热门）',
     showTop: '仅显示前列',
     showAll: '显示全部{count}支球队',
   },
@@ -244,6 +301,11 @@ export const zh: Dictionary = {
     noteLine1:
       '随着赛事推进（{progression}），每个阶段可投票1次，每位用户的最新一票会反映到大家的预测中。',
     noteNoChange: '同一阶段投票后不可更改。',
+    archiveTitle: '往轮投票结果（历史）',
+    archiveDesc: '已截止阶段的投票结果会保留，不会重置。可查看每一轮的得票前列。',
+    archiveTotal: '共{count}票',
+    archiveVotes: '{count}票',
+    archiveEmpty: '本轮没有投票。',
   },
   paywall: {
     bannerAria: '收费提示',

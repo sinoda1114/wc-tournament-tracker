@@ -14,22 +14,33 @@ import {
 import { computeFactorScores, type FactorKey } from '@/lib/champion-prediction';
 import {
   aggregateLatestVotes,
+  aggregateVotesByStage,
   aliveTeamIdsForStage,
-  currentVotingStage,
+  archivedVotingStages,
+  eliminatedTeamIds,
+  votableStage,
   VOTING_STAGES,
+  type VotingStage,
 } from '@/lib/crowd';
+import { ogLocale } from '@/lib/i18n/alternates';
 import { getDictionary } from '@/lib/i18n/dictionary';
 import { resolveLocale } from '@/lib/i18n/server';
 import { readVoterId } from '@/lib/voter';
 
 export const dynamic = 'force-dynamic';
 
-export const metadata: Metadata = {
-  title: '優勝国予想',
-  description:
-    '過去W杯成績・FIFAランク・WC2026成績・みんなの予想を掛け合わせて優勝確率を算出します。指標のON/OFFで予想が変わります。',
-  alternates: { canonical: '/prediction' },
-};
+// T-19: ロケール対応 metadata。canonical は単一URL（/prediction）固定で hreflang は付けない。
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await resolveLocale();
+  const { title, description } = getDictionary(locale).meta.prediction;
+  return {
+    title,
+    description,
+    alternates: { canonical: '/prediction' },
+    openGraph: { title, description, url: '/prediction', locale: ogLocale(locale) },
+    twitter: { title, description },
+  };
+}
 
 /** Map は RSC 境界を越えられないため、クライアントへはプレーンオブジェクトで渡す。 */
 function serializeFactors(
@@ -53,10 +64,11 @@ export default async function PredictionPage() {
 
   const locale = await resolveLocale();
   const dict = getDictionary(locale);
+  const now = new Date();
 
-  // 決勝T関連（投票パネル＝決勝T投票）は課金壁の対象。
-  // サーバ判定（クライアント詐称不可）。無料期間中は誰でも解放、決勝T突入後は
-  // 「購入済み or 72h救済」のみ解放。それ以外は VotePanel の代わりに PaywallLock を出す。
+  // 決勝トーナメント投票（投票パネル）は課金壁の対象。サーバ判定（クライアント詐称不可）。
+  // 無料期間中は誰でも解放、決勝T突入後は「購入済み or 72h救済」のみ解放。
+  // それ以外は VotePanel の代わりに PaywallLock を出す。group_stage 投票は無料（T-51）。
   const access = await resolveAccess();
 
   // ③2026成績は matches から、④みんなの予想は投票からライブ計算される。
@@ -69,8 +81,11 @@ export default async function PredictionPage() {
     fifaCode: t.fifaCode,
   }));
 
-  // 投票パネル用：現在ステージと候補（生存チーム）、自分の既投票。
-  const stage = currentVotingStage(matches);
+  // 優勝予想は常設。敗退が確定したチームはグレー化（選択不可）にするため ID を渡す。
+  const eliminatedIds = [...eliminatedTeamIds(matches)];
+
+  // 投票パネル用：いま投票できるステージ（open＝次ステージ未開始）と候補（生存チーム）、自分の既投票。
+  const stage = votableStage(matches, now);
   const aliveIds = stage ? new Set(aliveTeamIdsForStage(matches, stage)) : new Set<string>();
   const candidates = teamRatings
     .filter((t) => aliveIds.has(t.id))
@@ -86,6 +101,28 @@ export default async function PredictionPage() {
       ? dict.match.stage[VOTING_STAGES[stageIndex + 1]]
       : null;
 
+  // アーカイブ：過去ラウンドの投票結果を消さずに履歴として閲覧できるようにする。
+  const teamMetaById = new Map(
+    teamRatings.map((t) => [
+      t.id,
+      { id: t.id, nameJa: t.nameJa, nameEn: t.nameEn, fifaCode: t.fifaCode },
+    ]),
+  );
+  const archivedStages: VotingStage[] = archivedVotingStages(matches, now);
+  const archives = archivedStages.map((archStage) => {
+    const counts = aggregateVotesByStage(votes, archStage);
+    const total = [...counts.values()].reduce((sum, n) => sum + n, 0);
+    const results = [...counts.entries()]
+      .map(([teamId, count]) => ({
+        team: teamMetaById.get(teamId) ?? null,
+        teamId,
+        count,
+      }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5);
+    return { stage: archStage, label: dict.match.stage[archStage], total, results };
+  });
+
   return (
     <Container size="xl" py="xl">
       <Stack gap="lg">
@@ -97,6 +134,7 @@ export default async function PredictionPage() {
         <ChampionPrediction
           teams={predictionTeams}
           factors={serializeFactors(factors)}
+          eliminatedIds={eliminatedIds}
         />
 
         {access.hasAccess ? (
@@ -106,6 +144,7 @@ export default async function PredictionPage() {
             nextStageLabel={nextStageLabel}
             candidates={candidates}
             myVoteTeamId={myVoteTeamId}
+            archives={archives}
           />
         ) : (
           <PaywallLock locale={locale} dict={dict} />

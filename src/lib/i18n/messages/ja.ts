@@ -4,12 +4,71 @@
  * 文字列は段階的に増やしていく（まずは nav / header / language）。
  */
 export const ja = {
-  // 公開トップの metadata（title/description）。#19 でロケール別URLが各言語の <title>/<meta> を返す。
+  // 公開ページの metadata（title/description）。#19/T-19 でロケール別の <title>/<meta>/OGP を返す。
+  // 動的ページ（groupDetail/teamDetail/matchDetail）は {group} 等のプレースホルダをページ側で置換する。
   meta: {
     home: {
       title: 'ワールドカップ2026 試合日程・結果・優勝予想（非公式）',
       description:
         'ワールドカップ2026の日程・結果・順位・会場・出場選手と、みんなの優勝予想をひとつにまとめた非公式ファンサイト。お気に入りの国を登録して、見たい試合をすぐチェックできます（FIFA非公認）。',
+    },
+    groups: {
+      title: 'グループリーグ',
+      description:
+        '48ヶ国 × 12 グループの順位表と全 72 試合。WC 2026 のグループリーグを日程・結果つきで一覧できます。',
+    },
+    groupDetail: {
+      // {group} = グループの文字（A〜L）。
+      title: 'グループ{group}',
+      description:
+        'WC 2026 グループ{group}の順位表と試合結果。出場国と日程をまとめています。',
+    },
+    teams: {
+      title: '出場国一覧',
+      description:
+        'WC 2026 の出場国を一覧・検索できます。各国の代表メンバーや監督、所属グループを確認できます。',
+    },
+    teamDetail: {
+      // {name} = 国名（表示言語）、{nameEn} = 英語名。
+      title: '{name} 代表',
+      description:
+        '{name}（{nameEn}）の出場メンバー・監督。WC 2026 の代表スカッドをまとめています。',
+      fallback: '出場国',
+    },
+    matchDetail: {
+      // {home}/{away} = 対戦カード、{stage} = ステージ名、{stadium}/{city} = 会場。
+      title: '{home} vs {away}（{stage}）',
+      description:
+        '{stage}「{home} 対 {away}」の日程・会場・結果。{stadium}（{city}）で開催。',
+      fallback: '試合詳細',
+    },
+    prediction: {
+      title: '優勝国予想',
+      description:
+        '過去W杯成績・FIFAランク・WC2026成績・みんなの予想を掛け合わせて優勝確率を算出します。指標のON/OFFで予想が変わります。',
+    },
+    rankings: {
+      title: 'ランキング',
+      description:
+        'WC 2026 の得点ランキングとカード数。記録のある試合から自動集計します。',
+    },
+    favorites: {
+      title: 'お気に入り',
+      description:
+        'お気に入りに登録した国と、その試合だけをまとめてチェック。WC 2026 の気になる国を見逃しません。',
+    },
+    terms: {
+      title: '利用規約 | MatchFav',
+      description: 'MatchFav（FIFA非公認の非公式ファンサイト）の利用規約です。',
+    },
+    privacy: {
+      title: 'プライバシーポリシー | MatchFav',
+      description:
+        'MatchFav（FIFA非公認の非公式ファンサイト）のプライバシーポリシーです。',
+    },
+    tokushoho: {
+      title: '特定商取引法に基づく表記 | MatchFav',
+      description: 'MatchFav の特定商取引法に基づく表記です。',
     },
   },
   nav: {
@@ -216,6 +275,8 @@ export const ja = {
     groupCount: '{label}（{count}）',
     noteArg:
       '※ アルゼンチン代表は Leonardo Balerdi 選手が負傷のため辞退し、2026年6月11日時点で代替選手が未発表のため25名で表示しています。追加召集が発表され次第、反映します。',
+    noteJpn:
+      '※ 遠藤航選手は左足の負傷悪化により大会メンバーから離脱し、日本代表からの引退を発表しました。代わって町野修斗選手（FW）が追加招集され、背番号6を引き継いでいます。',
   },
   // 優勝国予想（ChampionPrediction）。{count}=チーム数・{name}=国名。
   prediction: {
@@ -234,6 +295,7 @@ export const ja = {
     onlyWc2026:
       'WC2026成績のみで算出しています。大会序盤は消化試合が少なく、わずかな結果に数字が大きく振られて偏りが出ます。試合が進むほど精度が上がるため、現時点ではおおまかな傾向としてご覧ください。',
     teamSquadAria: '{name}の選手を見る',
+    eliminatedAria: '{name}は敗退済み（優勝予想の対象外）',
     showTop: '上位だけ表示',
     showAll: '全{count}チームを表示',
   },
@@ -262,6 +324,11 @@ export const ja = {
     noteLine1:
       '大会の進行（{progression}）ごとに1回ずつ投票でき、各ユーザーの最新の票が「みんなの予想」に反映されます。',
     noteNoChange: '同じステージでは投票後の変更はできません。',
+    archiveTitle: '過去ラウンドの投票結果（履歴）',
+    archiveDesc: '締め切られたラウンドの投票結果は消えずに残ります。各ラウンドの上位を見られます。',
+    archiveTotal: '計{count}票',
+    archiveVotes: '{count}票',
+    archiveEmpty: 'このラウンドの投票はありませんでした。',
   },
   // サイト共通フッタ（SiteFooter）。{year}=西暦。
   // 課金壁の予告バナー（PaywallBanner・#26）。{price}=ロケール別価格。

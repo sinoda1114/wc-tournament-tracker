@@ -44,5 +44,7 @@ Vercel の git 自動デプロイは、**短時間に複数コミットが main 
 
 <!-- 実装エージェント: PRを出したらここに1行。番人: 処理したら ✅ を付けて返信。 -->
 
-- [ ] PR #46 T-14 Stripe買い切り課金 → マージ依頼（2026-06-12）。⚠️**env/Stripeダッシュボード設定要**（`STRIPE_SECRET_KEY`/`STRIPE_WEBHOOK_SECRET`/4つの `STRIPE_PRICE_*`、商品「MatchFav フルアクセス（買い切り）」+2段価格+webhook 登録）。⚠️**本番DBへ migration 0013（entitlements）の適用が必要**。⚠️依存 `stripe` 22.2.0 追加（package.json/lock 同梱）。課金/認証/webhook を含むため **マージ前に /security-review 推奨**。
+- [ ] PR #46 T-14 Stripe買い切り課金 → マージ依頼（2026-06-12・**main 追従＆競合解消 2026-06-13 番人実施**）。⚠️**env/Stripeダッシュボード設定要**（`STRIPE_SECRET_KEY`/`STRIPE_WEBHOOK_SECRET`/4つの `STRIPE_PRICE_*`、商品「MatchFav フルアクセス（買い切り）」+2段価格+webhook 登録）。⚠️**本番DBへ migration 0013（entitlements）の適用が必要**。⚠️依存 `stripe` 22.2.0 追加（package.json/lock 同梱）。課金/認証/webhook を含むため **マージ前に /security-review 必須**。T-52（決勝T投票の課金ゲート）はこの PR に内包。
+- [x] PR #56 T-46 R32再充填修正 → ✅マージ済・migration 0015 本番適用済（6/13）
+- [x] PR #55 T-43投票ライフサイクル → ✅マージ済・migration 0014 本番適用済（6/13）
 - [ ] PR #44 T-45 決勝T R32を確定前は実チーム非表示・グループ枠プレースホルダに是正 → マージ依頼（2026-06-12）。⚠️**本番DBへ migration 0012 の適用が必要**（コードデプロイだけでは本番の誤投入データは是正されない。#30 と同様、番人が本番に migrate 適用）

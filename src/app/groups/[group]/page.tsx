@@ -8,6 +8,7 @@ import { FavoriteFilterToggle } from '@/components/FavoriteFilterToggle';
 import { GroupCard } from '@/components/GroupCard';
 import { getGroupTeams, listGroupMatches } from '@/db/queries';
 import { filterMatchesByDates, parseDatesParam, parseQuickDayParam, resolveQuickDay } from '@/lib/date-filter';
+import { ogLocale } from '@/lib/i18n/alternates';
 import { getDictionary } from '@/lib/i18n/dictionary';
 import { resolveLocale, resolveTimeZone } from '@/lib/i18n/server';
 
@@ -33,21 +34,26 @@ type PageProps = {
   searchParams: Promise<{ date?: string | string[]; day?: string | string[] }>;
 };
 
+// T-19: ロケール対応 metadata。グループ文字を各言語テンプレに埋め込む。
+// canonical は単一URL（/groups/<g>）固定で hreflang は付けない。
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { group } = await params;
   const lower = group.toLowerCase();
+  const locale = await resolveLocale();
+  const meta = getDictionary(locale).meta;
   if (!VALID_GROUPS.has(lower)) {
-    return { title: 'グループリーグ' };
+    return { title: meta.groups.title };
   }
   const letter = lower.toUpperCase();
-  const title = `グループ${letter}`;
-  const description = `WC 2026 グループ${letter}の順位表と試合結果。出場国と日程をまとめています。`;
+  const title = meta.groupDetail.title.replace('{group}', letter);
+  const description = meta.groupDetail.description.replace('{group}', letter);
 
   return {
     title,
     description,
     alternates: { canonical: `/groups/${lower}` },
-    openGraph: { title, description, url: `/groups/${lower}` },
+    openGraph: { title, description, url: `/groups/${lower}`, locale: ogLocale(locale) },
+    twitter: { title, description },
   };
 }
 

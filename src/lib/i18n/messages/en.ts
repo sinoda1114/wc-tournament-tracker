@@ -8,6 +8,60 @@ export const en: Dictionary = {
       description:
         'Schedules, results, standings, venues and squads for World Cup 2026, plus everyone’s champion predictions — all in one place. Save your favorite nations and find your matches fast. An unofficial fan site (not affiliated with FIFA).',
     },
+    groups: {
+      title: 'Group stage',
+      description:
+        'Standings and all 72 matches across 48 nations and 12 groups. Browse the WC 2026 group stage with schedules and results.',
+    },
+    groupDetail: {
+      title: 'Group {group}',
+      description:
+        'Standings and results for WC 2026 Group {group}. Teams, fixtures and schedule in one place.',
+    },
+    teams: {
+      title: 'Teams',
+      description:
+        'Browse and search every nation at WC 2026. Check each squad, head coach and group.',
+    },
+    teamDetail: {
+      title: '{name}',
+      description:
+        '{name} squad and head coach. The full WC 2026 roster in one place.',
+      fallback: 'Team',
+    },
+    matchDetail: {
+      title: '{home} vs {away} ({stage})',
+      description:
+        '{stage}: “{home} vs {away}” — schedule, venue and result. Played at {stadium} ({city}).',
+      fallback: 'Match details',
+    },
+    prediction: {
+      title: 'Champion prediction',
+      description:
+        'We combine past World Cup form, FIFA ranking, WC 2026 results and everyone’s votes to estimate each nation’s title odds. Toggle the factors to reshape the forecast.',
+    },
+    rankings: {
+      title: 'Rankings',
+      description:
+        'Top scorers and card counts for WC 2026, tallied automatically from recorded matches.',
+    },
+    favorites: {
+      title: 'Favorites',
+      description:
+        'Keep your favorite nations and their matches in one view. Never miss the teams you care about at WC 2026.',
+    },
+    terms: {
+      title: 'Terms of Service | MatchFav',
+      description: 'Terms of Service for MatchFav, an unofficial fan site (not affiliated with FIFA).',
+    },
+    privacy: {
+      title: 'Privacy Policy | MatchFav',
+      description: 'Privacy Policy for MatchFav, an unofficial fan site (not affiliated with FIFA).',
+    },
+    tokushoho: {
+      title: 'Commercial Transactions Act Notice | MatchFav',
+      description: 'MatchFav notice based on Japan’s Act on Specified Commercial Transactions.',
+    },
   },
   nav: {
     label: 'Main navigation',
@@ -201,6 +255,8 @@ export const en: Dictionary = {
     groupCount: '{label} ({count})',
     noteArg:
       'Note: Argentina is shown with 25 players. Leonardo Balerdi withdrew through injury and, as of 11 June 2026, no replacement has been announced. We will update this as soon as a call-up is confirmed.',
+    noteJpn:
+      'Note: Wataru Endo has left the squad after his left-foot injury worsened and announced his retirement from the national team. Shuto Machino (FW) has been called up as his replacement and takes over the number 6 shirt.',
   },
   prediction: {
     title: 'Champion prediction',
@@ -218,6 +274,7 @@ export const en: Dictionary = {
     onlyWc2026:
       'Calculated from WC2026 form only. Early in the tournament few matches are played, so small results swing the numbers and create bias. Accuracy improves as matches progress, so treat this as a rough trend for now.',
     teamSquadAria: 'View the {name} squad',
+    eliminatedAria: '{name} is eliminated (no longer a title contender)',
     showTop: 'Show top only',
     showAll: 'Show all {count} teams',
   },
@@ -245,6 +302,11 @@ export const en: Dictionary = {
     noteLine1:
       'You can vote once per stage as the tournament progresses ({progression}), and the latest vote from each user is reflected in the crowd prediction.',
     noteNoChange: 'Votes cannot be changed once cast in the same stage.',
+    archiveTitle: 'Past round results (archive)',
+    archiveDesc: 'Results from closed rounds are kept, not reset. See the top picks for each round.',
+    archiveTotal: '{count} votes total',
+    archiveVotes: '{count} votes',
+    archiveEmpty: 'No votes were cast in this round.',
   },
   paywall: {
     bannerAria: 'Pricing notice',

@@ -41,6 +41,127 @@ export function currentVotingStage(
 }
 
 /**
+ * 投票のライフサイクル状態。
+ *   not_yet_open … 対象チームがまだ揃っていない（出場枠が未確定）＝まだ開かない
+ *   open         … チームが揃い、次の投票ステージがまだ始まっていない＝投票受付中
+ *   closed       … 次の投票ステージが始まった＝ロック（結果待ち/進行中。結果は確定表示）
+ *   archived     … そのラウンドの全試合が終了＝履歴（消さずに残す）
+ *
+ * ＊「締切＝次の投票ステージの初戦KO時刻」を採用する（マネタイズ確定仕様）。
+ *   そのステージの投票はステージ進行中ずっと開き、次ステージに入った瞬間ロックする
+ *   （＝「各ステージの最終日まで開放／次ステージでロック」）。グループ戦投票を
+ *   開幕戦で即ロックしていた旧仕様（"全締切" の死に体状態の原因）を是正する。
+ *   1ステージ＝1票・投じたらロックは従来どおり（ガチ予想）。
+ */
+export type VotingState = 'not_yet_open' | 'open' | 'closed' | 'archived';
+
+type LifecycleMatch = Pick<
+  Match,
+  'stage' | 'status' | 'homeTeamId' | 'awayTeamId' | 'kickoffAt'
+>;
+
+/**
+ * このステージの投票締切＝「次の投票ステージの初戦KO時刻」。
+ * ＝そのステージの投票はステージ進行中ずっと開き、次ステージが始まったらロックする。
+ * 進行順で後ろの VOTING_STAGES に属する試合の最小 kickoffAt を返す。無ければ null（締切なし）。
+ */
+function nextStageFirstKickoff(
+  matches: LifecycleMatch[],
+  stage: VotingStage,
+): Date | null {
+  const currentRank = (VOTING_STAGES as readonly string[]).indexOf(stage);
+  let earliest: Date | null = null;
+  for (const match of matches) {
+    const rank = (VOTING_STAGES as readonly string[]).indexOf(match.stage);
+    if (rank <= currentRank || !match.kickoffAt) continue;
+    const at = new Date(match.kickoffAt);
+    if (Number.isNaN(at.getTime())) continue;
+    if (!earliest || at.getTime() < earliest.getTime()) earliest = at;
+  }
+  return earliest;
+}
+
+/**
+ * 指定ステージの投票ライフサイクル状態を、現在時刻・次ステージ開始時刻・出場確定状況から判定する純関数。
+ * DB に締切フラグを持たせず、サーバ側で一意に算出する（後方互換・冪等）。
+ */
+export function stageVotingState(
+  matches: LifecycleMatch[],
+  stage: VotingStage,
+  now: Date = new Date(),
+): VotingState {
+  const inStage = matches.filter((m) => m.stage === stage);
+  // そのステージの試合がまだ無い＝開かない。
+  if (inStage.length === 0) return 'not_yet_open';
+
+  // 全試合終了＝履歴（アーカイブ）。
+  if (inStage.every((m) => m.status === 'finished')) return 'archived';
+
+  // 対象チームがまだ1チームも確定していない＝開かない。
+  const hasAnyTeam = inStage.some((m) => m.homeTeamId || m.awayTeamId);
+  if (!hasAnyTeam) return 'not_yet_open';
+
+  // 締切＝次の投票ステージの初戦KO時刻。到来済み（＝次ステージ開始済み）なら closed（ロック）。
+  // 次ステージが無い(final)／未定なら締切なし＝全試合終了で archived になるまで open。
+  const deadline = nextStageFirstKickoff(matches, stage);
+  if (deadline && now.getTime() >= deadline.getTime()) return 'closed';
+
+  return 'open';
+}
+
+/** そのステージが今まさに投票を受け付けているか（open のときだけ true）。 */
+export function stageOpenForVoting(
+  matches: LifecycleMatch[],
+  stage: VotingStage,
+  now: Date = new Date(),
+): boolean {
+  return stageVotingState(matches, stage, now) === 'open';
+}
+
+/**
+ * いま投票できるステージ＝進行順で最初に open になっているステージ。
+ * 無ければ null（受付中のステージなし）。
+ * ＊ currentVotingStage（未終了試合の有無で判定）と異なり、次ステージ開始締切を考慮する。
+ */
+export function votableStage(
+  matches: LifecycleMatch[],
+  now: Date = new Date(),
+): VotingStage | null {
+  for (const stage of VOTING_STAGES) {
+    if (stageVotingState(matches, stage, now) === 'open') return stage;
+  }
+  return null;
+}
+
+/** アーカイブ済み（履歴化された）投票ステージを進行順で返す。 */
+export function archivedVotingStages(
+  matches: LifecycleMatch[],
+  now: Date = new Date(),
+): VotingStage[] {
+  return VOTING_STAGES.filter(
+    (stage) => stageVotingState(matches, stage, now) === 'archived',
+  );
+}
+
+/**
+ * 敗退が確定したチームの teamId 集合。
+ * 決勝T（KO）で勝者が確定した試合の「敗者」を敗退扱いにする（third_place 含む）。
+ * 優勝予想で敗退チームをグレー化・選択不可にするのに使う。
+ */
+export function eliminatedTeamIds(
+  matches: Pick<Match, 'homeTeamId' | 'awayTeamId' | 'winnerTeamId' | 'status'>[],
+): Set<string> {
+  const eliminated = new Set<string>();
+  for (const m of matches) {
+    if (m.status !== 'finished' || !m.winnerTeamId) continue;
+    if (!m.homeTeamId || !m.awayTeamId) continue;
+    const loser = m.winnerTeamId === m.homeTeamId ? m.awayTeamId : m.homeTeamId;
+    eliminated.add(loser);
+  }
+  return eliminated;
+}
+
+/**
  * 指定ステージの試合に出場している（＝まだ敗退していない）teamId 一覧。投票候補に使う。
  * チーム未確定（null）の枠は除外。
  */
@@ -85,6 +206,22 @@ export function aggregateLatestVotes(votes: CrowdVote[]): Map<string, number> {
 
   const counts = new Map<string, number>();
   for (const v of latest.values()) {
+    counts.set(v.teamId, (counts.get(v.teamId) ?? 0) + 1);
+  }
+  return counts;
+}
+
+/**
+ * 指定ステージの票だけを teamId 別に集計する（アーカイブ／現ラウンドの履歴表示用）。
+ * aggregateLatestVotes と異なり、ステージをまたいだ上書きはしない（そのラウンド単独の結果）。
+ */
+export function aggregateVotesByStage(
+  votes: CrowdVote[],
+  stage: VotingStage,
+): Map<string, number> {
+  const counts = new Map<string, number>();
+  for (const v of votes) {
+    if (v.stage !== stage) continue;
     counts.set(v.teamId, (counts.get(v.teamId) ?? 0) + 1);
   }
   return counts;
