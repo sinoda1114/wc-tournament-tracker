@@ -275,6 +275,7 @@ export const pt: Dictionary = {
     onlyWc2026:
       'Calculado apenas com o desempenho na WC2026. No início do torneio há poucas partidas, então pequenos resultados mexem muito nos números e geram viés. A precisão melhora conforme as partidas avançam; veja como uma tendência aproximada por enquanto.',
     teamSquadAria: 'Ver o elenco de {name}',
+    eliminatedAria: '{name} está eliminado (não é mais candidato ao título)',
     showTop: 'Mostrar somente os primeiros',
     showAll: 'Mostrar as {count} seleções',
   },
@@ -304,6 +305,11 @@ export const pt: Dictionary = {
     noteLine1:
       'Você pode votar uma vez por fase conforme o torneio avança ({progression}), e o último voto de cada usuário é refletido no palpite do público.',
     noteNoChange: 'Os votos não podem ser alterados depois de registrados na mesma fase.',
+    archiveTitle: 'Resultados de fases anteriores (arquivo)',
+    archiveDesc: 'Os resultados das fases encerradas são mantidos, não reiniciados. Veja as seleções mais votadas de cada fase.',
+    archiveTotal: '{count} votos no total',
+    archiveVotes: '{count} votos',
+    archiveEmpty: 'Não houve votos nesta fase.',
   },
   paywall: {
     bannerAria: 'Aviso de preço',

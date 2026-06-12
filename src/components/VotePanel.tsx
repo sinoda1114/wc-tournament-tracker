@@ -13,6 +13,16 @@ import { localizedTeamName } from '@/lib/i18n/team-name';
 
 type Candidate = { id: string; nameJa: string; nameEn: string; fifaCode: string };
 
+/** アーカイブ（過去ラウンド）1件分の集計結果。 */
+type ArchiveEntry = {
+  stage: string;
+  label: string;
+  /** そのラウンドの総投票数。 */
+  total: number;
+  /** 得票上位（最大5件）。 */
+  results: { team: Candidate | null; teamId: string; count: number }[];
+};
+
 type VotePanelProps = {
   /** 現在投票できるステージ。null なら締切。 */
   stage: string | null;
@@ -22,6 +32,8 @@ type VotePanelProps = {
   candidates: Candidate[];
   /** このステージで自分が既に投じたチーム（無ければ null）。 */
   myVoteTeamId: string | null;
+  /** 過去ラウンドの投票結果（履歴）。新しい順は呼び出し側で整える。 */
+  archives?: ArchiveEntry[];
 };
 
 export function VotePanel({
@@ -30,6 +42,7 @@ export function VotePanel({
   nextStageLabel,
   candidates,
   myVoteTeamId,
+  archives = [],
 }: VotePanelProps) {
   const { locale, dict } = useI18n();
   const t = dict.vote;
@@ -146,6 +159,53 @@ export function VotePanel({
           ) : null}
         </div>
       )}
+
+      {archives.length > 0 ? (
+        <details className="wc-vote-archive">
+          <summary className="wc-vote-archive-summary">{t.archiveTitle}</summary>
+          <p className="wc-vote-archive-desc">{t.archiveDesc}</p>
+          <ul className="wc-vote-archive-list">
+            {archives.map((entry) => (
+              <li key={entry.stage} className="wc-vote-archive-stage">
+                <h3 className="wc-vote-archive-stage-title">
+                  {entry.label}
+                  <span className="wc-vote-archive-total">
+                    {t.archiveTotal.replace('{count}', String(entry.total))}
+                  </span>
+                </h3>
+                {entry.results.length === 0 ? (
+                  <Text c="dimmed" size="xs">
+                    {t.archiveEmpty}
+                  </Text>
+                ) : (
+                  <ol className="wc-vote-archive-results">
+                    {entry.results.map((r, i) => (
+                      <li key={r.teamId} className="wc-vote-archive-row">
+                        <span className="wc-vote-archive-rank">{i + 1}</span>
+                        {r.team ? (
+                          <span className="wc-vote-archive-team">
+                            <CountryFlag
+                              fifaCode={r.team.fifaCode}
+                              size="sm"
+                              ariaLabel={r.team.nameJa}
+                            />
+                            <span>{localizedTeamName(r.team, locale)}</span>
+                          </span>
+                        ) : (
+                          <span className="wc-vote-archive-team">{r.teamId.toUpperCase()}</span>
+                        )}
+                        <span className="wc-vote-archive-count">
+                          {t.archiveVotes.replace('{count}', String(r.count))}
+                        </span>
+                      </li>
+                    ))}
+                  </ol>
+                )}
+              </li>
+            ))}
+          </ul>
+        </details>
+      ) : null}
     </section>
   );
 }

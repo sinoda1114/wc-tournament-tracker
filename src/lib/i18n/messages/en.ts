@@ -274,6 +274,7 @@ export const en: Dictionary = {
     onlyWc2026:
       'Calculated from WC2026 form only. Early in the tournament few matches are played, so small results swing the numbers and create bias. Accuracy improves as matches progress, so treat this as a rough trend for now.',
     teamSquadAria: 'View the {name} squad',
+    eliminatedAria: '{name} is eliminated (no longer a title contender)',
     showTop: 'Show top only',
     showAll: 'Show all {count} teams',
   },
@@ -300,6 +301,11 @@ export const en: Dictionary = {
     noteLine1:
       'You can vote once per stage as the tournament progresses ({progression}), and the latest vote from each user is reflected in the crowd prediction.',
     noteNoChange: 'Votes cannot be changed once cast in the same stage.',
+    archiveTitle: 'Past round results (archive)',
+    archiveDesc: 'Results from closed rounds are kept, not reset. See the top picks for each round.',
+    archiveTotal: '{count} votes total',
+    archiveVotes: '{count} votes',
+    archiveEmpty: 'No votes were cast in this round.',
   },
   paywall: {
     bannerAria: 'Pricing notice',
