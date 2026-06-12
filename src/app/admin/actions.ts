@@ -3,8 +3,8 @@
 import { revalidatePath } from 'next/cache';
 
 import {
-  deleteAllCrowdVotes,
-  deleteCrowdVotesByStage,
+  deleteMyCrowdVoteByStage,
+  deleteMyCrowdVotes,
   isVotingStage,
 } from '@/db/crowd-admin';
 import {
@@ -15,6 +15,7 @@ import {
 import { updateMatchResult, type UpdateMatchResultInput } from '@/db/queries';
 import { isAdmin } from '@/lib/auth';
 import { STAGE_LABELS } from '@/lib/crowd';
+import { requireVoterId } from '@/lib/voter';
 import {
   matchEventCreateSchema,
   matchEventUpdateSchema,
@@ -48,23 +49,25 @@ export async function updateAdminMatchAction(input: UpdateMatchResultInput) {
 }
 
 /**
- * 指定ステージの「みんなの予想」票をリセット（DELETE）。所有者のみ。
- * 運用テスト用：そのステージだけ消して再投票できるようにする。
+ * **自分（操作中の管理者）の** 投票をすべてリセット（DELETE）。所有者のみ。
+ * 運用テスト用：自分のテスト票を消して再投票できるようにする。
+ * 安全設計: voter_id で自分に限定し、他ユーザーの票には絶対に触れない。
  */
-export async function resetCrowdVotesByStageAction(stage: string) {
+export async function resetMyCrowdVotesAction() {
   if (!(await isAdmin())) {
     return { ok: false as const, message: '管理者権限が必要です' };
   }
-  if (!isVotingStage(stage)) {
-    return { ok: false as const, message: '不正なステージです' };
+  const voterId = await requireVoterId();
+  if (!voterId) {
+    return { ok: false as const, message: 'ログインが必要です' };
   }
   try {
-    const deleted = await deleteCrowdVotesByStage(stage);
+    const deleted = await deleteMyCrowdVotes(voterId);
     revalidatePath('/prediction');
     revalidatePath('/admin');
     return {
       ok: true as const,
-      message: `${STAGE_LABELS[stage]}の投票を ${deleted} 件削除しました`,
+      message: `自分の投票を ${deleted} 件削除しました`,
     };
   } catch (error) {
     const message =
@@ -74,20 +77,28 @@ export async function resetCrowdVotesByStageAction(stage: string) {
 }
 
 /**
- * 全ての「みんなの予想」票をリセット（DELETE）。所有者のみ。
- * まっさらにする最も破壊的な操作。UI 側で明示的な確認を必須にする。
+ * **自分（操作中の管理者）の** 指定ステージの投票だけリセット（DELETE）。所有者のみ。
+ * 運用テスト用：自分のそのステージのテスト票だけ消して再投票できるようにする。
+ * 安全設計: voter_id で自分に限定し、他ユーザーの票には絶対に触れない。
  */
-export async function resetAllCrowdVotesAction() {
+export async function resetMyCrowdVoteByStageAction(stage: string) {
   if (!(await isAdmin())) {
     return { ok: false as const, message: '管理者権限が必要です' };
   }
+  if (!isVotingStage(stage)) {
+    return { ok: false as const, message: '不正なステージです' };
+  }
+  const voterId = await requireVoterId();
+  if (!voterId) {
+    return { ok: false as const, message: 'ログインが必要です' };
+  }
   try {
-    const deleted = await deleteAllCrowdVotes();
+    const deleted = await deleteMyCrowdVoteByStage(voterId, stage);
     revalidatePath('/prediction');
     revalidatePath('/admin');
     return {
       ok: true as const,
-      message: `全ての投票を ${deleted} 件削除しました`,
+      message: `自分の${STAGE_LABELS[stage]}の投票を ${deleted} 件削除しました`,
     };
   } catch (error) {
     const message =

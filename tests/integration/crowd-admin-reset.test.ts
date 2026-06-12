@@ -2,19 +2,19 @@ import { createClient, type Client } from '@libsql/client';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
 import { resetDbForTesting, setDbForTesting } from '@/db/client';
-import { deleteAllCrowdVotes, deleteCrowdVotesByStage } from '@/db/crowd-admin';
+import { deleteMyCrowdVoteByStage, deleteMyCrowdVotes } from '@/db/crowd-admin';
 import { castCrowdVote, listCrowdVotes } from '@/db/queries';
 
 /**
- * T-47 ADMIN 投票リセットの削除スコープを固めるユニット。
- * in-memory libSQL に最小スキーマを作り、ステージ別削除が当該ステージのみ、
- * 全削除が全部を消すことを担保する（DELETE は文字列連結せずパラメタライズド）。
+ * T-48 ADMIN 投票リセットの削除スコープを固めるユニット。
+ * **安全要件**: リセットは必ず voter_id で自分に限定し、**他ユーザーの票には絶対に触れない**。
+ * in-memory libSQL に最小スキーマを作り、自分の全削除・自分のステージ別削除が
+ * 「自分の票だけ」を消すことを担保する（DELETE は文字列連結せずパラメタライズド）。
  */
 
 let testClient: Client;
 
 async function setupSchema(client: Client) {
-  // crowd_votes が team_id で teams を参照するため、最小の teams も用意する。
   await client.execute(`
     CREATE TABLE teams (
       id TEXT PRIMARY KEY,
@@ -46,7 +46,8 @@ async function seedVotes(client: Client) {
       args: [id, id, id, id.toUpperCase(), '🏳️'],
     });
   }
-  // group_stage に2票、round_of_32 に1票。
+  // v1（自分役）: group_stage/jpn と round_of_32/bra の2票。
+  // v2（他ユーザー）: group_stage/arg の1票（これは絶対に消えてはいけない）。
   await castCrowdVote({ voterId: 'v1', stage: 'group_stage', teamId: 'jpn' });
   await castCrowdVote({ voterId: 'v2', stage: 'group_stage', teamId: 'arg' });
   await castCrowdVote({ voterId: 'v1', stage: 'round_of_32', teamId: 'bra' });
@@ -66,34 +67,40 @@ beforeEach(async () => {
   await seedVotes(testClient);
 });
 
-describe('deleteCrowdVotesByStage（ステージ別リセット）', () => {
-  it('指定ステージの票だけ削除し、他ステージは残す', async () => {
-    const affected = await deleteCrowdVotesByStage('group_stage');
+describe('deleteMyCrowdVotes（自分の全投票リセット）', () => {
+  it('自分(v1)の票だけ全部削除し、他ユーザー(v2)の票は残す', async () => {
+    const affected = await deleteMyCrowdVotes('v1');
 
     expect(affected).toBe(2);
     const remaining = await listCrowdVotes();
     expect(remaining).toHaveLength(1);
-    expect(remaining[0]).toMatchObject({ stage: 'round_of_32', teamId: 'bra' });
+    // v2 の group_stage 票は無傷。
+    expect(remaining[0]).toMatchObject({ voterId: 'v2', stage: 'group_stage', teamId: 'arg' });
   });
 
-  it('該当票が無いステージは0件削除（他に影響しない）', async () => {
-    const affected = await deleteCrowdVotesByStage('final');
+  it('票が無い voter は0件削除（他ユーザーに影響しない）', async () => {
+    const affected = await deleteMyCrowdVotes('nobody');
 
     expect(affected).toBe(0);
     expect(await listCrowdVotes()).toHaveLength(3);
   });
-
-  it('未知/不正なステージは投票ステージでないため拒否（DELETE しない）', async () => {
-    await expect(deleteCrowdVotesByStage('not_a_stage')).rejects.toThrow();
-    expect(await listCrowdVotes()).toHaveLength(3);
-  });
 });
 
-describe('deleteAllCrowdVotes（全リセット）', () => {
-  it('全ての票を削除してまっさらにする', async () => {
-    const affected = await deleteAllCrowdVotes();
+describe('deleteMyCrowdVoteByStage（自分の特定ステージのみ）', () => {
+  it('自分(v1)の指定ステージの票だけ削除し、同ステージの他ユーザー(v2)は残す', async () => {
+    const affected = await deleteMyCrowdVoteByStage('v1', 'group_stage');
 
-    expect(affected).toBe(3);
-    expect(await listCrowdVotes()).toHaveLength(0);
+    expect(affected).toBe(1);
+    const remaining = await listCrowdVotes();
+    // v1/round_of_32 と v2/group_stage は残る（同じ group_stage でも v2 は無傷）。
+    expect(remaining).toHaveLength(2);
+    expect(remaining.some((v) => v.voterId === 'v2' && v.stage === 'group_stage')).toBe(true);
+    expect(remaining.some((v) => v.voterId === 'v1' && v.stage === 'round_of_32')).toBe(true);
+    expect(remaining.some((v) => v.voterId === 'v1' && v.stage === 'group_stage')).toBe(false);
+  });
+
+  it('未知/不正なステージは拒否（DELETE しない）', async () => {
+    await expect(deleteMyCrowdVoteByStage('v1', 'not_a_stage')).rejects.toThrow();
+    expect(await listCrowdVotes()).toHaveLength(3);
   });
 });

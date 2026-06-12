@@ -4,8 +4,8 @@ import { useState, useTransition } from 'react';
 import { Alert, Button, Group, Paper, Select, Stack, Text } from '@mantine/core';
 
 import {
-  resetAllCrowdVotesAction,
-  resetCrowdVotesByStageAction,
+  resetMyCrowdVoteByStageAction,
+  resetMyCrowdVotesAction,
 } from '@/app/admin/actions';
 import { STAGE_LABELS, VOTING_STAGES } from '@/lib/crowd';
 
@@ -17,11 +17,11 @@ const STAGE_OPTIONS = VOTING_STAGES.map((stage) => ({
 }));
 
 /**
- * /admin の「みんなの予想 投票リセット」セクション（T-47）。
+ * /admin の「みんなの予想 投票リセット（自分の票のみ）」セクション（T-48）。
  *
- * ステージ別 / 全リセットの2系統。どちらも破壊操作なので実行前に
- * ネイティブ confirm を挟む（全リセットは特に明示的に）。サーバーアクション側で
- * isAdmin() ゲートが効くため、UI はあくまで運用者向けの入口。
+ * 安全設計（重要）: リセットは **ログイン中の管理者自身の票だけ** を対象にする
+ * （サーバー側で `voter_id = requireVoterId()` に限定）。**他ユーザーの票を消す機能は持たない**
+ * ＝誤操作で本番の全投票が飛ぶ事故を構造的に防ぐ。あくまで管理者1アカウントの投票テスト用。
  *
  * NOTE: Mantine の compound（Select 等）を含むため `'use client'` に隔離する。
  */
@@ -35,29 +35,29 @@ export function AdminVoteReset() {
     const label = STAGE_LABELS[stage as (typeof VOTING_STAGES)[number]] ?? stage;
     if (
       !window.confirm(
-        `「${label}」の投票をすべて削除します。本当に削除しますか？（取り消せません）`,
+        `自分の「${label}」の投票を削除します。よろしいですか？（自分の票のみ・取り消せません）`,
       )
     ) {
       return;
     }
     setResult(null);
     startTransition(async () => {
-      const res = await resetCrowdVotesByStageAction(stage);
+      const res = await resetMyCrowdVoteByStageAction(stage);
       setResult(res);
     });
   };
 
-  const runAllReset = () => {
+  const runAllMineReset = () => {
     if (
       !window.confirm(
-        '【全リセット】すべてのステージの投票を完全に削除します。まっさらになります。本当によろしいですか？（取り消せません）',
+        '自分の投票を全ステージ分まとめて削除します。よろしいですか？（自分の票のみ・他ユーザーには影響しません）',
       )
     ) {
       return;
     }
     setResult(null);
     startTransition(async () => {
-      const res = await resetAllCrowdVotesAction();
+      const res = await resetMyCrowdVotesAction();
       setResult(res);
     });
   };
@@ -66,9 +66,9 @@ export function AdminVoteReset() {
     <Paper withBorder p="md" radius="md">
       <Stack gap="md">
         <Stack gap={4}>
-          <Text fw={600}>みんなの予想 投票リセット</Text>
+          <Text fw={600}>みんなの予想 投票リセット（自分の票のみ）</Text>
           <Text size="sm" c="dimmed">
-            運用テスト用。指定ステージだけ、または全ての投票を削除します。削除後は優勝予想ページの集計に反映されます。
+            運用テスト用。自分（ログイン中の管理者）の投票だけを削除します。他ユーザーの票には一切触れません。削除後は優勝予想ページの集計に反映されます。
           </Text>
         </Stack>
 
@@ -89,18 +89,18 @@ export function AdminVoteReset() {
             loading={isPending}
             disabled={!stage}
           >
-            このステージをリセット
+            自分のこのステージをリセット
           </Button>
         </Group>
 
         <Group gap="sm" wrap="wrap">
           <Button
             variant="outline"
-            color="red"
-            onClick={runAllReset}
+            color="orange"
+            onClick={runAllMineReset}
             loading={isPending}
           >
-            全ステージをリセット（まっさら）
+            自分の投票を全ステージ分リセット
           </Button>
         </Group>
 
