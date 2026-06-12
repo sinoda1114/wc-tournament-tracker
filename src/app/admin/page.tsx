@@ -1,7 +1,8 @@
 import { notFound } from 'next/navigation';
-import { Container, Stack, Text, Title } from '@mantine/core';
+import { Container, Divider, Stack, Text, Title } from '@mantine/core';
 
 import { AdminMatchTable } from '@/components/AdminMatchTable';
+import { AdminVoteReset } from '@/components/AdminVoteReset';
 import { listTournamentMatches } from '@/db/queries';
 import { isAdmin } from '@/lib/auth';
 
@@ -24,6 +25,19 @@ export default async function AdminPage() {
         </Stack>
 
         <AdminMatchTable matches={matches} />
+
+        <Divider my="sm" />
+
+        <Stack gap={4}>
+          <Title order={2} size="h3">
+            みんなの予想
+          </Title>
+          <Text c="dimmed">
+            動作確認用に投票をリセットします（破壊操作・確認あり）。
+          </Text>
+        </Stack>
+
+        <AdminVoteReset />
       </Stack>
     </Container>
   );
