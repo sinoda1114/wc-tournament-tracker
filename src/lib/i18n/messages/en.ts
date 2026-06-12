@@ -201,6 +201,8 @@ export const en: Dictionary = {
     groupCount: '{label} ({count})',
     noteArg:
       'Note: Argentina is shown with 25 players. Leonardo Balerdi withdrew through injury and, as of 11 June 2026, no replacement has been announced. We will update this as soon as a call-up is confirmed.',
+    noteJpn:
+      'Note: Wataru Endo has left the squad after his left-foot injury worsened and announced his retirement from the national team. Shuto Machino (FW) has been called up as his replacement and takes over the number 6 shirt.',
   },
   prediction: {
     title: 'Champion prediction',

@@ -201,6 +201,8 @@ export const zh: Dictionary = {
     groupCount: '{label}（{count}）',
     noteArg:
       '注：阿根廷目前显示25名球员。莱昂纳多·巴莱尔迪因伤退出，截至2026年6月11日尚未公布替补人选。一旦确认补招，我们将及时更新。',
+    noteJpn:
+      '注：远藤航因左脚伤势加重退出本届大赛名单，并宣布从日本国家队退役。町野修斗（FW）获得递补征召，接过6号球衣。',
   },
   prediction: {
     title: '夺冠预测',
