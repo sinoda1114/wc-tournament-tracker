@@ -14,6 +14,7 @@ import {
   POSITION_GROUPS,
   type PositionGroup,
 } from '@/lib/positions';
+import { SQUAD_NOTES } from '@/lib/squad-notes';
 
 type SquadPanelProps = {
   squad: TeamSquad;
@@ -47,6 +48,7 @@ export function SquadPanel({ squad }: SquadPanelProps) {
   const { locale, dict } = useI18n();
   const { team, coach, players } = squad;
   const grouped = useMemo(() => groupPlayers(players), [players]);
+  const squadNoteKey = SQUAD_NOTES[team.fifaCode];
 
   const isEmpty = !coach && players.length === 0;
 
@@ -114,11 +116,11 @@ export function SquadPanel({ squad }: SquadPanelProps) {
             </Group>
           ) : null}
 
-          {/* 現実の名簿事情の注釈（#38）。今は ARG のみ（Balerdi 負傷辞退・補充未発表）。
-              補充が確定して26名になったら、この注釈と辞書キー noteArg を撤去する。 */}
-          {team.fifaCode === 'ARG' ? (
+          {/* 現実の名簿事情の注釈（負傷離脱・追加招集など）。
+              対象チームと辞書キーの対応は src/lib/squad-notes.ts（1行足すだけで増やせる）。 */}
+          {squadNoteKey ? (
             <Text size="xs" c="dimmed" className="wc-squad-note">
-              {dict.squad.noteArg}
+              {dict.squad[squadNoteKey]}
             </Text>
           ) : null}
         </Stack>

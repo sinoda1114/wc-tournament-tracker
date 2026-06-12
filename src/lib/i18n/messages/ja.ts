@@ -216,6 +216,8 @@ export const ja = {
     groupCount: '{label}（{count}）',
     noteArg:
       '※ アルゼンチン代表は Leonardo Balerdi 選手が負傷のため辞退し、2026年6月11日時点で代替選手が未発表のため25名で表示しています。追加召集が発表され次第、反映します。',
+    noteJpn:
+      '※ 遠藤航選手は左足の負傷悪化により大会メンバーから離脱し、日本代表からの引退を発表しました。代わって町野修斗選手（FW）が追加招集され、背番号6を引き継いでいます。',
   },
   // 優勝国予想（ChampionPrediction）。{count}=チーム数・{name}=国名。
   prediction: {

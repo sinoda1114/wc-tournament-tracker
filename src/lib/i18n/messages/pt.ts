@@ -202,6 +202,8 @@ export const pt: Dictionary = {
     groupCount: '{label} ({count})',
     noteArg:
       'Nota: a Argentina aparece com 25 jogadores. Leonardo Balerdi foi cortado por lesão e, em 11 de junho de 2026, nenhum substituto foi anunciado. Vamos atualizar assim que uma convocação for confirmada.',
+    noteJpn:
+      'Nota: Wataru Endo deixou a convocação após o agravamento da lesão no pé esquerdo e anunciou sua aposentadoria da seleção. Shuto Machino (FW) foi convocado em seu lugar e assume a camisa 6.',
   },
   prediction: {
     title: 'Palpite do campeão',

@@ -202,6 +202,8 @@ export const es: Dictionary = {
     groupCount: '{label} ({count})',
     noteArg:
       'Nota: Argentina aparece con 25 jugadores. Leonardo Balerdi se retiró por lesión y, al 11 de junio de 2026, no se ha anunciado un reemplazo. Lo actualizaremos en cuanto se confirme una convocatoria.',
+    noteJpn:
+      'Nota: Wataru Endo dejó la convocatoria tras agravarse su lesión en el pie izquierdo y anunció su retiro de la selección nacional. Shuto Machino (FW) fue convocado en su lugar y hereda el dorsal 6.',
   },
   prediction: {
     title: 'Pronóstico del campeón',
