@@ -1,4 +1,4 @@
--- 0013_crowd_votes_lifecycle.sql
+-- 0014_crowd_votes_lifecycle.sql
 -- T-43: みんなの投票ライフサイクル（開く→締切→アーカイブ）対応。
 --
 -- 設計判断（後方互換・冪等）:
