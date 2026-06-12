@@ -295,6 +295,7 @@ export const ja = {
     onlyWc2026:
       'WC2026成績のみで算出しています。大会序盤は消化試合が少なく、わずかな結果に数字が大きく振られて偏りが出ます。試合が進むほど精度が上がるため、現時点ではおおまかな傾向としてご覧ください。',
     teamSquadAria: '{name}の選手を見る',
+    eliminatedAria: '{name}は敗退済み（優勝予想の対象外）',
     showTop: '上位だけ表示',
     showAll: '全{count}チームを表示',
   },
@@ -322,6 +323,11 @@ export const ja = {
     noteLine1:
       '大会の進行（{progression}）ごとに1回ずつ投票でき、各ユーザーの最新の票が「みんなの予想」に反映されます。',
     noteNoChange: '同じステージでは投票後の変更はできません。',
+    archiveTitle: '過去ラウンドの投票結果（履歴）',
+    archiveDesc: '締め切られたラウンドの投票結果は消えずに残ります。各ラウンドの上位を見られます。',
+    archiveTotal: '計{count}票',
+    archiveVotes: '{count}票',
+    archiveEmpty: 'このラウンドの投票はありませんでした。',
   },
   // サイト共通フッタ（SiteFooter）。{year}=西暦。
   // 課金壁の予告バナー（PaywallBanner・#26）。{price}=ロケール別価格。

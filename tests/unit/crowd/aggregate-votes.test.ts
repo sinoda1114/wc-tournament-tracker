@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
-import { aggregateLatestVotes, type CrowdVote } from '@/lib/crowd';
+import {
+  aggregateLatestVotes,
+  aggregateVotesByStage,
+  type CrowdVote,
+} from '@/lib/crowd';
 
 function obj(map: Map<string, number>): Record<string, number> {
   return Object.fromEntries(map);
@@ -32,5 +36,22 @@ describe('aggregateLatestVotes', () => {
 
   it('空入力は空マップ', () => {
     expect(aggregateLatestVotes([]).size).toBe(0);
+  });
+});
+
+describe('aggregateVotesByStage', () => {
+  it('指定ステージの票だけをチーム別に集計（他ステージは無視）', () => {
+    const votes: CrowdVote[] = [
+      { voterId: 'u1', stage: 'group_stage', teamId: 'bra' },
+      { voterId: 'u2', stage: 'group_stage', teamId: 'bra' },
+      { voterId: 'u3', stage: 'group_stage', teamId: 'fra' },
+      { voterId: 'u1', stage: 'round_of_16', teamId: 'fra' },
+    ];
+    expect(obj(aggregateVotesByStage(votes, 'group_stage'))).toEqual({ bra: 2, fra: 1 });
+    expect(obj(aggregateVotesByStage(votes, 'round_of_16'))).toEqual({ fra: 1 });
+  });
+
+  it('該当票が無ければ空マップ', () => {
+    expect(aggregateVotesByStage([], 'final').size).toBe(0);
   });
 });

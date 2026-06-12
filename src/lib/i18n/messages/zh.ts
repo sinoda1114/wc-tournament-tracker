@@ -273,6 +273,7 @@ export const zh: Dictionary = {
     onlyWc2026:
       '仅根据WC2026表现计算。赛事初期场次较少，少量结果会使数字大幅波动并产生偏差。随着比赛推进精度会提高，目前请作为大致趋势参考。',
     teamSquadAria: '查看{name}的球员',
+    eliminatedAria: '{name}已淘汰（不再是夺冠热门）',
     showTop: '仅显示前列',
     showAll: '显示全部{count}支球队',
   },
@@ -299,6 +300,11 @@ export const zh: Dictionary = {
     noteLine1:
       '随着赛事推进（{progression}），每个阶段可投票1次，每位用户的最新一票会反映到大家的预测中。',
     noteNoChange: '同一阶段投票后不可更改。',
+    archiveTitle: '往轮投票结果（历史）',
+    archiveDesc: '已截止阶段的投票结果会保留，不会重置。可查看每一轮的得票前列。',
+    archiveTotal: '共{count}票',
+    archiveVotes: '{count}票',
+    archiveEmpty: '本轮没有投票。',
   },
   paywall: {
     bannerAria: '收费提示',

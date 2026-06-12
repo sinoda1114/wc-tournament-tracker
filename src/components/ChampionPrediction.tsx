@@ -29,6 +29,8 @@ type SerializedFactors = Record<FactorKey, Record<string, number>>;
 type ChampionPredictionProps = {
   teams: TeamMeta[];
   factors: SerializedFactors;
+  /** 敗退が確定したチームの teamId。グレー化・リンク無効化（選べない）にする。 */
+  eliminatedIds?: string[];
 };
 
 const STORAGE_KEY = 'wc-champion-toggles';
@@ -60,8 +62,13 @@ function formatPercent(probability: number): string {
   return `${(probability * 100).toFixed(1)}%`;
 }
 
-export function ChampionPrediction({ teams, factors }: ChampionPredictionProps) {
+export function ChampionPrediction({
+  teams,
+  factors,
+  eliminatedIds = [],
+}: ChampionPredictionProps) {
   const { locale, dict } = useI18n();
+  const eliminated = useMemo(() => new Set(eliminatedIds), [eliminatedIds]);
   const factorLabels: Record<FactorKey, string> = {
     pastWorldCup: dict.prediction.factorPastWorldCup,
     fifaRank: dict.prediction.factorFifaRank,
@@ -153,7 +160,9 @@ export function ChampionPrediction({ teams, factors }: ChampionPredictionProps) 
         {visible.map((row, index) => {
           const team = teamMeta.get(row.teamId);
           const rank = index + 1;
-          const teamUrl = team ? `/teams/${team.fifaCode.toLowerCase()}` : null;
+          const isEliminated = eliminated.has(row.teamId);
+          // 敗退チームはリンク無効化（選べない）。
+          const teamUrl = team && !isEliminated ? `/teams/${team.fifaCode.toLowerCase()}` : null;
           const inner = (
             <>
               <span className="wc-prediction-rank">{rank}</span>
@@ -175,7 +184,9 @@ export function ChampionPrediction({ teams, factors }: ChampionPredictionProps) 
               <span className="wc-prediction-prob">{formatPercent(row.probability)}</span>
             </>
           );
-          const rowClass = `wc-prediction-row${rank <= 3 ? ' is-top' : ''}`;
+          const rowClass = `wc-prediction-row${rank <= 3 ? ' is-top' : ''}${
+            isEliminated ? ' is-eliminated' : ''
+          }`;
           return (
             <li key={row.teamId} className="wc-prediction-item">
               {teamUrl ? (
@@ -190,7 +201,19 @@ export function ChampionPrediction({ teams, factors }: ChampionPredictionProps) 
                   {inner}
                 </Link>
               ) : (
-                <span className={rowClass}>{inner}</span>
+                <span
+                  className={rowClass}
+                  aria-label={
+                    isEliminated
+                      ? dict.prediction.eliminatedAria.replace(
+                          '{name}',
+                          localizedTeamName(team, locale),
+                        )
+                      : undefined
+                  }
+                >
+                  {inner}
+                </span>
               )}
             </li>
           );

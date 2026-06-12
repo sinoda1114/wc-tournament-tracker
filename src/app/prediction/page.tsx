@@ -12,9 +12,13 @@ import {
 import { computeFactorScores, type FactorKey } from '@/lib/champion-prediction';
 import {
   aggregateLatestVotes,
+  aggregateVotesByStage,
   aliveTeamIdsForStage,
-  currentVotingStage,
+  archivedVotingStages,
+  eliminatedTeamIds,
+  votableStage,
   VOTING_STAGES,
+  type VotingStage,
 } from '@/lib/crowd';
 import { ogLocale } from '@/lib/i18n/alternates';
 import { getDictionary } from '@/lib/i18n/dictionary';
@@ -57,6 +61,7 @@ export default async function PredictionPage() {
   ]);
 
   const dict = getDictionary(await resolveLocale());
+  const now = new Date();
 
   // ③2026成績は matches から、④みんなの予想は投票からライブ計算される。
   const crowdCounts = aggregateLatestVotes(votes);
@@ -68,8 +73,11 @@ export default async function PredictionPage() {
     fifaCode: t.fifaCode,
   }));
 
-  // 投票パネル用：現在ステージと候補（生存チーム）、自分の既投票。
-  const stage = currentVotingStage(matches);
+  // 優勝予想は常設。敗退が確定したチームはグレー化（選択不可）にするため ID を渡す。
+  const eliminatedIds = [...eliminatedTeamIds(matches)];
+
+  // 投票パネル用：いま投票できるステージ（open＝初戦KO未到来）と候補（生存チーム）、自分の既投票。
+  const stage = votableStage(matches, now);
   const aliveIds = stage ? new Set(aliveTeamIdsForStage(matches, stage)) : new Set<string>();
   const candidates = teamRatings
     .filter((t) => aliveIds.has(t.id))
@@ -85,6 +93,28 @@ export default async function PredictionPage() {
       ? dict.match.stage[VOTING_STAGES[stageIndex + 1]]
       : null;
 
+  // アーカイブ：過去ラウンドの投票結果を消さずに履歴として閲覧できるようにする。
+  const teamMetaById = new Map(
+    teamRatings.map((t) => [
+      t.id,
+      { id: t.id, nameJa: t.nameJa, nameEn: t.nameEn, fifaCode: t.fifaCode },
+    ]),
+  );
+  const archivedStages: VotingStage[] = archivedVotingStages(matches, now);
+  const archives = archivedStages.map((archStage) => {
+    const counts = aggregateVotesByStage(votes, archStage);
+    const total = [...counts.values()].reduce((sum, n) => sum + n, 0);
+    const results = [...counts.entries()]
+      .map(([teamId, count]) => ({
+        team: teamMetaById.get(teamId) ?? null,
+        teamId,
+        count,
+      }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5);
+    return { stage: archStage, label: dict.match.stage[archStage], total, results };
+  });
+
   return (
     <Container size="xl" py="xl">
       <Stack gap="lg">
@@ -96,6 +126,7 @@ export default async function PredictionPage() {
         <ChampionPrediction
           teams={predictionTeams}
           factors={serializeFactors(factors)}
+          eliminatedIds={eliminatedIds}
         />
 
         <VotePanel
@@ -104,6 +135,7 @@ export default async function PredictionPage() {
           nextStageLabel={nextStageLabel}
           candidates={candidates}
           myVoteTeamId={myVoteTeamId}
+          archives={archives}
         />
       </Stack>
     </Container>
