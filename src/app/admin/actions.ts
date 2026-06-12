@@ -3,12 +3,18 @@
 import { revalidatePath } from 'next/cache';
 
 import {
+  deleteAllCrowdVotes,
+  deleteCrowdVotesByStage,
+  isVotingStage,
+} from '@/db/crowd-admin';
+import {
   createMatchEvent,
   deleteMatchEvent,
   updateMatchEvent,
 } from '@/db/match-events';
 import { updateMatchResult, type UpdateMatchResultInput } from '@/db/queries';
 import { isAdmin } from '@/lib/auth';
+import { STAGE_LABELS } from '@/lib/crowd';
 import {
   matchEventCreateSchema,
   matchEventUpdateSchema,
@@ -37,6 +43,55 @@ export async function updateAdminMatchAction(input: UpdateMatchResultInput) {
     return { ok: true as const };
   } catch (error) {
     const message = error instanceof Error ? error.message : '更新に失敗しました';
+    return { ok: false as const, message };
+  }
+}
+
+/**
+ * 指定ステージの「みんなの予想」票をリセット（DELETE）。所有者のみ。
+ * 運用テスト用：そのステージだけ消して再投票できるようにする。
+ */
+export async function resetCrowdVotesByStageAction(stage: string) {
+  if (!(await isAdmin())) {
+    return { ok: false as const, message: '管理者権限が必要です' };
+  }
+  if (!isVotingStage(stage)) {
+    return { ok: false as const, message: '不正なステージです' };
+  }
+  try {
+    const deleted = await deleteCrowdVotesByStage(stage);
+    revalidatePath('/prediction');
+    revalidatePath('/admin');
+    return {
+      ok: true as const,
+      message: `${STAGE_LABELS[stage]}の投票を ${deleted} 件削除しました`,
+    };
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : '投票リセットに失敗しました';
+    return { ok: false as const, message };
+  }
+}
+
+/**
+ * 全ての「みんなの予想」票をリセット（DELETE）。所有者のみ。
+ * まっさらにする最も破壊的な操作。UI 側で明示的な確認を必須にする。
+ */
+export async function resetAllCrowdVotesAction() {
+  if (!(await isAdmin())) {
+    return { ok: false as const, message: '管理者権限が必要です' };
+  }
+  try {
+    const deleted = await deleteAllCrowdVotes();
+    revalidatePath('/prediction');
+    revalidatePath('/admin');
+    return {
+      ok: true as const,
+      message: `全ての投票を ${deleted} 件削除しました`,
+    };
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : '投票リセットに失敗しました';
     return { ok: false as const, message };
   }
 }
