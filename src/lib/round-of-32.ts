@@ -93,6 +93,14 @@ export type RoundOf32Slot = {
  * 8つの third place スロットが揃って初めて割当が成立する（FIFA 表が8グループ前提のため）。
  * 揃わない／3位が8グループ未満なら third place スロットは全て null のまま返す。
  *
+ * **確定ゲート**: グループステージが全12組とも消化済み（{@link isGroupStageComplete}）に
+ * なるまでは、1位/2位/3位いずれのスロットも解決しない（全 teamId=null）。
+ * グループ未消化でも {@link calculateGroupStandings} は同点 0-0-0 のチームに position 1..4 を
+ * 機械的に振るため、ゲート無しだと「現時点の暫定首位」を R32 に前倒し bind してしまう
+ * （本番 R32 がグループ未確定なのに実チームを保持していた T-46 の再充填バグの根因）。
+ * 1位/2位は各グループ内で確定するが、3位通過（ベスト3位の他組比較）と runners-up の
+ * 対戦相手割当は全組確定後にしか定まらないため、確定単位を「全グループ消化」に統一する。
+ *
  * @param slots R32 の全スロット（home/away 各16）。
  * @param groups 12グループ分の順位表。
  */
@@ -100,6 +108,11 @@ export function resolveRoundOf32Assignments(
   slots: readonly RoundOf32Slot[],
   groups: readonly GroupStandingsEntry[],
 ): SlotResolution[] {
+  // グループステージ未確定なら一切 bind しない（全スロット teamId=null）。
+  if (!isGroupStageComplete(groups)) {
+    return slots.map(({ matchId, side, slot }) => ({ matchId, side, slot, teamId: null }));
+  }
+
   const standingsByGroup = new Map<GroupLetter, GroupStanding[]>();
   for (const { group, standings } of groups) {
     standingsByGroup.set(group, standings);
