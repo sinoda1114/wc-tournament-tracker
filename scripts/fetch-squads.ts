@@ -9,6 +9,14 @@ import { seedTeams } from '../src/data/seed-teams';
 import { getDb } from '../src/db/client';
 import { fetchJsonWithRetry } from '../src/lib/fetch-retry';
 
+import {
+  CODE_TO_ISO,
+  fifaToIsoLocal,
+  linkParts,
+  parseCoach,
+  type ParsedCoach,
+} from './lib/squad-parse';
+
 // 全選手＋監督は Wikipedia「2026 FIFA World Cup squads」から取得する。
 // 1 リクエストでページ全体の wikitext を取り、48 カ国分を構造化テンプレートから
 // パースする（TheSportsDB のような 1 国 10 名上限・レート制限がない）。
@@ -29,23 +37,6 @@ const WIKI_SECTION_OVERRIDE: Record<string, string> = {
   IRN: 'Iran',
 };
 
-// flagicon の 3 文字コード（IOC/FIFA 系）-> 旗用 ISO2。監督の母国旗に使う。
-// 外国人監督に flagicon が付く（自国監督は省略）。未知コードは null。
-const CODE_TO_ISO: Record<string, string> = {
-  ITA: 'it', GER: 'de', NED: 'nl', ESP: 'es', FRA: 'fr', POR: 'pt',
-  ARG: 'ar', BRA: 'br', ENG: 'gb-eng', SCO: 'gb-sct', WAL: 'gb-wls',
-  NIR: 'gb-nir', IRL: 'ie', BEL: 'be', CRO: 'hr', SRB: 'rs', GRE: 'gr',
-  SUI: 'ch', AUT: 'at', DEN: 'dk', SWE: 'se', NOR: 'no', POL: 'pl',
-  RUS: 'ru', UKR: 'ua', URU: 'uy', COL: 'co', CHI: 'cl', MEX: 'mx',
-  USA: 'us', JPN: 'jp', KOR: 'kr', IRN: 'ir', MAR: 'ma', TUN: 'tn',
-  EGY: 'eg', ALG: 'dz', SEN: 'sn', GHA: 'gh', NGA: 'ng', CIV: 'ci',
-  CMR: 'cm', RSA: 'za', AUS: 'au', QAT: 'qa', KSA: 'sa', JOR: 'jo',
-  IRQ: 'iq', UZB: 'uz', PAR: 'py', PER: 'pe', ECU: 'ec', CAN: 'ca',
-  PAN: 'pa', HAI: 'ht', CUW: 'cw', CPV: 'cv', COD: 'cd', BIH: 'ba',
-  CZE: 'cz', TUR: 'tr', NZL: 'nz', SVK: 'sk', SVN: 'si', HUN: 'hu',
-  ROU: 'ro', BUL: 'bg', FIN: 'fi', ISL: 'is', VEN: 've', BOL: 'bo',
-};
-
 type ParsedPlayer = {
   number: string | null;
   pos: string;
@@ -58,24 +49,7 @@ type ParsedPlayer = {
   dateBorn: string | null;
 };
 
-type ParsedCoach = {
-  name: string;
-  nameJa: string | null;
-  flagCode: string | null;
-  /** 英語版 Wikipedia の記事タイトル（リンク先）。日本語名解決に使う。 */
-  link: string | null;
-};
-
 const pad = (n: string) => n.padStart(2, '0');
-
-/** `[[target|display]]` を記事タイトル(target)と表示名(display)に分解する。 */
-function linkParts(raw: string): { target: string | null; display: string } {
-  const s = raw.trim();
-  const m = /^\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/.exec(s);
-  if (m) return { target: m[1].trim(), display: (m[2] ?? m[1]).trim() };
-  const clean = s.replace(/\[\[|\]\]/g, '').trim();
-  return { target: null, display: clean };
-}
 
 /** 年齢計算（AS_OF 基準）。 */
 function ageFrom(dateBorn: string): number | null {
@@ -230,22 +204,6 @@ async function localizeJapaneseNames(
   return replaced;
 }
 
-function parseCoach(section: string): ParsedCoach | null {
-  // Coach: {{flagicon|ITA}} [[Carlo Ancelotti]]  /  Coach: [[Hajime Moriyasu]]
-  const m =
-    /Coach:\s*(?:\{\{\s*flagicon\s*\|\s*([A-Za-z]{3})\s*\}\}\s*)?(\[\[[^\]]+\]\])/.exec(
-      section,
-    );
-  if (!m) return null;
-  const { target, display } = linkParts(m[2]);
-  return {
-    name: display,
-    nameJa: null,
-    flagCode: m[1] ? m[1].toUpperCase() : null,
-    link: target,
-  };
-}
-
 function parsePlayers(section: string): ParsedPlayer[] {
   const players: ParsedPlayer[] = [];
   // age テンプレは表記揺れがある: 先頭大文字 "Birth date and age2"、
@@ -322,9 +280,11 @@ async function main() {
     }
 
     await db.execute({ sql: 'DELETE FROM players WHERE team_id = ?', args: [team.id] });
-    await db.execute({ sql: 'DELETE FROM coaches WHERE team_id = ?', args: [team.id] });
 
     if (coach) {
+      // fail-safe: 監督が読めたチームだけ既存行を消して入れ直す。
+      // パース失敗時に既存の coaches 行を消さない（2026-06-11 の欠落事故の再発防止）。
+      await db.execute({ sql: 'DELETE FROM coaches WHERE team_id = ?', args: [team.id] });
       // flagicon があれば外国人監督の母国、なければ自国（チーム自身の旗）。
       const nationalityIso = coach.flagCode
         ? CODE_TO_ISO[coach.flagCode] || null
@@ -339,6 +299,10 @@ async function main() {
         args: [team.id, coach.name, coach.name, coach.nameJa, nationality, nationalityIso, null],
       });
       totalCoaches += 1;
+    } else {
+      console.warn(
+        `  ⚠ ${team.fifaCode}: 監督をパースできませんでした。既存の coaches 行は保持します（削除スキップ）`,
+      );
     }
 
     if (players.length > 0) {
@@ -393,12 +357,6 @@ async function main() {
   console.log(`データ取得国: ${resolvedCountries} / ${targetTeams.length}`);
   console.log(`総選手数: ${totalPlayers}  総監督数: ${totalCoaches}`);
   console.log(`データ無し: ${noData.length ? noData.join(', ') : 'なし'}`);
-}
-
-// flags.ts に依存せず（クライアント専用ではないが）軽量な逆引きをローカルに持つ。
-// 自国監督の旗用に fifaCode -> ISO2 を解決。未知は null。
-function fifaToIsoLocal(fifa: string): string | null {
-  return CODE_TO_ISO[fifa.toUpperCase()] ?? null;
 }
 
 main().catch((error: unknown) => {
