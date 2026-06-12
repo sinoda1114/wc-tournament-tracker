@@ -91,6 +91,13 @@ T-48 投票リセット自分票のみ＋T-51 グループ投票窓開放(PR #57
   - **早割2段**（収益前倒し＋緊急性）: 無料期間（〜6/28＝`isFreePeriod()`真）に買えば **JP ¥680 / 海外 $5**、6/29以降は **JP ¥980 / 海外 $7**。境界は既存 `KNOCKOUT_START_UTC=2026-06-28T15:00:00Z` を流用（pricing.ts に earlyBird/full の2定数＋通貨×JP/海外）。
   - **転換率の打ち手（価格より重要）**: 課金壁は"データ"でなく**「お気に入りを決勝Tまで追える/優勝予想/このUX」**を訴求／**6/29カウントダウン**で緊急性／ロック先のチラ見せ／72h体験(6/29以降の新規)維持。収益の最大レバーは**グループ戦での無料signup最大化**（SEO/SNS/開幕戦バズ）。
   - **残作業**: ①~~商品名決定~~→「**MatchFav フルアクセス（買い切り）**」で確定 ②pricing.ts に早割2段＋海外通貨 ③Stripe Checkout(買い切り)＋entitlement（購入フラグ。日付ゲートだけだと全員に壁＝購入者にも壁になるので**購入者判定が必須**）④T-26補足（購入者にバナー非表示）⑤T-29（〜9/30明示）⑥特商法 noindex 解除。[[launch-monetization-plan]]・auth-billing 領域。
+  - **🧑‍💻 ユーザー担当（オーナー作業・PC のダッシュボード操作｜PR #46 実コードと突合済 2026-06-13）**: 番人のコードと独立に先行可。テストモードで先に全部入れてOK（決勝T課金壁は 6/28 まで誰も到達しない＝今テストキーでも実害ゼロ）。
+    - [ ] **(a) Stripe 商品＋価格4本**: Products → 商品「MatchFav フルアクセス（買い切り）」→ 価格を4本（**すべて One-time/一括**）。各 `price_…` を控える → 環境変数へ: `¥680 JPY→STRIPE_PRICE_JP_EARLY` / `¥980 JPY→STRIPE_PRICE_JP_REGULAR` / `$5 USD→STRIPE_PRICE_INTL_EARLY` / `$7 USD→STRIPE_PRICE_INTL_REGULAR`
+    - [ ] **(b) Secret key**: Developers→API keys の `sk_test_…`（本番化時 `sk_live_…`）→ `STRIPE_SECRET_KEY`
+    - [ ] **(c) Webhook**: Developers→Webhooks→Add endpoint・URL `https://matchfav.com/api/stripe/webhook`・イベントは **`checkout.session.completed` だけ** → Signing secret `whsec_…` → `STRIPE_WEBHOOK_SECRET`
+    - [ ] **(d) Vercel env（Production）**: 上記6つを wc-tournament-tracker の Environment Variables に投入（publishable キーは**不要**＝サーバリダイレクト型 Checkout）
+    - [ ] **(e) 本番化（〜6/28 までに別途・5分）**: Stripe を**ライブモード**に切替→ 価格4本/secret/webhook を**ライブで作り直し**（テストとライブは別物。webhook signing secret も別）→ Vercel env 6つを `sk_live_…`/ライブ `price_…`/ライブ `whsec_…` へ差し替え→ Redeploy。
+    - ※ env 値は私（このセッション）には渡さない・出力しない（`.env.local`/本番 env は不可侵）。投入後「入れた」とだけ教えてくれれば、私は配線（価格解決/エンドポイント存在）の妥当性確認まで手伝える。
 - **T-52** 決勝T投票の課金ゲート（②・**T-14/PR #46 にブロック**）— 投票マネタイズ確定仕様（[[voting-monetization-model]]）の決勝T側。knockout ステージ（round_of_32〜final）の投票を**買い切りエンタイトルメントの後ろ**に置く（グループ戦投票は無料・T-51で窓開放済）。課金は**買い切り1回ポッキリ**＝1回買えば決勝T全ラウンドの投票が開く（ステージ毎課金ではない）。実装は購入者判定（T-14 ③の entitlement）が前提のため **Stripe（PR #46）が入るまで着手不可**。ui-feature×auth-billing 領域。（2026-06-13 起票）
 - **T-19** i18n B-lite（**🟠 次・実行待ち**）— 本文UIは5言語対応済（投票エラー/es・pt・zh イベントラベルは `23f2d41` で修正済）。**残**: 各ページ metadata（title/description）と OGP 画像文言が日本語固定 → 多言語化。**B-lite 案あり・GO で夜間自走**。hreflang/URL 戦略とセットで設計（クローラに cookie が無い問題の裏返し）。
 - **T-12** サイト全体の最終動作チェック（**🟡 その後**）— 全ページ・全言語を通しで触って確認。実装が出揃ってから実施 → 2段ゲート → デプロイ。
