@@ -230,6 +230,7 @@ export const es: Dictionary = {
       locked: 'Ya has votado en esta fase.',
       error: 'No se pudo enviar tu voto. Inténtalo de nuevo más tarde.',
       auth: 'Inicia sesión para votar.',
+      paywall: 'La votación de la fase eliminatoria está disponible tras la compra.',
     },
     sectionAria: 'Votar en el pronóstico de la gente',
     title: 'Tu pronóstico de campeón',
@@ -253,6 +254,21 @@ export const es: Dictionary = {
     bannerAria: 'Aviso de precio',
     bannerMessage:
       'La fase eliminatoria (desde el 29 de junio) cuesta un único pago de {price}. La fase de grupos es gratis ahora mismo.',
+    lockTitle: 'Desbloquea la fase eliminatoria',
+    lockBody:
+      'Los pronósticos y el cuadro de la fase eliminatoria están disponibles con un único pago de {price} (MatchFav Full Access). Paga una vez y úsalo hasta el final del torneo.',
+    lockCta: 'Comprar por {price}',
+    lockSignIn: 'Inicia sesión para comprar',
+    offerPeriod: 'Disponible hasta el {offerEnd}',
+    purchasing: 'Abriendo el pago…',
+    purchaseError: 'No se pudo abrir el pago. Inténtalo de nuevo más tarde.',
+    successTitle: 'Gracias por tu compra',
+    successBody:
+      'MatchFav Full Access ya está activo. Disfruta de los pronósticos y el cuadro de la fase eliminatoria. Puede tardar un momento en aplicarse.',
+    successCta: 'Ir a la fase eliminatoria',
+    cancelTitle: 'Compra cancelada',
+    cancelBody: 'No se realizó ningún pago. Puedes reiniciar el pago cuando quieras.',
+    cancelCta: 'Volver al inicio',
   },
   footer: {
     brandTitle: 'MatchFav — Todo lo que quieres ver del Mundial 2026, en un solo lugar',

@@ -230,6 +230,7 @@ export const pt: Dictionary = {
       locked: 'Você já votou nesta fase.',
       error: 'Não foi possível enviar seu voto. Tente novamente mais tarde.',
       auth: 'Entre para votar.',
+      paywall: 'A votação do mata-mata fica disponível após a compra.',
     },
     sectionAria: 'Votar no palpite do público',
     title: 'Seu palpite de campeão',
@@ -253,6 +254,21 @@ export const pt: Dictionary = {
     bannerAria: 'Aviso de preço',
     bannerMessage:
       'O mata-mata (a partir de 29 de junho) é uma compra única de {price}. A fase de grupos é gratuita agora mesmo.',
+    lockTitle: 'Libere o mata-mata',
+    lockBody:
+      'Os palpites e o chaveamento do mata-mata estão disponíveis com uma compra única de {price} (MatchFav Full Access). Pague uma vez e use até o fim do torneio.',
+    lockCta: 'Comprar por {price}',
+    lockSignIn: 'Entre para comprar',
+    offerPeriod: 'Disponível até {offerEnd}',
+    purchasing: 'Abrindo o checkout…',
+    purchaseError: 'Não foi possível abrir o checkout. Tente novamente mais tarde.',
+    successTitle: 'Obrigado pela sua compra',
+    successBody:
+      'O MatchFav Full Access está ativo. Aproveite os palpites e o chaveamento do mata-mata. Pode levar um instante para ser aplicado.',
+    successCta: 'Ir para o mata-mata',
+    cancelTitle: 'Compra cancelada',
+    cancelBody: 'Nenhum pagamento foi feito. Você pode reiniciar o checkout quando quiser.',
+    cancelCta: 'Voltar ao início',
   },
   footer: {
     brandTitle: 'MatchFav — Tudo o que você quer ver da Copa 2026, em um só lugar',

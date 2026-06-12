@@ -229,6 +229,7 @@ export const en: Dictionary = {
       locked: 'You have already voted in this stage.',
       error: 'Failed to submit your vote. Please try again later.',
       auth: 'Sign in to cast your vote.',
+      paywall: 'Knockout-stage voting is available after purchase.',
     },
     sectionAria: 'Vote in the crowd prediction',
     title: 'Your title pick',
@@ -249,6 +250,21 @@ export const en: Dictionary = {
     bannerAria: 'Pricing notice',
     bannerMessage:
       'The knockout stage (from June 29) is a one-time {price}. The group stage is free to enjoy right now.',
+    lockTitle: 'Unlock the knockout stage',
+    lockBody:
+      'Knockout predictions and the bracket are available with a one-time {price} (MatchFav Full Access). Pay once, use it through the end of the tournament.',
+    lockCta: 'Buy for {price}',
+    lockSignIn: 'Sign in to purchase',
+    offerPeriod: 'Available until {offerEnd}',
+    purchasing: 'Opening checkout…',
+    purchaseError: 'Could not open checkout. Please try again later.',
+    successTitle: 'Thank you for your purchase',
+    successBody:
+      'MatchFav Full Access is now active. Enjoy knockout predictions and the bracket. It may take a moment to take effect.',
+    successCta: 'Go to the knockout stage',
+    cancelTitle: 'Purchase canceled',
+    cancelBody: 'No payment was made. You can restart checkout anytime.',
+    cancelCta: 'Back to home',
   },
   footer: {
     brandTitle: 'MatchFav — Everything you want to see about World Cup 2026, in one place',

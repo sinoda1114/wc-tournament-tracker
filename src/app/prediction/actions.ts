@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 
 import { castCrowdVote, listTournamentMatches } from '@/db/queries';
+import { hasKnockoutAccess } from '@/lib/billing/access';
 import { aliveTeamIdsForStage, currentVotingStage } from '@/lib/crowd';
 import { requireVoterId } from '@/lib/voter';
 
@@ -10,7 +11,7 @@ export type VoteActionResult =
   | { ok: true }
   | {
       ok: false;
-      reason: 'closed' | 'wrong_stage' | 'invalid_team' | 'locked' | 'auth' | 'error';
+      reason: 'closed' | 'wrong_stage' | 'invalid_team' | 'locked' | 'auth' | 'paywall' | 'error';
       message: string;
     };
 
@@ -45,6 +46,18 @@ export async function castVoteAction(
     if (!voterId) {
       return { ok: false, reason: 'auth', message: 'ログインすると投票できます。' };
     }
+
+    // 決勝T関連ステージ（group_stage 以外）の投票は課金壁の対象。サーバ側で fail-closed に
+    // 再判定する（PaywallLock を迂回した API 直叩きでの詐称を許さない）。無料期間中・購入済み・
+    // 72h救済中は解放、それ以外（決勝T突入後の未購入）は拒否。
+    if (current !== 'group_stage' && !(await hasKnockoutAccess())) {
+      return {
+        ok: false,
+        reason: 'paywall',
+        message: '決勝トーナメントの投票は購入後にご利用いただけます。',
+      };
+    }
+
     const result = await castCrowdVote({ voterId, stage: current, teamId });
     if (result === 'locked') {
       return {
