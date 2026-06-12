@@ -33,10 +33,10 @@ function isKnockoutStage(stage: VotingStage): boolean {
 }
 
 /**
- * 「みんなの予想」へ1票投じる。サーバ側で現在ステージ・締切（初戦KO時刻）・候補・重複を
+ * 「みんなの予想」へ1票投じる。サーバ側で現在ステージ・締切（次ステージ開始）・候補・重複を
  * 再検証してから保存する（クライアントの値は信用しない）。成功で /prediction を再生成。
  *
- * 投票ライフサイクル: 各ステージは「出場確定で open → 初戦KO時刻で締切（closed）→ 全試合終了で
+ * 投票ライフサイクル: 各ステージは「出場確定で open → 次ステージ開始で締切（closed）→ 全試合終了で
  * archived（履歴）」で毎ラウンド回る。投票を受け付けるのは open のステージのみ。
  */
 export async function castVoteAction(

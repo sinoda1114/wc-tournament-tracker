@@ -76,7 +76,7 @@ export default async function PredictionPage() {
   // 優勝予想は常設。敗退が確定したチームはグレー化（選択不可）にするため ID を渡す。
   const eliminatedIds = [...eliminatedTeamIds(matches)];
 
-  // 投票パネル用：いま投票できるステージ（open＝初戦KO未到来）と候補（生存チーム）、自分の既投票。
+  // 投票パネル用：いま投票できるステージ（open＝次ステージ未開始）と候補（生存チーム）、自分の既投票。
   const stage = votableStage(matches, now);
   const aliveIds = stage ? new Set(aliveTeamIdsForStage(matches, stage)) : new Set<string>();
   const candidates = teamRatings

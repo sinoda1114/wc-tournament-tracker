@@ -52,21 +52,23 @@ describe('stageVotingState', () => {
     expect(stageVotingState(matches, 'round_of_16', now)).toBe('not_yet_open');
   });
 
-  it('チームが揃い初戦KOが未来なら open', () => {
+  it('チームが揃い次の投票ステージが未開始なら open（自ステージの初戦KO済みでも開く）', () => {
     const matches = [
-      m({ stage: 'round_of_16', homeTeamId: 'fra', awayTeamId: 'eng', kickoffAt: '2026-07-01T18:00:00Z' }),
-      m({ stage: 'round_of_16', homeTeamId: 'bra', awayTeamId: 'arg', kickoffAt: '2026-07-02T18:00:00Z' }),
+      // 自ステージ(R16)は初戦KO済みでも、次ステージ(QF)が始まっていなければ開いたまま。
+      m({ stage: 'round_of_16', homeTeamId: 'fra', awayTeamId: 'eng', kickoffAt: '2026-06-14T18:00:00Z' }),
+      m({ stage: 'round_of_16', homeTeamId: 'bra', awayTeamId: 'arg', kickoffAt: '2026-06-16T18:00:00Z' }),
     ];
     expect(stageVotingState(matches, 'round_of_16', now)).toBe('open');
   });
 
-  it('締切＝そのラウンドの初戦KO時刻（最小 kickoff）を過ぎたら closed', () => {
+  it('締切＝次の投票ステージの初戦KOを過ぎたら closed', () => {
     const matches = [
-      // 初戦は now より前にKO済み → ロック
-      m({ stage: 'round_of_16', homeTeamId: 'fra', awayTeamId: 'eng', kickoffAt: '2026-06-14T18:00:00Z' }),
-      m({ stage: 'round_of_16', homeTeamId: 'bra', awayTeamId: 'arg', kickoffAt: '2026-06-16T18:00:00Z' }),
+      // R32 のチームは揃っている
+      m({ stage: 'round_of_32', homeTeamId: 'fra', awayTeamId: 'eng', kickoffAt: '2026-06-10T18:00:00Z' }),
+      // 次ステージ R16 が now より前に開始済み → R32 はロック
+      m({ stage: 'round_of_16', homeTeamId: 'bra', awayTeamId: 'arg', kickoffAt: '2026-06-14T18:00:00Z' }),
     ];
-    expect(stageVotingState(matches, 'round_of_16', now)).toBe('closed');
+    expect(stageVotingState(matches, 'round_of_32', now)).toBe('closed');
   });
 
   it('全試合 finished なら archived（履歴）', () => {
@@ -77,12 +79,14 @@ describe('stageVotingState', () => {
     expect(stageVotingState(matches, 'group_stage', now)).toBe('archived');
   });
 
-  it('一部 finished でも初戦KO済みなら closed（archived ではない）', () => {
+  it('次ステージ開始済みでも自ステージ未終了なら closed（archived ではない）', () => {
     const matches = [
-      m({ stage: 'round_of_16', ...FIN, kickoffAt: '2026-06-14T18:00:00Z' }),
-      m({ stage: 'round_of_16', homeTeamId: 'bra', awayTeamId: 'arg', kickoffAt: '2026-06-16T18:00:00Z' }),
+      m({ stage: 'round_of_32', ...FIN, kickoffAt: '2026-06-10T18:00:00Z' }),
+      m({ stage: 'round_of_32', homeTeamId: 'bra', awayTeamId: 'arg', kickoffAt: '2026-06-16T18:00:00Z' }),
+      // 次ステージ R16 が開始済み → R32 は closed
+      m({ stage: 'round_of_16', homeTeamId: 'ned', awayTeamId: 'usa', kickoffAt: '2026-06-14T18:00:00Z' }),
     ];
-    expect(stageVotingState(matches, 'round_of_16', now)).toBe('closed');
+    expect(stageVotingState(matches, 'round_of_32', now)).toBe('closed');
   });
 
   it('そのステージの試合が存在しなければ not_yet_open', () => {
@@ -90,37 +94,64 @@ describe('stageVotingState', () => {
     expect(stageVotingState(matches, 'final', now)).toBe('not_yet_open');
   });
 
-  it('チームが揃っていても kickoff が null（未定）なら open のまま（締切不能）', () => {
+  it('次の投票ステージが無い/未定なら open のまま（締切不能）', () => {
+    // final はこれより後の投票ステージが無い → 締切なしで open。
     const matches = [
-      m({ stage: 'round_of_16', homeTeamId: 'fra', awayTeamId: 'eng', kickoffAt: null }),
+      m({ stage: 'final', homeTeamId: 'fra', awayTeamId: 'eng', kickoffAt: '2026-06-10T18:00:00Z' }),
     ];
-    expect(stageVotingState(matches, 'round_of_16', now)).toBe('open');
+    expect(stageVotingState(matches, 'final', now)).toBe('open');
+  });
+
+  it('グループ戦は会期中ずっと open（開幕戦でロックしない・旧仕様の是正）', () => {
+    const matches = [
+      // 開幕戦は now より前にKO済みだが、次ステージ(R32)はまだ未開始
+      m({ stage: 'group_stage', homeTeamId: 'mex', awayTeamId: 'rsa', kickoffAt: '2026-06-11T18:00:00Z' }),
+      m({ stage: 'group_stage', homeTeamId: 'jpn', awayTeamId: 'bra', kickoffAt: '2026-06-20T18:00:00Z' }),
+      m({ stage: 'round_of_32', homeTeamId: null, awayTeamId: null, kickoffAt: '2026-06-28T18:00:00Z' }),
+    ];
+    expect(stageVotingState(matches, 'group_stage', now)).toBe('open');
   });
 });
 
 describe('stageOpenForVoting', () => {
   const now = new Date('2026-06-15T00:00:00Z');
   it('open のときだけ true', () => {
-    const open = [m({ stage: 'final', homeTeamId: 'fra', awayTeamId: 'eng', kickoffAt: '2026-07-19T18:00:00Z' })];
-    const closed = [m({ stage: 'final', homeTeamId: 'fra', awayTeamId: 'eng', kickoffAt: '2026-06-14T18:00:00Z' })];
-    expect(stageOpenForVoting(open, 'final', now)).toBe(true);
-    expect(stageOpenForVoting(closed, 'final', now)).toBe(false);
+    // semi_final は次ステージ(final)が未来なら open / 開始済みなら closed。
+    const open = [
+      m({ stage: 'semi_final', homeTeamId: 'fra', awayTeamId: 'eng', kickoffAt: '2026-07-14T18:00:00Z' }),
+      m({ stage: 'final', homeTeamId: null, awayTeamId: null, kickoffAt: '2026-07-19T18:00:00Z' }),
+    ];
+    const closed = [
+      m({ stage: 'semi_final', homeTeamId: 'fra', awayTeamId: 'eng', kickoffAt: '2026-06-10T18:00:00Z' }),
+      m({ stage: 'final', homeTeamId: 'bra', awayTeamId: 'arg', kickoffAt: '2026-06-14T18:00:00Z' }),
+    ];
+    expect(stageOpenForVoting(open, 'semi_final', now)).toBe(true);
+    expect(stageOpenForVoting(closed, 'semi_final', now)).toBe(false);
   });
 });
 
 describe('votableStage', () => {
   const now = new Date('2026-06-15T00:00:00Z');
 
-  it('open な最初のステージを返す（締切後の前ラウンドは飛ばす）', () => {
+  it('open な最初のステージを返す（次ステージ開始済みの前ラウンドは飛ばす）', () => {
     const matches = [
       // group は全終了（archived）
       m({ stage: 'group_stage', ...FIN, kickoffAt: '2026-06-11T18:00:00Z' }),
-      // R32 は初戦KO済み（closed）
-      m({ stage: 'round_of_32', homeTeamId: 'fra', awayTeamId: 'eng', kickoffAt: '2026-06-14T18:00:00Z' }),
-      // R16 はチーム確定・初戦KO未来（open）
-      m({ stage: 'round_of_16', homeTeamId: 'fra', awayTeamId: 'bra', kickoffAt: '2026-07-01T18:00:00Z' }),
+      // R32 はチーム確定だが次ステージ R16 が開始済み → closed
+      m({ stage: 'round_of_32', homeTeamId: 'fra', awayTeamId: 'eng', kickoffAt: '2026-06-10T18:00:00Z' }),
+      // R16 はチーム確定・次ステージ(QF)未開始 → open
+      m({ stage: 'round_of_16', homeTeamId: 'fra', awayTeamId: 'bra', kickoffAt: '2026-06-14T18:00:00Z' }),
     ];
     expect(votableStage(matches, now)).toBe('round_of_16');
+  });
+
+  it('グループ戦会期中はグループ戦を返す（旧仕様では null だった死に体の是正）', () => {
+    const matches = [
+      m({ stage: 'group_stage', homeTeamId: 'mex', awayTeamId: 'rsa', kickoffAt: '2026-06-11T18:00:00Z' }),
+      m({ stage: 'group_stage', homeTeamId: 'jpn', awayTeamId: 'bra', kickoffAt: '2026-06-20T18:00:00Z' }),
+      m({ stage: 'round_of_32', homeTeamId: null, awayTeamId: null, kickoffAt: '2026-06-28T18:00:00Z' }),
+    ];
+    expect(votableStage(matches, now)).toBe('group_stage');
   });
 
   it('どのステージも open でなければ null', () => {
