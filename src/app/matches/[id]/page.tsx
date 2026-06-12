@@ -14,13 +14,14 @@ import { getMatchDetail, getVenueMatchSummary } from '@/db/queries';
 import {
   formatKickoff,
   formatMatchDateZoned,
-  getParticipantLabel,
-  STAGE_LABELS,
+  formatSlotLabel,
   type MatchStage,
 } from '@/lib/bracket';
 import { getSiteUrl } from '@/lib/env';
+import { ogLocale } from '@/lib/i18n/alternates';
 import { getDictionary } from '@/lib/i18n/dictionary';
 import { resolveLocale, resolveTimeZone } from '@/lib/i18n/server';
+import { localizedTeamName } from '@/lib/i18n/team-name';
 import { buildBreadcrumbList, buildSportsEvent } from '@/lib/structured-data';
 import { tzOffset } from '@/lib/timezone';
 
@@ -33,26 +34,44 @@ type MatchDetailPageProps = {
 /**
  * 対戦カード・ステージを反映した動的メタデータ。
  * 確定前カードはスロット名（「勝者 #51」等）で説明し、未確定でも妥当なタイトルにする。
+ * T-19: 表示言語に応じたチーム名・スロット名・ステージ名・テンプレを使う。
+ * canonical は単一URL（/matches/<id>）固定で hreflang は付けない。
  */
 export async function generateMetadata({
   params,
 }: MatchDetailPageProps): Promise<Metadata> {
   const { id } = await params;
+  const locale = await resolveLocale();
+  const dict = getDictionary(locale);
   const matchId = Number(id);
   if (!Number.isInteger(matchId)) {
-    return { title: '試合詳細' };
+    return { title: dict.meta.matchDetail.fallback };
   }
 
   const match = await getMatchDetail(matchId);
   if (!match) {
-    return { title: '試合詳細' };
+    return { title: dict.meta.matchDetail.fallback };
   }
 
-  const stageLabel = STAGE_LABELS[match.stage as MatchStage] ?? match.stage;
-  const homeLabel = getParticipantLabel(match.homeTeam, match.homeSlot);
-  const awayLabel = getParticipantLabel(match.awayTeam, match.awaySlot);
-  const title = `${homeLabel} vs ${awayLabel}（${stageLabel}）`;
-  const description = `${stageLabel}「${homeLabel} 対 ${awayLabel}」の日程・会場・結果。${match.venue.stadiumName}（${match.venue.city}）で開催。`;
+  // チームが確定していればロケール化名、未確定ならスロット名（言語対応）。
+  const homeLabel =
+    localizedTeamName(match.homeTeam, locale) ||
+    formatSlotLabel(match.homeSlot, dict.match.slot);
+  const awayLabel =
+    localizedTeamName(match.awayTeam, locale) ||
+    formatSlotLabel(match.awaySlot, dict.match.slot);
+  const stageLabel = dict.match.stage[match.stage as MatchStage] ?? match.stage;
+  const tmpl = dict.meta.matchDetail;
+  const title = tmpl.title
+    .replace('{home}', homeLabel)
+    .replace('{away}', awayLabel)
+    .replace('{stage}', stageLabel);
+  const description = tmpl.description
+    .replace('{home}', homeLabel)
+    .replace('{away}', awayLabel)
+    .replace('{stage}', stageLabel)
+    .replace('{stadium}', match.venue.stadiumName)
+    .replace('{city}', match.venue.city);
   const canonical = `/matches/${match.id}`;
 
   return {
@@ -64,6 +83,7 @@ export async function generateMetadata({
       description,
       url: canonical,
       type: 'article',
+      locale: ogLocale(locale),
     },
     twitter: { card: 'summary_large_image', title, description },
   };

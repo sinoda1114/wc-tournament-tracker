@@ -3,15 +3,24 @@ import { Container } from '@mantine/core';
 
 import { TeamExplorer } from '@/components/TeamExplorer';
 import { listAllTeams } from '@/db/queries';
+import { ogLocale } from '@/lib/i18n/alternates';
+import { getDictionary } from '@/lib/i18n/dictionary';
+import { resolveLocale } from '@/lib/i18n/server';
 
 export const dynamic = 'force-dynamic';
 
-export const metadata: Metadata = {
-  title: '出場国一覧',
-  description:
-    'WC 2026 の出場国を一覧・検索できます。各国の代表メンバーや監督、所属グループを確認できます。',
-  alternates: { canonical: '/teams' },
-};
+// T-19: ロケール対応 metadata。canonical は単一URL（/teams）固定で hreflang は付けない。
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await resolveLocale();
+  const { title, description } = getDictionary(locale).meta.teams;
+  return {
+    title,
+    description,
+    alternates: { canonical: '/teams' },
+    openGraph: { title, description, url: '/teams', locale: ogLocale(locale) },
+    twitter: { title, description },
+  };
+}
 
 export default async function TeamsPage() {
   const teams = await listAllTeams();

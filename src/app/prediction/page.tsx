@@ -16,18 +16,25 @@ import {
   currentVotingStage,
   VOTING_STAGES,
 } from '@/lib/crowd';
+import { ogLocale } from '@/lib/i18n/alternates';
 import { getDictionary } from '@/lib/i18n/dictionary';
 import { resolveLocale } from '@/lib/i18n/server';
 import { readVoterId } from '@/lib/voter';
 
 export const dynamic = 'force-dynamic';
 
-export const metadata: Metadata = {
-  title: '優勝国予想',
-  description:
-    '過去W杯成績・FIFAランク・WC2026成績・みんなの予想を掛け合わせて優勝確率を算出します。指標のON/OFFで予想が変わります。',
-  alternates: { canonical: '/prediction' },
-};
+// T-19: ロケール対応 metadata。canonical は単一URL（/prediction）固定で hreflang は付けない。
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await resolveLocale();
+  const { title, description } = getDictionary(locale).meta.prediction;
+  return {
+    title,
+    description,
+    alternates: { canonical: '/prediction' },
+    openGraph: { title, description, url: '/prediction', locale: ogLocale(locale) },
+    twitter: { title, description },
+  };
+}
 
 /** Map は RSC 境界を越えられないため、クライアントへはプレーンオブジェクトで渡す。 */
 function serializeFactors(
