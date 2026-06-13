@@ -2425,6 +2425,82 @@ a {
 }
 
 /* =====================================================================
+   スマホUI 微調整 第2弾（T-57）
+   <768px のみ。PC（>=768px）表示は一切不変＝PC不可侵（方針決定 2026-06-13）。
+   ⑤ 順位表のモバイル可読性（最重要）/ ② ナビ切替ボタンのコンパクト化 /
+   ③ お気に入りフィルタを左・押しやすく / ⑥ トップ縦スタック圧縮（H1/説明文）
+   ===================================================================== */
+@media (max-width: 767px) {
+  /* --- ⑤ 順位表: 11列は狭幅で窮屈＋チーム名が縦割れ（「メキシコ」が割れる）。
+     モバイルは低優先列（勝/分/敗/得点/失点）を畳み、
+     #・国旗・チーム・試合数・得失点差・勝点だけ残す。デスクトップは全列のまま。 --- */
+  .wc-standings-table th:nth-child(5),
+  .wc-standings-table td:nth-child(5), /* 勝 W */
+  .wc-standings-table th:nth-child(6),
+  .wc-standings-table td:nth-child(6), /* 分 D */
+  .wc-standings-table th:nth-child(7),
+  .wc-standings-table td:nth-child(7), /* 敗 L */
+  .wc-standings-table th:nth-child(8),
+  .wc-standings-table td:nth-child(8), /* 得点 GF */
+  .wc-standings-table th:nth-child(9),
+  .wc-standings-table td:nth-child(9) /* 失点 GA */ {
+    display: none;
+  }
+
+  /* 残列はやや詰めつつ、チーム列に幅を回す。 */
+  .wc-standings-table th,
+  .wc-standings-table td {
+    padding: 0.45rem 0.3rem;
+  }
+
+  /* チーム名（2つ目の span = ローカライズ名）は 1 行省略にして縦割れを根絶。 */
+  .wc-standings-team-cell {
+    max-width: 44vw;
+  }
+
+  .wc-standings-team-cell > span:last-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+  }
+
+  /* --- ② ナビ切替ボタン（グループリーグ/決勝T/出場国…）をさらにコンパクトに --- */
+  .wc-site-nav {
+    font-size: 0.8rem;
+  }
+
+  .wc-site-nav .wc-nav-link {
+    padding: 0.26rem 0.62rem;
+  }
+
+  /* --- ⑥ H1 はナビ項目と文言が重複しがち（例: グループリーグ）。
+     モバイルは少し小さくして主張を抑え、本体（順位表）を上へ。 --- */
+  .wc-home-heading-row .mantine-Title-root {
+    font-size: 1.4rem;
+    line-height: 1.25;
+  }
+
+  /* 説明文はモバイルで冗長になりがち。サイズを落として縦の専有を減らす。 */
+  .wc-home-heading-desc {
+    font-size: 0.82rem;
+    line-height: 1.45;
+  }
+
+  /* --- ③ お気に入りフィルタ「☆のみを表示」を見出し行の最左・最上段へ。
+     親指で届きやすい左肩に独立配置（タイトルはその下へ回す）。 --- */
+  .wc-home-heading-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .wc-home-heading-row .wc-favorite-filter-toggle {
+    order: -1;
+  }
+}
+
+/* =====================================================================
    スマホUI 微調整 第3弾（T-58）
    <768px のみ。PC（>=768px）表示は一切不変＝PC不可侵（方針決定 2026-06-13）。
    ② お気に入り⭐をチーム行の最左へ（本サービスのコンセプト＝ファボ重視。
