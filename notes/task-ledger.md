@@ -1,6 +1,6 @@
 # タスク台帳（永続・セッション横断）
 
-**🕒 最終更新: 2026-06-13 JST（番人セッション同期: T-48自分票リセット＋T-51グループ投票窓開放を PR #57 でマージ・本番反映／T-52決勝T課金ゲートは PR #46 に内包・番人が main追従＆競合解消＋/security-review PASS 済→Stripe設定/env 待ち）**
+**🕒 最終更新: 2026-06-13 JST（番人セッション: T-53②注釈 PR #60／T-50勝利色 PR #58／postcss脆弱性(Dependabot#14) PR #59／T-52は #46 で env待ち。#58除き低リスク・いずれも番人マージ待ち。T-48/T-51 は #57 でマージ・本番反映済）**
 
 > **運用**（[[numbered-choices]] 準拠）
 > - 番号 **T-N は固定**。振り直さない。新規は「台帳の最大+1」を台帳に追記して確保。
@@ -43,6 +43,7 @@
 - ~~**T-51** グループ投票窓の開放（投票締切ルール改定）~~ — `crowd.ts` の投票締切を「そのステージ初戦KO」→「**次の投票ステージの初戦KO（＝次ステージ開始でロック）**」に改定。グループ戦投票が会期中ずっと open に（開幕戦即ロックの "全締切" 死に体を是正）。1ステージ1票ロックは従来どおり。[[voting-monetization-model]] 追従。**✅完了**（PR #57 squash `3008b89`・本番反映 2026-06-13・tsc/lint/全461テストPASS・/ai-review通過）。
 - **T-47** ヒーローセクションの文言変更 — トップの見出し/説明（`home.title`/`home.description`・`src/lib/i18n/messages/*.ts` ×5言語）を変更。**変更後テキスト未定（ユーザー指定待ち）**。ui-feature 領域・worktree→PR。（2026-06-13 起票）
 - **T-50** 勝利チームの表示色を見直す — 試合カード/スコアで勝者（チーム名＋スコア）が `var(--wc-accent)`（青）の流用で表示され「微妙・地味」との指摘（スクショ 2026-06-13: MEX 2-0 RSA / KOR 2-1 CZE の勝者が青）。`src/app/globals.css` の `.is-winner` 群（`.wc-team-row.is-winner` 付近 / `.wc-mini-team.is-winner` / `.wc-versus-name.is-winner` / 勝者スコア `strong.is-winner`）が `--wc-accent` を流用中。**勝利が映える専用色（例: ゴールド/グリーン系の勝者トークン `--wc-win` を新設）へ**。判定は `MatchVersus.tsx` の `isWinner`（既存・触らない）。ライト/ダーク両テーマでコントラスト確認。ui-feature 領域・worktree→PR。 **🟡実装完了・PR #58・篠田の視覚確認待ち（帰宅後）**: セマンティックトークン `--wc-win` を新設（theme-tuned `--wc-gold` 参照＝ライト #b45309／ダーク #fbbf24）し `.is-winner` 4ルールを青→金。tsc 0err・CSSのみ・`isWinner` 不変。帰宅後 OK なら番人マージ→本番 promote。色の好み調整は即対応可。プレビュー: feat/winner-color。（2026-06-13 起票／実装）
+- **[保守] Dependabot #14（postcss < 8.5.10 の CSS Stringify XSS・medium）** — Next がネストしていた postcss 8.4.31 を `overrides` で 8.5.15 に統一。**✅実装完了・PR #59**（サブエージェント・package.json/lock のみ・audit から postcss 消失。実害は低=ビルド時の信頼CSSのみ処理）。**番人マージ待ち**。※残: `esbuild` の high 1件は別途（T-8 範囲）。
 - **T-53** 各国スカッドの「離脱→補充」反映＋注釈書き — 大会直前の負傷離脱と補充招集を、**①出場選手リストに補充選手を追加**（本番DB手動更新＝スカッド凍結ルールに従い `fetch-squads` は使わず**チーム個別に手動INSERT**・[[squad-data-source]]）＋**②選手リスト下部に注釈**（日本の遠藤航→町野と同じ仕組み: `src/lib/squad-notes.ts` の `SQUAD_NOTES` に `FIFAコード→note<Code>` を1行追加＋ `src/lib/i18n/messages/{ja,en,es,pt,zh}.ts` の `squad.note<Code>` に注釈文を追加。`SquadPanel.tsx` が末尾に表示）。**確認済みペア（日本除く・"離脱→補充" が明確なものだけ）**:
 
   | 国 | 離脱選手 | 離脱理由 | 補充選手 | 背番号 | メモ |
