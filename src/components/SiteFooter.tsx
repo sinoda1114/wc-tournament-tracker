@@ -35,20 +35,8 @@ export function SiteFooter({ t }: { t: Dictionary['footer'] }) {
     { key: 'notice', node: <span>{t.dataNotice}</span> },
     // 非公式の明示は目立たせず、法務リンクと同じ薄い小書き行に置く（詳細は利用規約）。
     { key: 'unofficial', node: <span>{t.unofficialNote}</span> },
-    {
-      key: 'attribution',
-      // CC BY-SA の帰属表記（Wikipedia 由来の試合データ）。ライセンスへ外部リンク。
-      node: (
-        <a
-          href="https://creativecommons.org/licenses/by-sa/4.0/"
-          target="_blank"
-          rel="noreferrer"
-          className={styles.navLink}
-        >
-          {t.dataAttribution}
-        </a>
-      ),
-    },
+    // NOTE: Wikipedia(CC BY-SA) の帰属表記はフッター圧縮のため利用規約 第6条へ移設した
+    //（フッターから /terms へ全ページでリンク到達可能＝ライセンス義務は維持・T-61 篠田FB）。
   ];
 
   return (

@@ -150,6 +150,18 @@ export default function TermsPage() {
             その完全性・正確性・最新性・有用性を保証しません。
           </li>
           <li>
+            主なデータソースは、試合日程・結果等は TheSportsDB、天気予報は WeatherAPI.com です。
+            また、試合イベント（得点者・カード等）の一部は{' '}
+            <a href="https://www.wikipedia.org/" target="_blank" rel="noreferrer">
+              Wikipedia（ウィキペディア）
+            </a>
+            の記載に基づいており、{' '}
+            <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noreferrer">
+              クリエイティブ・コモンズ 表示-継承 4.0 国際（CC BY-SA 4.0）
+            </a>{' '}
+            ライセンスのもとで利用しています（事実の抽出・要約のため必要に応じ改変する場合があります）。
+          </li>
+          <li>
             天気情報は予報であり、実際の気象状況と異なる場合があります。観戦・移動その他の
             判断は、公式の発表・予報を必ず確認のうえ行ってください。
           </li>
