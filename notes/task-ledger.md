@@ -33,7 +33,7 @@
 - ぶら下がり: **T-26補足**（購入者にバナー非表示・1行）/ **T-29**（購入画面に提供期間〜2026-09-30 を明示）
 
 ### 🟠 次 — （T-19 metadata 多言語化は ~~完了~~（PR #54・本番実機OK）。実装系は下記参照）
-- **T-48＋T-51 は ✅完了（PR #57・本番反映 2026-06-13）**。**T-52 決勝T課金ゲートは PR #46 に内包・番人が main追従＆競合解消＋/security-review PASS まで完了 → Stripe設定/env（篠田）待ち**。次のユーザー指定待ちは **T-47 ヒーロー文言**。
+- **T-48＋T-51 は ✅完了（PR #57・本番反映 2026-06-13）**。**T-52 決勝T課金ゲートは PR #46 に内包・番人が main追従＆競合解消＋/security-review PASS まで完了 → Stripe設定/env（篠田）待ち**。**T-50 勝利表示色は実装完了・PR #58・篠田の視覚確認待ち（帰宅後）**。次のユーザー指定待ちは **T-47 ヒーロー文言**。
 
 ### 🟡 その後 — T-12 サイト全体の最終動作チェック（実装出揃い後）
 - 全ページ・全言語を通しで触って確認 → 2段ゲート → デプロイ。
@@ -42,7 +42,7 @@
 - ~~**T-48** ADMIN 投票リセット（自分票のみ）~~ — `/admin` で isAdmin＋requireVoterId の二重ゲート、`voter_id` 限定 DELETE で**自分の票だけ**リセット。「みんなの票を消す」機能は誤爆事故防止のため**廃止**（ユーザー指示）。**✅完了**（PR #57 squash `3008b89`・本番反映 2026-06-13・実機 reset→再投票 OK）。
 - ~~**T-51** グループ投票窓の開放（投票締切ルール改定）~~ — `crowd.ts` の投票締切を「そのステージ初戦KO」→「**次の投票ステージの初戦KO（＝次ステージ開始でロック）**」に改定。グループ戦投票が会期中ずっと open に（開幕戦即ロックの "全締切" 死に体を是正）。1ステージ1票ロックは従来どおり。[[voting-monetization-model]] 追従。**✅完了**（PR #57 squash `3008b89`・本番反映 2026-06-13・tsc/lint/全461テストPASS・/ai-review通過）。
 - **T-47** ヒーローセクションの文言変更 — トップの見出し/説明（`home.title`/`home.description`・`src/lib/i18n/messages/*.ts` ×5言語）を変更。**変更後テキスト未定（ユーザー指定待ち）**。ui-feature 領域・worktree→PR。（2026-06-13 起票）
-- **T-50** 勝利チームの表示色を見直す — 試合カード/スコアで勝者（チーム名＋スコア）が `var(--wc-accent)`（青）の流用で表示され「微妙・地味」との指摘（スクショ 2026-06-13: MEX 2-0 RSA / KOR 2-1 CZE の勝者が青）。`src/app/globals.css` の `.is-winner` 群（`.wc-team-row.is-winner` 付近 / `.wc-mini-team.is-winner` / `.wc-versus-name.is-winner` / 勝者スコア `strong.is-winner`）が `--wc-accent` を流用中。**勝利が映える専用色（例: ゴールド/グリーン系の勝者トークン `--wc-win` を新設）へ**。判定は `MatchVersus.tsx` の `isWinner`（既存・触らない）。ライト/ダーク両テーマでコントラスト確認。ui-feature 領域・worktree→PR。（2026-06-13 起票）
+- **T-50** 勝利チームの表示色を見直す — 試合カード/スコアで勝者（チーム名＋スコア）が `var(--wc-accent)`（青）の流用で表示され「微妙・地味」との指摘（スクショ 2026-06-13: MEX 2-0 RSA / KOR 2-1 CZE の勝者が青）。`src/app/globals.css` の `.is-winner` 群（`.wc-team-row.is-winner` 付近 / `.wc-mini-team.is-winner` / `.wc-versus-name.is-winner` / 勝者スコア `strong.is-winner`）が `--wc-accent` を流用中。**勝利が映える専用色（例: ゴールド/グリーン系の勝者トークン `--wc-win` を新設）へ**。判定は `MatchVersus.tsx` の `isWinner`（既存・触らない）。ライト/ダーク両テーマでコントラスト確認。ui-feature 領域・worktree→PR。 **🟡実装完了・PR #58・篠田の視覚確認待ち（帰宅後）**: セマンティックトークン `--wc-win` を新設（theme-tuned `--wc-gold` 参照＝ライト #b45309／ダーク #fbbf24）し `.is-winner` 4ルールを青→金。tsc 0err・CSSのみ・`isWinner` 不変。帰宅後 OK なら番人マージ→本番 promote。色の好み調整は即対応可。プレビュー: feat/winner-color。（2026-06-13 起票／実装）
 - **T-53** 各国スカッドの「離脱→補充」反映＋注釈書き — 大会直前の負傷離脱と補充招集を、**①出場選手リストに補充選手を追加**（本番DB手動更新＝スカッド凍結ルールに従い `fetch-squads` は使わず**チーム個別に手動INSERT**・[[squad-data-source]]）＋**②選手リスト下部に注釈**（日本の遠藤航→町野と同じ仕組み: `src/lib/squad-notes.ts` の `SQUAD_NOTES` に `FIFAコード→note<Code>` を1行追加＋ `src/lib/i18n/messages/{ja,en,es,pt,zh}.ts` の `squad.note<Code>` に注釈文を追加。`SquadPanel.tsx` が末尾に表示）。**確認済みペア（日本除く・"離脱→補充" が明確なものだけ）**:
 
   | 国 | 離脱選手 | 離脱理由 | 補充選手 | 背番号 | メモ |
