@@ -276,9 +276,19 @@ export const ja = {
     ageSuffix: '歳',
     groupCount: '{label}（{count}）',
     noteArg:
-      '※ アルゼンチン代表は Leonardo Balerdi 選手が負傷のため辞退し、2026年6月11日時点で代替選手が未発表のため25名で表示しています。追加召集が発表され次第、反映します。',
+      '※ アルゼンチン代表は Leonardo Balerdi 選手が負傷のため離脱し、Marcos Senesi 選手が追加招集されました。',
     noteJpn:
       '※ 遠藤航選手は左足の負傷悪化により大会メンバーから離脱し、日本代表からの引退を発表しました。代わって町野修斗選手（FW）が追加招集され、背番号6を引き継いでいます。',
+    noteNed:
+      '※ オランダ代表は Jurrien Timber 選手が鼠径部の負傷により離脱し、Lutsharel Geertruida 選手（背番号2）が追加招集されました。',
+    noteGer:
+      '※ ドイツ代表は Lennart Karl 選手が左大腿部の筋損傷により離脱し、Assan Ouédraogo 選手（背番号25）が追加招集されました。',
+    noteBra:
+      '※ ブラジル代表は Wesley 選手が左太ももの負傷により離脱し、Éderson 選手（MF・背番号2）が追加招集されました。',
+    noteSco:
+      '※ スコットランド代表は Billy Gilmour 選手が膝の負傷により離脱し、Tyler Fletcher 選手（背番号8）が追加招集されました。',
+    noteAut:
+      '※ オーストリア代表は Christoph Baumgartner 選手が右太ももの負傷により離脱し、Dejan Ljubičić 選手が追加招集されました。',
   },
   // 優勝国予想（ChampionPrediction）。{count}=チーム数・{name}=国名。
   prediction: {

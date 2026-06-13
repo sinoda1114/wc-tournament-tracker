@@ -11,8 +11,18 @@ export type SquadNoteKey = Extract<keyof Dictionary['squad'], `note${string}`>;
  * 頻度が低いのでコード定数で管理する（DB マイグレーションはしない）。
  */
 export const SQUAD_NOTES: Partial<Record<string, SquadNoteKey>> = {
-  // Balerdi 負傷辞退・補充未発表（#38）。補充が確定して26名になったら撤去。
+  // Balerdi 負傷離脱→Senesi 補充招集（2026-06-13）。
   ARG: 'noteArg',
   // 遠藤航が負傷離脱・代表引退、町野修斗が追加招集（2026-06-13）。
   JPN: 'noteJpn',
+  // Timber 鼠径部負傷→Geertruida 補充招集（2026-06-13）。
+  NED: 'noteNed',
+  // Karl 左大腿筋損傷→Ouédraogo 補充招集（2026-06-13）。
+  GER: 'noteGer',
+  // Wesley 左太もも負傷→Éderson(MF) 補充招集（2026-06-13）。
+  BRA: 'noteBra',
+  // Gilmour 膝負傷→Fletcher 補充招集（2026-06-13）。
+  SCO: 'noteSco',
+  // Baumgartner 右太もも負傷→Ljubičić 補充招集（2026-06-13）。
+  AUT: 'noteAut',
 };

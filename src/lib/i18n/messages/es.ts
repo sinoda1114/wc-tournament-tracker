@@ -257,9 +257,19 @@ export const es: Dictionary = {
     ageSuffix: ' años',
     groupCount: '{label} ({count})',
     noteArg:
-      'Nota: Argentina aparece con 25 jugadores. Leonardo Balerdi se retiró por lesión y, al 11 de junio de 2026, no se ha anunciado un reemplazo. Lo actualizaremos en cuanto se confirme una convocatoria.',
+      'Nota: Leonardo Balerdi se retiró de la convocatoria de Argentina por lesión y Marcos Senesi fue convocado en su lugar.',
     noteJpn:
       'Nota: Wataru Endo dejó la convocatoria tras agravarse su lesión en el pie izquierdo y anunció su retiro de la selección nacional. Shuto Machino (FW) fue convocado en su lugar y hereda el dorsal 6.',
+    noteNed:
+      'Nota: Jurrien Timber dejó la convocatoria de los Países Bajos por una lesión en la ingle y Lutsharel Geertruida (dorsal 2) fue convocado en su lugar.',
+    noteGer:
+      'Nota: Lennart Karl dejó la convocatoria de Alemania por una lesión muscular en el muslo izquierdo y Assan Ouédraogo (dorsal 25) fue convocado en su lugar.',
+    noteBra:
+      'Nota: Wesley dejó la convocatoria de Brasil por una lesión en el muslo izquierdo y Éderson (centrocampista, dorsal 2) fue convocado en su lugar.',
+    noteSco:
+      'Nota: Billy Gilmour dejó la convocatoria de Escocia por una lesión de rodilla y Tyler Fletcher (dorsal 8) fue convocado en su lugar.',
+    noteAut:
+      'Nota: Christoph Baumgartner dejó la convocatoria de Austria por una lesión en el muslo derecho y Dejan Ljubičić fue convocado en su lugar.',
   },
   prediction: {
     title: 'Pronóstico del campeón',

@@ -257,9 +257,19 @@ export const pt: Dictionary = {
     ageSuffix: ' anos',
     groupCount: '{label} ({count})',
     noteArg:
-      'Nota: a Argentina aparece com 25 jogadores. Leonardo Balerdi foi cortado por lesão e, em 11 de junho de 2026, nenhum substituto foi anunciado. Vamos atualizar assim que uma convocação for confirmada.',
+      'Nota: Leonardo Balerdi foi cortado da convocação da Argentina por lesão e Marcos Senesi foi convocado em seu lugar.',
     noteJpn:
       'Nota: Wataru Endo deixou a convocação após o agravamento da lesão no pé esquerdo e anunciou sua aposentadoria da seleção. Shuto Machino (FW) foi convocado em seu lugar e assume a camisa 6.',
+    noteNed:
+      'Nota: Jurrien Timber deixou a convocação da Holanda com uma lesão na virilha e Lutsharel Geertruida (camisa 2) foi convocado em seu lugar.',
+    noteGer:
+      'Nota: Lennart Karl deixou a convocação da Alemanha com uma lesão muscular na coxa esquerda e Assan Ouédraogo (camisa 25) foi convocado em seu lugar.',
+    noteBra:
+      'Nota: Wesley deixou a convocação do Brasil com uma lesão na coxa esquerda e Éderson (meio-campista, camisa 2) foi convocado em seu lugar.',
+    noteSco:
+      'Nota: Billy Gilmour deixou a convocação da Escócia com uma lesão no joelho e Tyler Fletcher (camisa 8) foi convocado em seu lugar.',
+    noteAut:
+      'Nota: Christoph Baumgartner deixou a convocação da Áustria com uma lesão na coxa direita e Dejan Ljubičić foi convocado em seu lugar.',
   },
   prediction: {
     title: 'Palpite do campeão',
