@@ -254,9 +254,19 @@ export const en: Dictionary = {
     ageSuffix: '',
     groupCount: '{label} ({count})',
     noteArg:
-      'Note: Argentina is shown with 25 players. Leonardo Balerdi withdrew through injury and, as of 11 June 2026, no replacement has been announced. We will update this as soon as a call-up is confirmed.',
+      'Note: Leonardo Balerdi withdrew from the Argentina squad through injury, and Marcos Senesi was called up as his replacement.',
     noteJpn:
       'Note: Wataru Endo has left the squad after his left-foot injury worsened and announced his retirement from the national team. Shuto Machino (FW) has been called up as his replacement and takes over the number 6 shirt.',
+    noteNed:
+      'Note: Jurrien Timber left the Netherlands squad with a groin injury, and Lutsharel Geertruida (No. 2) was called up as his replacement.',
+    noteGer:
+      'Note: Lennart Karl left the Germany squad with a left-thigh muscle injury, and Assan Ouédraogo (No. 25) was called up as his replacement.',
+    noteBra:
+      'Note: Wesley left the Brazil squad with a left-thigh injury, and Éderson (a midfielder, No. 2) was called up as his replacement.',
+    noteSco:
+      'Note: Billy Gilmour left the Scotland squad with a knee injury, and Tyler Fletcher (No. 8) was called up as his replacement.',
+    noteAut:
+      'Note: Christoph Baumgartner left the Austria squad with a right-thigh injury, and Dejan Ljubičić was called up as his replacement.',
   },
   prediction: {
     title: 'Champion prediction',
