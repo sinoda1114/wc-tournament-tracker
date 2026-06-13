@@ -24,7 +24,11 @@ export default function manifest(): MetadataRoute.Manifest {
     lang: 'ja',
     start_url: '/',
     scope: '/',
-    display: 'standalone',
+    // display:'browser' にして「installable PWA」判定を外す（T-67）。これにより Chrome は
+    // ネイティブの「アプリをインストール」(WebAPK) を促さず、⋮ メニューに「ホーム画面に追加」
+    // （＝素のショートカット作成）が出る。本サービスは“アプリのインストール”ではなく
+    // “ホーム画面ショートカット”を提供する方針（篠田 2026-06-14）。
+    display: 'browser',
     // 濃紺背景にブルー基調。スプラッシュ/テーマともダーク既定に揃える。
     background_color: '#0b1220',
     theme_color: '#1e3a8a',

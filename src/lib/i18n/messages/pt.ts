@@ -412,6 +412,11 @@ export const pt: Dictionary = {
     step3Before: 'Toque em ',
     addButton: '“Adicionar”',
     step3After: 'no canto superior direito para concluir.',
+    androidIntro:
+      'Você pode adicionar um atalho deste site à tela inicial. No Chrome, siga os passos abaixo.',
+    androidStep1: 'Abra o menu ⋮ (canto superior direito).',
+    androidStep2: 'Escolha “Adicionar à tela inicial”.',
+    androidStep3: 'Toque em “Adicionar” para concluir.',
   },
   theme: {
     switchToLight: 'Mudar para o modo claro',

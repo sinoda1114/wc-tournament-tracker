@@ -407,6 +407,10 @@ export const zh: Dictionary = {
     step3Before: '点按右上角的',
     addButton: '“添加”',
     step3After: '即可完成。',
+    androidIntro: '你可以将本站的快捷方式添加到主屏幕。在 Chrome 中，请按以下步骤操作。',
+    androidStep1: '点击右上角的 ⋮（菜单）。',
+    androidStep2: '选择“添加到主屏幕”。',
+    androidStep3: '点按“添加”即可完成。',
   },
   theme: {
     switchToLight: '切换到浅色模式',
