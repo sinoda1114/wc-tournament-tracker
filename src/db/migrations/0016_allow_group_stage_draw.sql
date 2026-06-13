@@ -13,11 +13,16 @@
 --
 -- SQLite は CHECK を ALTER TABLE で変更できないため、0003 と同じ公式推奨の
 -- テーブル再作成パターン（CREATE NEW → INSERT SELECT → DROP OLD → RENAME）を使う。
--- bracket_edges は matches に FK ON DELETE CASCADE で繋がるため、先に一時退避し
--- 入れ替え後に復元する（既存データ・インデックス・FK を完全保持）。
+-- ⚠️ matches に FK ON DELETE CASCADE で繋がる子テーブルを全て一時退避してから入れ替え、
+--    最後に復元する（既存データ・インデックス・FK を完全保持）。対象は:
+--      bracket_edges（0001）／match_events（0009・得点/カード/交代の履歴）
+--    ※0003 当時は match_events が未存在だったため退避対象に含まれていなかった。これを退避し
+--      ないと DROP TABLE matches の cascade で試合イベント履歴が全消失する（T-62 レビュー指摘）。
 CREATE TABLE _bracket_edges_backup AS SELECT * FROM bracket_edges;
+CREATE TABLE _match_events_backup AS SELECT * FROM match_events;
 
 DELETE FROM bracket_edges;
+DELETE FROM match_events;
 
 CREATE TABLE matches_new (
   id INTEGER PRIMARY KEY,
@@ -53,11 +58,12 @@ CREATE TABLE matches_new (
     OR winner_team_id = home_team_id
     OR winner_team_id = away_team_id
   ),
-  -- 終了試合は「勝者あり」または「引き分け（両スコアあり かつ 同点）」を許可。
+  -- 終了試合は「勝者あり」または「グループステージの引き分け（両スコアあり かつ 同点）」を許可。
+  -- 引き分けの勝者null許可は group_stage 限定（KO は PK 決着で必ず勝者が要る＝DB不変条件で締める）。
   CHECK (
     status != 'finished'
     OR winner_team_id IS NOT NULL
-    OR (home_score IS NOT NULL AND away_score IS NOT NULL AND home_score = away_score)
+    OR (stage = 'group_stage' AND home_score IS NOT NULL AND away_score IS NOT NULL AND home_score = away_score)
   )
 );
 
@@ -86,4 +92,14 @@ INSERT INTO bracket_edges (id, from_match_id, from_result, to_match_id, to_slot)
 SELECT id, from_match_id, from_result, to_match_id, to_slot
 FROM _bracket_edges_backup;
 
-DROP TABLE _bracket_edges_backup
+INSERT INTO match_events (
+  id, match_id, type, minute, team_id, player_name, player_out,
+  sort_order, source, external_id, created_at, updated_at
+)
+SELECT
+  id, match_id, type, minute, team_id, player_name, player_out,
+  sort_order, source, external_id, created_at, updated_at
+FROM _match_events_backup;
+
+DROP TABLE _bracket_edges_backup;
+DROP TABLE _match_events_backup
