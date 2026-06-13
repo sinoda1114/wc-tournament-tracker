@@ -12,6 +12,44 @@ import { getParticipantLabel, STAGE_LABELS, type MatchStage } from '@/lib/bracke
 
 export type Breadcrumb = { name: string; path: string };
 
+/** サイト全体のブランド表記。検索（指名検索）でカタカナ・英字どちらでも当たるよう揃える。 */
+const BRAND_NAME = 'MatchFav';
+const BRAND_ALTERNATE_NAMES = ['マッチファボ'] as const;
+
+/**
+ * Organization（運営主体）の JSON-LD。
+ *
+ * - name=MatchFav / alternateName にカタカナ「マッチファボ」を載せ、指名検索（ブランド名検索）
+ *   の同義語として検索エンジンに伝える（T-54: カタカナで検索してもヒットさせる狙い）。
+ * - 非公式ファンサイトのため、公式主体（FIFA 等）は名乗らない。logo は App Router の /icon.png。
+ */
+export function buildOrganization(baseUrl: string): Record<string, unknown> {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: BRAND_NAME,
+    alternateName: [...BRAND_ALTERNATE_NAMES],
+    url: baseUrl,
+    logo: `${baseUrl}/icon.png`,
+  };
+}
+
+/**
+ * WebSite の JSON-LD。
+ *
+ * - name=MatchFav / alternateName=マッチファボ を併記し、サイト名のサジェスト/指名検索に効かせる。
+ * - SearchAction は内部検索 UI を公開していない現状では付けない（誤った sitelinks searchbox 申告を避ける）。
+ */
+export function buildWebSite(baseUrl: string): Record<string, unknown> {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: BRAND_NAME,
+    alternateName: [...BRAND_ALTERNATE_NAMES],
+    url: baseUrl,
+  };
+}
+
 /** パンくず（BreadcrumbList）。path は先頭スラッシュ始まりの相対パスを渡す。 */
 export function buildBreadcrumbList(
   baseUrl: string,
