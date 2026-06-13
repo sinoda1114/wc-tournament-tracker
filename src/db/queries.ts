@@ -572,7 +572,18 @@ export async function updateMatchResult(input: UpdateMatchResultInput) {
 
   const winnerTeamId = resolveWinnerTeamId(input, currentMatch);
 
-  if (input.status === 'finished' && !winnerTeamId) {
+  // グループステージの引き分け（例: 1-1）は winner 不在が正常。
+  // これを許可しないと、cron 取込が引き分け試合を確定しようとして throw し、
+  // スコア/「終了」が永久に反映されない（イベントだけ入る不整合になる）。T-62。
+  // 決勝T（KO）は PK 決着で勝者が要るため従来どおり winner 必須を維持する
+  //（cron は reconcile 側で KO 引き分けをスキップし手入力に委ねている）。
+  const isGroupStageDraw =
+    currentMatch.stage === 'group_stage' &&
+    input.homeScore !== null &&
+    input.awayScore !== null &&
+    input.homeScore === input.awayScore;
+
+  if (input.status === 'finished' && !winnerTeamId && !isGroupStageDraw) {
     throw new Error('Finished matches require a winnerTeamId');
   }
 

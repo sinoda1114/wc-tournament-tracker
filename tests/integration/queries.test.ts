@@ -86,6 +86,13 @@ async function insertFixtures(client: Client) {
     args: [104, 'final', '2026-07-19', 'v1', 'Winner match 101', 'Winner match 102', 'scheduled'],
   });
 
+  // グループステージ試合（引き分け可・bracket_edges 無し）。T-62 の引き分け取込テスト用。
+  await client.execute({
+    sql: `INSERT INTO matches (id, stage, match_date, venue_id, home_slot, away_slot, status, home_team_id, away_team_id, group_letter)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    args: [105, 'group_stage', '2026-06-13', 'v1', '', '', 'scheduled', 'jpn', 'bra', 'A'],
+  });
+
   const edges: [number, 'winner' | 'loser', number, 'home' | 'away'][] = [
     [101, 'winner', 104, 'home'],
     [102, 'winner', 104, 'away'],
@@ -121,7 +128,8 @@ describe('listTournamentMatches', () => {
   it('returns matches with joined venue and team data', async () => {
     const matches = await listTournamentMatches();
 
-    expect(matches).toHaveLength(4);
+    // フィクスチャは KO 4 試合 + グループステージ 1 試合（105・T-62 用）= 5。
+    expect(matches).toHaveLength(5);
 
     const m101 = matches.find((m) => m.id === 101);
     expect(m101?.homeTeam?.nameJa).toBe('日本');
@@ -190,7 +198,8 @@ describe('updateMatchResult', () => {
     expect(m103?.awayTeamId).toBe('bra');
   });
 
-  it('rejects finished status without winner when scores are tied', async () => {
+  it('rejects finished status without winner when scores are tied (knockout)', async () => {
+    // M101 は準決勝（KO）。KO の引き分けは PK 決着が必要なので winner 無しは拒否のまま。
     await expect(
       updateMatchResult({
         matchId: 101,
@@ -199,6 +208,23 @@ describe('updateMatchResult', () => {
         status: 'finished',
       }),
     ).rejects.toThrow();
+  });
+
+  it('allows finished group-stage draw with null winner (T-62)', async () => {
+    // グループステージの引き分け（例: 1-1）は winner 不在が正常。
+    // 以前は「Finished matches require a winnerTeamId」で throw し、cron が引き分け試合の
+    // スコア/finished を取りこぼしていた（イベントだけ入る不整合）。その回帰防止。
+    const result = await updateMatchResult({
+      matchId: 105,
+      homeScore: 1,
+      awayScore: 1,
+      status: 'finished',
+    });
+
+    expect(result?.status).toBe('finished');
+    expect(result?.homeScore).toBe(1);
+    expect(result?.awayScore).toBe(1);
+    expect(result?.winnerTeamId).toBeNull();
   });
 
   it('honors explicit winnerTeamId override (PK shootout)', async () => {
