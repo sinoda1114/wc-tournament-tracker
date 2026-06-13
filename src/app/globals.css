@@ -787,6 +787,7 @@ a {
 /* ===== お気に入りチーム機能 ===== */
 
 .wc-favorite-star {
+  position: relative;
   cursor: pointer;
   background: transparent;
   border: 0;
@@ -799,6 +800,21 @@ a {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+}
+
+/* タップ判定の不可視拡張（WCAG 2.2 Target Size）。視覚サイズ（小さな星）は保ったまま
+   当たり判定だけを最低 36x36px へ広げる。デスクトップ表示・周囲レイアウトは不変。
+   モバイル幅では 44x44px まで拡張する（下の @media を参照）。 */
+.wc-favorite-star::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+  min-width: 36px;
+  min-height: 36px;
 }
 
 .wc-favorite-star:hover {
@@ -2288,4 +2304,122 @@ a {
   text-align: center;
   border: 1px dashed var(--wc-border);
   border-radius: 10px;
+}
+
+/* =====================================================================
+   スマホ画面最適化（T-56）
+   <768px のみ。デスクトップ表示は一切変更しない。
+   1) タップ領域 44x44px 以上（WCAG 2.2 Target Size）
+   2) 隣接ボタンの余白で誤タップ防止
+   3) 試合カードのスコア可読性・国旗・縦余白
+   4) 日付フィルターのチップ間隔・最小高さ
+   5) レスポンシブ・タイポ/余白
+   ===================================================================== */
+@media (max-width: 767px) {
+  /* --- 1) お気に入り星: 当たり判定を 44x44 まで拡張（見た目の星は不変） --- */
+  .wc-favorite-star::before {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  /* --- 1) view 切替トグル（ブラケット/カード）: タブを 44px 高に --- */
+  .wc-view-toggle button {
+    min-height: 44px;
+    padding: 0.5rem 1.1rem;
+    font-size: 0.9rem;
+  }
+
+  /* --- 1)+2) 日付フィルターのクイックバッジ: 44px 高・押し分けやすく --- */
+  .wc-date-filter-quick {
+    /* 横スクロール時もチップが潰れないように一列キープ */
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    max-width: 100%;
+    gap: 0.35rem;
+  }
+
+  .wc-date-filter-quick::-webkit-scrollbar {
+    display: none;
+  }
+
+  .wc-date-filter-badge {
+    min-height: 40px;
+    padding: 0.45rem 0.95rem;
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
+  /* --- 1) カレンダー起動ボタン・選択日チップ・× を 44px 系へ --- */
+  .wc-date-filter-actions {
+    gap: 0.6rem;
+    flex-wrap: wrap;
+  }
+
+  .wc-date-filter-calendar-button {
+    min-height: 44px;
+    padding: 0.5rem 1rem;
+  }
+
+  .wc-date-filter-active-chip {
+    min-height: 40px;
+    padding: 0.35rem 0.55rem 0.35rem 0.8rem;
+  }
+
+  /* × の当たり判定を確保（視覚は据え置き、内側で広げる） */
+  .wc-date-filter-reset {
+    min-width: 32px;
+    min-height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+  }
+
+  /* --- 3) 試合カード: 縦余白と区切りを少しゆとりへ（崩さず読みやすく） --- */
+  .wc-match-card-header {
+    gap: 0.4rem 0.55rem;
+    font-size: 0.8rem;
+  }
+
+  /* スコアを大きく・はっきり（小画面で 1 桁スコアが視認しづらいのを改善） */
+  .wc-versus-score {
+    gap: 0.5rem;
+    padding: 0 0.35rem;
+  }
+
+  .wc-versus-score strong {
+    font-size: 1.25em;
+  }
+
+  /* チーム名はモバイルで詰まりやすいので字間を少し緩める */
+  .wc-versus-md {
+    font-size: 0.95rem;
+  }
+
+  .wc-versus-md .wc-versus-side {
+    gap: 0.4rem;
+  }
+
+  /* --- 5) ブラケット内の versus（sm）はそのまま、タッチ最小高だけ確保 --- */
+  .wc-versus {
+    min-height: 28px;
+  }
+}
+
+/* さらに狭い端末（<=390px）: 横詰まりを避ける微調整 */
+@media (max-width: 390px) {
+  .wc-versus-md {
+    font-size: 0.9rem;
+    gap: 0.5rem;
+  }
+
+  .wc-match-card-header {
+    font-size: 0.76rem;
+  }
+
+  .wc-date-filter-badge {
+    padding: 0.45rem 0.8rem;
+  }
 }
