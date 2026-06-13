@@ -1,12 +1,17 @@
 'use client';
 
-import { Badge, Container, Stack, Table, Text, Title } from '@mantine/core';
+import { Container, Stack, Table, Text, Title } from '@mantine/core';
 
 import { CountryFlag } from '@/components/CountryFlag';
 import type { Locale } from '@/lib/i18n/config';
 import { useI18n } from '@/lib/i18n/context';
 import type { Dictionary } from '@/lib/i18n/dictionary';
-import type { CardStat, CardSuspension, ScorerStat } from '@/lib/rankings';
+import {
+  standardCompetitionRanks,
+  type CardStat,
+  type CardSuspension,
+  type ScorerStat,
+} from '@/lib/rankings';
 
 type RankingsViewProps = {
   scorers: ScorerStat[];
@@ -62,7 +67,20 @@ function formatMonthDay(iso: string): string {
   return `${Number(m)}/${Number(d)}`;
 }
 
-/** 出場停止セル。次戦（M/D vs 対戦相手）を赤バッジで示す。無ければダッシュ。 */
+/** 出場停止アイコン（🚫 no-entry）。次戦情報を aria-label/title に渡してA11yを担保（T-65）。 */
+function SuspensionGlyph({ label }: { label: string }) {
+  return (
+    <span className="wc-ranking-susp-icon" role="img" aria-label={label} title={label}>
+      🚫
+    </span>
+  );
+}
+
+/**
+ * 出場停止セル。直感アイコン（🚫）＋次戦（M/D vs 対戦相手）を併記する（T-65）。
+ * 無ければダッシュ。情報を失わないよう次戦テキストは残し、アイコンには次戦込みの
+ * aria-label/title を付与して支援技術にテキスト相当を渡す。
+ */
 function SuspensionCell({
   suspension,
   locale,
@@ -80,13 +98,14 @@ function SuspensionCell({
     );
   }
   const opponentLabel = suspension.opponent ? teamLabel(suspension.opponent, locale) : t.tbd;
+  const nextMatch = `${formatMonthDay(suspension.matchDate)} vs ${opponentLabel}`;
+  // 例: 「出場停止（6/18 vs 韓国）」をアイコンの代替テキストとして渡す。
+  const ariaLabel = `${t.suspended}（${nextMatch}）`;
   return (
     <span className="wc-ranking-susp">
-      <Badge color="red" size="sm" variant="light" radius="sm">
-        {t.suspended}
-      </Badge>
+      <SuspensionGlyph label={ariaLabel} />
       <Text component="span" size="xs" c="dimmed">
-        {formatMonthDay(suspension.matchDate)} vs {opponentLabel}
+        {nextMatch}
       </Text>
     </span>
   );
@@ -97,6 +116,11 @@ export function RankingsView({ scorers, cards }: RankingsViewProps) {
   const t = dict.rankings;
 
   const isEmpty = scorers.length === 0 && cards.length === 0;
+
+  // 同点同順位（標準競争順位）を値ベースで算出（T-63）。並びは現状維持。
+  const scorerRanks = standardCompetitionRanks(scorers, (s) => s.goals);
+  // カードランキングはソート基準（赤→黄）に合わせ、合成キー値で同順位を判定。
+  const cardRanks = standardCompetitionRanks(cards, (c) => c.red * 1000 + c.yellow);
 
   return (
     <Container size="lg" py="xl">
@@ -134,7 +158,7 @@ export function RankingsView({ scorers, cards }: RankingsViewProps) {
                   <Table.Tbody>
                     {scorers.map((s, i) => (
                       <Table.Tr key={`${s.playerName}-${s.fifaCode ?? ''}`}>
-                        <Table.Td>{i + 1}</Table.Td>
+                        <Table.Td>{scorerRanks[i]}</Table.Td>
                         <Table.Td>{s.playerName}</Table.Td>
                         <Table.Td>
                           <TeamCell team={s} locale={locale} />
@@ -181,7 +205,7 @@ export function RankingsView({ scorers, cards }: RankingsViewProps) {
                   <Table.Tbody>
                     {cards.map((c, i) => (
                       <Table.Tr key={`${c.playerName}-${c.fifaCode ?? ''}`}>
-                        <Table.Td>{i + 1}</Table.Td>
+                        <Table.Td>{cardRanks[i]}</Table.Td>
                         <Table.Td>{c.playerName}</Table.Td>
                         <Table.Td>
                           <TeamCell team={c} locale={locale} />

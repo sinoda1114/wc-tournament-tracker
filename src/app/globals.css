@@ -2524,6 +2524,19 @@ a {
   }
 }
 
+/* ===== ランキング修正（T-63/T-65） ===== */
+/* 出場停止アイコン（🚫）。スマホでも潰れず読めるサイズと行揃え。 */
+.wc-ranking-susp-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.05rem;
+  line-height: 1;
+  /* 絵文字フォントを明示し、環境差での極端な縮小を避ける。 */
+  font-family:
+    'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', system-ui, sans-serif;
+}
+
 /* ===== 日付一覧グループ名（T-64） ===== */
 /*
  * 試合カードヘッダの「グループ名／ステージ名」バッジ。
