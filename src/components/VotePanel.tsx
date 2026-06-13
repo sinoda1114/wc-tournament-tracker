@@ -34,6 +34,8 @@ type VotePanelProps = {
   myVoteTeamId: string | null;
   /** 過去ラウンドの投票結果（履歴）。新しい順は呼び出し側で整える。 */
   archives?: ArchiveEntry[];
+  /** 締切表示時、次ステージの出場国確定待ち（移行中）か。true なら「まもなく開始」を出す。 */
+  closedSoon?: boolean;
 };
 
 export function VotePanel({
@@ -43,6 +45,7 @@ export function VotePanel({
   candidates,
   myVoteTeamId,
   archives = [],
+  closedSoon = false,
 }: VotePanelProps) {
   const { locale, dict } = useI18n();
   const t = dict.vote;
@@ -86,7 +89,7 @@ export function VotePanel({
 
       {stage === null ? (
         <Text c="dimmed" size="sm">
-          {t.closed}
+          {closedSoon ? t.closedSoon : t.closed}
         </Text>
       ) : myVoteTeamId ? (
         <div className="wc-vote-form">

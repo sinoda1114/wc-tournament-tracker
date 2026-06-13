@@ -304,6 +304,7 @@ export const es: Dictionary = {
     title: 'Tu pronóstico de campeón',
     closed:
       'La votación se ha cerrado en todas las fases. El pronóstico de la gente queda fijado como resultado final.',
+    closedSoon: 'La votación de la próxima fase comenzará pronto.',
     votedPrefix: 'Votado para {stage}: ',
     locked: '(bloqueado en esta fase)',
     nextInfo:

@@ -133,6 +133,23 @@ export function votableStage(
   return null;
 }
 
+/**
+ * まだ開いていない（出場国が未確定等の）投票ステージが残っているか。
+ *
+ * 締切メッセージの出し分け用。`votableStage` が null のとき:
+ *  - これが **true** → 「移行中」（あるステージが締め切られ、次ステージの出場国確定待ち）
+ *    ＝『次ステージの投票はまもなく開始します』を出すべき場面。
+ *  - これが **false** → 全投票ステージ消化済み（決勝まで終了）＝『締め切られました（最終固定）』。
+ * 大会進行中は group/前のラウンドが open のため votableStage が null にならず、この関数の
+ * 値は使われない（呼び出し側が null のときだけ参照する）。
+ */
+export function hasUpcomingVotingStage(
+  matches: LifecycleMatch[],
+  now: Date = new Date(),
+): boolean {
+  return VOTING_STAGES.some((stage) => stageVotingState(matches, stage, now) === 'not_yet_open');
+}
+
 /** アーカイブ済み（履歴化された）投票ステージを進行順で返す。 */
 export function archivedVotingStages(
   matches: LifecycleMatch[],

@@ -16,6 +16,7 @@ import {
   aliveTeamIdsForStage,
   archivedVotingStages,
   eliminatedTeamIds,
+  hasUpcomingVotingStage,
   votableStage,
   VOTING_STAGES,
   type VotingStage,
@@ -78,6 +79,9 @@ export default async function PredictionPage() {
 
   // 投票パネル用：いま投票できるステージ（open＝次ステージ未開始）と候補（生存チーム）、自分の既投票。
   const stage = votableStage(matches, now);
+  // 投票不可(stage=null)のとき、次ステージの出場国確定待ち（移行中）か、全ステージ終了かを区別する。
+  // 移行中なら「まもなく開始」、全終了なら「締め切られました」を VotePanel が出し分ける。
+  const closedSoon = stage === null && hasUpcomingVotingStage(matches, now);
   const aliveIds = stage ? new Set(aliveTeamIdsForStage(matches, stage)) : new Set<string>();
   const candidates = teamRatings
     .filter((t) => aliveIds.has(t.id))
@@ -136,6 +140,7 @@ export default async function PredictionPage() {
           candidates={candidates}
           myVoteTeamId={myVoteTeamId}
           archives={archives}
+          closedSoon={closedSoon}
         />
       </Stack>
     </Container>

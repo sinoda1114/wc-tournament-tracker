@@ -302,6 +302,7 @@ export const en: Dictionary = {
     sectionAria: 'Vote in the crowd prediction',
     title: 'Your title pick',
     closed: 'Voting has closed for all stages. The crowd prediction is now fixed as the final result.',
+    closedSoon: 'Voting for the next stage will open soon.',
     votedPrefix: 'Voted for {stage}: ',
     locked: '(locked for this stage)',
     nextInfo: 'You can vote again when {stage} begins. The latest vote is reflected in the crowd prediction.',

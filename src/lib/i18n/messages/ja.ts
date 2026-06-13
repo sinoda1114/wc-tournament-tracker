@@ -324,6 +324,7 @@ export const ja = {
     sectionAria: 'みんなの予想に投票',
     title: 'あなたの優勝予想',
     closed: '全ステージの投票が締め切られました。みんなの予想は最終結果として固定されます。',
+    closedSoon: '次ステージの投票はまもなく開始します。',
     votedPrefix: '{stage}の投票済み：',
     locked: '（このステージはロック中）',
     nextInfo: '{stage}に進むと、もう一度投票できます。最新の票が「みんなの予想」に反映されます。',
