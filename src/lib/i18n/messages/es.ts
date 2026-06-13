@@ -285,7 +285,7 @@ export const es: Dictionary = {
       'Elige al menos un factor. Con todo desactivado, todas las selecciones tienen la misma probabilidad y no hay pronóstico.',
     flat: 'Los factores seleccionados aún no tienen datos. Todas las selecciones quedarían igualadas, así que la lista permanece oculta hasta que haya datos (aparece como referencia cuando avanzan los partidos).',
     onlyWc2026:
-      'Calculado solo con el rendimiento en WC2026. Al principio del torneo se juegan pocos partidos, por lo que pequeños resultados mueven mucho los números y generan sesgo. La precisión mejora a medida que avanzan los partidos; tómalo como una tendencia aproximada por ahora.',
+      'Calculado solo con el rendimiento en WC2026. Al principio del torneo se juegan pocos partidos, por lo que pequeños resultados mueven mucho los números y generan sesgo. La precisión mejora a medida que avanzan los partidos.',
     teamSquadAria: 'Ver el plantel de {name}',
     eliminatedAria: '{name} está eliminado (ya no es candidato al título)',
     showTop: 'Mostrar solo los primeros',
@@ -313,6 +313,7 @@ export const es: Dictionary = {
     currentSuffix:
       '. Elige una selección que creas que ganará (busca por nombre o código FIFA).',
     searchAria: 'Buscar selecciones para tu pronóstico',
+    selectHint: 'Selecciona la selección que crees que ganará.',
     submit: 'Votar',
     noteLine1:
       'Puedes votar una vez por fase a medida que avanza el torneo ({progression}), y el último voto de cada usuario se refleja en el pronóstico de la gente.',

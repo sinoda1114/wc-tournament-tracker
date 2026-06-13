@@ -139,6 +139,13 @@ export function VotePanel({
             </Button>
           </div>
 
+          {/* 国を未選択の間だけ表示する控えめなガイド（T-69）。投票ボタンが押せない理由を事前に伝える。 */}
+          {!selectedId ? (
+            <Text c="dimmed" size="xs" className="wc-vote-hint">
+              {t.selectHint}
+            </Text>
+          ) : null}
+
           <Text c="dimmed" size="sm" className="wc-vote-note">
             {t.noteLine1.replace('{progression}', progression)}{' '}
             <span className="wc-vote-emph">{t.noteNoChange}</span>
