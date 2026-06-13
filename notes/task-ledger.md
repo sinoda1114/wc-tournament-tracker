@@ -39,7 +39,7 @@
 
 - **T-49** 無効ロケールのソフト404 を 200→404（GSC に「ソフト404」警告が出たら着手で十分）。
 - **T-8** セキュリティ仕上げ（Sentry / CSP 方針）。
-- **T-7** CI 緑化 — audit の `esbuild` high を `npm audit fix`（非破壊。postcss は #59 で解消済）。docs push でも CI が焚かれ赤メールが出るので近く緑化推奨（優先度は Stripe の下）。
+- **T-7** CI 緑化（**🟢 ユーザー解消希望・2026-06-13／優先度は低のままでOK**）— CI は稼働中だが全 run 赤（型/lint/test/build は成功、`npm audit --audit-level=high` のみ失敗）。**postcss は PR #59 マージ済で解消**。**残＝esbuild high 1件のみ**（ビルド/開発依存・本番ランタイム非該当・実リスク低）。**修正＝`npm audit fix`（非破壊パッチ）→ PR → 番人マージで緑化**。esbuild が親(vite/vitest等)に固定され `audit fix` で上がらない場合は `overrides` で固定。**副次**: docs の台帳 push でも毎回 CI が焚かれ赤メールが出る → 緑化で騒音停止（or CI に `paths-ignore: ['notes/**','**.md']` を足して docs では走らせない案も可）。infra/番人 領域・worktree→PR。
 - **T-35** お気に入り端末間同期の実機 E2E（`notes/e2e-checklist-30-sync.md`）。
 - **T-28** 大会汎用化の判断（〜2026-08末）。
 
