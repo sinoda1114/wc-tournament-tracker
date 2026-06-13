@@ -8,8 +8,9 @@ import { useDisclosure, useMediaQuery } from '@mantine/hooks';
  * ヘッダ右側の操作群（言語 / TZ / テーマ / DL / 管理リンク等）の配置を画面幅で切り替える。
  *
  * - デスクトップ（>=768px）: 従来どおり横並びで常時表示。
- * - モバイル（<768px）: バーガーボタン 1 つに集約し、押すと Drawer の中へ縦並びで出す。
- *   → ヘッダの占有面積（特に折返しによる縦伸び）を削減する（T-55）。
+ * - モバイル（<768px）: ⋮（ケバブ）ボタン 1 つに集約し、押すと Drawer の中へ縦並びで出す。
+ *   ユーザーアイコン（UserButton）も inline から外し Drawer 先頭へ格納して、右上を
+ *   ⋮ ひとつだけにミニマム化する（T-66。T-55 の発展）。
  *
  * 重要:
  * - children（= LanguageSwitcher / TimeZonePicker / AddToHomeScreen / ThemeToggle 等）は
@@ -22,7 +23,10 @@ import { useDisclosure, useMediaQuery } from '@mantine/hooks';
 type HeaderControlsProps = {
   /** 低優先操作（言語/TZ/テーマ/DL）。モバイルでは Drawer 内、デスクトップでは inline。 */
   children: ReactNode;
-  /** ログイン中ユーザーのアバター（UserButton）。常時 inline 表示で配置を維持。 */
+  /**
+   * ログイン中ユーザーのアバター（UserButton）。
+   * デスクトップは inline 表示、モバイルは ⋮ Drawer 先頭へ格納（T-66）。
+   */
   account?: ReactNode;
   /** 管理者向けの「管理画面」リンク（管理者のみ非 null）。 */
   adminLink?: ReactNode;
@@ -51,9 +55,9 @@ export function HeaderControls({
   const showMobile = isMobile === true;
 
   if (showMobile) {
+    // 右上は ⋮ ボタン 1 つだけ。account（UserButton）は inline から外し Drawer 先頭へ。
     return (
       <Group gap="sm" align="center" wrap="nowrap">
-        {account}
         <Tooltip label={menuLabel}>
           <ActionIcon
             variant="default"
@@ -64,7 +68,7 @@ export function HeaderControls({
             aria-haspopup="dialog"
             aria-expanded={opened}
           >
-            <BurgerIcon size={18} />
+            <KebabIcon size={18} />
           </ActionIcon>
         </Tooltip>
         <Drawer
@@ -77,6 +81,13 @@ export function HeaderControls({
           padding="lg"
         >
           <Stack gap="md">
+            {/* アカウント（UserButton）を先頭に。Clerk の認証フローを壊さないため
+                子としてそのまま置く（カスタムトリガー化はしない）。 */}
+            {account ? (
+              <Group gap="sm" align="center" wrap="nowrap">
+                {account}
+              </Group>
+            ) : null}
             {adminLink ? <div onClick={drawer.close}>{adminLink}</div> : null}
             {/* 各操作は押下後に Drawer を閉じたいが、内部の Menu/Modal を壊さないため
                 ラップ側ではクリックを横取りしない（操作完了は各コンポーネントに委譲）。 */}
@@ -99,23 +110,22 @@ export function HeaderControls({
   );
 }
 
-/** バーガー（3 本線）アイコン。OS フォント非依存の SVG。 */
-function BurgerIcon({ size }: { size: number }) {
+/** ケバブ（縦三点 ⋮）アイコン。省スペース・OS フォント非依存の SVG（T-66）。 */
+function KebabIcon({ size }: { size: number }) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       width={size}
       height={size}
       viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
-      strokeLinecap="round"
-      strokeLinejoin="round"
+      fill="currentColor"
+      stroke="none"
       aria-hidden
       focusable={false}
     >
-      <path d="M4 7h16M4 12h16M4 17h16" />
+      <circle cx="12" cy="5" r="1.8" />
+      <circle cx="12" cy="12" r="1.8" />
+      <circle cx="12" cy="19" r="1.8" />
     </svg>
   );
 }

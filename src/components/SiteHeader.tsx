@@ -40,8 +40,9 @@ export async function SiteHeader({ locale, dict }: SiteHeaderProps) {
             </Link>
             <SiteNav labels={dict.nav} groupPhase={isFreePeriod(new Date())} />
           </Group>
-          {/* 低優先操作（言語/TZ/テーマ/DL/管理）はモバイルでバーガー→Drawer に集約。
-              UserButton（ログイン中のみ）は本人導線として常時 inline。#37/T-55 */}
+          {/* 低優先操作（言語/TZ/テーマ/DL/管理）はモバイルで ⋮→Drawer に集約。
+              UserButton（ログイン中のみ）も PC は inline、モバイルは ⋮ Drawer 先頭へ格納し
+              右上をミニマム化する（#37/T-55/T-66）。 */}
           <HeaderControls
             menuLabel={dict.header.menu}
             settingsLabel={dict.header.settings}
