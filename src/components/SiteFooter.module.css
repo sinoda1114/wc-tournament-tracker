@@ -119,3 +119,38 @@
   color: var(--wc-border);
   user-select: none;
 }
+
+/*
+ * ① スマホではフッターの縦専有を最小化する（T-58）。<768px のみ・PC不可侵。
+ * NOTE: 完全非表示（display:none）はしない。利用規約 / プライバシー / 特商法は
+ *   法的に常時到達可能であるべき（特に課金導入前後）。よって「隠す」ではなく
+ *   小さく畳んで面積を最小化する方針にする。
+ */
+@media (max-width: 767px) {
+  .footer {
+    margin-top: 1.25rem;
+  }
+
+  .inner {
+    gap: 0.25rem;
+  }
+
+  .brandTitle {
+    font-size: 0.8rem;
+  }
+
+  .bottom,
+  .left {
+    gap: 0.2rem 0.55rem;
+    font-size: 0.7rem;
+  }
+
+  .navLink {
+    font-size: 0.72rem;
+  }
+
+  /* 狭幅ではコピーライトを左の行の下へ自然に回す（右寄せのための auto を解除）。 */
+  .copyright {
+    margin-left: 0;
+  }
+}
