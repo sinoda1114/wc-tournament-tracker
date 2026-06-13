@@ -8,6 +8,9 @@
   --wc-accent: #3b82f6;
   --wc-accent-soft: rgba(59, 130, 246, 0.16);
   --wc-gold: #fbbf24;
+  /* 勝者（試合に勝ったチーム名/スコア）専用のセマンティック色。金=勝利。
+     値は theme-tuned な --wc-gold を参照（ライト=濃アンバー/ダーク=明るい金）。T-50。 */
+  --wc-win: var(--wc-gold);
   --wc-emphasis: #fb923c;
   /* 決勝T 突破=ポジティブを表す緑（順位表の 1-2 位枠・突破ライン）。ダーク用。 */
   --wc-qualify: #22c55e;
@@ -222,7 +225,7 @@ a {
 }
 
 .wc-team-row.is-winner {
-  color: var(--wc-accent);
+  color: var(--wc-win);
   font-weight: 700;
 }
 
@@ -535,7 +538,7 @@ a {
 }
 
 .wc-mini-team.is-winner {
-  color: var(--wc-accent);
+  color: var(--wc-win);
   font-weight: 700;
 }
 
@@ -593,7 +596,7 @@ a {
 }
 
 .wc-versus-side.is-winner {
-  color: var(--wc-accent);
+  color: var(--wc-win);
 }
 
 .wc-versus-side.is-winner .wc-versus-name {
@@ -616,7 +619,7 @@ a {
 }
 
 .wc-versus-score strong.is-winner {
-  color: var(--wc-accent);
+  color: var(--wc-win);
 }
 
 .wc-third-place {
