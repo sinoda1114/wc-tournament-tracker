@@ -65,7 +65,7 @@
 ### ⏳ 待ち（ユーザー操作 / 外部要因）
 - ~~**T-46 R32再充填バグ修正**~~（6/13 完了・本番実機OK）— 原因は **0012未適用ではなく**、`resolveRoundOf32Assignments` に「グループ全消化」ゲートが無く、ingest cron が未確定グループの暫定順位で R32 を埋め戻していた前倒し充填。修正＝`isGroupStageComplete()` ゲート追加（全12組消化まで R32 は NULL/スロット表示）＋ **migration 0015** で本番R32を再NULL化。本番確認(2026-06-13): R32 が `Group A runners-up` 等のスロット表示に復帰・round_of_32 投票も閉じた。PR #56・migration 0015 本番適用済。
 - **T-8** — セキュリティ仕上げ（Sentry / CSP 方針）。作業中・方針判断。
-- **T-7** — CI を GitHub へ（`gh auth refresh -s workflow`・ユーザー操作）。
+- **T-7** — **CI は GitHub Actions で稼働中だが「赤」**。コードは tsc/lint/test/build 全✓、`npm audit --audit-level=high` のみ失敗。原因＝esbuild high（GHSA-gv7w-rqvm-qjhr 他・**ビルド/開発時依存で本番ランタイム非該当＝実リスク低**）＋postcss moderate。修正＝postcss は **PR #59**（番人マージ待ち）、esbuild は `npm audit fix`（非破壊）。両依存を上げれば緑化。万年赤は回帰を隠すので近く対応推奨（優先度は Stripe の下）。旧「gh auth refresh 待ち」は解消済（CI 稼働中）。supply-chain/番人 領域。
 - **T-35** — お気に入り端末間同期の実機 E2E（`notes/e2e-checklist-30-sync.md` をログインで確認）。
 
 ### 🔮 将来
@@ -105,7 +105,7 @@ T-48 投票リセット自分票のみ＋T-51 グループ投票窓開放(PR #57
 - **T-19** i18n B-lite（**🟠 次・実行待ち**）— 本文UIは5言語対応済（投票エラー/es・pt・zh イベントラベルは `23f2d41` で修正済）。**残**: 各ページ metadata（title/description）と OGP 画像文言が日本語固定 → 多言語化。**B-lite 案あり・GO で夜間自走**。hreflang/URL 戦略とセットで設計（クローラに cookie が無い問題の裏返し）。
 - **T-12** サイト全体の最終動作チェック（**🟡 その後**）— 全ページ・全言語を通しで触って確認。実装が出揃ってから実施 → 2段ゲート → デプロイ。
 - **T-8** — セキュリティ仕上げ（Sentry 導入と CSP 方針）。作業中・方針判断。
-- **T-7** — CI を GitHub へ push（`gh auth refresh -s workflow` がユーザー操作待ち・[[gh-workflow-scope-missing]]）。
+- **T-7** — CI（GitHub Actions `.github/workflows/ci.yml`）は**稼働中だが全 run 赤**。落ちているのは最終ステップ `npm audit --audit-level=high` のみ（型/lint/test/build は成功）。high＝esbuild（NPM_CONFIG_REGISTRY 経由 RCE / dev サーバの任意ファイル読取(Windows)・GHSA-gv7w-rqvm-qjhr 他）＝**ビルド/開発時の依存で本番非該当・実リスク低**。moderate＝postcss XSS。**修正: PR #59（postcss 8.5.15 統一・番人マージ待ち）＋ esbuild を `npm audit fix`（非破壊パッチ）**→ 緑化。docs だけの台帳 push も毎回この CI を焚いて赤メールを増やすため、緑に戻す実益あり。旧「gh auth refresh -s workflow 待ち（[[gh-workflow-scope-missing]]）」は解消済。
 - **T-35** — お気に入り端末間同期の実機 E2E 確認（`notes/e2e-checklist-30-sync.md` をログイン状態で。T-30/T-39 関連）。
 - **T-29** — 購入画面に提供期間を明示（「2026-09-30 までの利用権」を Checkout/ペイウォール UI に・T-14/T-26 実装時にセット）。
 - **T-28** — 大会汎用化の判断（将来・**判断期限 2026-08末**）— MatchFav をユーロ/CL 等へ展開 or WC2026限定で終了。終了なら 2026-09-30 にデータ削除（規約明記済・`8674e61`）。継続なら DB 一般化＋データ永続化＋規約改定。今は一般化しない（YAGNI）。
