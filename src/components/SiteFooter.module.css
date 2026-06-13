@@ -135,14 +135,16 @@
     gap: 0.25rem;
   }
 
+  /* モバイルはフッターを最小化したいので、ブランドのキャッチ行は隠す
+     （MatchFav 名はヘッダに常時あり＝重複。T-61 篠田FB の圧縮要望）。 */
   .brandTitle {
-    font-size: 0.8rem;
+    display: none;
   }
 
   .bottom,
   .left {
-    gap: 0.2rem 0.55rem;
-    font-size: 0.7rem;
+    gap: 0.2rem 0.5rem;
+    font-size: 0.68rem;
   }
 
   .navLink {
@@ -152,5 +154,56 @@
   /* 狭幅ではコピーライトを左の行の下へ自然に回す（右寄せのための auto を解除）。 */
   .copyright {
     margin-left: 0;
+  }
+}
+
+/*
+ * ② 隠しバー（T-61・篠田FB）。フッターを既定で折りたたみ、下部ハンドルのタップで展開する。
+ * 利用規約 / プライバシー / 特商法は「1 タップで必ず到達可能」＝法的な到達性は維持
+ *   （display:none で消し去る方式は採らない）。
+ * ハンドルの DOM はモバイルでのみ描画される（FooterReveal はデスクトップでは children を直出し）。
+ */
+@media (max-width: 767px) {
+  .revealHandle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    background: transparent;
+    border: 0;
+    color: var(--wc-muted);
+    font-size: 0.74rem;
+    cursor: pointer;
+  }
+
+  /* iOS 風のグラバー（“引き出せるバー”に見せる視覚的アフォーダンス）。 */
+  .revealGrabber {
+    width: 32px;
+    height: 4px;
+    border-radius: 999px;
+    background: var(--wc-border);
+    flex: 0 0 auto;
+  }
+
+  .revealLabel {
+    letter-spacing: 0.02em;
+  }
+
+  .revealChevron {
+    transition: transform 160ms ease;
+  }
+
+  .revealChevronOpen {
+    transform: rotate(180deg);
+  }
+
+  .revealContent {
+    padding-top: 0.4rem;
+  }
+
+  .revealContent[hidden] {
+    display: none;
   }
 }
