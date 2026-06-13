@@ -2523,3 +2523,13 @@ a {
     padding-left: 0.2rem;
   }
 }
+
+/* ===== 日付一覧グループ名（T-64） ===== */
+/*
+ * 試合カードヘッダの「グループ名／ステージ名」バッジ。
+ * ヘッダ既定の `.mantine-Badge-root { margin-left: auto }` は右端の状態バッジ用なので、
+ * このグループバッジは打ち消して #id の直後にインライン表示する。控えめなグレー。
+ */
+.wc-match-card-header .mantine-Badge-root.wc-match-card-group {
+  margin-left: 0;
+}
