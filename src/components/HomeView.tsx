@@ -84,11 +84,13 @@ export async function HomeView({ searchParams }: { searchParams: Promise<HomeSea
       <Stack gap="lg">
         <MiniHero dict={dict} />
         <Stack gap={4}>
-          <Group align="center" wrap="wrap" gap="sm">
+          <Group align="center" wrap="wrap" gap="sm" className="wc-home-heading-row">
             <Title order={1}>{heading.title}</Title>
             <FavoriteFilterToggle showHintWhenEmpty={false} />
           </Group>
-          <Text c="dimmed">{heading.description}</Text>
+          <Text c="dimmed" className="wc-home-heading-desc">
+            {heading.description}
+          </Text>
         </Stack>
 
         <div className="wc-groups-toolbar">
