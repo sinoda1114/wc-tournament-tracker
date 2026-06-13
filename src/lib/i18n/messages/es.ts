@@ -412,6 +412,11 @@ export const es: Dictionary = {
     step3Before: 'Toca ',
     addButton: '«Añadir»',
     step3After: 'en la parte superior derecha para terminar.',
+    androidIntro:
+      'Puedes añadir un acceso directo a este sitio en tu pantalla de inicio. En Chrome, sigue estos pasos.',
+    androidStep1: 'Abre el menú ⋮ (arriba a la derecha).',
+    androidStep2: 'Elige «Añadir a pantalla de inicio».',
+    androidStep3: 'Toca «Añadir» para terminar.',
   },
   theme: {
     switchToLight: 'Cambiar a modo claro',

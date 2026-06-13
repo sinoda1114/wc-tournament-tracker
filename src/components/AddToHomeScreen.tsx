@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ActionIcon, Modal, Text, Tooltip } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 
@@ -29,12 +29,6 @@ import { useDictionary } from '@/lib/i18n/context';
  *       配色はサイトのブランド（ブルー/濃紺）に合わせ、`--wc-accent` を使う。
  */
 
-// beforeinstallprompt は型定義が標準 lib に無い（実験的 API のため）。最小限を自前で定義する。
-type BeforeInstallPromptEvent = Event & {
-  prompt: () => Promise<void>;
-  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
-};
-
 type Mode = 'hidden' | 'android' | 'ios';
 
 /** standalone（= 既にホーム画面アプリとして起動中）かどうか。iOS の独自 API も見る。 */
@@ -59,68 +53,38 @@ function isIos(): boolean {
   return iosDevice || iPadOs;
 }
 
+/** iOS 以外のモバイル（Android Chrome 等）か。デスクトップにはショートカット導線を出さない。 */
+function isMobileNonIos(): boolean {
+  if (typeof window === 'undefined') return false;
+  return /Android|Mobi/i.test(window.navigator.userAgent);
+}
+
 export function AddToHomeScreen() {
   const t = useDictionary().addToHome;
   const [mode, setMode] = useState<Mode>('hidden');
-  const [iosOpened, iosModal] = useDisclosure(false);
-  // Android のネイティブプロンプト event は再レンダーに依存しないので ref で保持する。
-  const deferredPromptRef = useRef<BeforeInstallPromptEvent | null>(null);
+  const [opened, modal] = useDisclosure(false);
 
+  // ショートカット作成は「ブラウザのメニューから手動で行う」手順案内に統一する（T-67）。
+  // ネイティブの install プロンプト（beforeinstallprompt→prompt）は使わない＝「アプリを
+  // インストール」風の挙動・誤解を避け、ホーム画面に“素のショートカット”を作る導線にする。
+  // （manifest も display:'browser' にして installable PWA 判定を外し、Chrome の ⋮ メニューに
+  //  「ホーム画面に追加」が出るようにしている。）
   useEffect(() => {
-    // 既にインストール済みなら何も出さない。
+    // 既にホーム画面から起動中なら出さない。
     if (isStandalone()) {
       setMode('hidden');
       return;
     }
-
-    // iOS は beforeinstallprompt が来ないので、UA 判定で先に案内モードにする。
+    // iOS=Safari の共有メニュー手順 / それ以外のモバイル=Chrome 等の ⋮ メニュー手順。
+    // デスクトップには出さない（スマホ向け導線のため）。
     if (isIos()) {
       setMode('ios');
-    }
-
-    const handleBeforeInstallPrompt = (event: Event) => {
-      // 既定のミニインフォバーを抑止し、自前ボタン経由で任意のタイミングに出す。
-      event.preventDefault();
-      deferredPromptRef.current = event as BeforeInstallPromptEvent;
+    } else if (isMobileNonIos()) {
       setMode('android');
-    };
-
-    const handleAppInstalled = () => {
-      // インストール完了したらボタンを隠し、保持していた event も破棄する。
-      deferredPromptRef.current = null;
+    } else {
       setMode('hidden');
-      iosModal.close();
-    };
-
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    window.addEventListener('appinstalled', handleAppInstalled);
-
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-      window.removeEventListener('appinstalled', handleAppInstalled);
-    };
-    // iosModal は @mantine/hooks が安定参照を返すため依存は初回のみで十分。
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }
   }, []);
-
-  const handleClick = async () => {
-    if (mode === 'android') {
-      const deferred = deferredPromptRef.current;
-      if (!deferred) return;
-      await deferred.prompt();
-      const choice = await deferred.userChoice;
-      // 一度使った prompt は再利用できない。承諾なら appinstalled で隠れるが、
-      // 拒否時もここで破棄し、二重発火を防ぐ（ボタンは残し、再表示は次回 event 待ち）。
-      deferredPromptRef.current = null;
-      if (choice.outcome === 'accepted') {
-        setMode('hidden');
-      }
-      return;
-    }
-    if (mode === 'ios') {
-      iosModal.open();
-    }
-  };
 
   if (mode === 'hidden') return null;
 
@@ -133,60 +97,83 @@ export function AddToHomeScreen() {
           variant="default"
           size="lg"
           radius="md"
-          onClick={handleClick}
+          onClick={modal.open}
           aria-label={label}
-          aria-haspopup={mode === 'ios' ? 'dialog' : undefined}
+          aria-haspopup="dialog"
         >
           <InstallIcon size={16} />
         </ActionIcon>
       </Tooltip>
 
-      {mode === 'ios' ? (
-        <Modal
-          opened={iosOpened}
-          onClose={iosModal.close}
-          title={label}
-          centered
-          radius="md"
-          size="sm"
-        >
-          <Text size="sm" c="var(--wc-muted)" mb="md">
-            {t.intro}
-          </Text>
-          <ol className="wc-a2hs-steps">
-            <li className="wc-a2hs-step">
-              <span className="wc-a2hs-step-icon" aria-hidden>
-                <ShareIcon size={20} />
-              </span>
-              <span>
-                {t.step1Before}
-                <Text component="span" fw={700} c="var(--wc-accent)">{t.shareButton}</Text>
-                {t.step1After}
-              </span>
-            </li>
-            <li className="wc-a2hs-step">
-              <span className="wc-a2hs-step-icon" aria-hidden>
-                <PlusSquareIcon size={20} />
-              </span>
-              <span>
-                {t.step2Before}
-                <Text component="span" fw={700} c="var(--wc-accent)">{t.addToHomeItem}</Text>
-                {t.step2After}
-              </span>
-            </li>
-            <li className="wc-a2hs-step">
-              <span className="wc-a2hs-step-icon" aria-hidden>
-                <CheckIcon size={20} />
-              </span>
-              <span>
-                {t.step3Before}
-                <Text component="span" fw={700} c="var(--wc-accent)">{t.addButton}</Text>
-                {t.step3After}
-              </span>
-            </li>
-          </ol>
-        </Modal>
-      ) : null}
+      <Modal
+        opened={opened}
+        onClose={modal.close}
+        title={label}
+        centered
+        radius="md"
+        size="sm"
+      >
+        <Text size="sm" c="var(--wc-muted)" mb="md">
+          {mode === 'ios' ? t.intro : t.androidIntro}
+        </Text>
+        <ol className="wc-a2hs-steps">
+          {mode === 'ios' ? (
+            <>
+              <li className="wc-a2hs-step">
+                <span className="wc-a2hs-step-icon" aria-hidden>
+                  <ShareIcon size={20} />
+                </span>
+                <span>
+                  {t.step1Before}
+                  <Text component="span" fw={700} c="var(--wc-accent)">{t.shareButton}</Text>
+                  {t.step1After}
+                </span>
+              </li>
+              <li className="wc-a2hs-step">
+                <span className="wc-a2hs-step-icon" aria-hidden>
+                  <PlusSquareIcon size={20} />
+                </span>
+                <span>
+                  {t.step2Before}
+                  <Text component="span" fw={700} c="var(--wc-accent)">{t.addToHomeItem}</Text>
+                  {t.step2After}
+                </span>
+              </li>
+              <li className="wc-a2hs-step">
+                <span className="wc-a2hs-step-icon" aria-hidden>
+                  <CheckIcon size={20} />
+                </span>
+                <span>
+                  {t.step3Before}
+                  <Text component="span" fw={700} c="var(--wc-accent)">{t.addButton}</Text>
+                  {t.step3After}
+                </span>
+              </li>
+            </>
+          ) : (
+            <>
+              <li className="wc-a2hs-step">
+                <span className="wc-a2hs-step-icon" aria-hidden>
+                  <MenuDotsIcon size={20} />
+                </span>
+                <span>{t.androidStep1}</span>
+              </li>
+              <li className="wc-a2hs-step">
+                <span className="wc-a2hs-step-icon" aria-hidden>
+                  <PlusSquareIcon size={20} />
+                </span>
+                <span>{t.androidStep2}</span>
+              </li>
+              <li className="wc-a2hs-step">
+                <span className="wc-a2hs-step-icon" aria-hidden>
+                  <CheckIcon size={20} />
+                </span>
+                <span>{t.androidStep3}</span>
+              </li>
+            </>
+          )}
+        </ol>
+      </Modal>
     </>
   );
 }
@@ -218,6 +205,26 @@ function InstallIcon({ size }: { size: number }) {
       <path d="M10 18.5h4" />
       {/* 追加を表すプラス記号（画面中央に配置） */}
       <path d="M12 8v5M9.5 10.5h5" />
+    </svg>
+  );
+}
+
+/** Android Chrome 等の「⋮（縦三点メニュー）」を表す SVG。 */
+function MenuDotsIcon({ size }: { size: number }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      stroke="none"
+      aria-hidden
+      focusable={false}
+    >
+      <circle cx="12" cy="5" r="1.6" />
+      <circle cx="12" cy="12" r="1.6" />
+      <circle cx="12" cy="19" r="1.6" />
     </svg>
   );
 }

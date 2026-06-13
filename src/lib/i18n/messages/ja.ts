@@ -440,6 +440,11 @@ export const ja = {
     step3Before: '右上の',
     addButton: '「追加」',
     step3After: 'をタップして完了です。',
+    androidIntro:
+      'このサイトをホーム画面にショートカットとして追加できます。Chrome では下記の手順で登録してください。',
+    androidStep1: '右上の ⋮（メニュー）を開きます。',
+    androidStep2: 'メニューの「ホーム画面に追加」を選びます。',
+    androidStep3: '「追加」をタップして完了です。',
   },
   // ライト/ダーク切替（ThemeToggle）。
   theme: {

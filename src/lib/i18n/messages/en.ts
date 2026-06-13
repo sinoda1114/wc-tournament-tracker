@@ -408,6 +408,11 @@ export const en: Dictionary = {
     step3Before: 'Tap ',
     addButton: '“Add”',
     step3After: 'in the top right to finish.',
+    androidIntro:
+      'You can add a shortcut to this site on your home screen. In Chrome, follow the steps below.',
+    androidStep1: 'Open the ⋮ menu (top right).',
+    androidStep2: 'Choose “Add to Home screen”.',
+    androidStep3: 'Tap “Add” to finish.',
   },
   theme: {
     switchToLight: 'Switch to light mode',
