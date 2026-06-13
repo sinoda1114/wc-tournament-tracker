@@ -1,150 +1,120 @@
 # タスク台帳（永続・セッション横断）
 
-**🕒 最終更新: 2026-06-13 JST（番人セッション: T-54 SEO PR #61／T-55 スマホヘッダー PR #62／T-53②注釈 PR #60／T-50勝利色 PR #58／postcss PR #59／T-52は #46 で env待ち。#58除き低リスク・いずれも番人マージ待ち。T-48/T-51 は #57 でマージ・本番反映済）**
+**🕒 最終更新: 2026-06-13 JST** — 番人マージ待ち=**PR #46 / #62 / #60 / #58**。本番反映済=#57(T-48/T-51)・#54(T-19)・#61(T-54)・#59(postcss)。
 
 > **運用**（[[numbered-choices]] 準拠）
 > - 番号 **T-N は固定**。振り直さない。新規は「台帳の最大+1」を台帳に追記して確保。
-> - 完了は ~~取り消し線~~ ＋完了日・PR を残す。
+> - 完了は ~~取り消し線~~ ＋完了日・PR を残す。**完了したら「着手可」から下の「✅完了」へ移す**（現役セクションに残さない＝埋もれ防止）。
 > - **正本はこのファイル**。セッション/ハーネスの TaskList 表示は揮発・ドリフトするので信用しない（食い違ったら台帳が正）。
-> - **【共通ルール｜GitHub 一本化】正本は GitHub `main` 上の本ファイル**。ローカルはそのミラーにすぎない。**タスクリストを変更したら、その都度すぐ GitHub `main` へ push して同期する**（コード/PR/feature を巻き込まないよう、マークダウン単一ファイルのコミットで可。例: `gh api -X PUT repos/<owner>/<repo>/contents/notes/task-ledger.md ...`）。ローカルだけ編集して放置しない＝常に GitHub と一致させる。docs のみのコミットなので本番ビルドは走るがアプリ出力は不変（無害）。読むときは `git show origin/main:notes/task-ledger.md`（または GitHub）を正とする。
+> - **【共通ルール｜GitHub 一本化】正本は GitHub `main` 上の本ファイル**。ローカルはミラー。変更したら都度すぐ GitHub `main` へ push 同期（マークダウン単一ファイルのコミットで可）。読むときは `git show origin/main:notes/task-ledger.md` を正とする。
 > - **PR の「マージした/してない」は `gh pr list --state open` が正本**（記憶・伝聞で語らない）。
-> - **表記**: タスクは `T-39`。PR への言及は**必ず `PR #19` と "PR" を明記**（`#19` 単独だと task と紛らわしいため禁止）。コミット/PR文では task に `#` を使わない（誤オートリンク防止）。音声「タスク39」は task(T-39)（曖昧なら確認）。
-> - **優先度表記**: 「P1/P2/P3」は廃止（"P" が何の略か不明なため）。「🔴 最優先」「🟠 次」「🟡 その後」の日本語表記を使う。
-> - **同期**: 番人⇄エージェントは `notes/agent-sync.md` のプロトコルに従う（人間を伝書鳩にしない）。
-> - W系・AT系は [launch-task-board.md](launch-task-board.md) 参照。
+> - **表記**: タスクは `T-39`。PR は**必ず `PR #19` と明記**（`#19` 単独禁止）。コミット/PR文では task に `#` を使わない。
+> - **優先度表記**: 「🔴 最優先」「🟠 次」「🟡 その後」（"P1/P2" は廃止）。
+> - **同期**: 番人⇄エージェントは `notes/agent-sync.md` のプロトコル。W系・AT系は [launch-task-board.md](launch-task-board.md)。
 
 ---
 
 ## 📊 いまの状態
 
-- **本番**: **https://matchfav.com** ✅（独自ドメイン接続済・www→apex 308・本番 Clerk live・2026-06-12）。旧 `*.vercel.app` も生存
-- **デプロイ**: git 自動（feature push→Preview / main マージ→Production・手動禁止）
-- **オープンPR**: `gh pr list --state open` で確認（これが正本）
+- **本番**: **https://matchfav.com** ✅（独自ドメイン・本番 Clerk live）。デプロイは git 自動（push→Preview / main マージ→Production）。
+- **オープンPR の正本**: `gh pr list --state open`。
 
-## 🎯 優先順位（おすすめ着手順）
+## 📌 番人マージ待ち PR ＝ いまの主戦場
 
-### 🔴 最優先 — T-14 Stripe 課金接続（6/29 の課金壁に必須・**PR #46 OPEN**）
-- ✅ **価格確定（6/12・収益最大化方針）**: 早割2段 **JP ¥680→¥980 / 海外 $5→$7**（6/29 0:00 JST で値上げ＝既存 KNOCKOUT_START_UTC 流用）。買い切り・〜2026-09-30。
-- 🔧 **実装は PR #46（OPEN）**。マージ前提3点:
-  - ① Stripe ダッシュボードで商品「**MatchFav フルアクセス（買い切り）**」＋ one-time Price 4本（JPY ¥680/¥980, USD $5/$7）を作成し Price ID を取得
-  - ② Vercel env 6種を投入: `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET` / `STRIPE_PRICE_JP_EARLY` / `STRIPE_PRICE_JP_REGULAR` / `STRIPE_PRICE_INTL_EARLY` / `STRIPE_PRICE_INTL_REGULAR`
-  - ③ 本番DBに migration 0013（entitlements / stripe_processed_events）適用
-- ⚠️ **マージ前に /security-review 必須**。
-- ぶら下がり: **T-26補足**（購入者にバナー非表示・1行）/ **T-29**（購入画面に提供期間〜2026-09-30 を明示）
+| PR | タスク | 残り条件（誰待ち） |
+|---|---|---|
+| **#46** | T-14/T-52 Stripe＋決勝T課金壁 | 🔴 **篠田**: Stripe設定＋env6種 → 本番DB migration0013 → マージ（詳細↓「🔴 T-14」） |
+| **#62** | T-55 スマホヘッダー削減 | **篠田**: プレビュー視覚確認 |
+| **#60** | T-53 スカッド注釈（6カ国×5言語） | 即マージ可（低リスク・CI緑なら） |
+| **#58** | T-50 勝者色 青→金 | **篠田**: 帰宅後の視覚確認 |
 
-### 🟠 次 — （T-19 metadata 多言語化は ~~完了~~（PR #54・本番実機OK）。実装系は下記参照）
-- **T-48＋T-51 は ✅完了（PR #57・本番反映 2026-06-13）**。**T-52 決勝T課金ゲートは PR #46 に内包・番人が main追従＆競合解消＋/security-review PASS まで完了 → Stripe設定/env（篠田）待ち**。**T-50 勝利表示色は実装完了・PR #58・篠田の視覚確認待ち（帰宅後）**。次のユーザー指定待ちは **T-47 ヒーロー文言**。
+## 🎯 次やること（PR待ちでない・着手可）
 
-### 🟡 その後 — T-12 サイト全体の最終動作チェック（実装出揃い後）
-- 全ページ・全言語を通しで触って確認 → 2段ゲート → デプロイ。
+- **T-47** ヒーロー文言変更 — 篠田の**変更後テキスト指定待ち**（`home.title`/`description` ×5言語）。ui-feature・worktree→PR。
+- **T-54 残** — ③ GSC 登録・インデックス送信（**篠田**）。コード（JSON-LD/メタ/llms.txt）は #61 で本番反映済。
+- **T-53 残** — ① 補充選手の**本番DB手動反映**（要GO・選手データ研究・任意。注釈② は #60 で対応済）。
+- **T-19** metadata 多言語化 B-lite（GO で夜間自走可）。
+- **T-12** サイト全体の最終動作チェック（実装出揃い後 → 2段ゲート → デプロイ）。
 
-### 🟢 着手可（設計確定）
-- ~~**T-48** ADMIN 投票リセット（自分票のみ）~~ — `/admin` で isAdmin＋requireVoterId の二重ゲート、`voter_id` 限定 DELETE で**自分の票だけ**リセット。「みんなの票を消す」機能は誤爆事故防止のため**廃止**（ユーザー指示）。**✅完了**（PR #57 squash `3008b89`・本番反映 2026-06-13・実機 reset→再投票 OK）。
-- ~~**T-51** グループ投票窓の開放（投票締切ルール改定）~~ — `crowd.ts` の投票締切を「そのステージ初戦KO」→「**次の投票ステージの初戦KO（＝次ステージ開始でロック）**」に改定。グループ戦投票が会期中ずっと open に（開幕戦即ロックの "全締切" 死に体を是正）。1ステージ1票ロックは従来どおり。[[voting-monetization-model]] 追従。**✅完了**（PR #57 squash `3008b89`・本番反映 2026-06-13・tsc/lint/全461テストPASS・/ai-review通過）。
-- **T-47** ヒーローセクションの文言変更 — トップの見出し/説明（`home.title`/`home.description`・`src/lib/i18n/messages/*.ts` ×5言語）を変更。**変更後テキスト未定（ユーザー指定待ち）**。ui-feature 領域・worktree→PR。（2026-06-13 起票）
-- **T-50** 勝利チームの表示色を見直す — 試合カード/スコアで勝者（チーム名＋スコア）が `var(--wc-accent)`（青）の流用で表示され「微妙・地味」との指摘（スクショ 2026-06-13: MEX 2-0 RSA / KOR 2-1 CZE の勝者が青）。`src/app/globals.css` の `.is-winner` 群（`.wc-team-row.is-winner` 付近 / `.wc-mini-team.is-winner` / `.wc-versus-name.is-winner` / 勝者スコア `strong.is-winner`）が `--wc-accent` を流用中。**勝利が映える専用色（例: ゴールド/グリーン系の勝者トークン `--wc-win` を新設）へ**。判定は `MatchVersus.tsx` の `isWinner`（既存・触らない）。ライト/ダーク両テーマでコントラスト確認。ui-feature 領域・worktree→PR。 **🟡実装完了・PR #58・篠田の視覚確認待ち（帰宅後）**: セマンティックトークン `--wc-win` を新設（theme-tuned `--wc-gold` 参照＝ライト #b45309／ダーク #fbbf24）し `.is-winner` 4ルールを青→金。tsc 0err・CSSのみ・`isWinner` 不変。帰宅後 OK なら番人マージ→本番 promote。色の好み調整は即対応可。プレビュー: feat/winner-color。（2026-06-13 起票／実装）
-- **[保守] Dependabot #14（postcss < 8.5.10 の CSS Stringify XSS・medium）** — Next がネストしていた postcss 8.4.31 を `overrides` で 8.5.15 に統一。**✅実装完了・PR #59**（サブエージェント・package.json/lock のみ・audit から postcss 消失。実害は低=ビルド時の信頼CSSのみ処理）。**✅マージ・本番反映済（PR #59・2026-06-13）**。※残: `esbuild` の high 1件は別途（T-8 範囲）。
-- **T-53** 各国スカッドの「離脱→補充」反映＋注釈書き — 大会直前の負傷離脱と補充招集を、**①出場選手リストに補充選手を追加**（本番DB手動更新＝スカッド凍結ルールに従い `fetch-squads` は使わず**チーム個別に手動INSERT**・[[squad-data-source]]）＋**②選手リスト下部に注釈**（日本の遠藤航→町野と同じ仕組み: `src/lib/squad-notes.ts` の `SQUAD_NOTES` に `FIFAコード→note<Code>` を1行追加＋ `src/lib/i18n/messages/{ja,en,es,pt,zh}.ts` の `squad.note<Code>` に注釈文を追加。`SquadPanel.tsx` が末尾に表示）。**確認済みペア（日本除く・"離脱→補充" が明確なものだけ）**:
+## 🧊 バックログ（低優先・今やらなくてよい）
 
-  | 国 | 離脱選手 | 離脱理由 | 補充選手 | 背番号 | メモ |
-  |---|---|---|---|---:|---|
-  | オランダ(NLD) | Jurrien Timber | 鼠径部負傷 | Lutsharel Geertruida | 2 | FIFAでも確認あり |
-  | ドイツ(GER) | Lennart Karl | 左大腿部の筋損傷・筋束断裂 | Assan Ouédraogo | 25 | Reuters/FIFA系で確認 |
-  | アルゼンチン(ARG) | Leonardo Balerdi | 右ふくらはぎ・ヒラメ筋系 | Marcos Senesi | 2 ※要確認 | AFA発表。既存 `noteArg`（「補充未発表で25名表示」）を**Senesi補充済みに更新**すること |
-  | ブラジル(BRA) | Wesley | 左太もも・内転筋負傷 | Éderson（**GKでなくMF**） | 2 | ESPNのロスターでも MF Éderson が#2 |
-  | スコットランド(SCO) | Billy Gilmour | 膝負傷 | Tyler Fletcher | 8 | Sky Sports |
-  | オーストリア(AUT) | Christoph Baumgartner | 右太もも負傷 | Dejan Ljubičić | 17 ※要確認 | 当初補充なし方針→後に追加 |
+- **T-49** 無効ロケールのソフト404 を 200→404（GSC に「ソフト404」警告が出たら着手で十分）。
+- **T-8** セキュリティ仕上げ（Sentry / CSP 方針）。
+- **T-7** CI 緑化 — audit の `esbuild` high を `npm audit fix`（非破壊。postcss は #59 で解消済）。docs push でも CI が焚かれ赤メールが出るので近く緑化推奨（優先度は Stripe の下）。
+- **T-35** お気に入り端末間同期の実機 E2E（`notes/e2e-checklist-30-sync.md`）。
+- **T-28** 大会汎用化の判断（〜2026-08末）。
 
-  ⚠️**注意**: カナダ/イラク/モロッコ/スウェーデンは "負傷離脱→緊急補充" の明確ペアとして**今回は入れない**（選外・欠場・不参加系と混ざりやすく不確実）。背番号は Senesi #2 / Ljubičić #17 が**最終ロスターで要確認扱い**（安全側）。出典: FIFA・Reuters・Sky Sports（URL は起票元メッセージ参照）。data-squad（DB手動更新）＋ui-feature/i18n（注釈）領域。（2026-06-13 起票） **🟡②注釈＝実装完了・PR #60**（6カ国 NED/GER/BRA/SCO/AUT＋ARG更新 ×5言語・key整合grep済・番人）。⚠️**FIFAコード訂正: オランダは台帳の「NLD」ではなく `NED`**（seed.ts 準拠）。背番号は Senesi/Ljubičić が要確認のため注釈では省略。**①本番DBへの補充選手の手動反映は未実施**（要GO・選手データ研究・partial squad のため注釈で情報は伝達済み＝任意）。番人マージ待ち。
-- **T-54** SEO最適化（**ブランド名「マッチファボ／MatchFav」の検索性**）— **ブランド名で検索したときに matchfav.com が出るようにする**のが主眼。**現状: カタカナ「マッチファボ」で検索してもヒットしない**（インデックス未登録 or ブランド名がメタに不足の疑い）。対応: ①title/description/OGP/構造化データ(JSON-LD `Organization`/`WebSite`)に**ブランド名をカタカナ「マッチファボ」とアルファベット「MatchFav」の両方**を明示 ②sitemap/robots/**llms.txt**（[[seo-llms-txt]]）整備 ③Google Search Console 登録・インデックス送信状況の確認（未登録なら登録）④ブランドクエリでのサイトリンク化を狙う。**スコープはブランド名の発見性**（チーム/国名のアプリ内検索は別タスク化が必要なら後で）。legal-seo-infra/seo-specialist 領域・worktree→PR。（2026-06-13 起票・文脈訂正） **✅①②＝マージ・本番反映済（PR #61・2026-06-13）**（サブエージェント legal-seo-infra）: JSON-LD(Organization/WebSite・`alternateName:["マッチファボ"]`)＋title/OGP/keywords/description にカタカナ併記＋llms.txt ブランド節。sitemap/robots は既存十分で不変。**残＝③GSC登録・インデックス送信（篠田・未）**。反映後は検索インデックス更新を数日待つ。
-- **T-55** スマホ表示のヘッダーの占有面積を削減 — モバイル幅でヘッダー（ロゴ＋ナビ＋言語/タイムゾーン/テーマ/DL 等）が縦に面積を食い、コンテンツが下に押される。スマホでヘッダーを**コンパクト化**（高さ圧縮・ナビ集約や折りたたみ・優先度の低い操作はメニュー内へ収納）。`SiteHeader.tsx`/`SiteNav.tsx` 系・各ブレークポイント（320/375/768）とライト/ダークで確認。ui-feature 領域・worktree→PR。（2026-06-13 起票） **🟡実装完了・PR #62**（サブエージェント ui-feature）: 新規 `HeaderControls.tsx`('use client')で <768px は右上バーガー→Drawer に 言語/TZ/テーマ/DL/管理 を集約・デスクトップは inline 維持。globals.css でヘッダー余白圧縮/ロゴ縮小/ナビ1行スクロール化。i18n header.menu/settings ×5追加。tsc PASS/eslint clean。プレビューで視覚確認→番人マージ待ち。
+---
 
-### 🧊 バックログ（低優先・任意｜今は着手しなくてよい）
-- **T-49** 無効ロケールのソフト404を HTTP 200→404 化（SEO・任意）— `/zzz` 等は not-found 画面は出るがステータス200。Next dev/prod で挙動差あり＝本番モード再現が要る。**GSC に「ソフト404」警告が出たら着手で十分**（出るまで放置可）。（2026-06-13 起票）
+## ✅ 最近完了（PR・本番反映）
 
-### ⏳ 待ち（ユーザー操作 / 外部要因）
-- ~~**T-46 R32再充填バグ修正**~~（6/13 完了・本番実機OK）— 原因は **0012未適用ではなく**、`resolveRoundOf32Assignments` に「グループ全消化」ゲートが無く、ingest cron が未確定グループの暫定順位で R32 を埋め戻していた前倒し充填。修正＝`isGroupStageComplete()` ゲート追加（全12組消化まで R32 は NULL/スロット表示）＋ **migration 0015** で本番R32を再NULL化。本番確認(2026-06-13): R32 が `Group A runners-up` 等のスロット表示に復帰・round_of_32 投票も閉じた。PR #56・migration 0015 本番適用済。
-- **T-8** — セキュリティ仕上げ（Sentry / CSP 方針）。作業中・方針判断。
-- **T-7** — **CI は GitHub Actions で稼働中だが「赤」**。コードは tsc/lint/test/build 全✓、`npm audit --audit-level=high` のみ失敗。原因＝esbuild high（GHSA-gv7w-rqvm-qjhr 他・**ビルド/開発時依存で本番ランタイム非該当＝実リスク低**）＋postcss moderate。修正＝postcss は **PR #59**（番人マージ待ち）、esbuild は `npm audit fix`（非破壊）。両依存を上げれば緑化。万年赤は回帰を隠すので近く対応推奨（優先度は Stripe の下）。旧「gh auth refresh 待ち」は解消済（CI 稼働中）。supply-chain/番人 領域。
-- **T-35** — お気に入り端末間同期の実機 E2E（`notes/e2e-checklist-30-sync.md` をログインで確認）。
-
-### 🔮 将来
-- **T-28** — 大会汎用化の判断（〜2026-08末）。
-
-## ✅ 最近完了（詳細は下）
-
-T-48 投票リセット自分票のみ＋T-51 グループ投票窓開放(PR #57・3008b89・6/13本番反映) / T-46 R32再充填バグ修正(PR #56+migration0015・6/13本番実機OK) / T-19 metadata多言語化(PR #54・6/13本番実機OK) / T-43(投票) 投票ライフサイクル(PR #55+migration0014・6/13本番OK) / T-45 登録ウォール(PR #47・6/13) / T-43(Wikipedia) イベント補完取込(PR #43・6/13実機確認) / T-44 公開ブラウズ案A(PR #42) / チーム詳細404調査クローズ(6/13・バグでなく誤URL) / T-42 自動取込の本番稼働実証(6/12開幕戦MEX-RSA 2-0+イベント) / T-22/T-25 本番ドメイン matchfav.com＋本番Clerk live(6/12) / T-40 ランキング/スタッツ(PR #28) / T-41 favicon v16(PR #27) / T-33 順位表の確定カラー(PR #23) / T-39 ログアウト時お気に入り一掃(PR #19) / T-38 在籍クラブ表示(PR #16) / T-37 ミニヒーロー(PR #14) / T-36 favicon(PR #12) / T-34 法務簡素化(PR #7) / T-32 順位表フラット(PR #6) / T-31 A2HSラベル(PR #8) / T-26 予告バナー(PR #5)
+T-54 SEOブランド発見性(PR #61・6/13) / postcss脆弱性 Dependabot#14(PR #59・6/13) / T-48 投票リセット自分票のみ＋T-51 グループ投票窓開放(PR #57・6/13本番反映) / T-46 R32再充填修正(PR #56+migration0015・6/13) / T-19 metadata多言語化(PR #54・6/13) / T-43(投票)ライフサイクル(PR #55+migration0014・6/13) / T-45 登録ウォール(PR #47・6/13) / T-43(Wikipedia)イベント補完(PR #43) / T-44 公開ブラウズ案A(PR #42) / チーム詳細404調査クローズ(6/13・誤URL) / T-42 自動取込実証(6/12開幕戦MEX-RSA) / T-22/T-25 本番ドメイン＋本番Clerk(6/12) / T-40 ランキング(PR #28) / T-41 favicon v16(PR #27) / T-33 確定カラー(PR #23) / T-39 お気に入り一掃(PR #19) / T-38 在籍クラブ(PR #16) / T-37 ミニヒーロー(PR #14) / T-36 favicon(PR #12) / T-34 法務簡素化(PR #7) / T-32 順位表フラット(PR #6) / T-31 A2HSラベル(PR #8) / T-26 予告バナー(PR #5)
 
 ## 📋 方針決定（やらない/許容と決めたこと）
 
-- **/admin の404秘匿化はやらない**（2026-06-13 ユーザー判断）: 探索リスク低・ログインしても非adminは404のため実害なし。現状（未ログインだと sign-in へ）は許容。
-- **【スカッド凍結ルール】大会期間中は `npm run db:fetch-squads`（スカッド一括再取得）を実行しない**（2026-06-13 ユーザー決定）:
-  - 理由1: `scripts/fetch-squads.ts` はチームごとに DELETE→再INSERT する**破壊型**で、手動更新（例: 2026-06-13 の日本代表 遠藤航→町野修斗の入替・本番DB直接更新済み）を上書きし、全選手の club_id 紐付けも消える。
-  - 理由2: 大会中の名簿変更は怪我離脱→追加招集程度（週1回あるか無いか）のレアケースで、全チーム洗い直しはコストと時間の無駄。
-  - 運用: 選手の入替が起きたらユーザーが番人に伝え、本番DBを個別に手動更新する（取得スクリプトの改修はしない＝YAGNI）。
+- **/admin の404秘匿化はやらない**（2026-06-13 ユーザー判断）: 探索リスク低・ログインしても非adminは404のため実害なし。
+- **【スカッド凍結ルール】大会期間中は `npm run db:fetch-squads` を実行しない**（2026-06-13 ユーザー決定）:
+  - `scripts/fetch-squads.ts` はチームごとに DELETE→再INSERT する**破壊型**で、手動更新（遠藤→町野 等）と club_id 紐付けを上書きする。
+  - 名簿変更は怪我離脱→補充程度のレアケース。**選手入替が起きたらユーザーが番人に伝え、本番DBを個別に手動更新**（取得スクリプトは改修しない＝YAGNI）。
 
 ---
 
 # 詳細（フル説明）
 
-## 進行中・待ち
+## 🔴 T-14 / T-52 — Stripe 課金接続＋決勝T課金壁（PR #46・最優先）
 
-- **T-43(投票)** みんなの投票（予想投票）のライフサイクル設計＋実装（**方針確定2026-06-12**・⚠️番号衝突あり→「番号の欠番について」参照）— 各ステージの投票は **開く→締切→アーカイブ（消さない）** を毎ラウンド繰り返す（"リセット"でなく履歴化＝戻る理由＋履歴コンテンツ）。**締切＝そのラウンドの初戦KO時**（結果が出る前にロック＝ガチ予想を担保）。次ラウンドは出場チーム確定でオープン。**優勝予想だけ常設**（任意・大会通して推し変え可・敗退チームは無効/灰色）。**収益連動**: グループL投票=無料、**決勝T(R32〜)の投票は課金の向こう側**（買う動機＝お気に入りと並ぶ有料価値・T-14と一直線）。実装: `crowd_votes`(0007既存)にステージ/締切/アーカイブ概念を追加（マイグレ要否は実装時に設計）。的中率バッジ等の軽ゲーミフィケーションはv2。ui-feature/data-squad 領域。 ⚠️**仕様改定2026-06-13**: 実装は PR #55 でマージ済。その後ユーザーと方針確定（[[voting-monetization-model]]）し、(a)「締切＝初戦KO」→「**次ステージ開始でロック**」に改定（→**T-51**）、(b)「優勝予想だけ常設」は**廃止**し全ステージ1票ロックに統一、(c) 決勝T課金ゲートは→**T-52**。
-- **T-14** Stripe 課金接続（**🔴 最優先・PR #46 OPEN**）— **価格確定（2026-06-12・収益最大化方針）**。買い切りで決勝T(6/29〜)を解除・アクセスは〜2026-09-30。**実装は PR #46（OPEN）**・マージ前提3点（Stripe 商品/Price 4本作成・Vercel env 6種・本番DB migration 0013）は上の「🔴 最優先」欄を参照。**マージ前に /security-review 必須**。**（2026-06-13 番人実施済）**: main追従＆T-51競合解消（merge `631d62e`）・**/security-review PASS（ブロッカー無し）**・全491テストPASS・PR #46 push 済。**残＝Stripe商品/価格4本/webhook＋env6種（篠田・PC）→本番DB migration0013→マージ→デプロイ→テスト購入**。テストモードで先に通す方針（KO投票の課金壁は6/28まで誰も到達せず実害ゼロ）。
-  - **早割2段**（収益前倒し＋緊急性）: 無料期間（〜6/28＝`isFreePeriod()`真）に買えば **JP ¥680 / 海外 $5**、6/29以降は **JP ¥980 / 海外 $7**。境界は既存 `KNOCKOUT_START_UTC=2026-06-28T15:00:00Z` を流用（pricing.ts に earlyBird/full の2定数＋通貨×JP/海外）。
-  - **転換率の打ち手（価格より重要）**: 課金壁は"データ"でなく**「お気に入りを決勝Tまで追える/優勝予想/このUX」**を訴求／**6/29カウントダウン**で緊急性／ロック先のチラ見せ／72h体験(6/29以降の新規)維持。収益の最大レバーは**グループ戦での無料signup最大化**（SEO/SNS/開幕戦バズ）。
-  - **残作業**: ①~~商品名決定~~→「**MatchFav フルアクセス（買い切り）**」で確定 ②pricing.ts に早割2段＋海外通貨 ③Stripe Checkout(買い切り)＋entitlement（購入フラグ。日付ゲートだけだと全員に壁＝購入者にも壁になるので**購入者判定が必須**）④T-26補足（購入者にバナー非表示）⑤T-29（〜9/30明示）⑥特商法 noindex 解除。[[launch-monetization-plan]]・auth-billing 領域。
-  - **🧑‍💻 ユーザー担当（オーナー作業・PC のダッシュボード操作｜PR #46 実コードと突合済 2026-06-13）**: 番人のコードと独立に先行可。テストモードで先に全部入れてOK（決勝T課金壁は 6/28 まで誰も到達しない＝今テストキーでも実害ゼロ）。
-    - [ ] **(a) Stripe 商品＋価格4本**: Products → 商品「MatchFav フルアクセス（買い切り）」→ 価格を4本（**すべて One-time/一括**）。各 `price_…` を控える → 環境変数へ: `¥680 JPY→STRIPE_PRICE_JP_EARLY` / `¥980 JPY→STRIPE_PRICE_JP_REGULAR` / `$5 USD→STRIPE_PRICE_INTL_EARLY` / `$7 USD→STRIPE_PRICE_INTL_REGULAR`
-    - [ ] **(b) Secret key**: Developers→API keys の `sk_test_…`（本番化時 `sk_live_…`）→ `STRIPE_SECRET_KEY`
-    - [ ] **(c) Webhook**: Developers→Webhooks→Add endpoint・URL `https://matchfav.com/api/stripe/webhook`・イベントは **`checkout.session.completed` だけ** → Signing secret `whsec_…` → `STRIPE_WEBHOOK_SECRET`
-    - [ ] **(d) Vercel env（Production）**: 上記6つを wc-tournament-tracker の Environment Variables に投入（publishable キーは**不要**＝サーバリダイレクト型 Checkout）
-    - [ ] **(e) 本番化（〜6/28 までに別途・5分）**: Stripe を**ライブモード**に切替→ 価格4本/secret/webhook を**ライブで作り直し**（テストとライブは別物。webhook signing secret も別）→ Vercel env 6つを `sk_live_…`/ライブ `price_…`/ライブ `whsec_…` へ差し替え→ Redeploy。
-    - ※ env 値は私（このセッション）には渡さない・出力しない（`.env.local`/本番 env は不可侵）。投入後「入れた」とだけ教えてくれれば、私は配線（価格解決/エンドポイント存在）の妥当性確認まで手伝える。
-- **T-52** 決勝T投票の課金ゲート（②・**T-14/PR #46 にブロック**）— 投票マネタイズ確定仕様（[[voting-monetization-model]]）の決勝T側。knockout ステージ（round_of_32〜final）の投票を**買い切りエンタイトルメントの後ろ**に置く（グループ戦投票は無料・T-51で窓開放済）。課金は**買い切り1回ポッキリ**＝1回買えば決勝T全ラウンドの投票が開く（ステージ毎課金ではない）。実装は **PR #46 に内包済**（KO投票を `isKnockoutStage(current) && !hasKnockoutAccess()` で fail-closed ゲート＋UI=PaywallLock・グループ投票は無料素通し）。**2026-06-13 番人が main追従＆競合解消・/security-review PASS 済**。**残＝Stripe設定/env（篠田）→migration→マージ**。⚠️未決の製品判断: 決勝T突入後の未購入者にアーカイブ（過去結果）も隠すか/無料で見せるか（篠田確認待ち）。ui-feature×auth-billing 領域。（2026-06-13 起票）
-- **T-19** i18n B-lite（**🟠 次・実行待ち**）— 本文UIは5言語対応済（投票エラー/es・pt・zh イベントラベルは `23f2d41` で修正済）。**残**: 各ページ metadata（title/description）と OGP 画像文言が日本語固定 → 多言語化。**B-lite 案あり・GO で夜間自走**。hreflang/URL 戦略とセットで設計（クローラに cookie が無い問題の裏返し）。
-- **T-12** サイト全体の最終動作チェック（**🟡 その後**）— 全ページ・全言語を通しで触って確認。実装が出揃ってから実施 → 2段ゲート → デプロイ。
-- **T-8** — セキュリティ仕上げ（Sentry 導入と CSP 方針）。作業中・方針判断。
-- **T-7** — CI（GitHub Actions `.github/workflows/ci.yml`）は**稼働中だが全 run 赤**。落ちているのは最終ステップ `npm audit --audit-level=high` のみ（型/lint/test/build は成功）。high＝esbuild（NPM_CONFIG_REGISTRY 経由 RCE / dev サーバの任意ファイル読取(Windows)・GHSA-gv7w-rqvm-qjhr 他）＝**ビルド/開発時の依存で本番非該当・実リスク低**。moderate＝postcss XSS。**修正: PR #59（postcss 8.5.15 統一・番人マージ待ち）＋ esbuild を `npm audit fix`（非破壊パッチ）**→ 緑化。docs だけの台帳 push も毎回この CI を焚いて赤メールを増やすため、緑に戻す実益あり。旧「gh auth refresh -s workflow 待ち（[[gh-workflow-scope-missing]]）」は解消済。
-- **T-35** — お気に入り端末間同期の実機 E2E 確認（`notes/e2e-checklist-30-sync.md` をログイン状態で。T-30/T-39 関連）。
-- **T-29** — 購入画面に提供期間を明示（「2026-09-30 までの利用権」を Checkout/ペイウォール UI に・T-14/T-26 実装時にセット）。
-- **T-28** — 大会汎用化の判断（将来・**判断期限 2026-08末**）— MatchFav をユーロ/CL 等へ展開 or WC2026限定で終了。終了なら 2026-09-30 にデータ削除（規約明記済・`8674e61`）。継続なら DB 一般化＋データ永続化＋規約改定。今は一般化しない（YAGNI）。
+**価格確定（6/12・収益最大化）**: 買い切り・早割2段 **JP ¥680→¥980 / 海外 $5→$7**（6/29 0:00 JST 値上げ＝既存 `KNOCKOUT_START_UTC` 流用）。アクセス〜2026-09-30。
 
-## 完了
+**番人実施済（2026-06-13）**: 実装は PR #46。main 追従＆ T-51 競合解消（merge `631d62e`）・**/security-review PASS（ブロッカー無し）**・全491テストPASS・push 済。**T-52（決勝T投票の課金ゲート）は本PRに内包**（KO投票を `isKnockoutStage(current) && !hasKnockoutAccess()` で fail-closed ＋ UI=PaywallLock・グループ投票は無料素通し）。
+- ⚠️**未決の製品判断**: 決勝T突入後の未購入者に**アーカイブ（過去結果）も隠すか/無料で見せるか**（篠田確認待ち）。
 
-- ~~T-13 Clerk(Google)認証 — ログイン必須化＋ヘッダUserButton~~（6/9頃・`3fe133f`）
-- ~~T-23 管理画面を所有者(Clerkオーナーメール)限定に・旧パスワード方式廃止~~（6/10・`42c6178`）
-- ~~T-24 会場天気表示 — WeatherAPI・3hキャッシュ・全言語同一スナップショット~~（6/10・`5d867dc` + fix `5443a61`）
-- ~~T-20a 試合イベント表示・手動tier — admin入力CRUD＋時系列表示＋i18n×5~~（6/10・`2be097a`）
-- ~~T-20b 試合イベント・自動tier — TheSportsDBタイムライン取込・manual不可侵~~（6/10・`dac6893` + 原子化fix `7134845`）
-- ~~T-20c 手動tierの動作確認 — admin入力→表示・ingest後の不可侵までユーザー確認済み~~（6/11）
-- ~~T-21 法務ページ清書 — terms/privacy/tokushoho 公開可能水準・新課金設計反映~~（6/10-11・`209f24e`。弁護士レビューは公開前に）
-- ~~T-27 リブランド一括反映 — MatchFav/matchfav.com/info@ をサイト全体へ~~（6/11・`209f24e`）
-- ~~セキュリティ/品質ゲート — /security-review 指摘ゼロ・品質fix 1件・i18n fix~~（6/11 夜間・`7134845` `23f2d41`）
-- ~~T-26 課金壁の予告バナー — 無料期間のみ表示・価格は pricing.ts 集約・光沢スイープ~~（6/11・PR #5）
-- ~~T-32 順位表をグループステージ中は完全フラットに~~（6/11・PR #6）
-- ~~T-34 法務3ページ簡素化 — 具体サービス名一般化・黄色枠撤去・特商法に実価格980円明記~~（6/11・PR #7）
-- ~~T-31 A2HSホバーラベル「スマートフォンにショートカットを追加」×5言語（アイコンは標準のまま）~~（6/11・PR #8）
-- ~~ヘッダのツールチップを Mantine Tooltip 化・表示遅延0.5秒に統一~~（6/11・PR #11 `5ada05f`）
-- ~~T-36 favicon を MatchFav v5（抽象化フィールド＋ハート）へ差し替え~~（6/11・PR #12 `73ae9d5`。後に T-41/v16 で上書き）
-- ~~T-37 トップに未ログイン訪問者向けミニヒーロー — 未ログイン時のみ価値訴求帯＋CTA~~（6/11・PR #14）
-- ~~T-38 出場選手の在籍クラブ表示 — Wikipedia squads 集計・clubs マスタ＋players.club_id（migration 0011 適用済）・本番DB clubs452/選手1247件投入~~（6/11・PR #16）
-- ~~T-39 ログアウト時に端末ローカルのお気に入り残骸を一掃~~（6/11・PR #19）
-- ~~T-33 順位表の確定カラー — 数学的に突破/敗退が確定したチームだけ緑/グレー（round-of-32.ts でタイブレーク判定）~~（6/11・PR #23）
-- ~~T-41 favicon を heart bold v16 へ差し替え — icon.png/apple-icon.png を v16（深緑+ゴールドのハート・透過）へ・v16アセットも assets/ にコミット・T-36/v5 を上書き~~（6/11・番人直接実装・PR #27）
-- ~~T-40 ランキング/スタッツページ — /rankings に得点ランキング＋カード(黄/赤)＋出場停止集計。match_events 集計（新API不要）・空状態グレースフル・i18n×5・ログイン必須・テスト同梱~~（6/12・PR #28）
-- ~~T-42 自動取込の本番稼働確認 — 開幕戦 MEX-RSA が毎時cron(/api/ingest)で結果(2-0/finished)＋イベント(auto: goal/red/sub/yellow)を自動取込。エンドツーエンド実証。※TheSportsDB無料はタイムライン一部欠落あり(スコアは正確)→重要試合は手動tierで補完可~~（6/12・実機確認）
-- ~~T-22 独自ドメイン接続 — matchfav.com を Vercel に apex 正準で接続・www→apex 308・Cloudflare DNS は全グレー雲・メール(MX/SPF/DKIM)不可侵維持。apex200/www308/法務SEO全200 確認~~（6/12・実機確認済）
-- ~~T-25 本番 Clerk — 本番インスタンス＋Clerk用CNAME5件 Verified/SSL・専用GCPで Google OAuth(自前クレデンシャル・審査不要スコープ)・Vercel Production に pk_live/sk_live/SITE_URL 投入・Redeploy・アプリ名MatchFav。シークレットでGoogleログイン成功(dev badge無)・/admin OK~~（6/12・実機確認済）
-- ~~T-44 公開ブラウズ（案A）— 閲覧は全公開・行動だけ要ログインに認証境界を整理~~（PR #42。その後 T-45 の登録ウォールを上に追加した形が最終形）
-- **🔴 T-46（差し戻し・未完）** ブラケットR32是正 — 決勝T R32 を確定前は実チーム非表示・グループ枠プレースホルダに是正。**コード（シード/自動bind `resolveAndPersistRoundOf32`）は PR #44 でマージ済**だが、**本番DBへ migration 0012 が未適用**のため本番(matchfav.com)の R32 は依然 実チーム（国旗）を表示している（ユーザー報告 2026-06-12 23:49 スクショ）。**検証 2026-06-13**: 本番 RSC ペイロードで R32 #73 が `homeTeamId:"kor"`／`awayTeam:{id:"uzb"}` を保持（`status:scheduled`・`winnerTeam:null`）＝ team_id が NULL 化されていない。`notes/agent-sync.md` の受け渡しボードも「本番DBへ migration 0012 適用」が `- [ ]` 未処理のまま。**台帳の旧記載「migration 0012 本番適用済」は誤り**。**残作業＝番人が本番DBへ migration 0012 を適用する**（idempotent・R32の team_id/score/winner を NULL 化し home_slot/away_slot のグループ枠ラベル表示へ戻す。大会開幕後だが R32 は未消化のためユーザー入力データ喪失なし）。適用後、本番 R32 が「グループX 1位/2位」表示になることを確認してクローズ。
-- ~~T-43(Wikipedia) Wikipediaイベント補完取込 — 試合イベントを Wikipedia から補完取込し TheSportsDB へフォールバック~~（PR #43 で本番反映済・実機確認済 6/13: 開幕戦 MEX 2-0 RSA に source=auto のイベント17件(goal2/yellow3/red3/sub9)。注記: red=3 は実試合より多い疑いがありデータ品質は今後確認余地。第2試合はまだ DB 上 finished になっておらず次回 cron 待ち。⚠️番号衝突→「番号の欠番について」参照）
-- ~~T-45 登録ウォール — 詳細ページ（/matches/[id]・/teams/[code]・/rankings・locale版）をログイン必須化。一覧/トップは公開のまま~~（6/13・PR #47 マージコミット `6b00cc6` で本番反映・ユーザー実機確認済。経緯: PR #45 と PR #47 の初回マージが2回とも「成功表示なのに main 未反映」になる事故があり、3回目で確実にマージ・gh api で裏取りした）
-- ~~チーム詳細404の調査 — 解消でクローズ。原因はバグではなく、確認手順書に書かれた誤URL形式（/teams/afc-australia）。実リンクは /teams/jpn 等の3文字コードで正常・ユーザー実機確認済~~（6/13）
-- ~~日本代表スカッド手動更新 — 遠藤航（怪我により離脱・代表引退）→ 町野修斗（FW・背番号6引き継ぎ・ホルシュタイン・キール）を本番DBに手動反映済み~~（6/13。あわせて「スカッド凍結ルール」を方針決定に記録）
+**残＝マージ前提（🧑‍💻 篠田のオーナー作業・PC｜PR #46 実コードと突合済）**: テストモードで先行可（決勝T課金壁は 6/28 まで誰も到達しない＝今テストキーでも実害ゼロ）。
+- [ ] **(a) Stripe 商品＋価格4本**: 商品「MatchFav フルアクセス（買い切り）」→ One-time 価格4本。`¥680→STRIPE_PRICE_JP_EARLY` / `¥980→STRIPE_PRICE_JP_REGULAR` / `$5→STRIPE_PRICE_INTL_EARLY` / `$7→STRIPE_PRICE_INTL_REGULAR`
+- [ ] **(b) Secret key**: `sk_test_…`（本番化時 `sk_live_…`）→ `STRIPE_SECRET_KEY`
+- [ ] **(c) Webhook**: URL `https://matchfav.com/api/stripe/webhook`・イベント **`checkout.session.completed` だけ** → `whsec_…` → `STRIPE_WEBHOOK_SECRET`
+- [ ] **(d) Vercel env（Production）**: 上記6つを投入（publishable キーは不要＝サーバリダイレクト型 Checkout）
+- [ ] **(e) 本番DB**: migration 0013（entitlements / stripe_processed_events）適用（番人が篠田の GO で実行）
+- [ ] **(f) 本番化（〜6/28・5分）**: Stripe をライブモードに切替→価格/secret/webhook をライブで作り直し→ env 差し替え→ Redeploy。
+- ※ env 値は番人に渡さない・出力しない。投入後「入れた」と一言で、配線の妥当性確認は手伝える。
+- **マージ前に /security-review 必須**（済）。[[launch-monetization-plan]]・[[voting-monetization-model]]・auth-billing 領域。
+
+## T-53 — 各国スカッド「離脱→補充」（注釈②=PR #60 済 / 補充DB①=要GO）
+
+注釈は `src/lib/squad-notes.ts` の `SQUAD_NOTES`（FIFAコード→note）＋ i18n `squad.note<Code>` ×5。`SquadPanel` が末尾表示。**②注釈は PR #60 で実装（6カ国×5言語）**。**① 本番DBへの補充選手反映は未実施**（要GO・partial squad のため注釈で情報は伝達済み＝任意）。⚠️**オランダの FIFAコードは台帳の「NLD」ではなく `NED`**（seed.ts 準拠）。背番号 Senesi/Ljubičić は要確認のため注釈では省略。
+
+| 国 | 離脱選手 | 離脱理由 | 補充選手 | 背番号 |
+|---|---|---|---|---:|
+| オランダ(**NED**) | Jurrien Timber | 鼠径部負傷 | Lutsharel Geertruida | 2 |
+| ドイツ(GER) | Lennart Karl | 左大腿部の筋損傷 | Assan Ouédraogo | 25 |
+| アルゼンチン(ARG) | Leonardo Balerdi | 右ふくらはぎ系 | Marcos Senesi | 2 ※要確認 |
+| ブラジル(BRA) | Wesley | 左太もも・内転筋 | Éderson（**MF**） | 2 |
+| スコットランド(SCO) | Billy Gilmour | 膝負傷 | Tyler Fletcher | 8 |
+| オーストリア(AUT) | Christoph Baumgartner | 右太もも負傷 | Dejan Ljubičić | 17 ※要確認 |
+
+⚠️ カナダ/イラク/モロッコ/スウェーデンは不確実なため**入れない**。出典: FIFA・Reuters・Sky Sports。data-squad＋ui-feature/i18n 領域。
+
+## その他 進行中・待ち（詳細）
+
+- **T-43(投票)** みんなの投票ライフサイクル — 実装は PR #55 でマージ済。⚠️**仕様改定2026-06-13**（[[voting-monetization-model]]）: (a)「締切＝初戦KO」→「**次ステージ開始でロック**」に改定（→T-51）、(b)「優勝予想だけ常設」は**廃止**し全ステージ1票ロックに統一、(c) 決勝T課金ゲートは→T-52。
+- **T-19** i18n B-lite — 本文UIは5言語済。残: 各ページ metadata（title/description）と OGP 画像文言の多言語化。GO で夜間自走。
+- **T-12** サイト全体の最終動作チェック — 全ページ・全言語を通しで → 2段ゲート → デプロイ。
+- **T-8** セキュリティ仕上げ（Sentry / CSP 方針）。作業中・方針判断。
+- **T-7** CI（`.github/workflows/ci.yml`）は稼働中だが全 run 赤。落ちるのは `npm audit --audit-level=high` のみ（型/lint/test/build は成功）。high＝esbuild（ビルド/開発依存・本番非該当・実リスク低）。**修正: postcss=PR #59 済＋ esbuild を `npm audit fix`** で緑化。
+- **T-29** 購入画面に提供期間〜2026-09-30 を明示（T-14/T-26 実装時にセット）。
+- **T-28** 大会汎用化の判断（〜2026-08末）。終了なら 2026-09-30 にデータ削除。今は一般化しない（YAGNI）。
+
+## ✅ 完了（履歴）
+
+- **🔴 T-46（差し戻し→6/13 完了・本番実機OK）** R32再充填バグ — 原因は 0012未適用ではなく `resolveRoundOf32Assignments` の前倒し充填。修正＝`isGroupStageComplete()` ゲート＋ migration 0015 で本番R32再NULL化。本番でスロット表示復帰・round_of_32 投票も閉じた。PR #56・migration 0015 適用済。
+- ~~T-45 登録ウォール — 詳細ページをログイン必須化~~（6/13・PR #47 `6b00cc6`。初回2回 main未反映事故→3回目で確実マージ）
+- ~~T-43(Wikipedia) イベント補完取込~~（PR #43・6/13実機。注: red=3 はデータ品質要確認余地）
+- ~~T-44 公開ブラウズ案A — 閲覧公開・行動だけ要ログイン~~（PR #42。後に T-45 を上に追加が最終形）
+- ~~日本代表スカッド手動更新 — 遠藤航→町野修斗（FW・#6・キール）を本番DB反映~~（6/13。スカッド凍結ルールも記録）
+- ~~T-13 Clerk(Google)認証~~（`3fe133f`）/ ~~T-23 admin所有者限定・旧PW廃止~~（`42c6178`）/ ~~T-24 会場天気~~（`5d867dc`+`5443a61`）/ ~~T-20a 試合イベント手動tier~~（`2be097a`）/ ~~T-20b 自動tier~~（`dac6893`+`7134845`）/ ~~T-20c 手動tier確認~~（6/11）/ ~~T-21 法務清書~~（`209f24e`）/ ~~T-27 リブランド~~（`209f24e`）/ ~~セキュリティ/品質ゲート~~（`7134845` `23f2d41`）
+- ~~T-26 予告バナー(PR #5)~~ / ~~T-32 順位表フラット(PR #6)~~ / ~~T-34 法務簡素化(PR #7)~~ / ~~T-31 A2HSラベル(PR #8)~~ / ~~ヘッダTooltip化(PR #11)~~ / ~~T-36 favicon v5(PR #12)~~ / ~~T-37 ミニヒーロー(PR #14)~~ / ~~T-38 在籍クラブ(PR #16)~~ / ~~T-39 お気に入り一掃(PR #19)~~ / ~~T-33 確定カラー(PR #23)~~ / ~~T-41 favicon v16(PR #27)~~ / ~~T-40 ランキング(PR #28)~~ / ~~T-42 自動取込実証(6/12)~~ / ~~T-22 独自ドメイン(6/12)~~ / ~~T-25 本番Clerk(6/12)~~
 
 ## 番号の欠番について
 
-旧セッションの TaskList（T-1〜T-25）はセッション終了で消失し、ハンドオフ・memory・git に記録が残っていたもののみ復元した。**T-1〜T-6, T-9〜T-11, T-15〜T-18 の内容は未復元**（多くは完了済みか W系に吸収された可能性が高い）。判明し次第ここに追記し、番号は再利用しない。
+旧セッションの TaskList（T-1〜T-25）は消失し、記録が残るもののみ復元。**T-1〜T-6, T-9〜T-11, T-15〜T-18 は未復元**（完了済か W系吸収の可能性）。番号は再利用しない。
 
-⚠️ **T-43 は番号衝突**: 台帳上の T-43（みんなの投票ライフサイクル・未着手）と、実装コミット/PR #43 が名乗った T-43（Wikipediaイベント補完取込・完了）の2件が存在する。台帳では「T-43(投票)」「T-43(Wikipedia)」と区別して記載。以後の新規番号は最大+1（**T-56〜**）を使い、再衝突させない。**使用済**: T-47＝ヒーロー文言変更 / T-50＝勝利チーム表示色の見直し / T-48＝ADMIN投票リセット（自分票のみ） / T-49＝無効ロケールのソフト404のSEO是正 / T-51＝グループ投票窓の開放 / T-52＝決勝T投票の課金ゲート / T-53＝各国スカッドの離脱→補充反映＋注釈 / T-54＝SEO最適化（ブランド名「マッチファボ／MatchFav」の検索性） / T-55＝スマホヘッダーの面積削減。
+⚠️ **T-43 は番号衝突**: 台帳の T-43（投票ライフサイクル）と PR #43 が名乗った T-43（Wikipedia補完・完了）の2件。「T-43(投票)」「T-43(Wikipedia)」と区別。新規は最大+1（**T-56〜**）。**使用済**: T-47=ヒーロー文言 / T-48=ADMIN投票リセット(自分票のみ) / T-49=ソフト404 / T-50=勝者色 / T-51=グループ投票窓 / T-52=決勝T課金ゲート / T-53=スカッド離脱→補充 / T-54=SEOブランド発見性 / T-55=スマホヘッダー削減。
