@@ -110,6 +110,37 @@ a {
   z-index: 20;
 }
 
+/* ヘッダ内側の余白。デスクトップは従来どおり、モバイルで圧縮する（T-55）。 */
+.wc-header-inner {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
+.wc-header-logo {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+}
+
+/* モバイル: 高さ圧縮（余白縮小＋ロゴ縮小）。ナビは折返しを許容しつつ詰める。 */
+@media (max-width: 767px) {
+  .wc-header-inner {
+    padding-top: 0.55rem;
+    padding-bottom: 0.55rem;
+  }
+
+  .wc-header-logo .mantine-Title-root {
+    font-size: 1.25rem;
+    line-height: 1.1;
+  }
+
+  .wc-header-brand {
+    gap: 0.5rem;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+}
+
 .wc-bracket-scroll {
   overflow-x: auto;
   padding-bottom: 1rem;
@@ -627,6 +658,28 @@ a {
 
 .wc-site-nav {
   font-size: 0.95rem;
+}
+
+/* モバイル: ナビを 1 行に保ち横スクロール（折返しで縦に伸びるのを防ぐ・T-55）。 */
+@media (max-width: 767px) {
+  .wc-site-nav {
+    font-size: 0.85rem;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    max-width: 100%;
+  }
+
+  .wc-site-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .wc-site-nav .wc-nav-link {
+    padding: 0.3rem 0.7rem;
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
 }
 
 .wc-nav-link {

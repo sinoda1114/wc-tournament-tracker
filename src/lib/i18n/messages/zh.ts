@@ -96,6 +96,8 @@ export const zh: Dictionary = {
     admin: '管理',
     signIn: '登录',
     skipToContent: '跳到主要内容',
+    menu: '菜单',
+    settings: '设置',
   },
   language: {
     label: '语言',
