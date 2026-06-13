@@ -14,6 +14,7 @@ import {
   type FactorScores,
   type FactorToggles,
 } from '@/lib/champion-prediction';
+import { standardCompetitionRanks } from '@/lib/rankings';
 
 /** 表示に必要な最小限のチーム情報。 */
 type TeamMeta = {
@@ -62,6 +63,16 @@ function formatPercent(probability: number): string {
   return `${(probability * 100).toFixed(1)}%`;
 }
 
+/**
+ * 同点同順位（標準競争順位）の判定基準となる「表示値%」を返す（T-71）。
+ * 生確率（浮動小数）ではなく formatPercent と同じ小数1桁に丸めた%値を使う。
+ * これにより 4.71% と 4.69% のように表示上は同じ「4.7%」なのに順位が割れる
+ * 不整合を防ぐ（ユーザーは表示された数字で同点だと体感するため）。
+ */
+function displayPercentValue(probability: number): number {
+  return Math.round(probability * 1000) / 10;
+}
+
 export function ChampionPrediction({
   teams,
   factors,
@@ -107,6 +118,13 @@ export function ChampionPrediction({
   const ranked = useMemo(
     () => combineFactors(factorScores, toggles),
     [factorScores, toggles],
+  );
+
+  // 同点同順位（標準競争順位）の rank を表示値%基準で算出（T-71）。
+  // ranked は確率の降順でソート済み。visible はその先頭スライスなので index が揃う。
+  const ranks = useMemo(
+    () => standardCompetitionRanks(ranked, (r) => displayPercentValue(r.probability)),
+    [ranked],
   );
 
   const visible = showAll ? ranked : ranked.slice(0, INITIAL_VISIBLE);
@@ -159,7 +177,7 @@ export function ChampionPrediction({
       <ol className="wc-prediction-list">
         {visible.map((row, index) => {
           const team = teamMeta.get(row.teamId);
-          const rank = index + 1;
+          const rank = ranks[index];
           const isEliminated = eliminated.has(row.teamId);
           // 敗退チームはリンク無効化（選べない）。
           const teamUrl = team && !isEliminated ? `/teams/${team.fifaCode.toLowerCase()}` : null;

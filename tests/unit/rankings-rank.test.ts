@@ -33,3 +33,38 @@ describe('standardCompetitionRanks', () => {
     expect(standardCompetitionRanks([] as { v: number }[], (s) => s.v)).toEqual([]);
   });
 });
+
+/**
+ * 優勝予想リストの同点同順位（T-71）。
+ * タイ判定は生確率ではなく「表示値%（小数1桁）」基準。
+ * 4.71% と 4.69% は表示上どちらも「4.7%」なので同順位になること。
+ */
+describe('優勝予想の表示値%基準タイ（T-71）', () => {
+  // ChampionPrediction.displayPercentValue と同じ丸め（確率→小数1桁の%値）。
+  const displayPercentValue = (probability: number) => Math.round(probability * 1000) / 10;
+
+  it('表示上同じ%（4.7%）の2チームは同順位・次はスキップ', () => {
+    // probability 降順ソート済みを想定: 4.71%, 4.69%, 4.0%
+    const rows = [
+      { teamId: 'KOR', probability: 0.0471 },
+      { teamId: 'USA', probability: 0.0469 },
+      { teamId: 'XYZ', probability: 0.04 },
+    ];
+    expect(standardCompetitionRanks(rows, (r) => displayPercentValue(r.probability))).toEqual([
+      1, 1, 3,
+    ]);
+  });
+
+  it('生確率では別でも表示値が同じなら同順位（4.7%が並ぶ）', () => {
+    const rows = [
+      { probability: 0.10 },
+      { probability: 0.0473 },
+      { probability: 0.0468 },
+      { probability: 0.0466 },
+    ];
+    // 10.0%, 4.7%, 4.7%, 4.7% → 1, 2, 2, 2
+    expect(standardCompetitionRanks(rows, (r) => displayPercentValue(r.probability))).toEqual([
+      1, 2, 2, 2,
+    ]);
+  });
+});
