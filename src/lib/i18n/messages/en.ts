@@ -284,7 +284,7 @@ export const en: Dictionary = {
       'Pick at least one factor. With everything off, all teams share the same probability and there is no prediction.',
     flat: 'The selected factors have no data yet. All teams would be level, so the list stays hidden until data arrives (it appears as a reference once matches progress).',
     onlyWc2026:
-      'Calculated from WC2026 form only. Early in the tournament few matches are played, so small results swing the numbers and create bias. Accuracy improves as matches progress, so treat this as a rough trend for now.',
+      'Calculated from WC2026 form only. Early in the tournament few matches are played, so small results swing the numbers and create bias. Accuracy improves as matches progress.',
     teamSquadAria: 'View the {name} squad',
     eliminatedAria: '{name} is eliminated (no longer a title contender)',
     showTop: 'Show top only',
@@ -309,6 +309,7 @@ export const en: Dictionary = {
     currentPrefix: 'Current stage: ',
     currentSuffix: '. Pick one nation you think will win (search by Japanese name, English name, or FIFA code).',
     searchAria: 'Search nations for your title pick',
+    selectHint: 'Select the nation you think will win.',
     submit: 'Vote',
     noteLine1:
       'You can vote once per stage as the tournament progresses ({progression}), and the latest vote from each user is reflected in the crowd prediction.',

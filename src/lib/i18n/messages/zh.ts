@@ -283,7 +283,7 @@ export const zh: Dictionary = {
     noneActive: '请至少选择一个指标。全部关闭时所有球队概率相同，无法形成预测。',
     flat: '所选指标暂无数据。所有球队会持平、无法形成预测，因此在有数据前不显示（比赛推进后会作为参考显示）。',
     onlyWc2026:
-      '仅根据WC2026表现计算。赛事初期场次较少，少量结果会使数字大幅波动并产生偏差。随着比赛推进精度会提高，目前请作为大致趋势参考。',
+      '仅根据WC2026表现计算。赛事初期场次较少，少量结果会使数字大幅波动并产生偏差。随着比赛推进精度会提高。',
     teamSquadAria: '查看{name}的球员',
     eliminatedAria: '{name}已淘汰（不再是夺冠热门）',
     showTop: '仅显示前列',
@@ -308,6 +308,7 @@ export const zh: Dictionary = {
     currentPrefix: '当前为',
     currentSuffix: '。请选择1支你认为会夺冠的球队（可按日文名、英文名或FIFA代码搜索）。',
     searchAria: '搜索夺冠预测的球队',
+    selectHint: '请选择你认为会夺冠的球队。',
     submit: '投票',
     noteLine1:
       '随着赛事推进（{progression}），每个阶段可投票1次，每位用户的最新一票会反映到大家的预测中。',

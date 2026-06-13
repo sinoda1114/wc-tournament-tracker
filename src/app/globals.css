@@ -2546,3 +2546,9 @@ a {
 .wc-match-card-header .mantine-Badge-root.wc-match-card-group {
   margin-left: 0;
 }
+
+/* ===== 投票ガイド/予想注記（T-69/T-70） ===== */
+/* 国未選択時のヘルパーテキスト。検索欄の下に控えめに表示する。 */
+.wc-vote-hint {
+  margin-top: 0.25rem;
+}

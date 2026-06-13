@@ -285,7 +285,7 @@ export const pt: Dictionary = {
       'Escolha pelo menos um fator. Com tudo desativado, todas as seleções têm a mesma probabilidade e não há palpite.',
     flat: 'Os fatores selecionados ainda não têm dados. Todas as seleções ficariam empatadas, então a lista fica oculta até haver dados (aparece como referência conforme as partidas avançam).',
     onlyWc2026:
-      'Calculado apenas com o desempenho na WC2026. No início do torneio há poucas partidas, então pequenos resultados mexem muito nos números e geram viés. A precisão melhora conforme as partidas avançam; veja como uma tendência aproximada por enquanto.',
+      'Calculado apenas com o desempenho na WC2026. No início do torneio há poucas partidas, então pequenos resultados mexem muito nos números e geram viés. A precisão melhora conforme as partidas avançam.',
     teamSquadAria: 'Ver o elenco de {name}',
     eliminatedAria: '{name} está eliminado (não é mais candidato ao título)',
     showTop: 'Mostrar somente os primeiros',
@@ -313,6 +313,7 @@ export const pt: Dictionary = {
     currentSuffix:
       '. Escolha uma seleção que você acha que vai ganhar (pesquise por nome ou código FIFA).',
     searchAria: 'Pesquisar seleções para o seu palpite',
+    selectHint: 'Selecione a seleção que você acha que vai ganhar.',
     submit: 'Votar',
     noteLine1:
       'Você pode votar uma vez por fase conforme o torneio avança ({progression}), e o último voto de cada usuário é refletido no palpite do público.',
