@@ -301,6 +301,7 @@ export const zh: Dictionary = {
     sectionAria: '为大家的预测投票',
     title: '你的夺冠预测',
     closed: '所有阶段的投票均已截止。大家的预测将作为最终结果固定。',
+    closedSoon: '下一阶段的投票即将开始。',
     votedPrefix: '{stage}已投票：',
     locked: '（本阶段已锁定）',
     nextInfo: '进入{stage}后可再次投票。最新一票将反映到大家的预测中。',

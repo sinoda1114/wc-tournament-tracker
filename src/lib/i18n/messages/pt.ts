@@ -304,6 +304,7 @@ export const pt: Dictionary = {
     title: 'Seu palpite de campeão',
     closed:
       'A votação foi encerrada em todas as fases. O palpite do público fica fixado como resultado final.',
+    closedSoon: 'A votação da próxima fase começará em breve.',
     votedPrefix: 'Votado para {stage}: ',
     locked: '(bloqueado nesta fase)',
     nextInfo:
