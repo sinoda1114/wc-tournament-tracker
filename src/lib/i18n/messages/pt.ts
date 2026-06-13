@@ -343,6 +343,7 @@ export const pt: Dictionary = {
     dataNotice: 'Os dados publicados podem mudar sem aviso prévio.',
     unofficialNote: 'Site não oficial de fãs (sem afiliação com a FIFA)',
     dataAttribution: 'Parte dos dados das partidas é baseada na Wikipédia (CC BY-SA).',
+    reveal: 'Informações e aviso legal',
   },
   venue: {
     cardAria: '{stadium} venue info',

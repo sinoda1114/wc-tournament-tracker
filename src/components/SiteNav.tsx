@@ -94,6 +94,9 @@ function SiteNavInner({ labels, groupPhase }: SiteNavProps) {
         </Link>
       ))}
 
+      {/* お気に入り(⭐)。DOM 上は末尾だが、モバイルでは CSS order で最左へ寄せる
+          （本サービスのコンセプト＝ファボ重視・親指で届きやすい左端へ／PC は不可侵で末尾のまま）。
+          → globals.css の @media(max-width:767px) `.wc-site-nav .wc-nav-favorites{order:-1}` 参照。 */}
       <Link
         href="/favorites"
         className={`wc-nav-link wc-nav-favorites${isFavoritesActive ? ' is-active' : ''}${hasFavorites ? ' has-favorites' : ''}`}

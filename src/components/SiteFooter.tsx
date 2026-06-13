@@ -4,6 +4,7 @@ import { Container } from '@mantine/core';
 
 import type { Dictionary } from '@/lib/i18n/dictionary';
 
+import { FooterReveal } from './FooterReveal';
 import styles from './SiteFooter.module.css';
 
 /**
@@ -53,10 +54,11 @@ export function SiteFooter({ t }: { t: Dictionary['footer'] }) {
   return (
     <footer className={styles.footer}>
       <Container size="xl" py="md">
-        <div className={styles.inner}>
-          <p className={styles.brandTitle}>{t.brandTitle}</p>
+        <FooterReveal label={t.reveal}>
+          <div className={styles.inner}>
+            <p className={styles.brandTitle}>{t.brandTitle}</p>
 
-          <div className={styles.bottom}>
+            <div className={styles.bottom}>
             <div className={styles.left}>
               {leftItems.map((item, index) => (
                 <Fragment key={item.key}>
@@ -70,8 +72,9 @@ export function SiteFooter({ t }: { t: Dictionary['footer'] }) {
               ))}
             </div>
             <p className={styles.copyright}>{t.copyright}</p>
+            </div>
           </div>
-        </div>
+        </FooterReveal>
       </Container>
     </footer>
   );
