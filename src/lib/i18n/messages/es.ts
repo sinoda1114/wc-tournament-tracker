@@ -96,6 +96,8 @@ export const es: Dictionary = {
     admin: 'Admin',
     signIn: 'Iniciar sesión',
     skipToContent: 'Saltar al contenido principal',
+    menu: 'Menú',
+    settings: 'Ajustes',
   },
   language: {
     label: 'Idioma',

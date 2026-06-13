@@ -104,6 +104,8 @@ export const ja = {
     admin: '管理画面',
     signIn: 'ログイン',
     skipToContent: 'メインコンテンツへスキップ',
+    menu: 'メニュー',
+    settings: '設定',
   },
   language: {
     label: '言語',
