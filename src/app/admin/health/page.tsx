@@ -1,8 +1,8 @@
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { Anchor, Container, Stack, Text, Title } from '@mantine/core';
+import { Container, Stack, Text, Title } from '@mantine/core';
 
 import { AdminDataHealth } from '@/components/AdminDataHealth';
+import { AnchorLink } from '@/components/RouterLink';
 import { isAdmin } from '@/lib/auth';
 import { runDataAudit } from '@/lib/ingest/run-audit';
 
@@ -23,9 +23,9 @@ export default async function AdminHealthPage() {
     <Container size="xl" py="xl">
       <Stack gap="lg">
         <Stack gap={4}>
-          <Anchor component={Link} href="/admin" size="sm">
+          <AnchorLink href="/admin" size="sm">
             ← 試合結果更新（管理トップ）へ戻る
-          </Anchor>
+          </AnchorLink>
           <Title order={1}>データヘルス</Title>
           <Text c="dimmed">
             取込データの自動監査。鮮度（KO後も未終了＝未取込疑い）と整合（得点者とスコアの過不足）を検知します。
