@@ -1552,7 +1552,7 @@ a {
 
 .wc-match-event {
   display: grid;
-  grid-template-columns: 2.5rem 1.4rem 1fr auto;
+  grid-template-columns: 2.5rem 1.4rem 1fr;
   align-items: baseline;
   gap: 0.5rem;
 }
@@ -1595,11 +1595,11 @@ a {
   padding: 0.02rem 0.45rem;
 }
 
-.wc-match-event-team {
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: var(--wc-muted);
-  font-variant-numeric: tabular-nums;
+.wc-match-event-flag {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 0.35rem;
+  vertical-align: middle;
 }
 
 .wc-match-event-yellow_card .wc-match-event-kind {
