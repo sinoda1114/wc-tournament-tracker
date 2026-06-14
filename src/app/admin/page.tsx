@@ -1,5 +1,6 @@
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { Container, Divider, Stack, Text, Title } from '@mantine/core';
+import { Anchor, Container, Divider, Stack, Text, Title } from '@mantine/core';
 
 import { AdminMatchTable } from '@/components/AdminMatchTable';
 import { AdminVoteReset } from '@/components/AdminVoteReset';
@@ -22,6 +23,9 @@ export default async function AdminPage() {
         <Stack gap={4}>
           <Title order={1}>試合結果更新</Title>
           <Text c="dimmed">スコアと勝者を保存すると、次の試合へ自動反映されます。</Text>
+          <Anchor component={Link} href="/admin/health" size="sm">
+            → データヘルス（取込の自動監査）
+          </Anchor>
         </Stack>
 
         <AdminMatchTable matches={matches} />
