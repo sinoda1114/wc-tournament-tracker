@@ -42,6 +42,27 @@ async function recordMigration(name: string) {
   });
 }
 
+/**
+ * 1 マイグレーションファイルを「全文 + 適用記録」を 1 トランザクションとして原子適用する。
+ *
+ * libSQL の `batch(stmts, 'write')` は配列全体を 1 トランザクションで実行し、
+ * 1 文でも失敗すると全体をロールバックする（DDL も SQLite/libSQL ではトランザクショナルに
+ * 巻き戻る）。テーブル再作成系（CREATE NEW → INSERT SELECT → DROP OLD → RENAME → 子テーブル復元）
+ * のように複数 DDL/DML が連鎖するマイグレーションでも、途中失敗でスキーマが半壊しない。
+ *
+ * `INSERT INTO _migrations ...` も同一 batch に含めることで「適用」と「適用済み記録」を
+ * 不可分にする（適用は成功したのに記録だけ漏れる/その逆を防ぐ）。
+ */
+export async function applyMigrationAtomically(file: string, statements: string[]) {
+  await getDb().batch(
+    [
+      ...statements,
+      { sql: 'INSERT INTO _migrations (name) VALUES (?)', args: [file] },
+    ],
+    'write',
+  );
+}
+
 async function migrate() {
   await ensureMigrationsTable();
 
@@ -76,19 +97,27 @@ async function migrate() {
       .map((statement) => statement.trim())
       .filter(Boolean);
 
-    for (const statement of statements) {
-      await getDb().execute(statement);
-    }
-
-    await recordMigration(file);
+    // 各マイグレーションを 1 トランザクションで原子適用する。
+    // 途中で失敗してもスキーマ/データは適用前へ巻き戻り、半壊状態を残さない。
+    await applyMigrationAtomically(file, statements);
     console.log(`Executed ${file}`);
   }
 
   console.log('Migration completed');
 }
 
-migrate().catch((error: unknown) => {
-  console.error('Migration failed');
-  console.error(error);
-  process.exitCode = 1;
-});
+// 直接実行（npm run db:migrate / tsx scripts/migrate.ts）のときだけ走らせる。
+// テストから applyMigrationAtomically を import しても本番 env への適用が
+// 発火しないようにエントリポイントをガードする。
+// 相対パス起動（tsx ./scripts/migrate.ts 等）でも判定が外れないよう、
+// 双方を resolve() して絶対パスで比較する。
+const entryPath = process.argv[1] ? resolve(process.argv[1]) : '';
+const isDirectRun = entryPath === resolve(fileURLToPath(import.meta.url));
+
+if (isDirectRun) {
+  migrate().catch((error: unknown) => {
+    console.error('Migration failed');
+    console.error(error);
+    process.exitCode = 1;
+  });
+}
