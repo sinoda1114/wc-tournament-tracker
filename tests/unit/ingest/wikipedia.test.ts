@@ -118,6 +118,57 @@ describe('parseWikipediaGroupArticle（得点欄の注記・複数分の合成�
   });
 });
 
+describe('parseWikipediaGroupArticle（先頭 * を省いた単独得点行: T-76 回帰）', () => {
+  // 真因: 得点が1件のとき編集者が箇条書き記号 * を省くことがあり、`*` 必須の旧パーサが
+  // その行を丸ごと捨てて得点者を取りこぼした（例: 韓国 2-1 チェコ の Krejčí 59'）。
+  // 実記事に倣い、分の後ろにアポストロフィ（59'）が付く揺れも含めて再現する。
+  const korCze = [
+    '{{#invoke:football box|main',
+    '|team1={{#invoke:flag|fb-rt|KOR}}',
+    '|team2={{#invoke:flag|fb|CZE}}',
+    '|goals1=',
+    "*[[Hwang In-beom]] 36'",
+    "*[[Son Heung-min]] 67'",
+    '|goals2=',
+    // ★ 先頭 * 無し・分末アポストロフィ付きの単独得点行（取りこぼしの再現）。
+    "[[Ladislav Krejčí (footballer, born 1999)|Krejčí]] 59'",
+    '}}',
+  ].join('\n');
+
+  it('先頭 * の無い単独得点行からも得点者を抽出する（CZE: Krejčí 59）', () => {
+    const matches = parseWikipediaGroupArticle(korCze);
+    expect(matches.length).toBe(1);
+    const goals = byType(matches[0].events, 'goal');
+    expect(goals.map((g) => ({ player: g.playerName, minute: g.minute, team: g.teamCode }))).toEqual(
+      [
+        { player: 'Hwang In-beom', minute: 36, team: 'KOR' },
+        { player: 'Ladislav Krejčí', minute: 59, team: 'CZE' },
+        { player: 'Son Heung-min', minute: 67, team: 'KOR' },
+      ],
+    );
+  });
+
+  it('リンクのみ・分の無い行は得点として拾わない（over-capture 防止）', () => {
+    // goals2 にリンクはあるが分（\d+'）を持たない注釈行を混ぜる。これは得点ではない。
+    const withNoise = [
+      '{{#invoke:football box|main',
+      '|team1={{#invoke:flag|fb-rt|KOR}}',
+      '|team2={{#invoke:flag|fb|CZE}}',
+      '|goals1=',
+      "[[Hwang In-beom]] 36'",
+      '|goals2=',
+      // 分を持たない（リンクだけの）行 → 得点として拾わない。
+      '[[Ladislav Krejčí (footballer, born 1999)|Krejčí]]',
+      '}}',
+    ].join('\n');
+    const matches = parseWikipediaGroupArticle(withNoise);
+    const goals = byType(matches[0].events, 'goal');
+    expect(goals.map((g) => `${g.teamCode}:${g.playerName}:${g.minute}`)).toEqual([
+      'KOR:Hwang In-beom:36',
+    ]);
+  });
+});
+
 describe('createWikipediaMatchEventProvider', () => {
   const baseContext: MatchEventContext = {
     externalEventId: '100',
