@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation';
 import { Badge, Container, Group, Stack, Text, Title } from '@mantine/core';
 
 import { JsonLd } from '@/components/JsonLd';
+import { MatchDataBadge } from '@/components/MatchDataBadge';
 import { MatchEvents } from '@/components/MatchEvents';
 import { MatchVersus } from '@/components/MatchVersus';
 import { VenueInfoCard } from '@/components/VenueInfoCard';
@@ -22,6 +23,7 @@ import { ogLocale } from '@/lib/i18n/alternates';
 import { getDictionary } from '@/lib/i18n/dictionary';
 import { resolveLocale, resolveTimeZone } from '@/lib/i18n/server';
 import { localizedTeamName } from '@/lib/i18n/team-name';
+import { deriveMatchDataState } from '@/lib/match-data-state';
 import { buildBreadcrumbList, buildSportsEvent } from '@/lib/structured-data';
 import { tzOffset } from '@/lib/timezone';
 
@@ -117,6 +119,20 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
   const venueSummary = await getVenueMatchSummary(match.venueId);
   const events = await getMatchEvents(match.id);
 
+  // データの正直さ（T-82④）: 詳細はイベント件数を持つので得点者不足（provisional）まで判定する。
+  const goalEventCount = events.filter(
+    (e) => e.type === 'goal' || e.type === 'penalty_goal' || e.type === 'own_goal',
+  ).length;
+  const dataState = deriveMatchDataState({
+    status: match.status,
+    stage: match.stage,
+    kickoffAt: match.kickoffAt,
+    matchDate: match.matchDate,
+    homeScore: match.homeScore,
+    awayScore: match.awayScore,
+    goalEventCount,
+  });
+
   // 構造化データ: 試合 = SportsEvent、ナビ階層 = BreadcrumbList。
   const baseUrl = getSiteUrl();
   const jsonLd = [
@@ -146,6 +162,7 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
                 {dict.match.status[match.status]}
               </Badge>
             ) : null}
+            <MatchDataBadge state={dataState} />
           </Group>
         </Stack>
 

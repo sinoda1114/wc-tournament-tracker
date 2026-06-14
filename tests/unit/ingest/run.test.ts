@@ -26,7 +26,7 @@ vi.mock('@/db/match-events', () => ({
     replaceAutoMatchEvents(matchId, events),
 }));
 
-import type { ResultProvider } from '@/lib/ingest/types';
+import type { ResultFallbackProvider, ResultProvider } from '@/lib/ingest/types';
 import { runIngestion } from '@/lib/ingest/run';
 
 /** mex vs rsa が「我々の試合 id=1（両チーム確定・未確定スコア）」に突き合う最小データ。 */
@@ -254,5 +254,99 @@ describe('runIngestion', () => {
     };
     await expect(runIngestion(failing)).rejects.toThrow('network down');
     expect(updateMatchResult).not.toHaveBeenCalled();
+  });
+
+  describe('結果フォールバック（T-82③・Wikipedia 補完）', () => {
+    // 主ソースが未掲載の過去グループ試合を、fetchFallbackResults で確定できることを検証する。
+    function providerWithFallback(
+      results: unknown[],
+      fallback: unknown[],
+      spy?: (targets: unknown[]) => void,
+    ): ResultProvider & ResultFallbackProvider {
+      return {
+        fetchResults: async () => results as never,
+        fetchFallbackResults: async (targets) => {
+          spy?.(targets);
+          return fallback as never;
+        },
+      };
+    }
+
+    it('主ソースが未掲載でも、未確定の過去試合を Wikipedia 由来結果で確定する', async () => {
+      listTournamentMatches.mockResolvedValue([matchRow(1, 'mex', 'rsa')]);
+      listAllTeams.mockResolvedValue(TEAMS);
+      updateMatchResult.mockResolvedValue(undefined);
+
+      const summary = await runIngestion(
+        providerWithFallback(
+          [], // TheSportsDB は #1 を持っていない
+          [{ dateEvent: '2026-06-11', homeName: 'MEX', awayName: 'RSA', homeScore: 2, awayScore: 0, finished: true }],
+        ),
+      );
+
+      expect(summary.fallbackUpdated).toBe(1);
+      expect(summary.updated).toBe(1);
+      expect(summary.matchIds).toEqual([1]);
+      expect(updateMatchResult).toHaveBeenCalledWith(
+        expect.objectContaining({ matchId: 1, homeScore: 2, awayScore: 0, status: 'finished' }),
+      );
+    });
+
+    it('主ソースが確定済みの試合はフォールバック対象に含めない（主ソース優先）', async () => {
+      listTournamentMatches.mockResolvedValue([matchRow(1, 'mex', 'rsa')]);
+      listAllTeams.mockResolvedValue(TEAMS);
+      updateMatchResult.mockResolvedValue(undefined);
+
+      let fallbackCalled = false;
+      const summary = await runIngestion(
+        providerWithFallback(
+          [{ dateEvent: '2026-06-11', homeName: 'Mexico', awayName: 'South Africa', homeScore: 2, awayScore: 0, finished: true }],
+          [],
+          () => {
+            fallbackCalled = true;
+          },
+        ),
+      );
+
+      // #1 は主ソースで確定済み → 対象ゼロ。provider は呼ばない（上書きしない＆無駄フェッチ回避）。
+      expect(fallbackCalled).toBe(false);
+      expect(summary.fallbackUpdated).toBe(0);
+      expect(summary.updated).toBe(1);
+    });
+
+    it('対象外（未来日）の試合は provider が結果を返しても適用しない（書き込み経路の防御）', async () => {
+      const future = { ...matchRow(2, 'bra', 'mar'), matchDate: '2999-12-31' };
+      listTournamentMatches.mockResolvedValue([matchRow(1, 'mex', 'rsa'), future]);
+      listAllTeams.mockResolvedValue(TEAMS);
+      updateMatchResult.mockResolvedValue(undefined);
+
+      const summary = await runIngestion(
+        providerWithFallback(
+          [],
+          [
+            { dateEvent: '2026-06-11', homeName: 'MEX', awayName: 'RSA', homeScore: 1, awayScore: 0, finished: true },
+            // 未来日の #2 は targets 外。provider が返しても適用されないこと。
+            { dateEvent: '2999-12-31', homeName: 'BRA', awayName: 'MAR', homeScore: 9, awayScore: 9, finished: true },
+          ],
+        ),
+      );
+
+      expect(summary.fallbackUpdated).toBe(1);
+      expect(summary.matchIds).toEqual([1]);
+      expect(updateMatchResult).toHaveBeenCalledWith(
+        expect.objectContaining({ matchId: 1, homeScore: 1, awayScore: 0 }),
+      );
+      expect(updateMatchResult).not.toHaveBeenCalledWith(expect.objectContaining({ matchId: 2 }));
+    });
+
+    it('fetchFallbackResults 非対応の provider でも従来どおり動く（fallbackUpdated=0）', async () => {
+      listTournamentMatches.mockResolvedValue([matchRow(1, 'mex', 'rsa')]);
+      listAllTeams.mockResolvedValue(TEAMS);
+
+      const summary = await runIngestion(provider([]));
+
+      expect(summary.fallbackUpdated).toBe(0);
+      expect(summary.updated).toBe(0);
+    });
   });
 });
