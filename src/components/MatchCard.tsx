@@ -12,9 +12,15 @@ import { MatchVersus } from './MatchVersus';
 
 type MatchCardProps = {
   match: MatchDetail;
+  /**
+   * グループ／ステージのコンテキストラベル（例: グループD・ラウンド32）を表示するか。
+   * デフォルトは true（フラット表示や日付フィルタなどグループ混在の文脈では必要）。
+   * グループ別ビューのように見出しで所属が自明な場合のみ false を渡して冗長表示を抑止する。
+   */
+  showContextLabel?: boolean;
 };
 
-export function MatchCard({ match }: MatchCardProps) {
+export function MatchCard({ match, showContextLabel = true }: MatchCardProps) {
   const dict = useDictionary();
   const timeZone = useTimeZone();
   const kickoff = formatKickoff(match.kickoffAt, timeZone);
@@ -41,7 +47,7 @@ export function MatchCard({ match }: MatchCardProps) {
           <Text size="xs" c="dimmed" fw={600} component="span">
             #{match.id}
           </Text>
-          {groupOrStageLabel ? (
+          {showContextLabel && groupOrStageLabel ? (
             <Badge
               variant="light"
               color="gray"

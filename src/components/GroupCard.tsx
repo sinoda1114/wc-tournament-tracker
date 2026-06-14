@@ -107,7 +107,11 @@ export function GroupCard({
             {t.noMatches}
           </Text>
         ) : (
-          <FilterableMatchList matches={matches} emptyText={t.favoriteNoMatches} />
+          <FilterableMatchList
+            matches={matches}
+            emptyText={t.favoriteNoMatches}
+            showContextLabel={false}
+          />
         )}
       </div>
     </section>

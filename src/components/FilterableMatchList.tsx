@@ -15,6 +15,12 @@ type FilterableMatchListProps = {
   emptyText?: string;
   /** 配列が空のときに何も描画したくない場合は true。 */
   hideWhenEmpty?: boolean;
+  /**
+   * 各カードのグループ／ステージのコンテキストラベルを表示するか。
+   * グループ別ビュー（見出しで所属が自明）では false を渡して冗長表示を抑止する。
+   * 既定は MatchCard 側の既定（true）に従う。
+   */
+  showContextLabel?: boolean;
 };
 
 /**
@@ -27,6 +33,7 @@ export function FilterableMatchList({
   matches,
   emptyText,
   hideWhenEmpty = false,
+  showContextLabel,
 }: FilterableMatchListProps) {
   const { filterOn, ready: filterReady } = useFavoriteFilter();
   const { favorites, ready: favReady } = useFavoriteTeams();
@@ -49,7 +56,11 @@ export function FilterableMatchList({
   return (
     <>
       {visible.map((match) => (
-        <MatchCard key={match.id} match={match} />
+        <MatchCard
+          key={match.id}
+          match={match}
+          showContextLabel={showContextLabel ?? true}
+        />
       ))}
     </>
   );
