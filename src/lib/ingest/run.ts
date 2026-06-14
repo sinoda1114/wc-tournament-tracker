@@ -2,7 +2,12 @@ import { replaceAutoMatchEvents } from '@/db/match-events';
 import { listAllTeams, listTournamentMatches, updateMatchResult } from '@/db/queries';
 import { resolveAndPersistRoundOf32 } from '@/db/queries/round-of-32';
 
-import { planMatchEventSyncs, planMatchUpdates, toAutoMatchEvents } from './reconcile';
+import {
+  planMatchEventSyncs,
+  planMatchUpdates,
+  toAutoMatchEvents,
+  type MatchEventSync,
+} from './reconcile';
 import type {
   FallbackResultTarget,
   MatchEventProvider,
@@ -99,6 +104,10 @@ export async function runIngestion(
   // Wikipedia から結果を導出して埋める。確定済みは対象に含めない＝主ソース優先＆冪等。
   // 失敗は隔離し（部分失敗は failures に集約）、取込全体は止めない。
   let fallbackUpdated = 0;
+  // フォールバックで確定した試合のイベント同期 context。主ソースの結果起点で計画される通常の
+  // イベント同期（planMatchEventSyncs）は TheSportsDB に無い試合を拾えないため、ここで明示的に
+  // 補う（=スコアだけ埋めて得点者が載らない、を防ぐ＝T-81 の主症状の完全解消）。
+  const fallbackEventSyncs: MatchEventSync[] = [];
   if (typeof provider.fetchFallbackResults === 'function') {
     try {
       const today = utcDateString(new Date());
@@ -107,6 +116,7 @@ export async function runIngestion(
       // 対象にした試合 id の集合。provider が targets 外の結果を返しても、ここに無い試合は
       // 適用しない（書き込み経路の防御: 主ソース優先・グループ限定を provider の善意に依存させない）。
       const targetMatchIds = new Set<number>();
+      const targetById = new Map<number, (typeof matches)[number]>();
       for (const m of matches) {
         // 対象: グループ・両チーム確定・未確定（finished でなく今回も更新していない）・過去/当日。
         if (m.stage !== 'group_stage' || !m.groupLetter) continue;
@@ -124,6 +134,7 @@ export async function runIngestion(
           matchDate: m.matchDate,
         });
         targetMatchIds.add(m.id);
+        targetById.set(m.id, m);
       }
 
       if (targets.length > 0) {
@@ -137,6 +148,20 @@ export async function runIngestion(
             await updateMatchResult(update);
             matchIds.push(update.matchId);
             fallbackUpdated += 1;
+            // 確定できた試合は得点者イベントも Wikipedia から同期する（後段のイベント同期に合流）。
+            const m = targetById.get(update.matchId);
+            if (m && m.homeTeamId && m.awayTeamId && m.groupLetter) {
+              fallbackEventSyncs.push({
+                matchId: m.id,
+                externalEventId: '', // Wikipedia は stage/group/code で特定するため未使用。
+                homeTeamId: m.homeTeamId,
+                awayTeamId: m.awayTeamId,
+                homeCode: fifaById.get(m.homeTeamId) ?? m.homeTeamId.toUpperCase(),
+                awayCode: fifaById.get(m.awayTeamId) ?? m.awayTeamId.toUpperCase(),
+                stage: m.stage,
+                groupLetter: m.groupLetter,
+              });
+            }
           } catch (error) {
             failures.push({
               matchId: update.matchId,
@@ -175,7 +200,11 @@ export async function runIngestion(
     failures: [],
   };
   if (typeof provider.fetchMatchEvents === 'function') {
-    const syncs = planMatchEventSyncs(results, matches, teams);
+    // 主ソース起点の同期計画 ＋ フォールバックで確定した試合（主ソースに無いので別途補う）。
+    // 重複（理論上は無いが防御的に）を matchId で排除する。
+    const planned = planMatchEventSyncs(results, matches, teams);
+    const plannedIds = new Set(planned.map((s) => s.matchId));
+    const syncs = [...planned, ...fallbackEventSyncs.filter((s) => !plannedIds.has(s.matchId))];
     events.planned = syncs.length;
     for (const sync of syncs) {
       try {

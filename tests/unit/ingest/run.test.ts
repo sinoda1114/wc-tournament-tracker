@@ -272,6 +272,39 @@ describe('runIngestion', () => {
       };
     }
 
+    it('フォールバックで確定した試合は得点者イベントも同期する（T-81: スコアだけ埋めて得点者欠落を防ぐ）', async () => {
+      listTournamentMatches.mockResolvedValue([matchRow(1, 'mex', 'rsa')]);
+      listAllTeams.mockResolvedValue(TEAMS);
+      updateMatchResult.mockResolvedValue(undefined);
+
+      // 主ソースは #1 を持たず（fetchResults 空）、fetchFallbackResults で確定。
+      // provider が fetchMatchEvents も持つ場合、確定した #1 の得点者も同期されること。
+      const provider = {
+        fetchResults: async () => [],
+        fetchFallbackResults: async () => [
+          { dateEvent: '2026-06-11', homeName: 'MEX', awayName: 'RSA', homeScore: 2, awayScore: 0, finished: true },
+        ],
+        fetchMatchEvents: async () => [
+          { type: 'goal', minute: 27, isHome: true, playerName: 'Scorer A', playerOut: null, externalId: 'wp-0' },
+          { type: 'goal', minute: 75, isHome: true, playerName: 'Scorer B', playerOut: null, externalId: 'wp-1' },
+        ],
+      };
+
+      const summary = await runIngestion(provider as never);
+
+      expect(summary.fallbackUpdated).toBe(1);
+      expect(summary.events.synced).toBe(1);
+      expect(summary.events.inserted).toBe(2);
+      // home(MEX) の得点として teamId=mex に解決して保存される。
+      expect(replaceAutoMatchEvents).toHaveBeenCalledWith(
+        1,
+        expect.arrayContaining([
+          expect.objectContaining({ playerName: 'Scorer A', teamId: 'mex', type: 'goal' }),
+          expect.objectContaining({ playerName: 'Scorer B', teamId: 'mex', type: 'goal' }),
+        ]),
+      );
+    });
+
     it('主ソースが未掲載でも、未確定の過去試合を Wikipedia 由来結果で確定する', async () => {
       listTournamentMatches.mockResolvedValue([matchRow(1, 'mex', 'rsa')]);
       listAllTeams.mockResolvedValue(TEAMS);
