@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { Anchor, Container, Divider, Stack, Text, Title } from '@mantine/core';
+import { Button, Container, Divider, Group, Stack, Text, Title } from '@mantine/core';
 
 import { AdminMatchTable } from '@/components/AdminMatchTable';
 import { AdminVoteReset } from '@/components/AdminVoteReset';
@@ -20,13 +20,16 @@ export default async function AdminPage() {
   return (
     <Container size="xl" py="xl">
       <Stack gap="lg">
-        <Stack gap={4}>
-          <Title order={1}>試合結果更新</Title>
-          <Text c="dimmed">スコアと勝者を保存すると、次の試合へ自動反映されます。</Text>
-          <Anchor component={Link} href="/admin/health" size="sm">
-            → データヘルス（取込の自動監査）
-          </Anchor>
-        </Stack>
+        <Group justify="space-between" align="flex-start" wrap="wrap" gap="sm">
+          <Stack gap={4}>
+            <Title order={1}>試合結果更新</Title>
+            <Text c="dimmed">スコアと勝者を保存すると、次の試合へ自動反映されます。</Text>
+          </Stack>
+          {/* データヘルス（T-82・取込の自動監査）への導線を上部に目立つボタンで配置。 */}
+          <Button component={Link} href="/admin/health" variant="light" leftSection="📊">
+            データヘルス（取込の自動監査）
+          </Button>
+        </Group>
 
         <AdminMatchTable matches={matches} />
 
