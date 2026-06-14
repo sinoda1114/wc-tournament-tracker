@@ -94,14 +94,20 @@ export type AuditConfig = {
  * - kickoffAt があればそれ + staleMs。
  * - 無ければ matchDate の「翌日0:00Z」+ staleMs（KO時刻不明の同日試合を誤検知しないよう一日まるごと猶予）。
  */
-function staleThresholdMs(match: AuditMatchInput, staleMs: number): number | null {
-  if (match.kickoffAt) {
-    const ko = Date.parse(match.kickoffAt);
+export function staleThresholdMs(
+  stage: string,
+  kickoffAt: string | null,
+  matchDate: string,
+  staleHours: number = DEFAULT_STALE_HOURS,
+): number | null {
+  const staleMs = effectiveStaleHours(stage, staleHours) * MS_PER_HOUR;
+  if (kickoffAt) {
+    const ko = Date.parse(kickoffAt);
     if (!Number.isNaN(ko)) return ko + staleMs;
   }
   // kickoffAt 欠落時の保守的フォールバック。matchDate は 'YYYY-MM-DD'（DB上はUTC日付）。
   // 「翌日0:00Z + 猶予」とし、現地夕方KOの同日試合を誤検知しない（検知が遅れる側に倒す）。
-  const dayStart = Date.parse(`${match.matchDate}T00:00:00Z`);
+  const dayStart = Date.parse(`${matchDate}T00:00:00Z`);
   if (!Number.isNaN(dayStart)) return dayStart + MS_PER_DAY + staleMs;
   return null;
 }
@@ -159,7 +165,7 @@ export function auditMatches(
     // --- 鮮度監査: 両チーム確定済みの未終了試合で KO しきい値を過ぎている ---
     if (m.status !== 'finished' && m.homeTeamId && m.awayTeamId) {
       const effHours = effectiveStaleHours(m.stage, staleHours);
-      const threshold = staleThresholdMs(m, effHours * MS_PER_HOUR);
+      const threshold = staleThresholdMs(m.stage, m.kickoffAt, m.matchDate, staleHours);
       if (threshold !== null && nowMs > threshold) {
         findings.push({
           matchId: m.id,

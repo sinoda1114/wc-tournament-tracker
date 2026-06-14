@@ -6,6 +6,7 @@ import { describe, expect, it } from 'vitest';
 import {
   createWikipediaMatchEventProvider,
   parseWikipediaGroupArticle,
+  wikiMatchToResult,
   withWikipediaEvents,
   type WikiMatch,
   type WikiMatchEvent,
@@ -82,6 +83,71 @@ describe('parseWikipediaGroupArticle（実 wikitext: 2026 FIFA World Cup Group A
     const minutes = mexRsa().events.map((e) => e.minute ?? Number.POSITIVE_INFINITY);
     const sorted = [...minutes].sort((a, b) => a - b);
     expect(minutes).toEqual(sorted);
+  });
+
+  it('score link から確定スコアを取り出す（T-82③・実施済みは N–N）', () => {
+    // MEX 2–0 RSA。score link の末尾セグメント "2–0" を採用する。
+    expect(mexRsa().score).toEqual({ team1: 2, team2: 0 });
+  });
+
+  it('未実施（score が "Match N" 等で N–N を持たない）試合は score=null', () => {
+    const matches = parseWikipediaGroupArticle(GROUP_A_WIKITEXT);
+    // フィクスチャには未実施扱い（score link 表示が "Match 28" 等）の試合が含まれる。
+    const unplayed = matches.filter((m) => m.score === null);
+    expect(unplayed.length).toBeGreaterThan(0);
+  });
+});
+
+describe('wikiMatchToResult（T-82③・WikiMatch → NormalizedResult）', () => {
+  const played: WikiMatch = {
+    team1Code: 'MEX',
+    team2Code: 'RSA',
+    score: { team1: 2, team2: 0 },
+    events: [],
+  };
+
+  it('記事の向き(team1=home)に一致すればスコアをそのまま割り当てる', () => {
+    const r = wikiMatchToResult(played, {
+      homeCode: 'MEX',
+      awayCode: 'RSA',
+      matchDate: '2026-06-11',
+    });
+    expect(r).toEqual({
+      dateEvent: '2026-06-11',
+      homeName: 'MEX',
+      awayName: 'RSA',
+      homeScore: 2,
+      awayScore: 0,
+      finished: true,
+      externalEventId: null,
+    });
+  });
+
+  it('我々の home/away が記事と逆向きならスコアを入れ替える', () => {
+    const r = wikiMatchToResult(played, {
+      homeCode: 'RSA',
+      awayCode: 'MEX',
+      matchDate: '2026-06-11',
+    });
+    expect(r).toMatchObject({ homeName: 'RSA', awayName: 'MEX', homeScore: 0, awayScore: 2 });
+  });
+
+  it('score が無ければ null（未確定を誤って finished にしない）', () => {
+    const r = wikiMatchToResult({ ...played, score: null }, {
+      homeCode: 'MEX',
+      awayCode: 'RSA',
+      matchDate: '2026-06-11',
+    });
+    expect(r).toBeNull();
+  });
+
+  it('対戦カードが一致しなければ null', () => {
+    const r = wikiMatchToResult(played, {
+      homeCode: 'BRA',
+      awayCode: 'ARG',
+      matchDate: '2026-06-11',
+    });
+    expect(r).toBeNull();
   });
 });
 

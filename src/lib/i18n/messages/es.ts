@@ -148,6 +148,10 @@ export const es: Dictionary = {
       in_progress: 'En vivo',
       finished: 'Finalizado',
     },
+    dataState: {
+      pending: 'Verificando',
+      provisional: 'Provisional',
+    },
     slot: {
       winner: 'Ganador #{n}',
       loser: 'Perdedor #{n}',

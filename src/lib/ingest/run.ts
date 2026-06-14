@@ -3,7 +3,12 @@ import { listAllTeams, listTournamentMatches, updateMatchResult } from '@/db/que
 import { resolveAndPersistRoundOf32 } from '@/db/queries/round-of-32';
 
 import { planMatchEventSyncs, planMatchUpdates, toAutoMatchEvents } from './reconcile';
-import type { MatchEventProvider, ResultProvider } from './types';
+import type {
+  FallbackResultTarget,
+  MatchEventProvider,
+  ResultFallbackProvider,
+  ResultProvider,
+} from './types';
 
 export type IngestionFailure = {
   /** 反映に失敗した試合 id。 */
@@ -41,9 +46,16 @@ export type IngestionSummary = {
   failures: IngestionFailure[];
   /** グループ順位確定で R32 入口（home/away_team_id）を埋めたスロット数。 */
   roundOf32Updated: number;
+  /** 補完ソース（Wikipedia）で確定できた試合数（T-82③）。provider 非対応時は 0。 */
+  fallbackUpdated: number;
   /** イベントタイムライン同期の集約。provider 非対応時は全て 0。 */
   events: MatchEventsSummary;
 };
+
+/** 'YYYY-MM-DD'（UTC）を返す。フォールバック対象（過去/当日の試合）の判定に使う。 */
+function utcDateString(date: Date): string {
+  return date.toISOString().slice(0, 10);
+}
 
 /**
  * 取得元 → 正規化 → 突き合わせ → DB反映 を一括実行する。
@@ -58,7 +70,7 @@ export type IngestionSummary = {
  * - fetchResults 自体（ネットワーク失敗）は呼び出し側に投げて 500 とし、cron の再試行に委ねる。
  */
 export async function runIngestion(
-  provider: ResultProvider & Partial<MatchEventProvider>,
+  provider: ResultProvider & Partial<MatchEventProvider> & Partial<ResultFallbackProvider>,
 ): Promise<IngestionSummary> {
   const [results, matches, teams] = await Promise.all([
     provider.fetchResults(),
@@ -79,6 +91,62 @@ export async function runIngestion(
         matchId: update.matchId,
         message: error instanceof Error ? error.message : 'update failed',
       });
+    }
+  }
+
+  // 結果フォールバック（T-82③・任意機能）。
+  // 主ソース（TheSportsDB）が確定できなかった「過去/当日のグループ試合」だけを対象に、
+  // Wikipedia から結果を導出して埋める。確定済みは対象に含めない＝主ソース優先＆冪等。
+  // 失敗は隔離し（部分失敗は failures に集約）、取込全体は止めない。
+  let fallbackUpdated = 0;
+  if (typeof provider.fetchFallbackResults === 'function') {
+    try {
+      const today = utcDateString(new Date());
+      const fifaById = new Map(teams.map((t) => [t.id, t.fifaCode.toUpperCase()]));
+      const targets: FallbackResultTarget[] = [];
+      // 対象にした試合 id の集合。provider が targets 外の結果を返しても、ここに無い試合は
+      // 適用しない（書き込み経路の防御: 主ソース優先・グループ限定を provider の善意に依存させない）。
+      const targetMatchIds = new Set<number>();
+      for (const m of matches) {
+        // 対象: グループ・両チーム確定・未確定（finished でなく今回も更新していない）・過去/当日。
+        if (m.stage !== 'group_stage' || !m.groupLetter) continue;
+        if (!m.homeTeamId || !m.awayTeamId) continue;
+        if (m.status === 'finished' || matchIds.includes(m.id)) continue;
+        if (m.matchDate > today) continue;
+        const homeCode = fifaById.get(m.homeTeamId);
+        const awayCode = fifaById.get(m.awayTeamId);
+        if (!homeCode || !awayCode) continue;
+        targets.push({
+          stage: m.stage,
+          groupLetter: m.groupLetter,
+          homeCode,
+          awayCode,
+          matchDate: m.matchDate,
+        });
+        targetMatchIds.add(m.id);
+      }
+
+      if (targets.length > 0) {
+        const fallbackResults = await provider.fetchFallbackResults(targets);
+        // 対象 id 内の更新だけを適用する（targets 外の試合は触らない）。
+        const fallbackUpdates = planMatchUpdates(fallbackResults, matches, teams).filter((u) =>
+          targetMatchIds.has(u.matchId),
+        );
+        for (const update of fallbackUpdates) {
+          try {
+            await updateMatchResult(update);
+            matchIds.push(update.matchId);
+            fallbackUpdated += 1;
+          } catch (error) {
+            failures.push({
+              matchId: update.matchId,
+              message: error instanceof Error ? error.message : 'fallback update failed',
+            });
+          }
+        }
+      }
+    } catch (error) {
+      console.error('[ingest] 結果フォールバックに失敗', error);
     }
   }
 
@@ -138,6 +206,7 @@ export async function runIngestion(
     matchIds,
     failures,
     roundOf32Updated,
+    fallbackUpdated,
     events,
   };
 }

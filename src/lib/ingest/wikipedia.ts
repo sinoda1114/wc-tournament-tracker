@@ -1,9 +1,12 @@
 import type { MatchEventType } from '@/db/match-events';
 
 import type {
+  FallbackResultTarget,
   MatchEventContext,
   MatchEventProvider,
   NormalizedMatchEvent,
+  NormalizedResult,
+  ResultFallbackProvider,
   ResultProvider,
 } from './types';
 
@@ -33,12 +36,17 @@ export type WikiMatchEvent = {
   playerOut: string | null;
 };
 
+/** football box の `score` パラメータから得た確定スコア（team1/team2 の向き）。 */
+export type WikiMatchScore = { team1: number; team2: number };
+
 /** 記事内の1試合（football box ＋ 両チームのラインナップ）の抽出結果。 */
 export type WikiMatch = {
   /** box の team1（=ホーム）の FIFAコード（大文字）。 */
   team1Code: string;
   /** box の team2（=アウェイ）の FIFAコード（大文字）。 */
   team2Code: string;
+  /** football box の `score`（"2–1" 等）。未実施/未記入なら null（=finished 判定にも使う）。 */
+  score: WikiMatchScore | null;
   events: WikiMatchEvent[];
 };
 
@@ -107,6 +115,21 @@ function parseTemplateParams(block: string): Record<string, string> {
     params[key] = seg.slice(eq + 1).trim();
   }
   return params;
+}
+
+/**
+ * football box の `score`（"2–1" / "0-0" / "1 – 1" 等）から確定スコアを取り出す。
+ * 区切りは en/em ダッシュとハイフンを許容。未実施（"v" / 空）や数値2つを取れない場合は null。
+ * null は「未確定（=finished でない）」として扱う（0-0 と未実施を score の有無で区別する）。
+ */
+function parseScore(value: string | undefined): WikiMatchScore | null {
+  if (!value) return null;
+  // 実データは `{{score link|<anchor>|2–0}}` の形で、表示スコアは末尾セグメントに来る。
+  // anchor 側の誤マッチを避けるため「最後の N–N」を採用する。未実施は `|Match 28}}` で N–N 無し→null。
+  const matches = [...value.matchAll(/(\d+)\s*[–—-]\s*(\d+)/g)];
+  const last = matches[matches.length - 1];
+  if (!last) return null;
+  return { team1: Number(last[1]), team2: Number(last[2]) };
 }
 
 /** `{{#invoke:flag|fb-rt|MEX}}` 等から3文字コードを取り出す（大文字）。無ければ null。 */
@@ -300,6 +323,8 @@ export function parseWikipediaGroupArticle(wikitext: string): WikiMatch[] {
     const team2Code = extractFlagCode(params.team2 ?? '');
     if (!team1Code || !team2Code) continue;
 
+    const score = parseScore(params.score);
+
     const events: WikiMatchEvent[] = [];
     if (params.goals1) events.push(...parseGoals(params.goals1, team1Code));
     if (params.goals2) events.push(...parseGoals(params.goals2, team2Code));
@@ -311,9 +336,46 @@ export function parseWikipediaGroupArticle(wikitext: string): WikiMatch[] {
     if (tables[0]) events.push(...parseLineupCardsAndSubs(tables[0], team1Code));
     if (tables[1]) events.push(...parseLineupCardsAndSubs(tables[1], team2Code));
 
-    matches.push({ team1Code, team2Code, events: sortByMinute(events) });
+    matches.push({ team1Code, team2Code, score, events: sortByMinute(events) });
   }
   return matches;
+}
+
+/**
+ * WikiMatch を、我々の home/away の向きに合わせた NormalizedResult に変換する純関数（T-82③）。
+ * - `score` が無い（未実施/未記入）なら null（=フォールバック対象にしない＝誤確定を防ぐ）。
+ * - 記事の team1/team2 と target の home/away の対応が取れない場合も null。
+ * - finished は score がある＝試合終了とみなす（Wikipedia の football box は終了後に score が入る）。
+ */
+export function wikiMatchToResult(
+  match: WikiMatch,
+  target: { homeCode: string; awayCode: string; matchDate: string },
+): NormalizedResult | null {
+  if (!match.score) return null;
+  const home = target.homeCode.toUpperCase();
+  const away = target.awayCode.toUpperCase();
+
+  let homeScore: number;
+  let awayScore: number;
+  if (match.team1Code === home && match.team2Code === away) {
+    homeScore = match.score.team1;
+    awayScore = match.score.team2;
+  } else if (match.team1Code === away && match.team2Code === home) {
+    homeScore = match.score.team2;
+    awayScore = match.score.team1;
+  } else {
+    return null;
+  }
+
+  return {
+    dateEvent: target.matchDate,
+    homeName: home,
+    awayName: away,
+    homeScore,
+    awayScore,
+    finished: true,
+    externalEventId: null,
+  };
 }
 
 /**
@@ -379,7 +441,7 @@ async function defaultFetchWikitext(articleTitle: string): Promise<string | null
  */
 export function createWikipediaMatchEventProvider(
   options: WikipediaProviderOptions = {},
-): MatchEventProvider {
+): MatchEventProvider & ResultFallbackProvider {
   const fetchWikitext = options.fetchWikitext ?? defaultFetchWikitext;
   // グループ文字 → 解析済み試合一覧（run 内キャッシュ。同グループの複数試合で再フェッチしない）。
   const cache = new Map<string, WikiMatch[]>();
@@ -420,6 +482,32 @@ export function createWikipediaMatchEventProvider(
         externalId: `wp-${index}`,
       }));
     },
+
+    async fetchFallbackResults(targets: FallbackResultTarget[]): Promise<NormalizedResult[]> {
+      // グループ記事キャッシュ（getGroupMatches）を fetchMatchEvents と共有するため、
+      // イベント同期と同じ run 内では追加フェッチが発生しない（同グループは1回だけ取得）。
+      const results: NormalizedResult[] = [];
+      for (const t of targets) {
+        if (t.stage !== 'group_stage' || !t.groupLetter) continue;
+        try {
+          const groupMatches = await getGroupMatches(t.groupLetter.toUpperCase());
+          const home = t.homeCode.toUpperCase();
+          const away = t.awayCode.toUpperCase();
+          const found = groupMatches.find(
+            (m) =>
+              (m.team1Code === home && m.team2Code === away) ||
+              (m.team1Code === away && m.team2Code === home),
+          );
+          if (!found) continue;
+          const result = wikiMatchToResult(found, t);
+          if (result) results.push(result);
+        } catch (error) {
+          // 1グループの取得失敗で全フォールバックを止めない（他グループは継続）。
+          console.error('[ingest] Wikipedia fallback result failed', t.groupLetter, error);
+        }
+      }
+      return results;
+    },
   };
 }
 
@@ -431,8 +519,8 @@ export function createWikipediaMatchEventProvider(
  */
 export function withWikipediaEvents(
   base: ResultProvider & MatchEventProvider,
-  wiki: MatchEventProvider,
-): ResultProvider & MatchEventProvider {
+  wiki: MatchEventProvider & ResultFallbackProvider,
+): ResultProvider & MatchEventProvider & ResultFallbackProvider {
   return {
     fetchResults: () => base.fetchResults(),
     async fetchMatchEvents(context: MatchEventContext): Promise<NormalizedMatchEvent[]> {
@@ -445,5 +533,9 @@ export function withWikipediaEvents(
       }
       return base.fetchMatchEvents(context);
     },
+    // 結果フォールバック（T-82③）は Wikipedia に委譲する。base（TheSportsDB）が確定できなかった
+    // 試合だけを run 層が targets として渡すため、主ソース優先は保たれる。
+    fetchFallbackResults: (targets: FallbackResultTarget[]): Promise<NormalizedResult[]> =>
+      wiki.fetchFallbackResults(targets),
   };
 }
