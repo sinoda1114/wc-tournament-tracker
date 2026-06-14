@@ -4,9 +4,9 @@ import type { Dictionary } from '@/lib/i18n/dictionary';
 
 /** 種別ごとの簡易マーカー（追加アイコン依存を避け絵文字/記号で表現）。 */
 const TYPE_MARK: Record<MatchEventType, string> = {
-  goal: '⚽',
-  own_goal: '⚽',
-  penalty_goal: '⚽',
+  goal: '\u{26BD}\u{FE0F}',
+  own_goal: '\u{26BD}\u{FE0F}',
+  penalty_goal: '\u{26BD}\u{FE0F}',
   yellow_card: '\u{1F7E8}',
   red_card: '\u{1F7E5}',
   substitution: '⇄',
