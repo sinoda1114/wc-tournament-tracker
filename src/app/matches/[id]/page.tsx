@@ -177,7 +177,7 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
           <MatchVersus match={match} nameMode="full" size="md" />
         </Stack>
 
-        <MatchEvents events={events} match={match} dict={dict} />
+        <MatchEvents events={events} match={match} dict={dict} locale={locale} />
 
         <VenueInfoCard venue={match.venue} summary={venueSummary} locale={locale} dict={dict} />
 
