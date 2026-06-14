@@ -135,18 +135,25 @@ function cleanPlayerName(linkInner: string): string {
  * football box の `goals1`/`goals2` 値から得点イベントを取り出す。
  * 各行は `*[[Target|Display]] 9` 形式で、1行に複数分（`23, 45+2 (pen.)`）や
  * `(pen.)`/`(o.g.)` 注記を持つことがある。注記で goal/penalty_goal/own_goal を判定する。
+ *
+ * 先頭の箇条書き記号 `*` は必須としない（T-76）。得点が1件のとき編集者が `*` を省く
+ * ことがあり（例: 韓国 2-1 チェコ の `[[…Krejčí]] 59'`）、`*` 必須の旧実装はその行を
+ * 丸ごと捨てて得点者を取りこぼした。over-capture を避けるため、対象とするのは
+ * 「`[[…]]` リンクを含み、かつリンク以降に分表記（`59` / `45+2` 等）を持つ行」に限る。
+ * 分末のアポストロフィ（`59'`）はトークン正規表現が数字部のみ拾うため問題ない。
  */
 function parseGoals(value: string, teamCode: string): WikiMatchEvent[] {
   const events: WikiMatchEvent[] = [];
   for (const rawLine of value.split('\n')) {
     const line = rawLine.trim();
-    if (!line.startsWith('*')) continue;
+    if (!line) continue;
     const linkInner = firstWikiLinkInner(line);
     if (!linkInner) continue;
     const playerName = cleanPlayerName(linkInner);
     if (!playerName) continue;
 
-    // リンク以降（分・注記）だけを対象にする。
+    // リンク以降（分・注記）だけを対象にする。リンクだけで分の無い行（注釈等）は
+    // 1件もマッチせず、得点として拾わない（保守的: 誤検出を避ける）。
     const after = line.slice(line.indexOf(']]') + 2);
     const tokenRe = /(\d+(?:\+\d+)?)\s*(?:\(([^)]*)\))?/g;
     let match: RegExpExecArray | null;
