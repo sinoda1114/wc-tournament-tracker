@@ -139,8 +139,9 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
     const jaByNumber = (squad: Awaited<ReturnType<typeof getTeamSquad>>): Map<number, string> => {
       const map = new Map<number, string>();
       squad?.players.forEach((p) => {
+        if (p.number == null || !p.nameJa) return;
         const n = Number(p.number);
-        if (Number.isFinite(n) && p.nameJa) map.set(n, p.nameJa);
+        if (Number.isFinite(n)) map.set(n, p.nameJa);
       });
       return map;
     };

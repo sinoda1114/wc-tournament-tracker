@@ -31,6 +31,10 @@ function wikiTeamName(fifaCode: string | null | undefined, nameEn: string): stri
 const WIKI_USER_AGENT = 'MatchFav/1.0 (https://matchfav.com; info@matchfav.com)';
 /** 試合スタメンは変動が少ないため長めにキャッシュ（秒）。 */
 const REVALIDATE_SECONDS = 3600;
+/** Wikipedia 応答遅延で SSR がぶら下がるのを防ぐ取得タイムアウト（ms）。超過時は throw → 呼び出し側で null。 */
+const WIKI_FETCH_TIMEOUT_MS = 8000;
+/** 次の試合見出しが見つからない場合に切り出すセクションの上限文字数（1試合分の実測は概ね 5〜10KB）。 */
+const MAX_SECTION_CHARS = 20_000;
 
 export type LineupPlayer = {
   /** Wikipedia のポジション略号（GK/RB/CB/LB/DM/CM/RM/LM/AM/RW/LW/RF/CF/LF など）。 */
@@ -60,6 +64,7 @@ async function defaultFetchHtml(articleTitle: string): Promise<string | null> {
     `&prop=text&format=json&formatversion=2&redirects=1`;
   const res = await fetch(url, {
     headers: { Accept: 'application/json', 'User-Agent': WIKI_USER_AGENT },
+    signal: AbortSignal.timeout(WIKI_FETCH_TIMEOUT_MS),
     next: { revalidate: REVALIDATE_SECONDS },
   });
   if (!res.ok) return null;
@@ -103,15 +108,17 @@ function sliceSection(html: string, homeEn: string, awayEn: string): { section: 
 
   let reversed = false;
   let start = html.indexOf(forward);
+  let matchedLen = forward.length;
   if (start < 0) {
     start = html.indexOf(reverse);
+    matchedLen = reverse.length;
     reversed = true;
   }
   if (start < 0) return null;
 
   // 次の試合見出し（mw-heading3）までをセクションとする。
-  const next = html.indexOf('mw-heading3', start + forward.length);
-  const section = html.slice(start, next > 0 ? next : start + 20000);
+  const next = html.indexOf('mw-heading3', start + matchedLen);
+  const section = html.slice(start, next > 0 ? next : start + MAX_SECTION_CHARS);
   return { section, reversed };
 }
 

@@ -115,11 +115,11 @@ export function MatchPitch({ lineup, home, away }: MatchPitchProps) {
 
         {/* 上=ホーム: y(0=GK..1=前線) → 画面上 2%..48% */}
         {lineup.home.map((p) => (
-          <Chip key={`h-${p.number}-${p.name}`} player={p} topPct={2 + p.y * 46} color={HOME_COLOR} textColor={HOME_TEXT} />
+          <Chip key={`h-${p.posCode}-${p.number}-${p.name}`} player={p} topPct={2 + p.y * 46} color={HOME_COLOR} textColor={HOME_TEXT} />
         ))}
         {/* 下=アウェイ: 反転 98%..52% */}
         {lineup.away.map((p) => (
-          <Chip key={`a-${p.number}-${p.name}`} player={p} topPct={98 - p.y * 46} color={AWAY_COLOR} textColor={AWAY_TEXT} />
+          <Chip key={`a-${p.posCode}-${p.number}-${p.name}`} player={p} topPct={98 - p.y * 46} color={AWAY_COLOR} textColor={AWAY_TEXT} />
         ))}
       </div>
     </div>
