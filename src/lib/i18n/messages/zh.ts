@@ -306,7 +306,7 @@ export const zh: Dictionary = {
     locked: '（本阶段已锁定）',
     nextInfo: '进入{stage}后可再次投票。最新一票将反映到大家的预测中。',
     lastVote: '这是最后一次投票。',
-    currentPrefix: '当前为',
+    currentPrefix: '当前阶段为',
     currentSuffix: '。请选择1支你认为会夺冠的球队（可按日文名、英文名或FIFA代码搜索）。',
     searchAria: '搜索夺冠预测的球队',
     selectHint: '请选择你认为会夺冠的球队。',
