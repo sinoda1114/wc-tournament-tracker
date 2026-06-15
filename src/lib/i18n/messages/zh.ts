@@ -166,7 +166,7 @@ export const zh: Dictionary = {
     },
     weekdays: ['周日', '周一', '周二', '周三', '周四', '周五', '周六'],
     events: {
-      title: '比赛事件',
+      title: '比赛时间线',
       aria: '进球、红黄牌与换人',
       assist: '助攻',
       type: {

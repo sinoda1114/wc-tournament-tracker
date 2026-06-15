@@ -166,7 +166,7 @@ export const es: Dictionary = {
     },
     weekdays: ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'],
     events: {
-      title: 'Incidencias del partido',
+      title: 'Cronología',
       aria: 'Goles, tarjetas y sustituciones',
       assist: 'Asistencia',
       type: {
