@@ -363,11 +363,6 @@ export const en: Dictionary = {
   },
   matchDetail: {
     number: 'Match {n}',
-    highlight: {
-      heading: '🎬 Highlights',
-      cta: 'Watch official highlights',
-      officialLink: 'Official link',
-    },
   },
   timezone: {
     label: 'Time zone',

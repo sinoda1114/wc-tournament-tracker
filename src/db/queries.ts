@@ -92,12 +92,6 @@ export type Match = {
   status: MatchStatus;
   /** グループステージ試合のグループ識別子（A〜L）。決勝Tは null。 */
   groupLetter: string | null;
-  /** T-90: 自前で書いた短いハイライト要約（無ければ null）。 */
-  highlightSummary: string | null;
-  /** T-90: 公式ハイライトの外部URL（無ければ null）。 */
-  highlightUrl: string | null;
-  /** T-90: ハイライトリンク元の表示ラベル（例「FIFA公式」。無ければ null）。 */
-  highlightSourceLabel: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -124,9 +118,6 @@ type MatchRow = {
   winner_team_id: string | null;
   status: MatchStatus;
   group_letter: string | null;
-  highlight_summary: string | null;
-  highlight_url: string | null;
-  highlight_source_label: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -714,9 +705,6 @@ async function getMatch(matchId: number) {
         winner_team_id,
         status,
         group_letter,
-        highlight_summary,
-        highlight_url,
-        highlight_source_label,
         created_at,
         updated_at
       FROM matches
@@ -746,9 +734,6 @@ function matchDetailSql(suffix: string) {
       m.winner_team_id,
       m.status,
       m.group_letter,
-      m.highlight_summary,
-      m.highlight_url,
-      m.highlight_source_label,
       m.created_at,
       m.updated_at,
       v.stadium_name AS venue_stadium_name,
@@ -801,9 +786,6 @@ function mapMatch(row: MatchRow): Match {
     winnerTeamId: row.winner_team_id,
     status: row.status,
     groupLetter: row.group_letter,
-    highlightSummary: row.highlight_summary,
-    highlightUrl: row.highlight_url,
-    highlightSourceLabel: row.highlight_source_label,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };

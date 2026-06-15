@@ -362,11 +362,6 @@ export const zh: Dictionary = {
   },
   matchDetail: {
     number: '第{n}场比赛',
-    highlight: {
-      heading: '🎬 精彩集锦',
-      cta: '观看官方集锦',
-      officialLink: '官方链接',
-    },
   },
   timezone: {
     label: '时区',
