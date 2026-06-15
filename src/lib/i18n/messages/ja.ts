@@ -390,6 +390,12 @@ export const ja = {
   // 試合詳細ページ（/matches/[id]）。{n}=試合番号。
   matchDetail: {
     number: '第{n}試合',
+    // T-90: ハイライト欄（スタメンとタイムラインの間）。
+    highlight: {
+      heading: '🎬 ハイライト',
+      cta: '公式ハイライトを見る',
+      officialLink: '公式リンク',
+    },
   },
   timezone: {
     label: 'タイムゾーン',
