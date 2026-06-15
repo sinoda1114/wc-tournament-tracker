@@ -329,7 +329,7 @@ export const ja = {
     locked: '（このステージはロック中）',
     nextInfo: '{stage}に進むと、もう一度投票できます。最新の票が「みんなの予想」に反映されます。',
     lastVote: 'これが最後の投票です。',
-    currentPrefix: '現在は',
+    currentPrefix: '現在のステージは',
     currentSuffix: '。優勝すると思う国を1票選んでください（日本語名・英語名・FIFAコードで検索）。',
     searchAria: '優勝予想の国を検索',
     // 国を未選択の間だけ表示する控えめなガイド（T-69）。

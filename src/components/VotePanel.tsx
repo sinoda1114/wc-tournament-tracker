@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
-import { Anchor, Button, Text } from '@mantine/core';
+import { Anchor, Badge, Button, Text } from '@mantine/core';
 
 import { CountryFlag } from '@/components/CountryFlag';
 import { TeamSearchCombobox } from '@/components/TeamSearchCombobox';
@@ -117,7 +117,16 @@ export function VotePanel({
         <div className="wc-vote-form">
           <Text size="sm">
             {t.currentPrefix}
-            <strong>{stageLabel}</strong>
+            <Badge
+              component="span"
+              color="blue"
+              variant="filled"
+              size="sm"
+              mx={4}
+              style={{ verticalAlign: 'middle' }}
+            >
+              {stageLabel}
+            </Badge>
             {t.currentSuffix}
           </Text>
 
