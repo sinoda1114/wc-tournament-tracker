@@ -8,6 +8,9 @@ import {
 
 const NOW = new Date('2026-06-14T22:00:00Z');
 
+/** 交代あり扱いの試合 id 集合（finished_no_subs を発火させずスコア系の検証に集中するため）。 */
+const SUBBED = new Set([1]);
+
 function match(overrides: Partial<AuditMatchInput> = {}): AuditMatchInput {
   return {
     id: 1,
@@ -68,7 +71,7 @@ describe('auditMatches - 鮮度監査 (stale_unfinished)', () => {
       awayScore: 0,
     });
 
-    const report = auditMatches([m], [], { now: NOW, staleHours: 2.5 });
+    const report = auditMatches([m], [], { now: NOW, staleHours: 2.5 }, SUBBED);
 
     expect(report.findings).toHaveLength(0);
   });
@@ -156,7 +159,7 @@ describe('auditMatches - 整合監査 (scorers)', () => {
     const m = finished(2, 1); // 合計3
     const events = [goal({ teamId: 'AUS' })]; // 1件しかない
 
-    const report = auditMatches([m], events, { now: NOW });
+    const report = auditMatches([m], events, { now: NOW }, SUBBED);
 
     expect(report.findings).toHaveLength(1);
     expect(report.findings[0]).toMatchObject({
@@ -172,7 +175,7 @@ describe('auditMatches - 整合監査 (scorers)', () => {
     const m = finished(1, 0); // 合計1
     const events = [goal({ teamId: 'AUS' }), goal({ teamId: 'AUS' })]; // 2件
 
-    const report = auditMatches([m], events, { now: NOW });
+    const report = auditMatches([m], events, { now: NOW }, SUBBED);
 
     expect(report.findings).toHaveLength(1);
     expect(report.findings[0].kind).toBe('scorers_excess');
@@ -186,7 +189,7 @@ describe('auditMatches - 整合監査 (scorers)', () => {
       goal({ teamId: 'TUR' }),
     ];
 
-    const report = auditMatches([m], events, { now: NOW });
+    const report = auditMatches([m], events, { now: NOW }, SUBBED);
 
     expect(report.findings).toHaveLength(0);
   });
@@ -196,7 +199,7 @@ describe('auditMatches - 整合監査 (scorers)', () => {
     const m = finished(1, 0);
     const events = [goal({ type: 'own_goal', teamId: 'TUR' })];
 
-    const report = auditMatches([m], events, { now: NOW });
+    const report = auditMatches([m], events, { now: NOW }, SUBBED);
 
     expect(report.findings).toHaveLength(0);
   });
@@ -210,7 +213,7 @@ describe('auditMatches - 整合監査 (scorers)', () => {
       goal({ teamId: 'AUS' }),
     ];
 
-    const report = auditMatches([m], events, { now: NOW });
+    const report = auditMatches([m], events, { now: NOW }, SUBBED);
 
     expect(report.findings).toHaveLength(1);
     expect(report.findings[0].kind).toBe('scorers_side_mismatch');
@@ -221,7 +224,7 @@ describe('auditMatches - 整合監査 (scorers)', () => {
     const m = finished(1, 1);
     const events = [goal({ teamId: null }), goal({ teamId: null })];
 
-    const report = auditMatches([m], events, { now: NOW });
+    const report = auditMatches([m], events, { now: NOW }, SUBBED);
 
     expect(report.findings).toHaveLength(0);
   });
@@ -229,7 +232,7 @@ describe('auditMatches - 整合監査 (scorers)', () => {
   it('0-0 の試合は得点イベント0件でも検知しない', () => {
     const m = finished(0, 0);
 
-    const report = auditMatches([m], [], { now: NOW });
+    const report = auditMatches([m], [], { now: NOW }, SUBBED);
 
     expect(report.findings).toHaveLength(0);
   });
@@ -245,7 +248,7 @@ describe('auditMatches - 整合監査 (scorers)', () => {
     });
     const events = [goal({ teamId: 'AUS' }), goal({ teamId: 'TUR' })];
 
-    const report = auditMatches([m], events, { now: NOW });
+    const report = auditMatches([m], events, { now: NOW }, SUBBED);
 
     expect(report.findings).toHaveLength(0);
   });
@@ -266,10 +269,58 @@ describe('auditMatches - レポート集計', () => {
     const report = auditMatches([stale, incomplete], [goal({ matchId: 11 })], {
       now: NOW,
       staleHours: 2.5,
-    });
+    }, new Set([11]));
 
     expect(report.counts.staleUnfinished).toBe(1);
     expect(report.counts.scoreMismatch).toBe(1);
+    expect(report.counts.finishedNoSubs).toBe(0);
     expect(report.findings).toHaveLength(2);
+  });
+});
+
+describe('auditMatches - 交代0件検知 (finished_no_subs・T-85(C))', () => {
+  const finishedGroup = match({ status: 'finished', homeScore: 1, awayScore: 0 });
+
+  it('終了したグループ戦で交代イベントが無ければ warn で検知する', () => {
+    // 交代を持つ試合集合に含めない（=交代0件）。得点はスコアと一致させ整合系は無所見に。
+    const report = auditMatches([finishedGroup], [goal({ teamId: 'AUS' })], { now: NOW }, new Set());
+
+    expect(report.counts.finishedNoSubs).toBe(1);
+    const f = report.findings.find((x) => x.kind === 'finished_no_subs');
+    expect(f).toMatchObject({ matchId: 1, kind: 'finished_no_subs', severity: 'warn' });
+  });
+
+  it('交代が1件以上ある試合は検知しない', () => {
+    const report = auditMatches(
+      [finishedGroup],
+      [goal({ teamId: 'AUS' })],
+      { now: NOW },
+      new Set([1]),
+    );
+
+    expect(report.counts.finishedNoSubs).toBe(0);
+    expect(report.findings.some((x) => x.kind === 'finished_no_subs')).toBe(false);
+  });
+
+  it('決勝T（group_stage 以外）は交代0件でも対象外', () => {
+    const ko = match({
+      stage: 'round_of_32',
+      groupLetter: null,
+      status: 'finished',
+      homeScore: 1,
+      awayScore: 0,
+    });
+
+    const report = auditMatches([ko], [goal({ teamId: 'AUS' })], { now: NOW }, new Set());
+
+    expect(report.counts.finishedNoSubs).toBe(0);
+  });
+
+  it('未終了のグループ戦は交代0件でも対象外', () => {
+    const scheduled = match({ status: 'scheduled' });
+
+    const report = auditMatches([scheduled], [], { now: NOW }, new Set());
+
+    expect(report.counts.finishedNoSubs).toBe(0);
   });
 });

@@ -60,6 +60,7 @@ export async function GET(request: Request) {
         console.warn('[ingest] data audit findings', {
           staleUnfinished: audit.counts.staleUnfinished,
           scoreMismatch: audit.counts.scoreMismatch,
+          finishedNoSubs: audit.counts.finishedNoSubs,
           findings: audit.findings,
         });
       }

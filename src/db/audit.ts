@@ -65,3 +65,11 @@ export async function getAuditGoalEvents(): Promise<AuditGoalEvent[]> {
     };
   });
 }
+
+/** 交代イベントを1件以上持つ試合 id の集合（T-85(C)「終了なのに交代0件」検知用）。 */
+export async function getAuditSubstitutionMatchIds(): Promise<Set<number>> {
+  const result = await db().execute(`
+    SELECT DISTINCT match_id FROM match_events WHERE type = 'substitution'
+  `);
+  return new Set(result.rows.map((row) => Number((row as unknown as { match_id: number }).match_id)));
+}

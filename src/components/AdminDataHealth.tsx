@@ -14,6 +14,7 @@ const KIND_LABELS: Record<AuditFindingKind, string> = {
   scorers_incomplete: '得点者不足',
   scorers_excess: '得点者過多',
   scorers_side_mismatch: '左右割当ズレ',
+  finished_no_subs: '交代0件(TheSportsDBのみ疑い)',
 };
 
 const SEVERITY_COLOR: Record<AuditSeverity, string> = {
@@ -69,6 +70,9 @@ export function AdminDataHealth({ report }: AdminDataHealthProps) {
         </Badge>
         <Badge color="yellow" variant="light">
           整合エラー {report.counts.scoreMismatch}
+        </Badge>
+        <Badge color="orange" variant="light">
+          交代0件 {report.counts.finishedNoSubs}
         </Badge>
         <Text size="sm" c="dimmed">
           {report.checkedMatches} 試合を監査・{generatedJst} 時点

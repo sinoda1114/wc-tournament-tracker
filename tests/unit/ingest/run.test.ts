@@ -178,6 +178,7 @@ describe('runIngestion', () => {
       synced: 1,
       inserted: 2,
       empty: 0,
+      skippedInconsistent: 0,
       perMatch: [{ matchId: 1, count: 2 }],
       failures: [],
     });
@@ -239,8 +240,100 @@ describe('runIngestion', () => {
       synced: 0,
       inserted: 0,
       empty: 0,
+      skippedInconsistent: 0,
       perMatch: [],
       failures: [],
+    });
+  });
+
+  describe('収束モデル（T-85 (A)24h再同期 / (B)自己矛盾ガード）', () => {
+    it('(A) 終了後24h の finished グループ戦は TheSportsDB 結果に無くても Wikipedia 再同期する', async () => {
+      // 主ソース結果に #1 は無い（planMatchEventSyncs は空）。だが snapshot は finished かつ
+      // updatedAt が直近 → 再同期対象に入る。fetchMatchEvents が呼ばれ置換されること。
+      const justFinished = {
+        ...matchRow(1, 'mex', 'rsa'),
+        status: 'finished' as const,
+        homeScore: 1,
+        awayScore: 0,
+        updatedAt: new Date().toISOString(),
+      };
+      listTournamentMatches.mockResolvedValue([justFinished]);
+      listAllTeams.mockResolvedValue(TEAMS);
+
+      const fetchMatchEvents = vi.fn(async () => [
+        { type: 'goal' as const, minute: 10, isHome: true, playerName: 'Scorer', playerOut: null, externalId: 'wp-0' },
+      ]);
+      const summary = await runIngestion({
+        fetchResults: async () => [], // 主ソースは #1 を返さない
+        fetchMatchEvents,
+      });
+
+      expect(fetchMatchEvents).toHaveBeenCalledWith(
+        expect.objectContaining({ stage: 'group_stage', groupLetter: 'A', homeCode: 'MEX', awayCode: 'RSA' }),
+      );
+      expect(replaceAutoMatchEvents).toHaveBeenCalledWith(1, expect.any(Array));
+      expect(summary.events.synced).toBe(1);
+    });
+
+    it('(A) 終了から24hを超えた試合は再同期しない', async () => {
+      const old = {
+        ...matchRow(1, 'mex', 'rsa'),
+        status: 'finished' as const,
+        homeScore: 1,
+        awayScore: 0,
+        updatedAt: '2026-01-01T00:00:00Z', // ずっと前
+      };
+      listTournamentMatches.mockResolvedValue([old]);
+      listAllTeams.mockResolvedValue(TEAMS);
+
+      const fetchMatchEvents = vi.fn(async () => []);
+      await runIngestion({ fetchResults: async () => [], fetchMatchEvents });
+
+      expect(fetchMatchEvents).not.toHaveBeenCalled();
+    });
+
+    it('(B) 得点者件数 ≠ スコア合計 のバッチは書き込まない（固着させず skippedInconsistent に計上）', async () => {
+      const finished = {
+        ...matchRow(1, 'mex', 'rsa'),
+        status: 'finished' as const,
+        homeScore: 2,
+        awayScore: 1, // 合計3
+        updatedAt: new Date().toISOString(),
+      };
+      listTournamentMatches.mockResolvedValue([finished]);
+      listAllTeams.mockResolvedValue(TEAMS);
+
+      // 得点1件しか返さない（合計3と矛盾）→ 書き込まない。
+      const fetchMatchEvents = vi.fn(async () => [
+        { type: 'goal' as const, minute: 10, isHome: true, playerName: 'Only', playerOut: null, externalId: 'wp-0' },
+      ]);
+      const summary = await runIngestion({ fetchResults: async () => [], fetchMatchEvents });
+
+      expect(replaceAutoMatchEvents).not.toHaveBeenCalled();
+      expect(summary.events.skippedInconsistent).toBe(1);
+      expect(summary.events.synced).toBe(0);
+    });
+
+    it('(B) 得点者件数 = スコア合計 なら書き込む', async () => {
+      const finished = {
+        ...matchRow(1, 'mex', 'rsa'),
+        status: 'finished' as const,
+        homeScore: 1,
+        awayScore: 1, // 合計2
+        updatedAt: new Date().toISOString(),
+      };
+      listTournamentMatches.mockResolvedValue([finished]);
+      listAllTeams.mockResolvedValue(TEAMS);
+
+      const fetchMatchEvents = vi.fn(async () => [
+        { type: 'goal' as const, minute: 10, isHome: true, playerName: 'H', playerOut: null, externalId: 'wp-0' },
+        { type: 'goal' as const, minute: 20, isHome: false, playerName: 'A', playerOut: null, externalId: 'wp-1' },
+      ]);
+      const summary = await runIngestion({ fetchResults: async () => [], fetchMatchEvents });
+
+      expect(replaceAutoMatchEvents).toHaveBeenCalledWith(1, expect.any(Array));
+      expect(summary.events.synced).toBe(1);
+      expect(summary.events.skippedInconsistent).toBe(0);
     });
   });
 

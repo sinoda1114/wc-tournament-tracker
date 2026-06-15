@@ -7,9 +7,7 @@ import type { MatchDetail } from '@/db/queries';
 import { useFavoriteTeams } from '@/hooks/useFavoriteTeams';
 import { formatKickoff, formatMatchDateZoned, type MatchStage } from '@/lib/bracket';
 import { useDictionary, useTimeZone } from '@/lib/i18n/context';
-import { deriveMatchDataState } from '@/lib/match-data-state';
 
-import { MatchDataBadge } from './MatchDataBadge';
 import { MatchVersus } from './MatchVersus';
 
 type MatchCardProps = {
@@ -34,16 +32,6 @@ export function MatchCard({ match, showContextLabel = true }: MatchCardProps) {
     match.stage === 'group_stage' && match.groupLetter
       ? dict.groups.groupHeading.replace('{letter}', match.groupLetter)
       : dict.match.stage[match.stage as MatchStage] ?? match.stage;
-
-  // データの正直さ（T-82④）: 一覧カードはイベント件数を持たないため pending（未取込/確認中）のみ判定。
-  const dataState = deriveMatchDataState({
-    status: match.status,
-    stage: match.stage,
-    kickoffAt: match.kickoffAt,
-    matchDate: match.matchDate,
-    homeScore: match.homeScore,
-    awayScore: match.awayScore,
-  });
 
   const homeFav = ready && match.homeTeam ? isFavorite(match.homeTeam.fifaCode) : false;
   const awayFav = ready && match.awayTeam ? isFavorite(match.awayTeam.fifaCode) : false;
@@ -100,8 +88,6 @@ export function MatchCard({ match, showContextLabel = true }: MatchCardProps) {
               {dict.match.status[match.status]}
             </Badge>
           ) : null}
-          {/* データの正直さ（T-82④）: 未取込/確認中を確定値と区別して明示。 */}
-          <MatchDataBadge state={dataState} />
         </div>
 
         <MatchVersus match={match} nameMode="full" />
