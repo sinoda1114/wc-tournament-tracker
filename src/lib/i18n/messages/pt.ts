@@ -367,6 +367,11 @@ export const pt: Dictionary = {
   },
   matchDetail: {
     number: 'Partida {n}',
+    highlight: {
+      heading: '🎬 Melhores momentos',
+      cta: 'Ver os melhores momentos oficiais',
+      officialLink: 'Link oficial',
+    },
   },
   timezone: {
     label: 'Fuso horário',

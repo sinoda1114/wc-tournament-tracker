@@ -6,6 +6,7 @@ import { Badge, Container, Group, Stack, Text, Title } from '@mantine/core';
 
 import { JsonLd } from '@/components/JsonLd';
 import { MatchEvents } from '@/components/MatchEvents';
+import { MatchHighlight } from '@/components/MatchHighlight';
 import { MatchPitch } from '@/components/MatchPitch';
 import { MatchVersus } from '@/components/MatchVersus';
 import { VenueInfoCard } from '@/components/VenueInfoCard';
@@ -209,6 +210,13 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
             away={{ name: localizedTeamName(match.awayTeam, locale), fifaCode: match.awayTeam.fifaCode }}
           />
         ) : null}
+
+        <MatchHighlight
+          summary={match.highlightSummary}
+          url={match.highlightUrl}
+          sourceLabel={match.highlightSourceLabel}
+          dict={dict}
+        />
 
         <MatchEvents events={events} match={match} dict={dict} locale={locale} />
 

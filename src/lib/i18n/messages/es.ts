@@ -367,6 +367,11 @@ export const es: Dictionary = {
   },
   matchDetail: {
     number: 'Partido {n}',
+    highlight: {
+      heading: '🎬 Resúmenes',
+      cta: 'Ver los resúmenes oficiales',
+      officialLink: 'Enlace oficial',
+    },
   },
   timezone: {
     label: 'Zona horaria',
