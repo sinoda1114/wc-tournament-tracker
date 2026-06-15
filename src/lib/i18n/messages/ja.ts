@@ -10,7 +10,7 @@ export const ja = {
     home: {
       title: 'ワールドカップ2026 試合日程・結果・優勝予想（非公式）',
       description:
-        'ワールドカップ2026の日程・結果・順位・会場・出場選手と、みんなの優勝予想をひとつにまとめた非公式ファンサイト。お気に入りの国を登録して、見たい試合をすぐチェックできます（FIFA非公認）。',
+        'MatchFav（マッチファボ）は、ワールドカップ2026の日程・結果・順位・会場・出場選手と、みんなの優勝予想をひとつにまとめた非公式ファンサイト。お気に入りの国を登録して、見たい試合をすぐチェックできます（FIFA非公認）。',
     },
     groups: {
       title: 'グループリーグ',
@@ -104,6 +104,8 @@ export const ja = {
     admin: '管理画面',
     signIn: 'ログイン',
     skipToContent: 'メインコンテンツへスキップ',
+    menu: 'メニュー',
+    settings: '設定',
   },
   language: {
     label: '言語',
@@ -174,7 +176,7 @@ export const ja = {
     },
     weekdays: ['日', '月', '火', '水', '木', '金', '土'],
     events: {
-      title: '試合のできごと',
+      title: 'タイムライン',
       aria: '試合中の得点・カード・交代',
       assist: 'アシスト',
       type: {
@@ -274,9 +276,19 @@ export const ja = {
     ageSuffix: '歳',
     groupCount: '{label}（{count}）',
     noteArg:
-      '※ アルゼンチン代表は Leonardo Balerdi 選手が負傷のため辞退し、2026年6月11日時点で代替選手が未発表のため25名で表示しています。追加召集が発表され次第、反映します。',
+      '※ アルゼンチン代表は Leonardo Balerdi 選手が負傷のため離脱し、Marcos Senesi 選手が追加招集されました。',
     noteJpn:
       '※ 遠藤航選手は左足の負傷悪化により大会メンバーから離脱し、日本代表からの引退を発表しました。代わって町野修斗選手（FW）が追加招集され、背番号6を引き継いでいます。',
+    noteNed:
+      '※ オランダ代表は Jurrien Timber 選手が鼠径部の負傷により離脱し、Lutsharel Geertruida 選手（背番号2）が追加招集されました。',
+    noteGer:
+      '※ ドイツ代表は Lennart Karl 選手が左大腿部の筋損傷により離脱し、Assan Ouédraogo 選手（背番号25）が追加招集されました。',
+    noteBra:
+      '※ ブラジル代表は Wesley 選手が左太ももの負傷により離脱し、Éderson 選手（MF・背番号2）が追加招集されました。',
+    noteSco:
+      '※ スコットランド代表は Billy Gilmour 選手が膝の負傷により離脱し、Tyler Fletcher 選手（背番号8）が追加招集されました。',
+    noteAut:
+      '※ オーストリア代表は Christoph Baumgartner 選手が右太ももの負傷により離脱し、Dejan Ljubičić 選手が追加招集されました。',
   },
   // 優勝国予想（ChampionPrediction）。{count}=チーム数・{name}=国名。
   prediction: {
@@ -293,7 +305,7 @@ export const ja = {
       '指標を1つ以上選んでください。すべてOFFだと全チームが同じ確率になり、予想になりません。',
     flat: '選んだ指標にはまだデータがありません。全チームが横並びになり予想にならないため、データが入るまで表示しません（試合が進むと参考値として表示されます）。',
     onlyWc2026:
-      'WC2026成績のみで算出しています。大会序盤は消化試合が少なく、わずかな結果に数字が大きく振られて偏りが出ます。試合が進むほど精度が上がるため、現時点ではおおまかな傾向としてご覧ください。',
+      'WC2026成績のみで算出しています。大会序盤は消化試合が少なく、わずかな結果に数字が大きく振られて偏りが出ます。試合が進むほど精度が上がります。',
     teamSquadAria: '{name}の選手を見る',
     eliminatedAria: '{name}は敗退済み（優勝予想の対象外）',
     showTop: '上位だけ表示',
@@ -313,13 +325,16 @@ export const ja = {
     sectionAria: 'みんなの予想に投票',
     title: 'あなたの優勝予想',
     closed: '全ステージの投票が締め切られました。みんなの予想は最終結果として固定されます。',
+    closedSoon: '次ステージの投票はまもなく開始します。',
     votedPrefix: '{stage}の投票済み：',
     locked: '（このステージはロック中）',
     nextInfo: '{stage}に進むと、もう一度投票できます。最新の票が「みんなの予想」に反映されます。',
     lastVote: 'これが最後の投票です。',
-    currentPrefix: '現在は',
+    currentPrefix: '現在のステージは',
     currentSuffix: '。優勝すると思う国を1票選んでください（日本語名・英語名・FIFAコードで検索）。',
     searchAria: '優勝予想の国を検索',
+    // 国を未選択の間だけ表示する控えめなガイド（T-69）。
+    selectHint: '優勝予想国を選んでください。',
     submit: '投票する',
     noteLine1:
       '大会の進行（{progression}）ごとに1回ずつ投票でき、各ユーザーの最新の票が「みんなの予想」に反映されます。',
@@ -367,6 +382,7 @@ export const ja = {
     dataNotice: '掲載データは予告なく変更される場合があります。',
     unofficialNote: '非公式ファンサイト（FIFA非公認）',
     dataAttribution: '試合データの一部は Wikipedia（CC BY-SA）に基づきます。',
+    reveal: 'サイト情報・規約',
   },
   // 会場情報カード（VenueInfoCard）。{stadium}=会場名。値（屋根/芝等）は lib/venue。
   venue: {
@@ -443,6 +459,11 @@ export const ja = {
     step3Before: '右上の',
     addButton: '「追加」',
     step3After: 'をタップして完了です。',
+    androidIntro:
+      'このサイトをホーム画面にショートカットとして追加できます。Chrome では下記の手順で登録してください。',
+    androidStep1: '右上の ⋮（メニュー）を開きます。',
+    androidStep2: 'メニューの「ホーム画面に追加」を選びます。',
+    androidStep3: '「追加」をタップして完了です。',
   },
   // ライト/ダーク切替（ThemeToggle）。
   theme: {

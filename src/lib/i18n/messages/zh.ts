@@ -96,6 +96,8 @@ export const zh: Dictionary = {
     admin: '管理',
     signIn: '登录',
     skipToContent: '跳到主要内容',
+    menu: '菜单',
+    settings: '设置',
   },
   language: {
     label: '语言',
@@ -160,7 +162,7 @@ export const zh: Dictionary = {
     },
     weekdays: ['周日', '周一', '周二', '周三', '周四', '周五', '周六'],
     events: {
-      title: '比赛事件',
+      title: '比赛时间线',
       aria: '进球、红黄牌与换人',
       assist: '助攻',
       type: {
@@ -254,9 +256,19 @@ export const zh: Dictionary = {
     ageSuffix: '岁',
     groupCount: '{label}（{count}）',
     noteArg:
-      '注：阿根廷目前显示25名球员。莱昂纳多·巴莱尔迪因伤退出，截至2026年6月11日尚未公布替补人选。一旦确认补招，我们将及时更新。',
+      '注：莱昂纳多·巴莱尔迪因伤退出阿根廷名单，马科斯·塞内西获得递补征召。',
     noteJpn:
       '注：远藤航因左脚伤势加重退出本届大赛名单，并宣布从日本国家队退役。町野修斗（FW）获得递补征召，接过6号球衣。',
+    noteNed:
+      '注：尤里恩·廷伯因腹股沟伤势退出荷兰名单，卢萨雷尔·赫尔特雷达（2号）获得递补征召。',
+    noteGer:
+      '注：伦纳特·卡尔因左大腿肌肉伤势退出德国名单，阿桑·韦德拉奥戈（25号）获得递补征召。',
+    noteBra:
+      '注：韦斯利因左大腿伤势退出巴西名单，埃德森（中场，2号）获得递补征召。',
+    noteSco:
+      '注：比利·吉尔莫因膝伤退出苏格兰名单，泰勒·弗莱彻（8号）获得递补征召。',
+    noteAut:
+      '注：克里斯托夫·鲍姆加特纳因右大腿伤势退出奥地利名单，德扬·柳比契奇获得递补征召。',
   },
   prediction: {
     title: '夺冠预测',
@@ -271,7 +283,7 @@ export const zh: Dictionary = {
     noneActive: '请至少选择一个指标。全部关闭时所有球队概率相同，无法形成预测。',
     flat: '所选指标暂无数据。所有球队会持平、无法形成预测，因此在有数据前不显示（比赛推进后会作为参考显示）。',
     onlyWc2026:
-      '仅根据WC2026表现计算。赛事初期场次较少，少量结果会使数字大幅波动并产生偏差。随着比赛推进精度会提高，目前请作为大致趋势参考。',
+      '仅根据WC2026表现计算。赛事初期场次较少，少量结果会使数字大幅波动并产生偏差。随着比赛推进精度会提高。',
     teamSquadAria: '查看{name}的球员',
     eliminatedAria: '{name}已淘汰（不再是夺冠热门）',
     showTop: '仅显示前列',
@@ -290,13 +302,15 @@ export const zh: Dictionary = {
     sectionAria: '为大家的预测投票',
     title: '你的夺冠预测',
     closed: '所有阶段的投票均已截止。大家的预测将作为最终结果固定。',
+    closedSoon: '下一阶段的投票即将开始。',
     votedPrefix: '{stage}已投票：',
     locked: '（本阶段已锁定）',
     nextInfo: '进入{stage}后可再次投票。最新一票将反映到大家的预测中。',
     lastVote: '这是最后一次投票。',
-    currentPrefix: '当前为',
+    currentPrefix: '当前阶段为',
     currentSuffix: '。请选择1支你认为会夺冠的球队（可按日文名、英文名或FIFA代码搜索）。',
     searchAria: '搜索夺冠预测的球队',
+    selectHint: '请选择你认为会夺冠的球队。',
     submit: '投票',
     noteLine1:
       '随着赛事推进（{progression}），每个阶段可投票1次，每位用户的最新一票会反映到大家的预测中。',
@@ -342,6 +356,7 @@ export const zh: Dictionary = {
     dataNotice: '所刊载数据可能会在不另行通知的情况下变更。',
     unofficialNote: '非官方球迷网站（与FIFA无关）',
     dataAttribution: '部分比赛数据基于维基百科（CC BY-SA）。',
+    reveal: '站点信息与条款',
   },
   venue: {
     cardAria: '{stadium} venue info',
@@ -410,6 +425,10 @@ export const zh: Dictionary = {
     step3Before: '点按右上角的',
     addButton: '“添加”',
     step3After: '即可完成。',
+    androidIntro: '你可以将本站的快捷方式添加到主屏幕。在 Chrome 中，请按以下步骤操作。',
+    androidStep1: '点击右上角的 ⋮（菜单）。',
+    androidStep2: '选择“添加到主屏幕”。',
+    androidStep3: '点按“添加”即可完成。',
   },
   theme: {
     switchToLight: '切换到浅色模式',

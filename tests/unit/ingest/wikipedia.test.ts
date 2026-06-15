@@ -6,6 +6,7 @@ import { describe, expect, it } from 'vitest';
 import {
   createWikipediaMatchEventProvider,
   parseWikipediaGroupArticle,
+  wikiMatchToResult,
   withWikipediaEvents,
   type WikiMatch,
   type WikiMatchEvent,
@@ -83,6 +84,71 @@ describe('parseWikipediaGroupArticle（実 wikitext: 2026 FIFA World Cup Group A
     const sorted = [...minutes].sort((a, b) => a - b);
     expect(minutes).toEqual(sorted);
   });
+
+  it('score link から確定スコアを取り出す（T-82③・実施済みは N–N）', () => {
+    // MEX 2–0 RSA。score link の末尾セグメント "2–0" を採用する。
+    expect(mexRsa().score).toEqual({ team1: 2, team2: 0 });
+  });
+
+  it('未実施（score が "Match N" 等で N–N を持たない）試合は score=null', () => {
+    const matches = parseWikipediaGroupArticle(GROUP_A_WIKITEXT);
+    // フィクスチャには未実施扱い（score link 表示が "Match 28" 等）の試合が含まれる。
+    const unplayed = matches.filter((m) => m.score === null);
+    expect(unplayed.length).toBeGreaterThan(0);
+  });
+});
+
+describe('wikiMatchToResult（T-82③・WikiMatch → NormalizedResult）', () => {
+  const played: WikiMatch = {
+    team1Code: 'MEX',
+    team2Code: 'RSA',
+    score: { team1: 2, team2: 0 },
+    events: [],
+  };
+
+  it('記事の向き(team1=home)に一致すればスコアをそのまま割り当てる', () => {
+    const r = wikiMatchToResult(played, {
+      homeCode: 'MEX',
+      awayCode: 'RSA',
+      matchDate: '2026-06-11',
+    });
+    expect(r).toEqual({
+      dateEvent: '2026-06-11',
+      homeName: 'MEX',
+      awayName: 'RSA',
+      homeScore: 2,
+      awayScore: 0,
+      finished: true,
+      externalEventId: null,
+    });
+  });
+
+  it('我々の home/away が記事と逆向きならスコアを入れ替える', () => {
+    const r = wikiMatchToResult(played, {
+      homeCode: 'RSA',
+      awayCode: 'MEX',
+      matchDate: '2026-06-11',
+    });
+    expect(r).toMatchObject({ homeName: 'RSA', awayName: 'MEX', homeScore: 0, awayScore: 2 });
+  });
+
+  it('score が無ければ null（未確定を誤って finished にしない）', () => {
+    const r = wikiMatchToResult({ ...played, score: null }, {
+      homeCode: 'MEX',
+      awayCode: 'RSA',
+      matchDate: '2026-06-11',
+    });
+    expect(r).toBeNull();
+  });
+
+  it('対戦カードが一致しなければ null', () => {
+    const r = wikiMatchToResult(played, {
+      homeCode: 'BRA',
+      awayCode: 'ARG',
+      matchDate: '2026-06-11',
+    });
+    expect(r).toBeNull();
+  });
 });
 
 describe('parseWikipediaGroupArticle（得点欄の注記・複数分の合成ケース）', () => {
@@ -114,6 +180,57 @@ describe('parseWikipediaGroupArticle（得点欄の注記・複数分の合成�
         playerOut: null,
       },
       { type: 'goal', minute: 78, teamCode: 'ENG', playerName: 'Bukayo Saka', playerOut: null },
+    ]);
+  });
+});
+
+describe('parseWikipediaGroupArticle（先頭 * を省いた単独得点行: T-76 回帰）', () => {
+  // 真因: 得点が1件のとき編集者が箇条書き記号 * を省くことがあり、`*` 必須の旧パーサが
+  // その行を丸ごと捨てて得点者を取りこぼした（例: 韓国 2-1 チェコ の Krejčí 59'）。
+  // 実記事に倣い、分の後ろにアポストロフィ（59'）が付く揺れも含めて再現する。
+  const korCze = [
+    '{{#invoke:football box|main',
+    '|team1={{#invoke:flag|fb-rt|KOR}}',
+    '|team2={{#invoke:flag|fb|CZE}}',
+    '|goals1=',
+    "*[[Hwang In-beom]] 36'",
+    "*[[Son Heung-min]] 67'",
+    '|goals2=',
+    // ★ 先頭 * 無し・分末アポストロフィ付きの単独得点行（取りこぼしの再現）。
+    "[[Ladislav Krejčí (footballer, born 1999)|Krejčí]] 59'",
+    '}}',
+  ].join('\n');
+
+  it('先頭 * の無い単独得点行からも得点者を抽出する（CZE: Krejčí 59）', () => {
+    const matches = parseWikipediaGroupArticle(korCze);
+    expect(matches.length).toBe(1);
+    const goals = byType(matches[0].events, 'goal');
+    expect(goals.map((g) => ({ player: g.playerName, minute: g.minute, team: g.teamCode }))).toEqual(
+      [
+        { player: 'Hwang In-beom', minute: 36, team: 'KOR' },
+        { player: 'Ladislav Krejčí', minute: 59, team: 'CZE' },
+        { player: 'Son Heung-min', minute: 67, team: 'KOR' },
+      ],
+    );
+  });
+
+  it('リンクのみ・分の無い行は得点として拾わない（over-capture 防止）', () => {
+    // goals2 にリンクはあるが分（\d+'）を持たない注釈行を混ぜる。これは得点ではない。
+    const withNoise = [
+      '{{#invoke:football box|main',
+      '|team1={{#invoke:flag|fb-rt|KOR}}',
+      '|team2={{#invoke:flag|fb|CZE}}',
+      '|goals1=',
+      "[[Hwang In-beom]] 36'",
+      '|goals2=',
+      // 分を持たない（リンクだけの）行 → 得点として拾わない。
+      '[[Ladislav Krejčí (footballer, born 1999)|Krejčí]]',
+      '}}',
+    ].join('\n');
+    const matches = parseWikipediaGroupArticle(withNoise);
+    const goals = byType(matches[0].events, 'goal');
+    expect(goals.map((g) => `${g.teamCode}:${g.playerName}:${g.minute}`)).toEqual([
+      'KOR:Hwang In-beom:36',
     ]);
   });
 });

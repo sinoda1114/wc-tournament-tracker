@@ -26,7 +26,7 @@ vi.mock('@/db/match-events', () => ({
     replaceAutoMatchEvents(matchId, events),
 }));
 
-import type { ResultProvider } from '@/lib/ingest/types';
+import type { ResultFallbackProvider, ResultProvider } from '@/lib/ingest/types';
 import { runIngestion } from '@/lib/ingest/run';
 
 /** mex vs rsa が「我々の試合 id=1（両チーム確定・未確定スコア）」に突き合う最小データ。 */
@@ -178,6 +178,7 @@ describe('runIngestion', () => {
       synced: 1,
       inserted: 2,
       empty: 0,
+      skippedInconsistent: 0,
       perMatch: [{ matchId: 1, count: 2 }],
       failures: [],
     });
@@ -239,8 +240,100 @@ describe('runIngestion', () => {
       synced: 0,
       inserted: 0,
       empty: 0,
+      skippedInconsistent: 0,
       perMatch: [],
       failures: [],
+    });
+  });
+
+  describe('収束モデル（T-85 (A)24h再同期 / (B)自己矛盾ガード）', () => {
+    it('(A) 終了後24h の finished グループ戦は TheSportsDB 結果に無くても Wikipedia 再同期する', async () => {
+      // 主ソース結果に #1 は無い（planMatchEventSyncs は空）。だが snapshot は finished かつ
+      // updatedAt が直近 → 再同期対象に入る。fetchMatchEvents が呼ばれ置換されること。
+      const justFinished = {
+        ...matchRow(1, 'mex', 'rsa'),
+        status: 'finished' as const,
+        homeScore: 1,
+        awayScore: 0,
+        updatedAt: new Date().toISOString(),
+      };
+      listTournamentMatches.mockResolvedValue([justFinished]);
+      listAllTeams.mockResolvedValue(TEAMS);
+
+      const fetchMatchEvents = vi.fn(async () => [
+        { type: 'goal' as const, minute: 10, isHome: true, playerName: 'Scorer', playerOut: null, externalId: 'wp-0' },
+      ]);
+      const summary = await runIngestion({
+        fetchResults: async () => [], // 主ソースは #1 を返さない
+        fetchMatchEvents,
+      });
+
+      expect(fetchMatchEvents).toHaveBeenCalledWith(
+        expect.objectContaining({ stage: 'group_stage', groupLetter: 'A', homeCode: 'MEX', awayCode: 'RSA' }),
+      );
+      expect(replaceAutoMatchEvents).toHaveBeenCalledWith(1, expect.any(Array));
+      expect(summary.events.synced).toBe(1);
+    });
+
+    it('(A) 終了から24hを超えた試合は再同期しない', async () => {
+      const old = {
+        ...matchRow(1, 'mex', 'rsa'),
+        status: 'finished' as const,
+        homeScore: 1,
+        awayScore: 0,
+        updatedAt: '2026-01-01T00:00:00Z', // ずっと前
+      };
+      listTournamentMatches.mockResolvedValue([old]);
+      listAllTeams.mockResolvedValue(TEAMS);
+
+      const fetchMatchEvents = vi.fn(async () => []);
+      await runIngestion({ fetchResults: async () => [], fetchMatchEvents });
+
+      expect(fetchMatchEvents).not.toHaveBeenCalled();
+    });
+
+    it('(B) 得点者件数 ≠ スコア合計 のバッチは書き込まない（固着させず skippedInconsistent に計上）', async () => {
+      const finished = {
+        ...matchRow(1, 'mex', 'rsa'),
+        status: 'finished' as const,
+        homeScore: 2,
+        awayScore: 1, // 合計3
+        updatedAt: new Date().toISOString(),
+      };
+      listTournamentMatches.mockResolvedValue([finished]);
+      listAllTeams.mockResolvedValue(TEAMS);
+
+      // 得点1件しか返さない（合計3と矛盾）→ 書き込まない。
+      const fetchMatchEvents = vi.fn(async () => [
+        { type: 'goal' as const, minute: 10, isHome: true, playerName: 'Only', playerOut: null, externalId: 'wp-0' },
+      ]);
+      const summary = await runIngestion({ fetchResults: async () => [], fetchMatchEvents });
+
+      expect(replaceAutoMatchEvents).not.toHaveBeenCalled();
+      expect(summary.events.skippedInconsistent).toBe(1);
+      expect(summary.events.synced).toBe(0);
+    });
+
+    it('(B) 得点者件数 = スコア合計 なら書き込む', async () => {
+      const finished = {
+        ...matchRow(1, 'mex', 'rsa'),
+        status: 'finished' as const,
+        homeScore: 1,
+        awayScore: 1, // 合計2
+        updatedAt: new Date().toISOString(),
+      };
+      listTournamentMatches.mockResolvedValue([finished]);
+      listAllTeams.mockResolvedValue(TEAMS);
+
+      const fetchMatchEvents = vi.fn(async () => [
+        { type: 'goal' as const, minute: 10, isHome: true, playerName: 'H', playerOut: null, externalId: 'wp-0' },
+        { type: 'goal' as const, minute: 20, isHome: false, playerName: 'A', playerOut: null, externalId: 'wp-1' },
+      ]);
+      const summary = await runIngestion({ fetchResults: async () => [], fetchMatchEvents });
+
+      expect(replaceAutoMatchEvents).toHaveBeenCalledWith(1, expect.any(Array));
+      expect(summary.events.synced).toBe(1);
+      expect(summary.events.skippedInconsistent).toBe(0);
     });
   });
 
@@ -254,5 +347,132 @@ describe('runIngestion', () => {
     };
     await expect(runIngestion(failing)).rejects.toThrow('network down');
     expect(updateMatchResult).not.toHaveBeenCalled();
+  });
+
+  describe('結果フォールバック（T-82③・Wikipedia 補完）', () => {
+    // 主ソースが未掲載の過去グループ試合を、fetchFallbackResults で確定できることを検証する。
+    function providerWithFallback(
+      results: unknown[],
+      fallback: unknown[],
+      spy?: (targets: unknown[]) => void,
+    ): ResultProvider & ResultFallbackProvider {
+      return {
+        fetchResults: async () => results as never,
+        fetchFallbackResults: async (targets) => {
+          spy?.(targets);
+          return fallback as never;
+        },
+      };
+    }
+
+    it('フォールバックで確定した試合は得点者イベントも同期する（T-81: スコアだけ埋めて得点者欠落を防ぐ）', async () => {
+      listTournamentMatches.mockResolvedValue([matchRow(1, 'mex', 'rsa')]);
+      listAllTeams.mockResolvedValue(TEAMS);
+      updateMatchResult.mockResolvedValue(undefined);
+
+      // 主ソースは #1 を持たず（fetchResults 空）、fetchFallbackResults で確定。
+      // provider が fetchMatchEvents も持つ場合、確定した #1 の得点者も同期されること。
+      const provider = {
+        fetchResults: async () => [],
+        fetchFallbackResults: async () => [
+          { dateEvent: '2026-06-11', homeName: 'MEX', awayName: 'RSA', homeScore: 2, awayScore: 0, finished: true },
+        ],
+        fetchMatchEvents: async () => [
+          { type: 'goal', minute: 27, isHome: true, playerName: 'Scorer A', playerOut: null, externalId: 'wp-0' },
+          { type: 'goal', minute: 75, isHome: true, playerName: 'Scorer B', playerOut: null, externalId: 'wp-1' },
+        ],
+      };
+
+      const summary = await runIngestion(provider as never);
+
+      expect(summary.fallbackUpdated).toBe(1);
+      expect(summary.events.synced).toBe(1);
+      expect(summary.events.inserted).toBe(2);
+      // home(MEX) の得点として teamId=mex に解決して保存される。
+      expect(replaceAutoMatchEvents).toHaveBeenCalledWith(
+        1,
+        expect.arrayContaining([
+          expect.objectContaining({ playerName: 'Scorer A', teamId: 'mex', type: 'goal' }),
+          expect.objectContaining({ playerName: 'Scorer B', teamId: 'mex', type: 'goal' }),
+        ]),
+      );
+    });
+
+    it('主ソースが未掲載でも、未確定の過去試合を Wikipedia 由来結果で確定する', async () => {
+      listTournamentMatches.mockResolvedValue([matchRow(1, 'mex', 'rsa')]);
+      listAllTeams.mockResolvedValue(TEAMS);
+      updateMatchResult.mockResolvedValue(undefined);
+
+      const summary = await runIngestion(
+        providerWithFallback(
+          [], // TheSportsDB は #1 を持っていない
+          [{ dateEvent: '2026-06-11', homeName: 'MEX', awayName: 'RSA', homeScore: 2, awayScore: 0, finished: true }],
+        ),
+      );
+
+      expect(summary.fallbackUpdated).toBe(1);
+      expect(summary.updated).toBe(1);
+      expect(summary.matchIds).toEqual([1]);
+      expect(updateMatchResult).toHaveBeenCalledWith(
+        expect.objectContaining({ matchId: 1, homeScore: 2, awayScore: 0, status: 'finished' }),
+      );
+    });
+
+    it('主ソースが確定済みの試合はフォールバック対象に含めない（主ソース優先）', async () => {
+      listTournamentMatches.mockResolvedValue([matchRow(1, 'mex', 'rsa')]);
+      listAllTeams.mockResolvedValue(TEAMS);
+      updateMatchResult.mockResolvedValue(undefined);
+
+      let fallbackCalled = false;
+      const summary = await runIngestion(
+        providerWithFallback(
+          [{ dateEvent: '2026-06-11', homeName: 'Mexico', awayName: 'South Africa', homeScore: 2, awayScore: 0, finished: true }],
+          [],
+          () => {
+            fallbackCalled = true;
+          },
+        ),
+      );
+
+      // #1 は主ソースで確定済み → 対象ゼロ。provider は呼ばない（上書きしない＆無駄フェッチ回避）。
+      expect(fallbackCalled).toBe(false);
+      expect(summary.fallbackUpdated).toBe(0);
+      expect(summary.updated).toBe(1);
+    });
+
+    it('対象外（未来日）の試合は provider が結果を返しても適用しない（書き込み経路の防御）', async () => {
+      const future = { ...matchRow(2, 'bra', 'mar'), matchDate: '2999-12-31' };
+      listTournamentMatches.mockResolvedValue([matchRow(1, 'mex', 'rsa'), future]);
+      listAllTeams.mockResolvedValue(TEAMS);
+      updateMatchResult.mockResolvedValue(undefined);
+
+      const summary = await runIngestion(
+        providerWithFallback(
+          [],
+          [
+            { dateEvent: '2026-06-11', homeName: 'MEX', awayName: 'RSA', homeScore: 1, awayScore: 0, finished: true },
+            // 未来日の #2 は targets 外。provider が返しても適用されないこと。
+            { dateEvent: '2999-12-31', homeName: 'BRA', awayName: 'MAR', homeScore: 9, awayScore: 9, finished: true },
+          ],
+        ),
+      );
+
+      expect(summary.fallbackUpdated).toBe(1);
+      expect(summary.matchIds).toEqual([1]);
+      expect(updateMatchResult).toHaveBeenCalledWith(
+        expect.objectContaining({ matchId: 1, homeScore: 1, awayScore: 0 }),
+      );
+      expect(updateMatchResult).not.toHaveBeenCalledWith(expect.objectContaining({ matchId: 2 }));
+    });
+
+    it('fetchFallbackResults 非対応の provider でも従来どおり動く（fallbackUpdated=0）', async () => {
+      listTournamentMatches.mockResolvedValue([matchRow(1, 'mex', 'rsa')]);
+      listAllTeams.mockResolvedValue(TEAMS);
+
+      const summary = await runIngestion(provider([]));
+
+      expect(summary.fallbackUpdated).toBe(0);
+      expect(summary.updated).toBe(0);
+    });
   });
 });

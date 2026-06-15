@@ -96,6 +96,8 @@ export const es: Dictionary = {
     admin: 'Admin',
     signIn: 'Iniciar sesión',
     skipToContent: 'Saltar al contenido principal',
+    menu: 'Menú',
+    settings: 'Ajustes',
   },
   language: {
     label: 'Idioma',
@@ -160,7 +162,7 @@ export const es: Dictionary = {
     },
     weekdays: ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'],
     events: {
-      title: 'Incidencias del partido',
+      title: 'Cronología',
       aria: 'Goles, tarjetas y sustituciones',
       assist: 'Asistencia',
       type: {
@@ -255,9 +257,19 @@ export const es: Dictionary = {
     ageSuffix: ' años',
     groupCount: '{label} ({count})',
     noteArg:
-      'Nota: Argentina aparece con 25 jugadores. Leonardo Balerdi se retiró por lesión y, al 11 de junio de 2026, no se ha anunciado un reemplazo. Lo actualizaremos en cuanto se confirme una convocatoria.',
+      'Nota: Leonardo Balerdi se retiró de la convocatoria de Argentina por lesión y Marcos Senesi fue convocado en su lugar.',
     noteJpn:
       'Nota: Wataru Endo dejó la convocatoria tras agravarse su lesión en el pie izquierdo y anunció su retiro de la selección nacional. Shuto Machino (FW) fue convocado en su lugar y hereda el dorsal 6.',
+    noteNed:
+      'Nota: Jurrien Timber dejó la convocatoria de los Países Bajos por una lesión en la ingle y Lutsharel Geertruida (dorsal 2) fue convocado en su lugar.',
+    noteGer:
+      'Nota: Lennart Karl dejó la convocatoria de Alemania por una lesión muscular en el muslo izquierdo y Assan Ouédraogo (dorsal 25) fue convocado en su lugar.',
+    noteBra:
+      'Nota: Wesley dejó la convocatoria de Brasil por una lesión en el muslo izquierdo y Éderson (centrocampista, dorsal 2) fue convocado en su lugar.',
+    noteSco:
+      'Nota: Billy Gilmour dejó la convocatoria de Escocia por una lesión de rodilla y Tyler Fletcher (dorsal 8) fue convocado en su lugar.',
+    noteAut:
+      'Nota: Christoph Baumgartner dejó la convocatoria de Austria por una lesión en el muslo derecho y Dejan Ljubičić fue convocado en su lugar.',
   },
   prediction: {
     title: 'Pronóstico del campeón',
@@ -273,7 +285,7 @@ export const es: Dictionary = {
       'Elige al menos un factor. Con todo desactivado, todas las selecciones tienen la misma probabilidad y no hay pronóstico.',
     flat: 'Los factores seleccionados aún no tienen datos. Todas las selecciones quedarían igualadas, así que la lista permanece oculta hasta que haya datos (aparece como referencia cuando avanzan los partidos).',
     onlyWc2026:
-      'Calculado solo con el rendimiento en WC2026. Al principio del torneo se juegan pocos partidos, por lo que pequeños resultados mueven mucho los números y generan sesgo. La precisión mejora a medida que avanzan los partidos; tómalo como una tendencia aproximada por ahora.',
+      'Calculado solo con el rendimiento en WC2026. Al principio del torneo se juegan pocos partidos, por lo que pequeños resultados mueven mucho los números y generan sesgo. La precisión mejora a medida que avanzan los partidos.',
     teamSquadAria: 'Ver el plantel de {name}',
     eliminatedAria: '{name} está eliminado (ya no es candidato al título)',
     showTop: 'Mostrar solo los primeros',
@@ -293,6 +305,7 @@ export const es: Dictionary = {
     title: 'Tu pronóstico de campeón',
     closed:
       'La votación se ha cerrado en todas las fases. El pronóstico de la gente queda fijado como resultado final.',
+    closedSoon: 'La votación de la próxima fase comenzará pronto.',
     votedPrefix: 'Votado para {stage}: ',
     locked: '(bloqueado en esta fase)',
     nextInfo:
@@ -302,6 +315,7 @@ export const es: Dictionary = {
     currentSuffix:
       '. Elige una selección que creas que ganará (busca por nombre o código FIFA).',
     searchAria: 'Buscar selecciones para tu pronóstico',
+    selectHint: 'Selecciona la selección que crees que ganará.',
     submit: 'Votar',
     noteLine1:
       'Puedes votar una vez por fase a medida que avanza el torneo ({progression}), y el último voto de cada usuario se refleja en el pronóstico de la gente.',
@@ -347,6 +361,7 @@ export const es: Dictionary = {
     dataNotice: 'Los datos publicados pueden cambiar sin previo aviso.',
     unofficialNote: 'Sitio no oficial de fans (sin afiliación con la FIFA)',
     dataAttribution: 'Parte de los datos de los partidos se basa en Wikipedia (CC BY-SA).',
+    reveal: 'Información y aviso legal',
   },
   venue: {
     cardAria: '{stadium} venue info',
@@ -415,6 +430,11 @@ export const es: Dictionary = {
     step3Before: 'Toca ',
     addButton: '«Añadir»',
     step3After: 'en la parte superior derecha para terminar.',
+    androidIntro:
+      'Puedes añadir un acceso directo a este sitio en tu pantalla de inicio. En Chrome, sigue estos pasos.',
+    androidStep1: 'Abre el menú ⋮ (arriba a la derecha).',
+    androidStep2: 'Elige «Añadir a pantalla de inicio».',
+    androidStep3: 'Toca «Añadir» para terminar.',
   },
   theme: {
     switchToLight: 'Cambiar a modo claro',

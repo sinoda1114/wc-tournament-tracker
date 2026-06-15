@@ -1,6 +1,7 @@
 import { revalidatePath } from 'next/cache';
 import { NextResponse } from 'next/server';
 
+import { runDataAudit } from '@/lib/ingest/run-audit';
 import { runIngestion } from '@/lib/ingest/run';
 import { createTheSportsDbProvider } from '@/lib/ingest/thesportsdb';
 import { createWikipediaMatchEventProvider, withWikipediaEvents } from '@/lib/ingest/wikipedia';
@@ -49,7 +50,25 @@ export async function GET(request: Request) {
     for (const { matchId, count } of summary.events.perMatch) {
       if (count > 0) revalidatePath(`/matches/${matchId}`);
     }
-    return NextResponse.json({ ok: true, ...summary });
+
+    // 取込直後にデータの自動セルフ監査を回し、未取込疑い/整合エラーを cron ログに残す（T-82）。
+    // 監査の失敗は取込成功を覆さない（独立した監視レイヤ）。
+    let audit;
+    try {
+      audit = await runDataAudit();
+      if (audit.findings.length > 0) {
+        console.warn('[ingest] data audit findings', {
+          staleUnfinished: audit.counts.staleUnfinished,
+          scoreMismatch: audit.counts.scoreMismatch,
+          finishedNoSubs: audit.counts.finishedNoSubs,
+          findings: audit.findings,
+        });
+      }
+    } catch (auditError) {
+      console.error('[ingest] data audit failed', auditError);
+    }
+
+    return NextResponse.json({ ok: true, ...summary, audit: audit?.counts ?? null });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'ingest failed';
     return NextResponse.json({ ok: false, message }, { status: 500 });

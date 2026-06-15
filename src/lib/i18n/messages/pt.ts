@@ -96,6 +96,8 @@ export const pt: Dictionary = {
     admin: 'Admin',
     signIn: 'Entrar',
     skipToContent: 'Pular para o conteúdo principal',
+    menu: 'Menu',
+    settings: 'Configurações',
   },
   language: {
     label: 'Idioma',
@@ -160,7 +162,7 @@ export const pt: Dictionary = {
     },
     weekdays: ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'],
     events: {
-      title: 'Lances da partida',
+      title: 'Linha do tempo',
       aria: 'Gols, cartões e substituições',
       assist: 'Assistência',
       type: {
@@ -255,9 +257,19 @@ export const pt: Dictionary = {
     ageSuffix: ' anos',
     groupCount: '{label} ({count})',
     noteArg:
-      'Nota: a Argentina aparece com 25 jogadores. Leonardo Balerdi foi cortado por lesão e, em 11 de junho de 2026, nenhum substituto foi anunciado. Vamos atualizar assim que uma convocação for confirmada.',
+      'Nota: Leonardo Balerdi foi cortado da convocação da Argentina por lesão e Marcos Senesi foi convocado em seu lugar.',
     noteJpn:
       'Nota: Wataru Endo deixou a convocação após o agravamento da lesão no pé esquerdo e anunciou sua aposentadoria da seleção. Shuto Machino (FW) foi convocado em seu lugar e assume a camisa 6.',
+    noteNed:
+      'Nota: Jurrien Timber deixou a convocação da Holanda com uma lesão na virilha e Lutsharel Geertruida (camisa 2) foi convocado em seu lugar.',
+    noteGer:
+      'Nota: Lennart Karl deixou a convocação da Alemanha com uma lesão muscular na coxa esquerda e Assan Ouédraogo (camisa 25) foi convocado em seu lugar.',
+    noteBra:
+      'Nota: Wesley deixou a convocação do Brasil com uma lesão na coxa esquerda e Éderson (meio-campista, camisa 2) foi convocado em seu lugar.',
+    noteSco:
+      'Nota: Billy Gilmour deixou a convocação da Escócia com uma lesão no joelho e Tyler Fletcher (camisa 8) foi convocado em seu lugar.',
+    noteAut:
+      'Nota: Christoph Baumgartner deixou a convocação da Áustria com uma lesão na coxa direita e Dejan Ljubičić foi convocado em seu lugar.',
   },
   prediction: {
     title: 'Palpite do campeão',
@@ -273,7 +285,7 @@ export const pt: Dictionary = {
       'Escolha pelo menos um fator. Com tudo desativado, todas as seleções têm a mesma probabilidade e não há palpite.',
     flat: 'Os fatores selecionados ainda não têm dados. Todas as seleções ficariam empatadas, então a lista fica oculta até haver dados (aparece como referência conforme as partidas avançam).',
     onlyWc2026:
-      'Calculado apenas com o desempenho na WC2026. No início do torneio há poucas partidas, então pequenos resultados mexem muito nos números e geram viés. A precisão melhora conforme as partidas avançam; veja como uma tendência aproximada por enquanto.',
+      'Calculado apenas com o desempenho na WC2026. No início do torneio há poucas partidas, então pequenos resultados mexem muito nos números e geram viés. A precisão melhora conforme as partidas avançam.',
     teamSquadAria: 'Ver o elenco de {name}',
     eliminatedAria: '{name} está eliminado (não é mais candidato ao título)',
     showTop: 'Mostrar somente os primeiros',
@@ -293,6 +305,7 @@ export const pt: Dictionary = {
     title: 'Seu palpite de campeão',
     closed:
       'A votação foi encerrada em todas as fases. O palpite do público fica fixado como resultado final.',
+    closedSoon: 'A votação da próxima fase começará em breve.',
     votedPrefix: 'Votado para {stage}: ',
     locked: '(bloqueado nesta fase)',
     nextInfo:
@@ -302,6 +315,7 @@ export const pt: Dictionary = {
     currentSuffix:
       '. Escolha uma seleção que você acha que vai ganhar (pesquise por nome ou código FIFA).',
     searchAria: 'Pesquisar seleções para o seu palpite',
+    selectHint: 'Selecione a seleção que você acha que vai ganhar.',
     submit: 'Votar',
     noteLine1:
       'Você pode votar uma vez por fase conforme o torneio avança ({progression}), e o último voto de cada usuário é refletido no palpite do público.',
@@ -347,6 +361,7 @@ export const pt: Dictionary = {
     dataNotice: 'Os dados publicados podem mudar sem aviso prévio.',
     unofficialNote: 'Site não oficial de fãs (sem afiliação com a FIFA)',
     dataAttribution: 'Parte dos dados das partidas é baseada na Wikipédia (CC BY-SA).',
+    reveal: 'Informações e aviso legal',
   },
   venue: {
     cardAria: '{stadium} venue info',
@@ -415,6 +430,11 @@ export const pt: Dictionary = {
     step3Before: 'Toque em ',
     addButton: '“Adicionar”',
     step3After: 'no canto superior direito para concluir.',
+    androidIntro:
+      'Você pode adicionar um atalho deste site à tela inicial. No Chrome, siga os passos abaixo.',
+    androidStep1: 'Abra o menu ⋮ (canto superior direito).',
+    androidStep2: 'Escolha “Adicionar à tela inicial”.',
+    androidStep3: 'Toque em “Adicionar” para concluir.',
   },
   theme: {
     switchToLight: 'Mudar para o modo claro',

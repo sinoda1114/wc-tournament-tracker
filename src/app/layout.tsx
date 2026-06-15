@@ -7,13 +7,15 @@ import { ColorSchemeScript } from '@mantine/core';
 import type { Metadata, Viewport } from 'next';
 
 import { CookieConsent } from '@/components/CookieConsent';
+import { JsonLd } from '@/components/JsonLd';
 import { PaywallBanner } from '@/components/PaywallBanner';
 import { SiteFooter } from '@/components/SiteFooter';
 import { SiteHeader } from '@/components/SiteHeader';
-import { getSiteUrlObject } from '@/lib/env';
+import { getSiteUrl, getSiteUrlObject } from '@/lib/env';
 import type { Locale } from '@/lib/i18n/config';
 import { getDictionary } from '@/lib/i18n/dictionary';
 import { resolveLocale, resolveTimeZone } from '@/lib/i18n/server';
+import { buildOrganization, buildWebSite } from '@/lib/structured-data';
 
 import { Providers } from './providers';
 import './globals.css';
@@ -22,7 +24,10 @@ import './globals.css';
 // ブランドは MatchFav（2026-06-11 確定）。大会名は名前に含めず説明文の記述的使用に留め、
 // 「FIFA」綴り・図形商標・公式提携の示唆は使わない（知財対策。非公式である旨を必ず併記）。
 const SITE_NAME = 'MatchFav';
-const SITE_TITLE_DEFAULT = 'MatchFav — W杯2026 試合・優勝予想・お気に入りトラッカー（非公式）';
+// 指名検索（ブランド名検索）でカタカナ「マッチファボ」でも当たるよう、英字とカタカナを併記する。
+const SITE_NAME_WITH_KANA = 'MatchFav（マッチファボ）';
+const SITE_TITLE_DEFAULT =
+  'MatchFav（マッチファボ）— W杯2026 試合・優勝予想・お気に入りトラッカー（非公式）';
 const SITE_DESCRIPTION =
   'MatchFav（マッチファボ）は、ワールドカップ2026の日程・結果・優勝予想・お気に入りをひとつにまとめる非公式ファンサイトです（FIFA非公認）。';
 
@@ -36,13 +41,15 @@ export const metadata: Metadata = {
   },
   description: SITE_DESCRIPTION,
   applicationName: SITE_NAME,
+  // 指名検索（ブランド名検索）対策。カタカナ／英字どちらの綴りでも引っかかるよう両方を列挙する。
+  keywords: ['MatchFav', 'マッチファボ', 'マッチファブ', 'ワールドカップ2026', 'W杯2026', '優勝予想'],
   // manifest.ts を参照（PWA）。
   manifest: '/manifest.webmanifest',
   // canonical/hreflang は各ページの generateMetadata で出す（layout に置くと全ページ
   // canonical='/' になり得るため。トップは #19 でロケール別 canonical＋hreflang を出力）。
   openGraph: {
     type: 'website',
-    siteName: SITE_NAME,
+    siteName: SITE_NAME_WITH_KANA,
     title: SITE_TITLE_DEFAULT,
     description: SITE_DESCRIPTION,
     locale: 'ja_JP',
@@ -85,6 +92,12 @@ export default async function RootLayout({
   const dict = getDictionary(locale);
   const timeZone = await resolveTimeZone();
 
+  // 指名検索（ブランド名検索）強化のための JSON-LD。Organization / WebSite に
+  // alternateName=「マッチファボ」を載せ、カタカナ綴りを英字 MatchFav の同義語として伝える。
+  // 絶対 URL は env（NEXT_PUBLIC_SITE_URL）経由。全ページ共通なのでルート layout に置く。
+  const siteUrl = getSiteUrl();
+  const siteJsonLd = [buildOrganization(siteUrl), buildWebSite(siteUrl)];
+
   return (
     // afterSignOutUrl: サインアウト後は Clerk の Account Portal を経由せず自前の公開トップ（/）へ
     // 直接戻す。未設定だと account portal 経由でハング/スピンし続ける事象があるため明示する。
@@ -92,6 +105,8 @@ export default async function RootLayout({
       <html lang={toHtmlLang(locale)} suppressHydrationWarning>
       <head>
         <ColorSchemeScript defaultColorScheme="dark" />
+        {/* サイト全体の構造化データ（Organization / WebSite）。ブランド名の指名検索（T-54）対策。 */}
+        <JsonLd data={siteJsonLd} />
       </head>
       <body>
         <Providers locale={locale} dict={dict} timeZone={timeZone}>

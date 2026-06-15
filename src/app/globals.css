@@ -8,6 +8,9 @@
   --wc-accent: #3b82f6;
   --wc-accent-soft: rgba(59, 130, 246, 0.16);
   --wc-gold: #fbbf24;
+  /* 勝者（試合に勝ったチーム名/スコア）専用のセマンティック色。金=勝利。
+     値は theme-tuned な --wc-gold を参照（ライト=濃アンバー/ダーク=明るい金）。T-50。 */
+  --wc-win: var(--wc-gold);
   --wc-emphasis: #fb923c;
   /* 決勝T 突破=ポジティブを表す緑（順位表の 1-2 位枠・突破ライン）。ダーク用。 */
   --wc-qualify: #22c55e;
@@ -30,7 +33,9 @@
   --wc-accent-soft: rgba(37, 99, 235, 0.12);
   --wc-gold: #b45309;
   --wc-emphasis: #c2410c;
-  --wc-line: rgba(100, 116, 139, 0.45);
+  /* ブラケット接続ライン。半透明だと細線(1.5px)の位置でAA/合成のにじみ方が変わり、
+     セグメントごとに濃淡ムラが出る（T-59）。不透明色に固定して全接続ラインを均一化する。 */
+  --wc-line: #b8bfca;
   --wc-line-strong: rgba(180, 83, 9, 0.65);
   /* ライトテーマ: 白地で沈まないよう少し濃い緑にする。 */
   --wc-qualify: #16a34a;
@@ -108,6 +113,37 @@ a {
   position: sticky;
   top: 0;
   z-index: 20;
+}
+
+/* ヘッダ内側の余白。デスクトップは従来どおり、モバイルで圧縮する（T-55）。 */
+.wc-header-inner {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
+.wc-header-logo {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+}
+
+/* モバイル: 高さ圧縮（余白縮小＋ロゴ縮小）。ナビは折返しを許容しつつ詰める。 */
+@media (max-width: 767px) {
+  .wc-header-inner {
+    padding-top: 0.55rem;
+    padding-bottom: 0.55rem;
+  }
+
+  .wc-header-logo .mantine-Title-root {
+    font-size: 1.25rem;
+    line-height: 1.1;
+  }
+
+  .wc-header-brand {
+    gap: 0.5rem;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
 }
 
 .wc-bracket-scroll {
@@ -191,7 +227,7 @@ a {
 }
 
 .wc-team-row.is-winner {
-  color: var(--wc-accent);
+  color: var(--wc-win);
   font-weight: 700;
 }
 
@@ -257,7 +293,8 @@ a {
 }
 
 :root {
-  --wc-line: rgba(148, 163, 184, 0.55);
+  /* T-59: 不透明色で均一化（半透明だと接続ラインのセグメント間で濃淡ムラ）。ダーク用。 */
+  --wc-line: #5d6675;
   --wc-line-strong: rgba(251, 191, 36, 0.7);
   --wc-line-gap: 18px;
 }
@@ -504,7 +541,7 @@ a {
 }
 
 .wc-mini-team.is-winner {
-  color: var(--wc-accent);
+  color: var(--wc-win);
   font-weight: 700;
 }
 
@@ -562,7 +599,7 @@ a {
 }
 
 .wc-versus-side.is-winner {
-  color: var(--wc-accent);
+  color: var(--wc-win);
 }
 
 .wc-versus-side.is-winner .wc-versus-name {
@@ -585,7 +622,7 @@ a {
 }
 
 .wc-versus-score strong.is-winner {
-  color: var(--wc-accent);
+  color: var(--wc-win);
 }
 
 .wc-third-place {
@@ -627,6 +664,28 @@ a {
 
 .wc-site-nav {
   font-size: 0.95rem;
+}
+
+/* モバイル: ナビを 1 行に保ち横スクロール（折返しで縦に伸びるのを防ぐ・T-55）。 */
+@media (max-width: 767px) {
+  .wc-site-nav {
+    font-size: 0.85rem;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    max-width: 100%;
+  }
+
+  .wc-site-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .wc-site-nav .wc-nav-link {
+    padding: 0.3rem 0.7rem;
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
 }
 
 .wc-nav-link {
@@ -731,6 +790,7 @@ a {
 /* ===== お気に入りチーム機能 ===== */
 
 .wc-favorite-star {
+  position: relative;
   cursor: pointer;
   background: transparent;
   border: 0;
@@ -743,6 +803,21 @@ a {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+}
+
+/* タップ判定の不可視拡張（WCAG 2.2 Target Size）。視覚サイズ（小さな星）は保ったまま
+   当たり判定だけを最低 36x36px へ広げる。デスクトップ表示・周囲レイアウトは不変。
+   モバイル幅では 44x44px まで拡張する（下の @media を参照）。 */
+.wc-favorite-star::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+  min-width: 36px;
+  min-height: 36px;
 }
 
 .wc-favorite-star:hover {
@@ -1477,7 +1552,7 @@ a {
 
 .wc-match-event {
   display: grid;
-  grid-template-columns: 2.5rem 1.4rem 1fr auto;
+  grid-template-columns: 2.5rem 1.4rem 1fr;
   align-items: baseline;
   gap: 0.5rem;
 }
@@ -1520,11 +1595,11 @@ a {
   padding: 0.02rem 0.45rem;
 }
 
-.wc-match-event-team {
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: var(--wc-muted);
-  font-variant-numeric: tabular-nums;
+.wc-match-event-flag {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 0.35rem;
+  vertical-align: middle;
 }
 
 .wc-match-event-yellow_card .wc-match-event-kind {
@@ -2232,4 +2307,276 @@ a {
   text-align: center;
   border: 1px dashed var(--wc-border);
   border-radius: 10px;
+}
+
+/* =====================================================================
+   スマホ画面最適化（T-56）
+   <768px のみ。デスクトップ表示は一切変更しない。
+   1) タップ領域 44x44px 以上（WCAG 2.2 Target Size）
+   2) 隣接ボタンの余白で誤タップ防止
+   3) 試合カードのスコア可読性・国旗・縦余白
+   4) 日付フィルターのチップ間隔・最小高さ
+   5) レスポンシブ・タイポ/余白
+   ===================================================================== */
+@media (max-width: 767px) {
+  /* --- 1) お気に入り星: 当たり判定を 44x44 まで拡張（見た目の星は不変） --- */
+  .wc-favorite-star::before {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  /* --- 1) view 切替トグル（ブラケット/カード）: タブを 44px 高に --- */
+  .wc-view-toggle button {
+    min-height: 44px;
+    padding: 0.5rem 1.1rem;
+    font-size: 0.9rem;
+  }
+
+  /* --- 1)+2) 日付フィルターのクイックバッジ: 44px 高・押し分けやすく --- */
+  .wc-date-filter-quick {
+    /* 横スクロール時もチップが潰れないように一列キープ */
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    max-width: 100%;
+    gap: 0.35rem;
+  }
+
+  .wc-date-filter-quick::-webkit-scrollbar {
+    display: none;
+  }
+
+  .wc-date-filter-badge {
+    min-height: 40px;
+    padding: 0.45rem 0.95rem;
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
+  /* --- 1) カレンダー起動ボタン・選択日チップ・× を 44px 系へ --- */
+  .wc-date-filter-actions {
+    gap: 0.6rem;
+    flex-wrap: wrap;
+  }
+
+  .wc-date-filter-calendar-button {
+    min-height: 44px;
+    padding: 0.5rem 1rem;
+  }
+
+  .wc-date-filter-active-chip {
+    min-height: 40px;
+    padding: 0.35rem 0.55rem 0.35rem 0.8rem;
+  }
+
+  /* × の当たり判定を確保（視覚は据え置き、内側で広げる） */
+  .wc-date-filter-reset {
+    min-width: 32px;
+    min-height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+  }
+
+  /* --- 3) 試合カード: 縦余白と区切りを少しゆとりへ（崩さず読みやすく） --- */
+  .wc-match-card-header {
+    gap: 0.4rem 0.55rem;
+    font-size: 0.8rem;
+  }
+
+  /* スコアを大きく・はっきり（小画面で 1 桁スコアが視認しづらいのを改善） */
+  .wc-versus-score {
+    gap: 0.5rem;
+    padding: 0 0.35rem;
+  }
+
+  .wc-versus-score strong {
+    font-size: 1.25em;
+  }
+
+  /* チーム名はモバイルで詰まりやすいので字間を少し緩める */
+  .wc-versus-md {
+    font-size: 0.95rem;
+  }
+
+  .wc-versus-md .wc-versus-side {
+    gap: 0.4rem;
+  }
+
+  /* --- 5) ブラケット内の versus（sm）はそのまま、タッチ最小高だけ確保 --- */
+  .wc-versus {
+    min-height: 28px;
+  }
+}
+
+/* さらに狭い端末（<=390px）: 横詰まりを避ける微調整 */
+@media (max-width: 390px) {
+  .wc-versus-md {
+    font-size: 0.9rem;
+    gap: 0.5rem;
+  }
+
+  .wc-match-card-header {
+    font-size: 0.76rem;
+  }
+
+  .wc-date-filter-badge {
+    padding: 0.45rem 0.8rem;
+  }
+}
+
+/* =====================================================================
+   スマホUI 微調整 第2弾（T-57）
+   <768px のみ。PC（>=768px）表示は一切不変＝PC不可侵（方針決定 2026-06-13）。
+   ⑤ 順位表のモバイル可読性（最重要）/ ② ナビ切替ボタンのコンパクト化 /
+   ③ お気に入りフィルタを左・押しやすく / ⑥ トップ縦スタック圧縮（H1/説明文）
+   ===================================================================== */
+@media (max-width: 767px) {
+  /* --- ⑤ 順位表: 11列は狭幅で窮屈＋チーム名が縦割れ（「メキシコ」が割れる）。
+     モバイルは低優先列（勝/分/敗/得点/失点）を畳み、
+     #・国旗・チーム・試合数・得失点差・勝点だけ残す。デスクトップは全列のまま。 --- */
+  .wc-standings-table th:nth-child(5),
+  .wc-standings-table td:nth-child(5), /* 勝 W */
+  .wc-standings-table th:nth-child(6),
+  .wc-standings-table td:nth-child(6), /* 分 D */
+  .wc-standings-table th:nth-child(7),
+  .wc-standings-table td:nth-child(7), /* 敗 L */
+  .wc-standings-table th:nth-child(8),
+  .wc-standings-table td:nth-child(8), /* 得点 GF */
+  .wc-standings-table th:nth-child(9),
+  .wc-standings-table td:nth-child(9) /* 失点 GA */ {
+    display: none;
+  }
+
+  /* 残列はやや詰めつつ、チーム列に幅を回す。 */
+  .wc-standings-table th,
+  .wc-standings-table td {
+    padding: 0.45rem 0.3rem;
+  }
+
+  /* チーム名（2つ目の span = ローカライズ名）は 1 行省略にして縦割れを根絶。 */
+  .wc-standings-team-cell {
+    max-width: 44vw;
+  }
+
+  .wc-standings-team-cell > span:last-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+  }
+
+  /* --- ② ナビ切替ボタン（グループリーグ/決勝T/出場国…）をさらにコンパクトに --- */
+  .wc-site-nav {
+    font-size: 0.8rem;
+  }
+
+  .wc-site-nav .wc-nav-link {
+    padding: 0.26rem 0.62rem;
+  }
+
+  /* --- ⑥ H1 はナビ項目と文言が重複しがち（例: グループリーグ）。
+     モバイルは少し小さくして主張を抑え、本体（順位表）を上へ。 --- */
+  .wc-home-heading-row .mantine-Title-root {
+    font-size: 1.4rem;
+    line-height: 1.25;
+  }
+
+  /* 説明文はモバイルで冗長になりがち。サイズを落として縦の専有を減らす。 */
+  .wc-home-heading-desc {
+    font-size: 0.82rem;
+    line-height: 1.45;
+  }
+
+  /* --- ③ お気に入りフィルタ「☆のみを表示」を見出し行の最左・最上段へ。
+     親指で届きやすい左肩に独立配置（タイトルはその下へ回す）。 --- */
+  .wc-home-heading-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .wc-home-heading-row .wc-favorite-filter-toggle {
+    order: -1;
+  }
+}
+
+/* =====================================================================
+   スマホUI 微調整 第3弾（T-58）
+   <768px のみ。PC（>=768px）表示は一切不変＝PC不可侵（方針決定 2026-06-13）。
+   ② お気に入り⭐をチーム行の最左へ（本サービスのコンセプト＝ファボ重視。
+      親指で届きやすい左に。PC は従来どおり行の右のまま）。
+   ===================================================================== */
+@media (max-width: 767px) {
+  /* `/teams` のチーム行（.wc-team-chip）: ⭐ を行頭（最左）へ。
+     order だけで並びを入れ替え、DOM/PC レイアウトは不変。 */
+  .wc-team-chip .wc-favorite-star {
+    order: -1;
+    margin-right: 0.15rem;
+    margin-left: 0.45rem;
+  }
+
+  /* ⭐ が左に来た分、リンク側の左パディングを詰めて余白の二重取りを避ける。 */
+  .wc-team-chip-main {
+    padding-left: 0.2rem;
+  }
+}
+
+/* ===== ランキング修正（T-63/T-65） ===== */
+/* 出場停止アイコン（🚫）。スマホでも潰れず読めるサイズと行揃え。 */
+.wc-ranking-susp-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.05rem;
+  line-height: 1;
+  /* 絵文字フォントを明示し、環境差での極端な縮小を避ける。 */
+  font-family:
+    'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', system-ui, sans-serif;
+}
+
+/* ===== 日付一覧グループ名（T-64） ===== */
+/*
+ * 試合カードヘッダの「グループ名／ステージ名」バッジ。
+ * ヘッダ既定の `.mantine-Badge-root { margin-left: auto }` は右端の状態バッジ用なので、
+ * このグループバッジは打ち消して #id の直後にインライン表示する。控えめなグレー。
+ */
+.wc-match-card-header .mantine-Badge-root.wc-match-card-group {
+  margin-left: 0;
+}
+
+/* ===== 投票ガイド/予想注記（T-69/T-70） ===== */
+/* 国未選択時のヘルパーテキスト。検索欄の下に控えめに表示する。 */
+.wc-vote-hint {
+  margin-top: 0.25rem;
+}
+
+/* ===== スマホナビ横スクロール発見性（T-72） ===== */
+/* 上部ナビ（お気に入り/グループリーグ/決勝T/出場国/予想/ランキング）はスマホで
+   横スクロールするが、続きがある（スクロールできる）ことが見た目で分からなかった。
+   右端フェード＋次項目の半見せ(peek)で「まだ続きがある」を示す。
+   変更はスマホ幅(<=767px)のみ。PC(>=768px)表示は一切変更しない。 */
+@media (max-width: 767px) {
+  /* マスクのフェード幅。右端の最後の項目より少し奥（右）に最初の色止め(#000)を置き、
+     そこから transparent へ。スクロールを右端まで送ると、右に隠れていた中身がなくなり
+     フェードは自然と弱まる（=端まで来たら気にならなくなる）。 */
+  .wc-site-nav {
+    --wc-nav-fade: 28px;
+    /* 次項目の半見せ(peek): 右端にフェード幅ぶんの余白を作り、最後の項目を少し見切れ
+       させて続きを示唆する。余白をフェード幅と揃えることで、右端まで送り切ったときは
+       最後の項目がフェードの外（くっきり）に出て、薄く残り続けないようにする。 */
+    padding-right: var(--wc-nav-fade);
+    -webkit-mask-image: linear-gradient(
+      to right,
+      #000 calc(100% - var(--wc-nav-fade)),
+      transparent 100%
+    );
+    mask-image: linear-gradient(
+      to right,
+      #000 calc(100% - var(--wc-nav-fade)),
+      transparent 100%
+    );
+  }
 }

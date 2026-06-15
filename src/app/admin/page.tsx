@@ -1,7 +1,8 @@
 import { notFound } from 'next/navigation';
-import { Container, Divider, Stack, Text, Title } from '@mantine/core';
+import { Container, Divider, Group, Stack, Text, Title } from '@mantine/core';
 
 import { AdminMatchTable } from '@/components/AdminMatchTable';
+import { ButtonLink } from '@/components/RouterLink';
 import { AdminVoteReset } from '@/components/AdminVoteReset';
 import { listTournamentMatches } from '@/db/queries';
 import { isAdmin } from '@/lib/auth';
@@ -19,10 +20,18 @@ export default async function AdminPage() {
   return (
     <Container size="xl" py="xl">
       <Stack gap="lg">
-        <Stack gap={4}>
-          <Title order={1}>試合結果更新</Title>
-          <Text c="dimmed">スコアと勝者を保存すると、次の試合へ自動反映されます。</Text>
-        </Stack>
+        <Group justify="space-between" align="flex-start" wrap="wrap" gap="sm">
+          <Stack gap={4}>
+            <Title order={1}>試合結果更新</Title>
+            <Text c="dimmed">スコアと勝者を保存すると、次の試合へ自動反映されます。</Text>
+          </Stack>
+          {/* データヘルス（T-82・取込の自動監査）への導線を上部に目立つボタンで配置。
+              Server Component から Mantine へ component={Link}（関数）を直接渡すと RSC で throw するため、
+              関数渡しを client 境界に隠蔽した ButtonLink を使う。 */}
+          <ButtonLink href="/admin/health" variant="light" leftSection="📊">
+            データヘルス（取込の自動監査）
+          </ButtonLink>
+        </Group>
 
         <AdminMatchTable matches={matches} />
 

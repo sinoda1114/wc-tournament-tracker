@@ -83,17 +83,8 @@ function SiteNavInner({ labels, groupPhase }: SiteNavProps) {
 
   return (
     <Group gap="xs" className="wc-site-nav" role="navigation" aria-label={labels.label}>
-      {items.map((item) => (
-        <Link
-          key={item.key}
-          href={item.href}
-          className={`wc-nav-link${item.active ? ' is-active' : ''}`}
-          aria-current={item.active ? 'page' : undefined}
-        >
-          {labels[item.key]}
-        </Link>
-      ))}
-
+      {/* お気に入り(⭐)は最左に固定する（PC・モバイル共通）。本サービスのコンセプト＝
+          ファボ重視＝視線/親指が最初に届く左端へ（篠田 2026-06-13: PC も左で確定）。 */}
       <Link
         href="/favorites"
         className={`wc-nav-link wc-nav-favorites${isFavoritesActive ? ' is-active' : ''}${hasFavorites ? ' has-favorites' : ''}`}
@@ -108,6 +99,17 @@ function SiteNavInner({ labels, groupPhase }: SiteNavProps) {
           </span>
         ) : null}
       </Link>
+
+      {items.map((item) => (
+        <Link
+          key={item.key}
+          href={item.href}
+          className={`wc-nav-link${item.active ? ' is-active' : ''}`}
+          aria-current={item.active ? 'page' : undefined}
+        >
+          {labels[item.key]}
+        </Link>
+      ))}
     </Group>
   );
 }

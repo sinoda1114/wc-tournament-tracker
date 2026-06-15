@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
-import { Anchor, Button, Text } from '@mantine/core';
+import { Anchor, Badge, Button, Text } from '@mantine/core';
 
 import { CountryFlag } from '@/components/CountryFlag';
 import { TeamSearchCombobox } from '@/components/TeamSearchCombobox';
@@ -34,6 +34,8 @@ type VotePanelProps = {
   myVoteTeamId: string | null;
   /** 過去ラウンドの投票結果（履歴）。新しい順は呼び出し側で整える。 */
   archives?: ArchiveEntry[];
+  /** 締切表示時、次ステージの出場国確定待ち（移行中）か。true なら「まもなく開始」を出す。 */
+  closedSoon?: boolean;
 };
 
 export function VotePanel({
@@ -43,6 +45,7 @@ export function VotePanel({
   candidates,
   myVoteTeamId,
   archives = [],
+  closedSoon = false,
 }: VotePanelProps) {
   const { locale, dict } = useI18n();
   const t = dict.vote;
@@ -86,7 +89,7 @@ export function VotePanel({
 
       {stage === null ? (
         <Text c="dimmed" size="sm">
-          {t.closed}
+          {closedSoon ? t.closedSoon : t.closed}
         </Text>
       ) : myVoteTeamId ? (
         <div className="wc-vote-form">
@@ -114,7 +117,16 @@ export function VotePanel({
         <div className="wc-vote-form">
           <Text size="sm">
             {t.currentPrefix}
-            <strong>{stageLabel}</strong>
+            <Badge
+              component="span"
+              color="blue"
+              variant="filled"
+              size="sm"
+              mx={4}
+              style={{ verticalAlign: 'middle' }}
+            >
+              {stageLabel}
+            </Badge>
             {t.currentSuffix}
           </Text>
 
@@ -138,6 +150,13 @@ export function VotePanel({
               {t.submit}
             </Button>
           </div>
+
+          {/* 国を未選択の間だけ表示する控えめなガイド（T-69）。投票ボタンが押せない理由を事前に伝える。 */}
+          {!selectedId ? (
+            <Text c="dimmed" size="xs" className="wc-vote-hint">
+              {t.selectHint}
+            </Text>
+          ) : null}
 
           <Text c="dimmed" size="sm" className="wc-vote-note">
             {t.noteLine1.replace('{progression}', progression)}{' '}

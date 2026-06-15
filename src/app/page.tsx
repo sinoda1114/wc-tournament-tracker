@@ -22,7 +22,8 @@ export async function generateMetadata(): Promise<Metadata> {
     alternates,
     openGraph: {
       type: 'website',
-      siteName: 'MatchFav',
+      // 指名検索（ブランド名検索）対策でカタカナ併記。layout の siteName と揃える。
+      siteName: 'MatchFav（マッチファボ）',
       title,
       description,
       url: alternates.canonical,

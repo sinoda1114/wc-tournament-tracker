@@ -69,3 +69,28 @@ export type MatchEventContext = {
 export interface MatchEventProvider {
   fetchMatchEvents(context: MatchEventContext): Promise<NormalizedMatchEvent[]>;
 }
+
+/** 結果フォールバックの対象（=主ソースが確定できなかった試合）の最小情報。 */
+export type FallbackResultTarget = {
+  /** 'group_stage' 等。フォールバック対応外のステージは provider 側で無視する。 */
+  stage: string;
+  /** グループ文字（'A'..'L'）。グループステージ以外は null。 */
+  groupLetter: string | null;
+  /** 我々の home チームの FIFAコード（大文字）。 */
+  homeCode: string;
+  /** 我々の away チームの FIFAコード（大文字）。 */
+  awayCode: string;
+  /** 'YYYY-MM-DD'（会場日付）。返す NormalizedResult の dateEvent に使う。 */
+  matchDate: string;
+};
+
+/**
+ * 主ソース（TheSportsDB）が未掲載/未確定の試合だけを対象に、補完ソース（例: Wikipedia）から
+ * 結果（スコア/finished）を導出する任意機能（T-82③・単一ソース依存の緩和）。
+ *
+ * - run 層は「未確定の試合」だけを targets として渡すため、確定済みを上書きしない（主ソース優先）。
+ * - 持たない provider では呼ばれず、取込は従来どおり動く（Partial 連携）。
+ */
+export interface ResultFallbackProvider {
+  fetchFallbackResults(targets: FallbackResultTarget[]): Promise<NormalizedResult[]>;
+}

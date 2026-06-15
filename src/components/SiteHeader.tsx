@@ -10,6 +10,7 @@ import type { Locale } from '@/lib/i18n/config';
 import type { Dictionary } from '@/lib/i18n/dictionary';
 
 import { AddToHomeScreen } from './AddToHomeScreen';
+import { HeaderControls } from './HeaderControls';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { SiteNav } from './SiteNav';
 import { ThemeToggle } from './ThemeToggle';
@@ -29,30 +30,36 @@ export async function SiteHeader({ locale, dict }: SiteHeaderProps) {
 
   return (
     <header className="wc-header">
-      <Container size="xl" py="md">
-        <Group justify="space-between" align="center" wrap="wrap" gap="md">
-          <Group gap="lg" align="center" wrap="wrap">
-            <Link href="/">
+      <Container size="xl" className="wc-header-inner">
+        <Group justify="space-between" align="center" wrap="nowrap" gap="md">
+          <Group gap="lg" align="center" wrap="wrap" className="wc-header-brand">
+            <Link href="/" className="wc-header-logo">
               <Title order={2} c="var(--wc-text)">
                 MatchFav
               </Title>
             </Link>
             <SiteNav labels={dict.nav} groupPhase={isFreePeriod(new Date())} />
           </Group>
-          <Group gap="sm" align="center" wrap="nowrap">
-            {admin ? (
-              <TextLink href="/admin" c="dimmed" size="sm">
-                {dict.header.admin}
-              </TextLink>
-            ) : null}
+          {/* 低優先操作（言語/TZ/テーマ/DL/管理）はモバイルで ⋮→Drawer に集約。
+              UserButton（ログイン中のみ）も PC は inline、モバイルは ⋮ Drawer 先頭へ格納し
+              右上をミニマム化する（#37/T-55/T-66）。 */}
+          <HeaderControls
+            menuLabel={dict.header.menu}
+            settingsLabel={dict.header.settings}
+            account={user ? <UserButton /> : undefined}
+            adminLink={
+              admin ? (
+                <TextLink href="/admin" c="dimmed" size="sm">
+                  {dict.header.admin}
+                </TextLink>
+              ) : undefined
+            }
+          >
             <LanguageSwitcher locale={locale} label={dict.language.label} />
             <TimeZonePicker label={dict.timezone.label} />
             <AddToHomeScreen />
             <ThemeToggle />
-            {/* 未ログイン時のログイン導線はヒーローのCTA（トップ）と各保護ページの
-                リダイレクトが担うため、ヘッダには出さない（#37 フィードバック）。 */}
-            {user ? <UserButton /> : null}
-          </Group>
+          </HeaderControls>
         </Group>
       </Container>
     </header>
