@@ -148,10 +148,6 @@ export const zh: Dictionary = {
       in_progress: '进行中',
       finished: '已结束',
     },
-    dataState: {
-      pending: '数据确认中',
-      provisional: '快讯',
-    },
     slot: {
       winner: '第{n}场胜者',
       loser: '第{n}场负者',

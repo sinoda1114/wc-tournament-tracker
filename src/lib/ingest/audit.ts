@@ -55,7 +55,8 @@ export type AuditFindingKind =
   | 'stale_unfinished'
   | 'scorers_incomplete'
   | 'scorers_excess'
-  | 'scorers_side_mismatch';
+  | 'scorers_side_mismatch'
+  | 'finished_no_subs';
 
 export type AuditSeverity = 'error' | 'warn';
 
@@ -79,6 +80,8 @@ export type AuditReport = {
     staleUnfinished: number;
     /** 整合監査（得点者の過不足/左右ズレ）の件数。 */
     scoreMismatch: number;
+    /** 終了グループ戦なのに交代0件＝TheSportsDBのみ取込疑いの件数（T-85(C)）。 */
+    finishedNoSubs: number;
   };
 };
 
@@ -147,6 +150,8 @@ export function auditMatches(
   matches: AuditMatchInput[],
   goalEvents: AuditGoalEvent[],
   config: AuditConfig = {},
+  /** 交代イベントを1件以上持つ試合 id（T-85(C) の「交代0件」検知用）。未指定なら検知しない。 */
+  substitutionMatchIds: Set<number> = new Set(),
 ): AuditReport {
   const staleHours = config.staleHours ?? DEFAULT_STALE_HOURS;
   const now = config.now ?? new Date();
@@ -245,15 +250,41 @@ export function auditMatches(
         }
       }
     }
+
+    // --- TheSportsDBのみ取込の疑い: 終了したグループ戦なのに交代イベントが0件（T-85(C)） ---
+    // Wikipedia は通常 交代を含むので、0件は「Wikipediaエンリッチ未収束＝TheSportsDB(得点のみ)」の疑い。
+    // 24h再同期で収束見込みだが、収束しない個体を検知して可視化する。
+    if (
+      m.status === 'finished' &&
+      m.stage === 'group_stage' &&
+      m.homeTeamId &&
+      m.awayTeamId &&
+      !substitutionMatchIds.has(m.id)
+    ) {
+      findings.push({
+        matchId: m.id,
+        kind: 'finished_no_subs',
+        severity: 'warn',
+        message:
+          '終了したグループ戦なのに交代イベントが0件＝TheSportsDB のみ取込の疑い（Wikipedia再同期で収束見込み）。',
+        context: {
+          stage: m.stage,
+          group: m.groupLetter,
+          homeScore: m.homeScore,
+          awayScore: m.awayScore,
+        },
+      });
+    }
   }
 
   const staleUnfinished = findings.filter((f) => f.kind === 'stale_unfinished').length;
-  const scoreMismatch = findings.length - staleUnfinished;
+  const finishedNoSubs = findings.filter((f) => f.kind === 'finished_no_subs').length;
+  const scoreMismatch = findings.length - staleUnfinished - finishedNoSubs;
 
   return {
     generatedAt: now.toISOString(),
     checkedMatches: matches.length,
     findings,
-    counts: { staleUnfinished, scoreMismatch },
+    counts: { staleUnfinished, scoreMismatch, finishedNoSubs },
   };
 }

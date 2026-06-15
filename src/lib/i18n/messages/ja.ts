@@ -162,10 +162,6 @@ export const ja = {
       in_progress: '試合中',
       finished: '終了',
     },
-    dataState: {
-      pending: 'データ確認中',
-      provisional: '速報',
-    },
     slot: {
       winner: '勝者 #{n}',
       loser: '敗者 #{n}',
