@@ -166,7 +166,7 @@ export const pt: Dictionary = {
     },
     weekdays: ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'],
     events: {
-      title: 'Lances da partida',
+      title: 'Linha do tempo',
       aria: 'Gols, cartões e substituições',
       assist: 'Assistência',
       type: {

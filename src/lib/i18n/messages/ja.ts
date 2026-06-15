@@ -180,7 +180,7 @@ export const ja = {
     },
     weekdays: ['日', '月', '火', '水', '木', '金', '土'],
     events: {
-      title: '試合のできごと',
+      title: 'タイムライン',
       aria: '試合中の得点・カード・交代',
       assist: 'アシスト',
       type: {

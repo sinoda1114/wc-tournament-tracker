@@ -166,7 +166,7 @@ export const en: Dictionary = {
     },
     weekdays: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
     events: {
-      title: 'Match events',
+      title: 'Timeline',
       aria: 'Goals, cards and substitutions',
       assist: 'Assist',
       type: {
