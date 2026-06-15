@@ -1,5 +1,8 @@
 import { connection } from 'next/server';
 
+import { auth } from '@clerk/nextjs/server';
+
+import { hasActiveEntitlement } from '@/db/queries/billing';
 import type { Locale } from '@/lib/i18n/config';
 import type { Dictionary } from '@/lib/i18n/dictionary';
 import { isFreePeriod, priceDisplayForLocale } from '@/lib/pricing';
@@ -20,11 +23,19 @@ type PaywallBannerProps = {
  */
 export async function PaywallBanner({ locale, dict }: PaywallBannerProps) {
   await connection();
-  // TODO(#14): 課金(entitlement)実装後、購入者にはこのバナーを出さない。
-  //   ここに「entitlement 未保有のときだけ表示」の条件を1つ足す:
-  //   const hasEntitlement = await getEntitlement(); if (hasEntitlement) return null;
-  //   現状は決済導線が無く購入者ゼロのため、無料期間中は全員に表示するのが正しい。
+  // 無料期間（決勝T開始前）以外は出さない。
   if (!isFreePeriod(new Date())) return null;
+
+  // #26補足(T-14): 購入済みユーザーには予告バナーを出さない（恒久解放済みのため不要）。
+  // 例外時は fail-open（バナーを出す）— バナーは非機密の告知なので過剰非表示を避ける。
+  const { userId } = await auth();
+  if (userId) {
+    try {
+      if (await hasActiveEntitlement(userId)) return null;
+    } catch {
+      // DB 障害時はバナー表示を継続（告知の取りこぼしを避ける）。
+    }
+  }
 
   const t = dict.paywall;
   const message = t.bannerMessage.replace('{price}', priceDisplayForLocale(locale));

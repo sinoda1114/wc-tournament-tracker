@@ -1,8 +1,10 @@
 import type { Metadata } from 'next';
 import { Container, Stack, Text, Title } from '@mantine/core';
 
+import { PaywallLock } from '@/components/billing/PaywallLock';
 import { ChampionPrediction } from '@/components/ChampionPrediction';
 import { VotePanel } from '@/components/VotePanel';
+import { resolveAccess } from '@/lib/billing/access';
 import {
   getMyVotes,
   listCrowdVotes,
@@ -61,8 +63,14 @@ export default async function PredictionPage() {
     readVoterId(),
   ]);
 
-  const dict = getDictionary(await resolveLocale());
+  const locale = await resolveLocale();
+  const dict = getDictionary(locale);
   const now = new Date();
+
+  // 決勝トーナメント投票（投票パネル）は課金壁の対象。サーバ判定（クライアント詐称不可）。
+  // 無料期間中は誰でも解放、決勝T突入後は「購入済み or 72h救済」のみ解放。
+  // それ以外は VotePanel の代わりに PaywallLock を出す。group_stage 投票は無料（T-51）。
+  const access = await resolveAccess();
 
   // ③2026成績は matches から、④みんなの予想は投票からライブ計算される。
   const crowdCounts = aggregateLatestVotes(votes);
@@ -133,15 +141,19 @@ export default async function PredictionPage() {
           eliminatedIds={eliminatedIds}
         />
 
-        <VotePanel
-          stage={stage}
-          stageLabel={stage ? dict.match.stage[stage] : null}
-          nextStageLabel={nextStageLabel}
-          candidates={candidates}
-          myVoteTeamId={myVoteTeamId}
-          archives={archives}
-          closedSoon={closedSoon}
-        />
+        {access.hasAccess ? (
+          <VotePanel
+            stage={stage}
+            stageLabel={stage ? dict.match.stage[stage] : null}
+            nextStageLabel={nextStageLabel}
+            candidates={candidates}
+            myVoteTeamId={myVoteTeamId}
+            archives={archives}
+            closedSoon={closedSoon}
+          />
+        ) : (
+          <PaywallLock locale={locale} dict={dict} />
+        )}
       </Stack>
     </Container>
   );

@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 
 import { castCrowdVote, listTournamentMatches } from '@/db/queries';
+import { hasKnockoutAccess } from '@/lib/billing/access';
 import {
   aliveTeamIdsForStage,
   stageOpenForVoting,
@@ -15,11 +16,11 @@ export type VoteActionResult =
   | { ok: true }
   | {
       ok: false;
-      reason: 'closed' | 'wrong_stage' | 'invalid_team' | 'locked' | 'auth' | 'error';
+      reason: 'closed' | 'wrong_stage' | 'invalid_team' | 'locked' | 'auth' | 'paywall' | 'error';
       message: string;
     };
 
-/** 決勝トーナメント系（KO）のステージ。ここに #46 マージ後の entitlement ゲートを差し込む。 */
+/** 決勝トーナメント系（KO）のステージ。これらの投票は entitlement（買い切り）ゲートの対象。 */
 const KNOCKOUT_STAGES: readonly VotingStage[] = [
   'round_of_32',
   'round_of_16',
@@ -67,13 +68,6 @@ export async function castVoteAction(
       };
     }
 
-    // 決勝トーナメント系ステージはここで集約。
-    // TODO(#46): #46（hasKnockoutAccess）マージ後、ここに entitlement ゲートを追加する。
-    //   例: if (isKnockoutStage(current) && !(await hasKnockoutAccess(...))) return paywall;
-    if (isKnockoutStage(current)) {
-      // 現状は課金ゲートなし（T-14/#46 マージ後に有効化）。
-    }
-
     if (!aliveTeamIdsForStage(matches, current).includes(teamId)) {
       return { ok: false, reason: 'invalid_team', message: 'そのチームには投票できません。' };
     }
@@ -83,6 +77,18 @@ export async function castVoteAction(
     if (!voterId) {
       return { ok: false, reason: 'auth', message: 'ログインすると投票できます。' };
     }
+
+    // 決勝トーナメント（KO）ステージの投票は課金壁の対象。サーバ側で fail-closed に
+    // 再判定する（PaywallLock を迂回した API 直叩きでの詐称を許さない）。無料期間中・購入済み・
+    // 72h救済中は解放、それ以外（決勝T突入後の未購入）は拒否。group_stage は無料（T-51）。
+    if (isKnockoutStage(current) && !(await hasKnockoutAccess())) {
+      return {
+        ok: false,
+        reason: 'paywall',
+        message: '決勝トーナメントの投票は購入後にご利用いただけます。',
+      };
+    }
+
     const result = await castCrowdVote({ voterId, stage: current, teamId });
     if (result === 'locked') {
       return {

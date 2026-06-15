@@ -297,6 +297,7 @@ export const zh: Dictionary = {
       locked: '本阶段已投过票。',
       error: '投票失败，请稍后再试。',
       auth: '登录后即可投票。',
+      paywall: '淘汰赛阶段的投票需购买后使用。',
     },
     sectionAria: '为大家的预测投票',
     title: '你的夺冠预测',
@@ -324,6 +325,21 @@ export const zh: Dictionary = {
     bannerAria: '收费提示',
     bannerMessage:
       '淘汰赛阶段（6月29日起）为一次性买断 {price}。小组赛阶段现在即可免费畅享。',
+    lockTitle: '解锁淘汰赛阶段',
+    lockBody:
+      '淘汰赛预测与对阵表可通过一次性买断 {price}（MatchFav Full Access）使用。一次付费，用到赛事结束。',
+    lockCta: '以 {price} 购买',
+    lockSignIn: '登录后购买',
+    offerPeriod: '提供期间：截至 {offerEnd}',
+    purchasing: '正在打开结账页面…',
+    purchaseError: '无法打开结账页面，请稍后再试。',
+    successTitle: '感谢您的购买',
+    successBody:
+      'MatchFav Full Access 已激活。尽享淘汰赛预测与对阵表。生效可能需要片刻。',
+    successCta: '前往淘汰赛',
+    cancelTitle: '购买已取消',
+    cancelBody: '未进行任何付款。您可以随时重新结账。',
+    cancelCta: '返回首页',
   },
   footer: {
     brandTitle: 'MatchFav — 2026世界杯你想看的一切，尽在一处',

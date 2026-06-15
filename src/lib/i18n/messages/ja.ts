@@ -320,6 +320,7 @@ export const ja = {
       locked: 'このステージはすでに投票済みです。',
       error: '投票に失敗しました。時間をおいて再度お試しください。',
       auth: 'ログインすると投票できます。',
+      paywall: '決勝トーナメントの投票は購入後にご利用いただけます。',
     },
     sectionAria: 'みんなの予想に投票',
     title: 'あなたの優勝予想',
@@ -350,6 +351,21 @@ export const ja = {
     bannerAria: '課金のお知らせ',
     bannerMessage:
       '決勝トーナメント（6/29）から有料 買い切り {price}。グループリーグは無料でお楽しみいただけます。',
+    lockTitle: '決勝トーナメントは買い切りでフルアクセス',
+    lockBody:
+      '決勝トーナメントの予想・対戦表は買い切り {price}（MatchFav フルアクセス）でご利用いただけます。一度のお支払いで大会終了まで使えます。',
+    lockCta: '{price} で購入する',
+    lockSignIn: 'ログインして購入する',
+    offerPeriod: '提供期間: 〜{offerEnd}',
+    purchasing: '決済ページへ移動中…',
+    purchaseError: '決済ページを開けませんでした。時間をおいて再度お試しください。',
+    successTitle: 'ご購入ありがとうございます',
+    successBody:
+      'MatchFav フルアクセスが有効になりました。決勝トーナメントの予想・対戦表をお楽しみください。反映に少し時間がかかる場合があります。',
+    successCta: '決勝トーナメントへ',
+    cancelTitle: '購入はキャンセルされました',
+    cancelBody: '決済は行われていません。いつでも購入手続きを再開できます。',
+    cancelCta: 'トップへ戻る',
   },
   footer: {
     brandTitle: 'MatchFav — W杯2026の「見たい」を、ぜんぶ1か所に',

@@ -15,9 +15,9 @@ describe('priceDisplayForLocale', () => {
     expect(priceDisplayForLocale('ja')).toBe('¥980');
   });
 
-  it('日本語以外は $10', () => {
+  it('日本語以外は $7（通常価格＝早割後の上限）', () => {
     for (const locale of ['en', 'es', 'pt', 'zh'] as const) {
-      expect(priceDisplayForLocale(locale)).toBe('$10');
+      expect(priceDisplayForLocale(locale)).toBe('$7');
     }
   });
 });
