@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# 本体（リポ実体ディレクトリ＝main統合＋デプロイ専用）での commit を物理的に拒否する。
+# 機能開発は必ず worktree で行う規律（CLAUDE.md / dev-workflow-multiagent）のフールプルーフ。
+#
+# 判定: 本体は git-dir == common-dir、worktree は git-dir != common-dir。
+#   本体     git-dir = <repo>/.git              / common-dir = <repo>/.git
+#   worktree git-dir = <repo>/.git/worktrees/x  / common-dir = <repo>/.git
+# 両者を同じ流儀（cd + pwd -P）で物理絶対パスに正規化して比較する。
+set -euo pipefail
+
+resolve() { cd "$1" 2>/dev/null && pwd -P; }
+git_dir=$(resolve "$(git rev-parse --git-dir)") || git_dir=""
+common_dir=$(resolve "$(git rev-parse --git-common-dir)") || common_dir=""
+
+# fail-safe: 判定できないときは安全側（拒否）に倒す。
+if [ -z "$git_dir" ] || [ -z "$common_dir" ]; then
+  echo "⛔ git ディレクトリの判定に失敗しました。安全のため commit を中断します（回避: git commit --no-verify）。" >&2
+  exit 1
+fi
+
+if [ "$git_dir" = "$common_dir" ]; then
+  cat >&2 <<'MSG'
+⛔ 本体ディレクトリでの commit は禁止です（main 統合＋デプロイ専用）。
+   機能開発は worktree で行ってください:
+       scripts/new-worktree.sh <topic>
+   緊急で本体コミットが必要な場合のみ（番人の判断で）:
+       git commit --no-verify
+MSG
+  exit 1
+fi
+exit 0
