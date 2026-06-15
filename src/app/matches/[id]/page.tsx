@@ -6,11 +6,12 @@ import { Badge, Container, Group, Stack, Text, Title } from '@mantine/core';
 
 import { JsonLd } from '@/components/JsonLd';
 import { MatchEvents } from '@/components/MatchEvents';
+import { MatchPitch } from '@/components/MatchPitch';
 import { MatchVersus } from '@/components/MatchVersus';
 import { VenueInfoCard } from '@/components/VenueInfoCard';
 import { VenueWeather } from '@/components/VenueWeather';
 import { getMatchEvents } from '@/db/match-events';
-import { getMatchDetail, getVenueMatchSummary } from '@/db/queries';
+import { getMatchDetail, getTeamSquad, getVenueMatchSummary } from '@/db/queries';
 import {
   formatKickoff,
   formatMatchDateZoned,
@@ -18,6 +19,7 @@ import {
   type MatchStage,
 } from '@/lib/bracket';
 import { getSiteUrl } from '@/lib/env';
+import { fetchMatchLineup, shortLatinName, type MatchLineup } from '@/lib/lineup/wikipedia-lineup';
 import { ogLocale } from '@/lib/i18n/alternates';
 import { getDictionary } from '@/lib/i18n/dictionary';
 import { resolveLocale, resolveTimeZone } from '@/lib/i18n/server';
@@ -117,6 +119,45 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
   const venueSummary = await getVenueMatchSummary(match.venueId);
   const events = await getMatchEvents(match.id);
 
+  // T-87: グループ戦の先発XIを Wikipedia から取得しピッチ表示（取れなければ非表示）。
+  // 取得失敗（ネットワーク等）でページ全体を落とさないよう握りつぶす。
+  let lineup: MatchLineup | null =
+    match.stage === 'group_stage' && match.groupLetter && match.homeTeam?.nameEn && match.awayTeam?.nameEn
+      ? await fetchMatchLineup({
+          home: { nameEn: match.homeTeam.nameEn, fifaCode: match.homeTeam.fifaCode },
+          away: { nameEn: match.awayTeam.nameEn, fifaCode: match.awayTeam.fifaCode },
+          groupLetter: match.groupLetter,
+        }).catch(() => null)
+      : null;
+
+  // 表示名のローカライズ: ja は背番号で自国スカッドの日本語名に解決、無ければ英語姓へ短縮。
+  if (lineup && match.homeTeam && match.awayTeam) {
+    const [homeSquad, awaySquad] = await Promise.all([
+      getTeamSquad(match.homeTeam.fifaCode).catch(() => null),
+      getTeamSquad(match.awayTeam.fifaCode).catch(() => null),
+    ]);
+    const jaByNumber = (squad: Awaited<ReturnType<typeof getTeamSquad>>): Map<number, string> => {
+      const map = new Map<number, string>();
+      squad?.players.forEach((p) => {
+        const n = Number(p.number);
+        if (Number.isFinite(n) && p.nameJa) map.set(n, p.nameJa);
+      });
+      return map;
+    };
+    const homeJa = jaByNumber(homeSquad);
+    const awayJa = jaByNumber(awaySquad);
+    const localize = (players: MatchLineup['home'], jaMap: Map<number, string>) =>
+      players.map((p) => {
+        const ja = p.number != null ? jaMap.get(p.number) : undefined;
+        if (locale === 'ja' && ja) {
+          const captain = / \(c\)$/.test(p.name) ? ' (c)' : '';
+          return { ...p, name: ja + captain };
+        }
+        return { ...p, name: shortLatinName(p.name) };
+      });
+    lineup = { home: localize(lineup.home, homeJa), away: localize(lineup.away, awayJa) };
+  }
+
   // 構造化データ: 試合 = SportsEvent、ナビ階層 = BreadcrumbList。
   const baseUrl = getSiteUrl();
   const jsonLd = [
@@ -159,6 +200,14 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
         >
           <MatchVersus match={match} nameMode="full" size="md" />
         </Stack>
+
+        {lineup && match.homeTeam && match.awayTeam ? (
+          <MatchPitch
+            lineup={lineup}
+            home={{ name: localizedTeamName(match.homeTeam, locale), fifaCode: match.homeTeam.fifaCode }}
+            away={{ name: localizedTeamName(match.awayTeam, locale), fifaCode: match.awayTeam.fifaCode }}
+          />
+        ) : null}
 
         <MatchEvents events={events} match={match} dict={dict} locale={locale} />
 
