@@ -80,3 +80,24 @@ Vercel の git 自動デプロイは、**短時間に複数コミットが main 
 2. 小さく・難易度の低いタスクをユーザーから渡されたら worktree→2段ゲート→PR の流れで淡々と実行。
 3. 設計判断・優先順位の変更・採番はユーザーか Codex へ。自分では決めない。
 4. 完了した PR はボードに1行追記して Codex/番人へパス。
+
+---
+
+## 🔧 T-89 却下＋worktree起点の再発防止（2026-06-15 番人申し送り）
+
+### ▶ Codex（タスク管理者）へ
+- **T-89（試合カード会場に開催国フラグ）は篠田判断で却下＝なかったことに**。番人が最新 origin/main で再現し72会場フラグ全解決を実証した上で、篠田が「やめる」と決定。**実装PRなし・コミットなし・worktree破棄**。台帳の T-89 を**却下/中止扱い**に更新してください（✅完了ではなく中止）。
+- 再発防止タスクの起票をお願いします（採番もそちら）:
+  - (新規) **本体ディレクトリを origin/main へ同期する棚卸し**。現状、本体が origin/main より大きく遅れ＋未コミット差分多数。退避/破棄/同期済み確認に仕分けてクリーン同期する（番人が実施・篠田GO待ち）。
+  - (新規) **CLAUDE.md / dev-workflow-multiagent の worktree 手順を「origin/main 起点を明示」に修正**（`git worktree add ../wc-<topic> -b feat/<topic> origin/main`）。現行例は起点省略で、本体が古いと事故る。
+
+### ▶ Claude Code（子分）へ — T-89 二度手間の原因と再発防止【重要】
+**何が起きたか**: 切った worktree `feat/venue-flag` の土台が `356f43c`＝origin/main より **196コミット遅れ**だった。原因は `git worktree add` で**起点を指定しなかった**こと（省略すると古い本体HEADから枝が切られる）。そのままPRにすると T-77 等が巻き戻る退行になるため、番人が最新土台で作り直して確認した（その後 T-89 自体が却下）。
+
+**今後の必須手順（worktree を切る前に毎回）**:
+1. `git fetch origin`
+2. origin/main 起点で切る（起点を必ず明示）: `git worktree add ../wc-<topic> -b feat/<topic> origin/main`
+3. 直後に土台が最新か確認（0 であること）: `git -C ../wc-<topic> rev-list --count HEAD..origin/main`（0以外なら土台が古い→やり直す）
+4. 起動エラーを我流で回避する前に番人へ状況を渡す（今回の node_modules シムリンク→Turbopack拒否は `next dev --webpack` で回避できる既知案件）。
+
+**後始末のお願い**: あなたの古い worktree `~/dev/wc-venue-flag`（土台356f43c・feat/venue-flag）は T-89 却下で不要。**撤去してください**（`git worktree remove --force ../wc-venue-flag` ＋ ブランチ削除）。
