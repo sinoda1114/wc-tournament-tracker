@@ -325,7 +325,7 @@ export const zh: Dictionary = {
     bannerAria: '收费提示',
     bannerMessage:
       '⏳ 早鸟价 {earlyPrice} 截至 6 月 28 日。🏆 6 月 29 日起 {regularPrice}。小组赛阶段免费！',
-    bannerCta: '立即购买 →',
+    bannerCta: '立即购买',
     bannerCtaAria: '购买淘汰赛阶段完整权限（前往预测页面）',
     lockTitle: '解锁淘汰赛阶段',
     lockBody:

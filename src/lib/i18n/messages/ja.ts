@@ -351,7 +351,7 @@ export const ja = {
     bannerAria: '課金のお知らせ',
     bannerMessage:
       '⏳ 早割 {earlyPrice} は6/28まで。🏆 6/29から {regularPrice}。グループリーグは無料！',
-    bannerCta: '→ 購入する',
+    bannerCta: '購入する',
     bannerCtaAria: '決勝トーナメントを購入する（予想ページへ）',
     lockTitle: '決勝トーナメントは買い切りでフルアクセス',
     lockBody:

@@ -330,7 +330,7 @@ export const es: Dictionary = {
     bannerAria: 'Aviso de precio',
     bannerMessage:
       '⏳ Precio anticipado {earlyPrice} hasta el 28 de junio. 🏆 Desde el 29 de junio, {regularPrice}. ¡La fase de grupos es gratis!',
-    bannerCta: 'Consíguelo →',
+    bannerCta: 'Consíguelo',
     bannerCtaAria: 'Consigue el acceso completo a la fase eliminatoria (ir a la página de pronósticos)',
     lockTitle: 'Desbloquea la fase eliminatoria',
     lockBody:
