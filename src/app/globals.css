@@ -1670,6 +1670,38 @@ a {
   font-weight: 600;
 }
 
+@media (max-width: 560px) {
+  .wc-prediction {
+    padding: 1rem;
+  }
+
+  .wc-prediction-toggles {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+    border-radius: 18px;
+  }
+
+  .wc-prediction-toggles button {
+    min-height: 3rem;
+    padding: 0.55rem 0.65rem;
+    border-right: 0;
+    border-bottom: 1px solid var(--wc-border);
+    font-size: 0.82rem;
+    font-weight: 700;
+    line-height: 1.25;
+    text-align: center;
+  }
+
+  .wc-prediction-toggles button:nth-child(odd) {
+    border-right: 1px solid var(--wc-border);
+  }
+
+  .wc-prediction-toggles button:nth-last-child(-n + 2) {
+    border-bottom: 0;
+  }
+}
+
 .wc-prediction-list {
   list-style: none;
   margin: 0.9rem 0 0;
