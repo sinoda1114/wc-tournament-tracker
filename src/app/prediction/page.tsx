@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Container, Stack, Text, Title } from '@mantine/core';
 
+import { EarlyBirdPurchase } from '@/components/billing/EarlyBirdPurchase';
 import { PaywallLock } from '@/components/billing/PaywallLock';
 import { ChampionPrediction } from '@/components/ChampionPrediction';
 import { VotePanel } from '@/components/VotePanel';
@@ -140,6 +141,9 @@ export default async function PredictionPage() {
           factors={serializeFactors(factors)}
           eliminatedIds={eliminatedIds}
         />
+
+        {/* 無料期間中の早割先行購入導線（自己ゲート：無料期間中＆未購入のときだけ出る）。 */}
+        <EarlyBirdPurchase locale={locale} dict={dict} />
 
         {access.hasAccess ? (
           <VotePanel

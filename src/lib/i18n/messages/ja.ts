@@ -356,6 +356,10 @@ export const ja = {
       '決勝トーナメントの予想・対戦表は買い切り {price}（MatchFav フルアクセス）でご利用いただけます。一度のお支払いで大会終了まで使えます。',
     lockCta: '{price} で購入する',
     lockSignIn: 'ログインして購入する',
+    earlyTitle: '今だけ早割で先行購入',
+    earlyBody:
+      '決勝トーナメント（6/29〜）の予想・対戦表を、いまなら早割 {earlyPrice} で先行購入できます。6/29 以降は {regularPrice} になります。買い切り・一度のお支払いで大会終了まで使えます。',
+    earlyCta: '{earlyPrice} で先行購入する',
     offerPeriod: '提供期間: 〜{offerEnd}',
     purchasing: '決済ページへ移動中…',
     purchaseError: '決済ページを開けませんでした。時間をおいて再度お試しください。',
