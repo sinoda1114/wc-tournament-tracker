@@ -5,11 +5,13 @@ import { DateFilterBar } from '@/components/DateFilterBar';
 import { FavoriteFilterToggle } from '@/components/FavoriteFilterToggle';
 import { GroupsFilterableGrid } from '@/components/GroupsFilterableGrid';
 import { MatchDayList } from '@/components/MatchDayList';
+import { PaywallLock } from '@/components/billing/PaywallLock';
 import {
   getGroupTeams,
   listGroupStageMatches,
   listTournamentMatches,
 } from '@/db/queries';
+import { hasKnockoutAccess } from '@/lib/billing/access';
 import { parseDatesParam, parseQuickDayParam, resolveQuickDay } from '@/lib/date-filter';
 import { ogLocale } from '@/lib/i18n/alternates';
 import { getDictionary } from '@/lib/i18n/dictionary';
@@ -65,12 +67,17 @@ export default async function GroupsPage({ searchParams }: GroupsPageProps) {
       : quickDay
         ? [resolveQuickDay(quickDay, await resolveTimeZone())]
         : [];
-  const dict = getDictionary(await resolveLocale());
+  const locale = await resolveLocale();
+  const dict = getDictionary(locale);
   const isDate = selectedDates.length > 0;
+  // 決勝T課金壁（T-68 面②）。日付フィルタは listTournamentMatches()（決勝T含む全試合）を
+  // 返すため、ここを無料のままにすると home 側のゲートを /groups から迂回できてしまう。
+  // 順位表グリッド（既定ビュー）は無料のまま、日付フィルタ操作だけを壁の内側に置く。
+  const knockoutAccess = await hasKnockoutAccess();
 
   // 日付選択時は「その日の全試合」。未選択時は順位表グリッド（全グループ）。
   // NOTE: listTournamentMatches() は全試合（GL含む）。GL一覧と連結すると二重表示になる。
-  const dayMatches = isDate ? await listTournamentMatches() : [];
+  const dayMatches = isDate && knockoutAccess ? await listTournamentMatches() : [];
 
   const allGroupMatches = isDate ? [] : await listGroupStageMatches();
   const groupData = isDate
@@ -99,9 +106,13 @@ export default async function GroupsPage({ searchParams }: GroupsPageProps) {
         </div>
 
         {isDate ? (
-          selectedDates.map((date) => (
-            <MatchDayList key={date} matches={dayMatches} date={date} />
-          ))
+          knockoutAccess ? (
+            selectedDates.map((date) => (
+              <MatchDayList key={date} matches={dayMatches} date={date} />
+            ))
+          ) : (
+            <PaywallLock locale={locale} dict={dict} />
+          )
         ) : (
           <GroupsFilterableGrid groupData={groupData} />
         )}

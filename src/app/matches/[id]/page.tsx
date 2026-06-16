@@ -10,8 +10,10 @@ import { MatchPitch } from '@/components/MatchPitch';
 import { MatchVersus } from '@/components/MatchVersus';
 import { VenueInfoCard } from '@/components/VenueInfoCard';
 import { VenueWeather } from '@/components/VenueWeather';
+import { PaywallLock } from '@/components/billing/PaywallLock';
 import { getMatchEvents } from '@/db/match-events';
 import { getMatchDetail, getTeamSquad, getVenueMatchSummary } from '@/db/queries';
+import { hasKnockoutAccess } from '@/lib/billing/access';
 import {
   formatKickoff,
   formatMatchDateZoned,
@@ -107,6 +109,17 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
 
   const locale = await resolveLocale();
   const dict = getDictionary(locale);
+
+  // 決勝T課金壁（T-68 面③）: 試合詳細は未購入×決勝T期間では出さず PaywallLock に差し替える。
+  // 重い取得（先発XI/イベント/天気）の前に早期 return し、無駄な取得も避ける。
+  if (!(await hasKnockoutAccess())) {
+    return (
+      <Container size="md" py="xl">
+        <PaywallLock locale={locale} dict={dict} />
+      </Container>
+    );
+  }
+
   const timeZone = await resolveTimeZone();
   const stageLabel = dict.match.stage[match.stage as MatchStage] ?? match.stage;
   // グループリーグの試合は「どのグループか（グループA 等）」を併記する。

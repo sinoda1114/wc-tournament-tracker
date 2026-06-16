@@ -6,11 +6,13 @@ import { GroupsFilterableGrid } from '@/components/GroupsFilterableGrid';
 import { MatchDayList } from '@/components/MatchDayList';
 import { MiniHero } from '@/components/MiniHero';
 import { TournamentViewToggle } from '@/components/TournamentViewToggle';
+import { PaywallLock } from '@/components/billing/PaywallLock';
 import {
   getGroupTeams,
   listGroupStageMatches,
   listTournamentMatches,
 } from '@/db/queries';
+import { hasKnockoutAccess } from '@/lib/billing/access';
 import { parseDatesParam, parseQuickDayParam, resolveQuickDay } from '@/lib/date-filter';
 import { getDictionary } from '@/lib/i18n/dictionary';
 import { resolveLocale, resolveTimeZone } from '@/lib/i18n/server';
@@ -51,7 +53,10 @@ export async function HomeView({ searchParams }: { searchParams: Promise<HomeSea
       : quickDay
         ? [resolveQuickDay(quickDay, await resolveTimeZone())]
         : [];
-  const dict = getDictionary(await resolveLocale());
+  const locale = await resolveLocale();
+  const dict = getDictionary(locale);
+  // 決勝T課金壁（T-68）。未購入×決勝T期間のみ false（グループ期間/購入済/72h救済は true）。
+  const knockoutAccess = await hasKnockoutAccess();
   const isDate = selectedDates.length > 0;
   // 無料期間＝グループステージ期間（lib/pricing と同一境界）。PaywallBanner と同じ判定方法。
   // ?view=kt はグループステージ中でもブラケットを見るための明示指定（ナビ「決勝T」用）。
@@ -61,7 +66,9 @@ export async function HomeView({ searchParams }: { searchParams: Promise<HomeSea
   // 日付選択時は「その日の全試合」一覧（フェーズ問わず共通）。
   // NOTE: listTournamentMatches() は全試合（GL含む）を返すため、GL一覧と連結しない
   //（連結すると GL の試合が二重表示になる）。
-  const dayMatches = isDate ? await listTournamentMatches() : [];
+  // 日付フィルタの結果（その日の全試合）も決勝T課金壁の内側（T-68 面②）。
+  // アクセス不可なら取得自体を省き、描画側で PaywallLock を出す。
+  const dayMatches = isDate && knockoutAccess ? await listTournamentMatches() : [];
 
   // 未選択時: フェーズに応じた既定ビューのデータだけ取得する。
   const knockoutMatches = !isDate && isKnockoutPhase ? await listTournamentMatches() : [];
@@ -98,11 +105,18 @@ export async function HomeView({ searchParams }: { searchParams: Promise<HomeSea
         </div>
 
         {isDate ? (
-          selectedDates.map((date) => (
-            <MatchDayList key={date} matches={dayMatches} date={date} />
-          ))
+          knockoutAccess ? (
+            selectedDates.map((date) => (
+              <MatchDayList key={date} matches={dayMatches} date={date} />
+            ))
+          ) : (
+            <PaywallLock locale={locale} dict={dict} />
+          )
         ) : isKnockoutPhase ? (
-          <TournamentViewToggle matches={knockoutMatches} />
+          <TournamentViewToggle
+            matches={knockoutMatches}
+            cardLock={knockoutAccess ? undefined : <PaywallLock locale={locale} dict={dict} />}
+          />
         ) : (
           <GroupsFilterableGrid groupData={groupData} />
         )}
