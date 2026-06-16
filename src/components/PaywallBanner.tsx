@@ -52,7 +52,7 @@ export async function PaywallBanner({ locale, dict }: PaywallBannerProps) {
     <aside className="wc-paywall-banner" aria-label={t.bannerAria}>
       <span className="wc-paywall-banner-text">{message}</span>
       <AnchorLink
-        href="/prediction"
+        href="/buy"
         className="wc-paywall-banner-cta"
         aria-label={t.bannerCtaAria}
       >
