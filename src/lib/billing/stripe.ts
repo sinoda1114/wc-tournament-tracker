@@ -33,6 +33,31 @@ const STRIPE_CHECKOUT_LOCALE: Record<Locale, Stripe.Checkout.SessionCreateParams
   pt: 'pt',
   zh: 'zh',
 };
+const CHECKOUT_PRODUCT_COPY: Record<Locale, { name: string; description: string }> = {
+  ja: {
+    name: 'MatchFav フルアクセス（買い切り）',
+    description: 'MatchFav の決勝トーナメント投票など全機能を解放する買い切りパス',
+  },
+  en: {
+    name: 'MatchFav Full Access (one-time purchase)',
+    description:
+      'Unlock knockout predictions, brackets, and all paid MatchFav features with one pass.',
+  },
+  es: {
+    name: 'MatchFav Acceso completo (pago único)',
+    description:
+      'Desbloquea los pronósticos, el cuadro eliminatorio y todas las funciones de pago de MatchFav.',
+  },
+  pt: {
+    name: 'MatchFav Acesso completo (compra única)',
+    description:
+      'Libere os palpites, o chaveamento do mata-mata e todos os recursos pagos do MatchFav.',
+  },
+  zh: {
+    name: 'MatchFav 全功能通行证（一次性买断）',
+    description: '解锁淘汰赛预测、对阵表以及 MatchFav 的所有付费功能。',
+  },
+};
 
 let cached: Stripe | null = null;
 
@@ -92,6 +117,9 @@ type CheckoutStripeClient = {
     create: (params: Stripe.CustomerCreateParams) => Promise<{ id: string }>;
     update: (id: string, params: Stripe.CustomerUpdateParams) => Promise<{ id: string }>;
   };
+  prices: {
+    retrieve: (id: string) => Promise<CheckoutPrice>;
+  };
 };
 
 type CheckoutCustomer = {
@@ -99,21 +127,31 @@ type CheckoutCustomer = {
   metadata?: Stripe.Metadata | null;
 };
 
+type CheckoutPrice = {
+  currency: string;
+  unit_amount: number | null;
+};
+
 type CheckoutCustomerParams = Pick<Stripe.Checkout.SessionCreateParams, 'customer' | 'customer_email'>;
+type CheckoutLineItem = NonNullable<Stripe.Checkout.SessionCreateParams['line_items']>[number];
 
 export function stripeLocaleForCheckout(locale: Locale): Stripe.Checkout.SessionCreateParams.Locale {
   return STRIPE_CHECKOUT_LOCALE[locale];
 }
 
+export function checkoutProductCopy(locale: Locale): { name: string; description: string } {
+  return CHECKOUT_PRODUCT_COPY[locale];
+}
+
 export function buildCheckoutSessionParams(
   input: CreateCheckoutInput,
-  priceId: string,
+  lineItem: CheckoutLineItem,
   customerParams: CheckoutCustomerParams,
 ): Stripe.Checkout.SessionCreateParams {
   const { userId, locale, successUrl, cancelUrl } = input;
   return {
     mode: 'payment',
-    line_items: [{ price: priceId, quantity: 1 }],
+    line_items: [lineItem],
     success_url: successUrl,
     cancel_url: cancelUrl,
     locale: stripeLocaleForCheckout(locale),
@@ -125,6 +163,26 @@ export function buildCheckoutSessionParams(
       statement_descriptor_suffix: CHECKOUT_STATEMENT_DESCRIPTOR_SUFFIX,
     },
     ...customerParams,
+  };
+}
+
+async function resolveCheckoutLineItem(
+  stripe: CheckoutStripeClient,
+  input: CreateCheckoutInput,
+): Promise<CheckoutLineItem> {
+  const priceId = resolvePriceId(input.locale, input.now);
+  const price = await stripe.prices.retrieve(priceId);
+  if (price.unit_amount == null) {
+    throw new Error(`Stripe Price の unit_amount を取得できませんでした: ${priceId}`);
+  }
+
+  return {
+    quantity: 1,
+    price_data: {
+      currency: price.currency,
+      unit_amount: price.unit_amount,
+      product_data: checkoutProductCopy(input.locale),
+    },
   };
 }
 
@@ -159,11 +217,11 @@ export async function createCheckoutSession(
   input: CreateCheckoutInput,
   client: CheckoutStripeClient = getStripe(),
 ): Promise<string> {
-  const priceId = resolvePriceId(input.locale, input.now);
+  const lineItem = await resolveCheckoutLineItem(client, input);
   const customerParams = await resolveCheckoutCustomerParams(client, input);
 
   const session = await client.checkout.sessions.create(
-    buildCheckoutSessionParams(input, priceId, customerParams),
+    buildCheckoutSessionParams(input, lineItem, customerParams),
   );
 
   if (!session.url) {
