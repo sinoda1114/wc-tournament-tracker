@@ -29,8 +29,14 @@ function wikiTeamName(fifaCode: string | null | undefined, nameEn: string): stri
   return (fifaCode && WIKI_TEAM_NAME_ALIAS[fifaCode.toUpperCase()]) || nameEn;
 }
 const WIKI_USER_AGENT = 'MatchFav/1.0 (https://matchfav.com; info@matchfav.com)';
-/** 試合スタメンは変動が少ないため長めにキャッシュ（秒）。 */
-const REVALIDATE_SECONDS = 3600;
+/**
+ * Wikipedia 記事HTMLのキャッシュ秒数。
+ * T-92: 以前は 3600（1h）だったが、KO直後でまだ先発XIが未掲載のHTMLを掴むと、
+ * 次の再取得まで最大1時間「先発XI非表示」が固定化された（/matches/14 の実害）。
+ * 記事はグループ単位の単一URLで取得回数が少ない（最大12グループ）ため、
+ * 短め(10分)にしてミスのstale固定を防ぐ。掲載後は内容安定なので負荷も小さい。
+ */
+const REVALIDATE_SECONDS = 600;
 /** Wikipedia 応答遅延で SSR がぶら下がるのを防ぐ取得タイムアウト（ms）。超過時は throw → 呼び出し側で null。 */
 const WIKI_FETCH_TIMEOUT_MS = 8000;
 /** 次の試合見出しが見つからない場合に切り出すセクションの上限文字数（1試合分の実測は概ね 5〜10KB）。 */
@@ -208,6 +214,28 @@ function layoutTeam(players: LineupPlayer[]): PitchPlayer[] {
   return out;
 }
 
+/** 記事HTMLから home/away の先発XI（生）を取り出す。section/tables が無ければ理由を返す。 */
+type XIExtraction =
+  | { ok: true; homeXi: LineupPlayer[]; awayXi: LineupPlayer[] }
+  | { ok: false; reason: 'section' | 'tables' };
+
+function extractXIs(html: string, homeName: string, awayName: string): XIExtraction {
+  const sliced = sliceSection(html, homeName, awayName);
+  if (!sliced) return { ok: false, reason: 'section' };
+
+  const tables = extractLineupTables(sliced.section);
+  if (tables.length < 2) return { ok: false, reason: 'tables' };
+
+  const first = parseLineupTable(tables[0]);
+  const second = parseLineupTable(tables[1]);
+  // 記事は team1(=左/home) → team2(=右/away) の順。見出しが逆順一致なら入れ替え。
+  return {
+    ok: true,
+    homeXi: sliced.reversed ? second : first,
+    awayXi: sliced.reversed ? first : second,
+  };
+}
+
 export type WikipediaLineupOptions = {
   fetchHtml?: FetchHtml;
 };
@@ -217,6 +245,20 @@ export type WikipediaLineupOptions = {
  * グループステージのみ対応（記事構造が異なる決勝Tは対象外＝null）。
  */
 export type LineupTeamRef = { nameEn: string; fifaCode: string | null };
+
+/** グループ記事タイトル（Wikipedia 英語版）。表示・監査で共通利用し表記揺れを防ぐ。 */
+export function groupArticleTitle(groupLetter: string): string {
+  return `2026 FIFA World Cup Group ${groupLetter}`;
+}
+
+/** グループ記事HTMLを取得（テスト用に fetchHtml 注入可）。取得失敗は throw、本文なしは null。 */
+export async function fetchGroupArticleHtml(
+  groupLetter: string,
+  options: WikipediaLineupOptions = {},
+): Promise<string | null> {
+  const fetchHtml = options.fetchHtml ?? defaultFetchHtml;
+  return fetchHtml(groupArticleTitle(groupLetter));
+}
 
 export async function fetchMatchLineup(
   params: { home: LineupTeamRef; away: LineupTeamRef; groupLetter: string },
@@ -228,22 +270,68 @@ export async function fetchMatchLineup(
   const homeName = wikiTeamName(home.fifaCode, home.nameEn);
   const awayName = wikiTeamName(away.fifaCode, away.nameEn);
 
-  const fetchHtml = options.fetchHtml ?? defaultFetchHtml;
-  const html = await fetchHtml(`2026 FIFA World Cup Group ${groupLetter}`);
+  const html = await fetchGroupArticleHtml(groupLetter, options);
   if (!html) return null;
 
-  const sliced = sliceSection(html, homeName, awayName);
-  if (!sliced) return null;
-
-  const tables = extractLineupTables(sliced.section);
-  if (tables.length < 2) return null;
-
-  const first = parseLineupTable(tables[0]);
-  const second = parseLineupTable(tables[1]);
-  // 記事は team1(=左/home) → team2(=右/away) の順。見出しが逆順一致なら入れ替え。
-  const homeXi = sliced.reversed ? second : first;
-  const awayXi = sliced.reversed ? first : second;
+  const extracted = extractXIs(html, homeName, awayName);
+  if (!extracted.ok) return null;
+  const { homeXi, awayXi } = extracted;
   if (homeXi.length === 0 || awayXi.length === 0) return null;
 
   return { home: layoutTeam(homeXi), away: layoutTeam(awayXi) };
+}
+
+/**
+ * 監査用の先発XI被覆チェック（T-92）。表示用の `fetchMatchLineup` が成否を null に潰すのに対し、
+ * こちらは「取得失敗 / 未掲載 / 部分取得 / 正常」を区別して返す。
+ * Wikipedia 記事はグループ単位の単一URLなので、表示側と同じデータキャッシュを共有し取得回数を抑える。
+ */
+export type LineupCoverage =
+  | { status: 'ok'; homeCount: number; awayCount: number }
+  | { status: 'partial'; homeCount: number; awayCount: number }
+  | { status: 'missing'; reason: 'article' | 'section' | 'tables' | 'empty' }
+  | { status: 'fetch_failed'; error: string };
+
+/**
+ * 取得済み記事HTMLから home/away の先発XI被覆を判定する純関数（I/Oなし）。
+ * グループ単位で1回だけ取得したHTMLを複数試合で使い回すために、取得と判定を分離している
+ * （監査側 auditLineups の並列・重複排除のため）。
+ */
+export function lineupCoverageFromHtml(
+  html: string,
+  home: LineupTeamRef,
+  away: LineupTeamRef,
+): LineupCoverage {
+  const homeName = wikiTeamName(home.fifaCode, home.nameEn);
+  const awayName = wikiTeamName(away.fifaCode, away.nameEn);
+
+  const extracted = extractXIs(html, homeName, awayName);
+  if (!extracted.ok) return { status: 'missing', reason: extracted.reason };
+
+  const homeCount = extracted.homeXi.length;
+  const awayCount = extracted.awayXi.length;
+  if (homeCount === 0 && awayCount === 0) return { status: 'missing', reason: 'empty' };
+  if (homeCount < 11 || awayCount < 11) return { status: 'partial', homeCount, awayCount };
+  return { status: 'ok', homeCount, awayCount };
+}
+
+export async function fetchMatchLineupCoverage(
+  params: { home: LineupTeamRef; away: LineupTeamRef; groupLetter: string },
+  options: WikipediaLineupOptions = {},
+): Promise<LineupCoverage> {
+  const { home, away, groupLetter } = params;
+  if (!home?.nameEn || !away?.nameEn || !groupLetter) {
+    return { status: 'missing', reason: 'article' };
+  }
+
+  let html: string | null;
+  try {
+    html = await fetchGroupArticleHtml(groupLetter, options);
+  } catch (error) {
+    return { status: 'fetch_failed', error: error instanceof Error ? error.message : 'fetch failed' };
+  }
+  // Wikipedia 非200 / 本文なし。表示側は null=非表示だが、監査では取得失敗として可視化する。
+  if (!html) return { status: 'fetch_failed', error: 'wikipedia returned no parseable html' };
+
+  return lineupCoverageFromHtml(html, home, away);
 }

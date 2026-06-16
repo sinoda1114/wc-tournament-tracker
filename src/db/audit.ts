@@ -1,4 +1,5 @@
 import type { AuditGoalEvent, AuditMatchInput } from '@/lib/ingest/audit';
+import type { LineupAuditMatch } from '@/lib/ingest/lineup-audit';
 
 import { getDb } from './client';
 import type { MatchStatus } from './queries';
@@ -72,4 +73,42 @@ export async function getAuditSubstitutionMatchIds(): Promise<Set<number>> {
     SELECT DISTINCT match_id FROM match_events WHERE type = 'substitution'
   `);
   return new Set(result.rows.map((row) => Number((row as unknown as { match_id: number }).match_id)));
+}
+
+type LineupAuditRow = {
+  id: number;
+  group_letter: string | null;
+  home_name_en: string | null;
+  home_fifa_code: string | null;
+  away_name_en: string | null;
+  away_fifa_code: string | null;
+};
+
+/**
+ * 先発XI被覆監査（T-92）の対象＝両チーム確定済みの「終了グループ戦」。
+ * 名前/FIFAコードは Wikipedia 記事の見出し解決に使う（@/lib/ingest/lineup-audit）。
+ */
+export async function getLineupAuditMatches(): Promise<LineupAuditMatch[]> {
+  const result = await db().execute(`
+    SELECT m.id, m.group_letter,
+           ht.name_en AS home_name_en, ht.fifa_code AS home_fifa_code,
+           at.name_en AS away_name_en, at.fifa_code AS away_fifa_code
+    FROM matches m
+    LEFT JOIN teams ht ON ht.id = m.home_team_id
+    LEFT JOIN teams at ON at.id = m.away_team_id
+    WHERE m.stage = 'group_stage'
+      AND m.status = 'finished'
+      AND m.home_team_id IS NOT NULL
+      AND m.away_team_id IS NOT NULL
+    ORDER BY m.id ASC
+  `);
+  return result.rows.map((row) => {
+    const r = row as unknown as LineupAuditRow;
+    return {
+      id: Number(r.id),
+      groupLetter: r.group_letter,
+      home: r.home_name_en ? { nameEn: r.home_name_en, fifaCode: r.home_fifa_code } : null,
+      away: r.away_name_en ? { nameEn: r.away_name_en, fifaCode: r.away_fifa_code } : null,
+    };
+  });
 }

@@ -383,6 +383,7 @@ export const pt: Dictionary = {
   },
   matchDetail: {
     number: 'Partida {n}',
+    lineupPending: 'A escalação titular ainda não está disponível (aparecerá assim que for obtida).',
   },
   timezone: {
     label: 'Fuso horário',

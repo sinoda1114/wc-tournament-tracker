@@ -378,6 +378,7 @@ export const zh: Dictionary = {
   },
   matchDetail: {
     number: '第{n}场比赛',
+    lineupPending: '首发阵容尚未更新（获取后将自动显示）。',
   },
   timezone: {
     label: '时区',

@@ -379,6 +379,7 @@ export const en: Dictionary = {
   },
   matchDetail: {
     number: 'Match {n}',
+    lineupPending: 'Starting lineup not yet available (it will appear once fetched).',
   },
   timezone: {
     label: 'Time zone',

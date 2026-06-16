@@ -56,7 +56,12 @@ export type AuditFindingKind =
   | 'scorers_incomplete'
   | 'scorers_excess'
   | 'scorers_side_mismatch'
-  | 'finished_no_subs';
+  | 'finished_no_subs'
+  // T-92: 終了グループ戦の先発XI（Wikipedia取得）被覆。DBに無くライブ取得で判定するため、
+  // 純関数 auditMatches では生成せず run-audit でマージする（counts.lineupIssues に集計）。
+  | 'lineup_missing'
+  | 'lineup_partial'
+  | 'lineup_fetch_failed';
 
 export type AuditSeverity = 'error' | 'warn';
 
@@ -82,6 +87,8 @@ export type AuditReport = {
     scoreMismatch: number;
     /** 終了グループ戦なのに交代0件＝TheSportsDBのみ取込疑いの件数（T-85(C)）。 */
     finishedNoSubs: number;
+    /** 先発XI（Wikipedia）の欠落/部分/取得失敗の合計（T-92）。run-audit でライブ取得しマージ。 */
+    lineupIssues: number;
   };
 };
 
@@ -285,6 +292,7 @@ export function auditMatches(
     generatedAt: now.toISOString(),
     checkedMatches: matches.length,
     findings,
-    counts: { staleUnfinished, scoreMismatch, finishedNoSubs },
+    // lineupIssues は I/O（Wikipedia取得）が要るので純関数では 0。run-audit で実値に置換する。
+    counts: { staleUnfinished, scoreMismatch, finishedNoSubs, lineupIssues: 0 },
   };
 }
