@@ -177,13 +177,29 @@ describe('resolveRoundOf32Assignments', () => {
     expect(thirdTeamIds).toEqual(['A3', 'B3', 'C3', 'D3', 'E3', 'F3', 'G3', 'H3']);
   });
 
-  it('グループが12組に満たない（4組のみ）なら確定ゲートで全スロット null', () => {
-    // T-46 ゲート導入前は「与えたグループの 1位/2位だけ部分適用」だったが、
-    // 全12組消化が確定単位になったため、12組未満では一切 bind しない。
+  it('12組未満（4組のみ消化済み）でも、消化完了グループの1位/2位は解決する（T-104）', () => {
+    // T-46 時代は「全12組消化まで一切 bind しない」だったが、T-104 で
+    // 「確定したグループから順次反映」へ変更。A〜D の4組が消化完了なら、
+    // その4組の winners/runners-up は埋まる。3位枠は全12組消化が必要なので null のまま。
     const partial: GroupStandingsEntry[] = ALL_GROUPS.slice(0, 4).map((g) => groupStandings(g));
     const result = resolveRoundOf32Assignments(R32_SLOTS, partial);
+    const find = (matchId: number, side: 'home' | 'away') =>
+      result.find((r) => r.matchId === matchId && r.side === side)!;
+
     expect(result.length).toBe(R32_SLOTS.length);
-    expect(result.every((r) => r.teamId === null)).toBe(true);
+    // A〜D の 1位/2位は確定（消化完了グループの position を信頼）。
+    expect(find(79, 'home').teamId).toBe('A1'); // Group A winners
+    expect(find(73, 'home').teamId).toBe('A2'); // Group A runners-up
+    expect(find(85, 'home').teamId).toBe('B1'); // Group B winners
+    expect(find(76, 'home').teamId).toBe('C1'); // Group C winners
+    expect(find(81, 'home').teamId).toBe('D1'); // Group D winners
+    expect(find(88, 'home').teamId).toBe('D2'); // Group D runners-up
+    // 未投入グループ（E〜L）のスロットは null。
+    expect(find(74, 'home').teamId).toBe(null); // Group E winners
+    expect(find(86, 'home').teamId).toBe(null); // Group J winners
+    // 3位枠は全12組消化が前提なので null。
+    const thirds = result.filter((r) => /third place$/i.test(r.slot));
+    expect(thirds.every((r) => r.teamId === null)).toBe(true);
   });
 
   it('結果は入力スロットと1:1（件数・matchId/side 保持）', () => {
@@ -194,7 +210,7 @@ describe('resolveRoundOf32Assignments', () => {
     );
   });
 
-  // ---- T-46: グループ未確定なら R32 を前倒し充填しない（確定ゲート） ----
+  // ---- T-104: 未消化グループは bind しない／確定したグループから順次反映 ----
 
   /** 全グループ4チームを played=0 にした「グループステージ未消化」状態の12組。 */
   function twelveGroupsUnplayed(): GroupStandingsEntry[] {
@@ -204,14 +220,14 @@ describe('resolveRoundOf32Assignments', () => {
     }));
   }
 
-  it('グループ未消化（played=0）なら全スロット null（前倒し充填しない）', () => {
+  it('グループ未消化（played=0）なら全スロット null（暫定首位を前倒し bind しない）', () => {
     const result = resolveRoundOf32Assignments(R32_SLOTS, twelveGroupsUnplayed());
     expect(result.length).toBe(R32_SLOTS.length);
     expect(result.every((r) => r.teamId === null)).toBe(true);
   });
 
-  it('一部グループだけ消化済み（全組未完）でも全スロット null（確定単位は全グループ）', () => {
-    // A 組だけ played=3、残りは played=0。全組消化前なので bind しない。
+  it('未消化グループ（A以外 played=0）の暫定首位は出さない／消化済みA組のみ確定', () => {
+    // A 組だけ played=3、残りは played=0（試合途中）。
     const groups: GroupStandingsEntry[] = ALL_GROUPS.map((g) => ({
       group: g,
       standings: [1, 2, 3, 4].map((pos) =>
@@ -219,21 +235,46 @@ describe('resolveRoundOf32Assignments', () => {
       ),
     }));
     const result = resolveRoundOf32Assignments(R32_SLOTS, groups);
-    expect(result.every((r) => r.teamId === null)).toBe(true);
-    // A 組の暫定首位 A1 も R32(79 home = Group A winners) に出てはいけない。
-    expect(result.find((r) => r.matchId === 79 && r.side === 'home')!.teamId).toBe(null);
+    const find = (matchId: number, side: 'home' | 'away') =>
+      result.find((r) => r.matchId === matchId && r.side === side)!;
+    // 消化完了した A 組の 1位/2位は確定（T-104＝確定分は出す）。
+    expect(find(79, 'home').teamId).toBe('A1'); // Group A winners
+    expect(find(73, 'home').teamId).toBe('A2'); // Group A runners-up
+    // 未消化グループ（B winners=85h 等）の暫定首位は出さない。
+    expect(find(85, 'home').teamId).toBe(null); // Group B winners（未消化）
+    expect(find(81, 'home').teamId).toBe(null); // Group D winners（未消化）
+    // 3位枠は全組消化前なので null。
+    const thirds = result.filter((r) => /third place$/i.test(r.slot));
+    expect(thirds.every((r) => r.teamId === null)).toBe(true);
   });
 
-  it('グループが12組未満（取込途中）でも全スロット null', () => {
-    const partial = ALL_GROUPS.slice(0, 11).map((g) => groupStandings(g));
-    const result = resolveRoundOf32Assignments(R32_SLOTS, partial);
-    expect(result.every((r) => r.teamId === null)).toBe(true);
+  it('全12組消化完了で 1位/2位/3位すべて解決する', () => {
+    // 3位の強さを操作して上位8カットオフを確定させる（A〜H通過・I〜L敗退）。
+    const groups = twelveGroups({
+      A: 3, B: 3, C: 3, D: 3, E: 3, F: 3, G: 3, H: 3,
+      I: 0, J: 0, K: 0, L: 0,
+    });
+    const result = resolveRoundOf32Assignments(R32_SLOTS, groups);
+    const find = (matchId: number, side: 'home' | 'away') =>
+      result.find((r) => r.matchId === matchId && r.side === side)!;
+    expect(find(79, 'home').teamId).toBe('A1'); // 1位
+    expect(find(73, 'home').teamId).toBe('A2'); // 2位
+    expect(find(74, 'away').teamId).toBe('C3'); // 3位枠（FIFA割当）
   });
 
-  it('全12組消化完了で初めて 1位/2位/3位を解決する（ゲート解除）', () => {
-    // twelveGroups() は played=3（消化済み）。従来挙動どおり bind される。
+  // ---- T-104: 3位カットオフが完全同点なら3位枠は出さない（誤表示防止） ----
+
+  it('上位8と9位が完全同点（カットオフ未確定）なら3位枠は全 null・1位2位は出る', () => {
+    // 3位の points をすべて同値（既定 0）にすると 8位/9位が分離せずカットオフ未確定。
     const result = resolveRoundOf32Assignments(R32_SLOTS, twelveGroups());
-    expect(result.find((r) => r.matchId === 79 && r.side === 'home')!.teamId).toBe('A1');
-    expect(result.find((r) => r.matchId === 73 && r.side === 'home')!.teamId).toBe('A2');
+    const find = (matchId: number, side: 'home' | 'away') =>
+      result.find((r) => r.matchId === matchId && r.side === side)!;
+    // 1位/2位は消化完了グループなので確定。
+    expect(find(79, 'home').teamId).toBe('A1');
+    expect(find(73, 'home').teamId).toBe('A2');
+    // 3位枠はカットオフ未確定なので全 null（暫定の3位通過を誤表示しない）。
+    const thirds = result.filter((r) => /third place$/i.test(r.slot));
+    expect(thirds.length).toBeGreaterThan(0);
+    expect(thirds.every((r) => r.teamId === null)).toBe(true);
   });
 });

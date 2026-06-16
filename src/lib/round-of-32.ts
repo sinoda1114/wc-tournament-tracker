@@ -81,48 +81,76 @@ export type RoundOf32Slot = {
   slot: string;
 };
 
+/** 1グループの順位表が「消化完了」か（4チームが全員 3 試合以上を終えた）。 */
+function isGroupComplete(standings: readonly GroupStanding[]): boolean {
+  return standings.length === 4 && standings.every((s) => s.played >= 3);
+}
+
 /**
- * グループ確定後、R32 の各スロットを teamId へ解決する純関数。
+ * 順位表上で a が b より「1次キー（勝点 → 得失点差 → 総得点）で厳密に上位」か。
+ * すべて同値なら false＝この2チームは本実装スコープでは分離できていない。
+ * a は b より上位（position が小さい）であることを前提に呼ぶ。
+ */
+function strictlyAbove(a: GroupStanding, b: GroupStanding): boolean {
+  if (a.points !== b.points) return a.points > b.points;
+  if (a.goalDifference !== b.goalDifference) return a.goalDifference > b.goalDifference;
+  return a.goalsFor > b.goalsFor;
+}
+
+/**
+ * ベスト3位ランキングで「上位8と9位の境界」が分離して確定しているか。
  *
- * - 'Group X winners' / 'Group X runners-up' は該当グループ順位表の 1位 / 2位。
- * - third place スロットは {@link rankThirdPlacedTeams} で上位8グループを選び、
- *   {@link assignThirdPlaceSlots}（FIFA 公式割当）で matchId ごとに3位グループを定め、
- *   そのグループの3位 teamId を割り当てる。
- * - 解決に必要な順位が確定していない場合は teamId=null（部分適用可・冪等の材料）。
+ * グループ間の3位比較には直接対決（h2h）の概念が無く、{@link rankThirdPlacedTeams} は
+ * FIFA 基準の上位（勝点/得失/得点）までしか解決しない。したがって 8位と9位が 1次キーで
+ * 厳密に分離しているときだけカットオフ確定とみなし、完全同点（以降のフェアプレー/ランキング/
+ * 抽選でしか割れない）なら**未確定**として3位枠を出さない（T-104 達成条件④）。
+ * 3位が8組以下なら9位が存在せずカットオフは自明確定。
+ */
+function isThirdPlaceCutoffDecided(
+  ranked: readonly { group: GroupLetter; standing: GroupStanding }[],
+): boolean {
+  if (ranked.length < 8) return false;
+  if (ranked.length === 8) return true;
+  return strictlyAbove(ranked[7].standing, ranked[8].standing);
+}
+
+/**
+ * R32 の各スロットを teamId へ解決する純関数（T-104: 確定したチームから順次反映）。
  *
- * 8つの third place スロットが揃って初めて割当が成立する（FIFA 表が8グループ前提のため）。
- * 揃わない／3位が8グループ未満なら third place スロットは全て null のまま返す。
+ * - 'Group X winners' / 'Group X runners-up' は、**そのグループが消化完了した時点**で
+ *   {@link calculateGroupStandings} の position（1位/2位）を信頼して解決する（全12組の消化を
+ *   待たない）。standings は勝点→得失→得点→直接対決まで解決済みで、完了グループの順位は確定値。
+ * - third place スロットは全12組消化（{@link isGroupStageComplete}）かつ上位8の
+ *   カットオフ確定（{@link isThirdPlaceCutoffDecided}）が揃って初めて、
+ *   {@link rankThirdPlacedTeams}→{@link assignThirdPlaceSlots}（FIFA 公式割当）で解決する。
+ *   割当は8グループ前提のため、3位の他組比較が定まる全消化後にのみ成立する。
+ * - 確定していないスロットは teamId=null（UI は slot ラベルのプレースホルダを表示）。部分適用・冪等。
  *
- * **確定ゲート**: グループステージが全12組とも消化済み（{@link isGroupStageComplete}）に
- * なるまでは、1位/2位/3位いずれのスロットも解決しない（全 teamId=null）。
- * グループ未消化でも {@link calculateGroupStandings} は同点 0-0-0 のチームに position 1..4 を
- * 機械的に振るため、ゲート無しだと「現時点の暫定首位」を R32 に前倒し bind してしまう
+ * **誤表示しない原則**: {@link calculateGroupStandings} は未消化でも同点 0-0-0 に position 1..4 を
+ * 機械的に振るため、消化完了をゲートにしないと「暫定首位」を前倒し bind してしまう
  * （本番 R32 がグループ未確定なのに実チームを保持していた T-46 の再充填バグの根因）。
- * 1位/2位は各グループ内で確定するが、3位通過（ベスト3位の他組比較）と runners-up の
- * 対戦相手割当は全組確定後にしか定まらないため、確定単位を「全グループ消化」に統一する。
+ * 以前の「全12組消化まで一切表示しない（6/29 開始日まで空欄）」方針は T-104 で撤回し、
+ * **確定したグループから順次 1位/2位を埋める**方式へ変更した（3位通過枠の確定単位は据え置き）。
  *
  * @param slots R32 の全スロット（home/away 各16）。
- * @param groups 12グループ分の順位表。
+ * @param groups 最大12グループ分の順位表。
  */
 export function resolveRoundOf32Assignments(
   slots: readonly RoundOf32Slot[],
   groups: readonly GroupStandingsEntry[],
 ): SlotResolution[] {
-  // グループステージ未確定なら一切 bind しない（全スロット teamId=null）。
-  if (!isGroupStageComplete(groups)) {
-    return slots.map(({ matchId, side, slot }) => ({ matchId, side, slot, teamId: null }));
-  }
-
   const standingsByGroup = new Map<GroupLetter, GroupStanding[]>();
   for (const { group, standings } of groups) {
     standingsByGroup.set(group, standings);
   }
 
-  // ベスト3位 → ホスト試合 → 3位グループ の割当（成立すれば）。
-  const ranked = rankThirdPlacedTeams(groups);
-  const top8Groups = ranked.slice(0, 8).map((r) => r.group);
+  // 3位通過枠は全12組消化＋カットオフ確定後にのみ成立（他組比較が定まらないと割当不能）。
+  const allGroupsComplete = isGroupStageComplete(groups);
+  const ranked = allGroupsComplete ? rankThirdPlacedTeams(groups) : [];
   const thirdAssignment =
-    top8Groups.length === 8 ? assignThirdPlaceSlots(top8Groups) : null;
+    allGroupsComplete && isThirdPlaceCutoffDecided(ranked)
+      ? assignThirdPlaceSlots(ranked.slice(0, 8).map((r) => r.group))
+      : null;
 
   // matchId → 割り当てられた3位グループ。
   const thirdGroupByMatch = new Map<number, GroupLetter>();
@@ -130,9 +158,11 @@ export function resolveRoundOf32Assignments(
     for (const a of thirdAssignment) thirdGroupByMatch.set(a.matchId, a.thirdPlaceGroup);
   }
 
-  function teamIdByGroupPosition(group: GroupLetter, position: number): string | null {
+  /** そのグループが消化完了していれば position の teamId、未消化/未投入なら null。 */
+  function teamIdIfDecided(group: GroupLetter, position: number): string | null {
     const standings = standingsByGroup.get(group);
     if (!standings) return null;
+    if (!isGroupComplete(standings)) return null;
     return teamAtPosition(standings, position)?.teamId ?? null;
   }
 
@@ -141,14 +171,15 @@ export function resolveRoundOf32Assignments(
 
     const winners = slot.match(WINNERS_RE);
     if (winners) {
-      teamId = teamIdByGroupPosition(winners[1].toUpperCase() as GroupLetter, 1);
+      teamId = teamIdIfDecided(winners[1].toUpperCase() as GroupLetter, 1);
     } else {
       const runners = slot.match(RUNNERS_RE);
       if (runners) {
-        teamId = teamIdByGroupPosition(runners[1].toUpperCase() as GroupLetter, 2);
+        teamId = teamIdIfDecided(runners[1].toUpperCase() as GroupLetter, 2);
       } else if (THIRD_RE.test(slot)) {
         const group = thirdGroupByMatch.get(matchId);
-        teamId = group ? teamIdByGroupPosition(group, 3) : null;
+        // 3位枠は全消化＋カットオフ確定後のみ thirdGroupByMatch が埋まる。
+        teamId = group ? teamIdIfDecided(group, 3) : null;
       }
     }
 
