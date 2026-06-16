@@ -1672,17 +1672,24 @@ a {
 
 @media (max-width: 560px) {
   .wc-prediction {
+    min-width: 0;
     padding: 1rem;
+    overflow: hidden;
   }
 
   .wc-prediction-toggles {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     width: 100%;
+    min-width: 0;
     border-radius: 18px;
   }
 
   .wc-prediction-toggles button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
     min-height: 3rem;
     padding: 0.55rem 0.65rem;
     border-right: 0;
@@ -1691,6 +1698,7 @@ a {
     font-weight: 700;
     line-height: 1.25;
     text-align: center;
+    overflow-wrap: anywhere;
   }
 
   .wc-prediction-toggles button:nth-child(odd) {
