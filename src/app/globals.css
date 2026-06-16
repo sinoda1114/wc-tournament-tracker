@@ -2146,6 +2146,40 @@ a {
   z-index: 1;
   max-width: 60rem;
 }
+/* 購入導線CTA: 控えめなピル。長文化・狭幅でも text の隣で自然に折り返す（flex-wrap は親で許可）。 */
+.wc-paywall-banner-cta {
+  position: relative; /* 光沢(::after)より前面に置く */
+  z-index: 1;
+  flex: none;
+  white-space: nowrap;
+  padding: 0.18rem 0.7rem;
+  border-radius: 999px;
+  background: var(--wc-accent);
+  color: var(--wc-on-accent, #fff);
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.4;
+  text-decoration: none;
+  transition:
+    filter 150ms ease,
+    transform 150ms ease;
+}
+.wc-paywall-banner-cta:hover {
+  filter: brightness(1.07);
+  text-decoration: none;
+}
+.wc-paywall-banner-cta:active {
+  transform: translateY(1px);
+}
+.wc-paywall-banner-cta:focus-visible {
+  outline: 2px solid var(--wc-accent);
+  outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .wc-paywall-banner-cta {
+    transition: none;
+  }
+}
 
 /* ===== 未ログイン訪問者向けヒーロー（#37・トップのみ） ===== */
 /* 独立LPの代替。パレット変数でライト/ダーク両対応。 */

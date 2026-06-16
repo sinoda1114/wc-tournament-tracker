@@ -329,7 +329,9 @@ export const pt: Dictionary = {
   paywall: {
     bannerAria: 'Aviso de preço',
     bannerMessage:
-      'O mata-mata (a partir de 29 de junho) é uma compra única de {price}. A fase de grupos é gratuita agora mesmo.',
+      '⏳ Preço promocional {earlyPrice} até 28 de junho. 🏆 A partir de 29 de junho, {regularPrice}. A fase de grupos é gratuita!',
+    bannerCta: 'Quero acesso →',
+    bannerCtaAria: 'Tenha acesso completo ao mata-mata (ir para a página de palpites)',
     lockTitle: 'Libere o mata-mata',
     lockBody:
       'Os palpites e o chaveamento do mata-mata estão disponíveis com uma compra única de {price} (MatchFav Full Access). Pague uma vez e use até o fim do torneio.',

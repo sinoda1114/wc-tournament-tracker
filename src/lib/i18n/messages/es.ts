@@ -329,7 +329,9 @@ export const es: Dictionary = {
   paywall: {
     bannerAria: 'Aviso de precio',
     bannerMessage:
-      'La fase eliminatoria (desde el 29 de junio) cuesta un único pago de {price}. La fase de grupos es gratis ahora mismo.',
+      '⏳ Precio anticipado {earlyPrice} hasta el 28 de junio. 🏆 Desde el 29 de junio, {regularPrice}. ¡La fase de grupos es gratis!',
+    bannerCta: 'Consíguelo →',
+    bannerCtaAria: 'Consigue el acceso completo a la fase eliminatoria (ir a la página de pronósticos)',
     lockTitle: 'Desbloquea la fase eliminatoria',
     lockBody:
       'Los pronósticos y el cuadro de la fase eliminatoria están disponibles con un único pago de {price} (MatchFav Full Access). Paga una vez y úsalo hasta el final del torneo.',
