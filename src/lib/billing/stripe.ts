@@ -24,6 +24,16 @@ const PRICE_ENV: Record<Market, Record<PriceTier, string>> = {
   },
 };
 
+const CHECKOUT_PRODUCT = 'matchfav';
+const CHECKOUT_STATEMENT_DESCRIPTOR_SUFFIX = 'MATCHFAV';
+const STRIPE_CHECKOUT_LOCALE: Record<Locale, Stripe.Checkout.SessionCreateParams.Locale> = {
+  ja: 'ja',
+  en: 'en',
+  es: 'es',
+  pt: 'pt',
+  zh: 'zh',
+};
+
 let cached: Stripe | null = null;
 
 /** Stripe クライアント（遅延初期化）。STRIPE_SECRET_KEY 未設定なら例外。 */
@@ -71,24 +81,90 @@ type CreateCheckoutInput = {
   email?: string | null;
 };
 
-/**
- * 買い切り（mode: 'payment'）の Checkout セッションを作成し、リダイレクト先 URL を返す。
- * client_reference_id と metadata に Clerk userId を載せ、webhook で本人へ紐付ける。
- */
-export async function createCheckoutSession(input: CreateCheckoutInput): Promise<string> {
-  const { userId, locale, now, successUrl, cancelUrl, email } = input;
-  const priceId = resolvePriceId(locale, now);
+type CheckoutStripeClient = {
+  checkout: {
+    sessions: {
+      create: (params: Stripe.Checkout.SessionCreateParams) => Promise<{ url: string | null }>;
+    };
+  };
+  customers: {
+    list: (params: Stripe.CustomerListParams) => Promise<{ data: CheckoutCustomer[] }>;
+    create: (params: Stripe.CustomerCreateParams) => Promise<{ id: string }>;
+    update: (id: string, params: Stripe.CustomerUpdateParams) => Promise<{ id: string }>;
+  };
+};
 
-  const session = await getStripe().checkout.sessions.create({
+type CheckoutCustomer = {
+  id: string;
+  metadata?: Stripe.Metadata | null;
+};
+
+type CheckoutCustomerParams = Pick<Stripe.Checkout.SessionCreateParams, 'customer' | 'customer_email'>;
+
+export function stripeLocaleForCheckout(locale: Locale): Stripe.Checkout.SessionCreateParams.Locale {
+  return STRIPE_CHECKOUT_LOCALE[locale];
+}
+
+export function buildCheckoutSessionParams(
+  input: CreateCheckoutInput,
+  priceId: string,
+  customerParams: CheckoutCustomerParams,
+): Stripe.Checkout.SessionCreateParams {
+  const { userId, locale, successUrl, cancelUrl } = input;
+  return {
     mode: 'payment',
     line_items: [{ price: priceId, quantity: 1 }],
     success_url: successUrl,
     cancel_url: cancelUrl,
+    locale: stripeLocaleForCheckout(locale),
     client_reference_id: userId,
-    metadata: { userId },
-    // 顧客メールがあれば事前入力（無くても Checkout 側で入力可）。
-    ...(email ? { customer_email: email } : {}),
+    metadata: { userId, product: CHECKOUT_PRODUCT },
+    payment_intent_data: {
+      metadata: { userId, product: CHECKOUT_PRODUCT },
+      // カード明細はアカウントの短縮表記（例: WAALSFORCE）+ suffix で表示される。
+      statement_descriptor_suffix: CHECKOUT_STATEMENT_DESCRIPTOR_SUFFIX,
+    },
+    ...customerParams,
+  };
+}
+
+async function resolveCheckoutCustomerParams(
+  stripe: CheckoutStripeClient,
+  input: CreateCheckoutInput,
+): Promise<CheckoutCustomerParams> {
+  const email = input.email?.trim();
+  if (!email) return {};
+
+  const preferredLocales = [stripeLocaleForCheckout(input.locale)];
+  const existing = await stripe.customers.list({ email, limit: 10 });
+  const customer = existing.data.find((c) => c.metadata?.userId === input.userId);
+  if (customer) {
+    await stripe.customers.update(customer.id, { preferred_locales: preferredLocales });
+    return { customer: customer.id };
+  }
+
+  const created = await stripe.customers.create({
+    email,
+    preferred_locales: preferredLocales,
+    metadata: { userId: input.userId, product: CHECKOUT_PRODUCT },
   });
+  return { customer: created.id };
+}
+
+/**
+ * 買い切り（mode: 'payment'）の Checkout セッションを作成し、リダイレクト先 URL を返す。
+ * client_reference_id と metadata に Clerk userId を載せ、webhook で本人へ紐付ける。
+ */
+export async function createCheckoutSession(
+  input: CreateCheckoutInput,
+  client: CheckoutStripeClient = getStripe(),
+): Promise<string> {
+  const priceId = resolvePriceId(input.locale, input.now);
+  const customerParams = await resolveCheckoutCustomerParams(client, input);
+
+  const session = await client.checkout.sessions.create(
+    buildCheckoutSessionParams(input, priceId, customerParams),
+  );
 
   if (!session.url) {
     throw new Error('Stripe Checkout セッションの URL を取得できませんでした。');
