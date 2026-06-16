@@ -119,16 +119,34 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
   const venueSummary = await getVenueMatchSummary(match.venueId);
   const events = await getMatchEvents(match.id);
 
-  // T-87: グループ戦の先発XIを Wikipedia から取得しピッチ表示（取れなければ非表示）。
-  // 取得失敗（ネットワーク等）でページ全体を落とさないよう握りつぶす。
-  let lineup: MatchLineup | null =
-    match.stage === 'group_stage' && match.groupLetter && match.homeTeam?.nameEn && match.awayTeam?.nameEn
-      ? await fetchMatchLineup({
-          home: { nameEn: match.homeTeam.nameEn, fifaCode: match.homeTeam.fifaCode },
-          away: { nameEn: match.awayTeam.nameEn, fifaCode: match.awayTeam.fifaCode },
-          groupLetter: match.groupLetter,
-        }).catch(() => null)
-      : null;
+  // T-87/T-92: グループ戦の先発XIを Wikipedia から取得しピッチ表示。
+  // 先発XIを期待できるカード（両チーム確定済みのグループ戦）かを先に判定しておき、
+  // 取得できなかったときに「未反映」を静かに示すために使う（無言で消えるのを防ぐ）。
+  const lineupExpected = Boolean(
+    match.stage === 'group_stage' &&
+      match.groupLetter &&
+      match.homeTeam?.nameEn &&
+      match.awayTeam?.nameEn,
+  );
+
+  let lineup: MatchLineup | null = null;
+  if (lineupExpected && match.groupLetter && match.homeTeam?.nameEn && match.awayTeam?.nameEn) {
+    try {
+      // 取得失敗（ネットワーク等）でページ全体を落とさないよう握りつぶすが、
+      // T-92: サイレントにせず原因をサーバログに残す（本番で非表示の理由を追えるように）。
+      lineup = await fetchMatchLineup({
+        home: { nameEn: match.homeTeam.nameEn, fifaCode: match.homeTeam.fifaCode },
+        away: { nameEn: match.awayTeam.nameEn, fifaCode: match.awayTeam.fifaCode },
+        groupLetter: match.groupLetter,
+      });
+    } catch (error) {
+      console.error(
+        `[match ${match.id}] fetchMatchLineup failed (group ${match.groupLetter}, ${match.homeTeam.nameEn} vs ${match.awayTeam.nameEn})`,
+        error,
+      );
+      lineup = null;
+    }
+  }
 
   // 表示名のローカライズ: ja は背番号で自国スカッドの日本語名に解決、無ければ英語姓へ短縮。
   if (lineup && match.homeTeam && match.awayTeam) {
@@ -208,6 +226,12 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
             home={{ name: localizedTeamName(match.homeTeam, locale), fifaCode: match.homeTeam.fifaCode }}
             away={{ name: localizedTeamName(match.awayTeam, locale), fifaCode: match.awayTeam.fifaCode }}
           />
+        ) : lineupExpected && match.status !== 'scheduled' ? (
+          // T-92: 先発XIを期待できるカード（実施中/終了）で取得できなかったとき、無言で消えず控えめに状態を示す。
+          // 未開催(scheduled)はそもそも未掲載が自然なのでノートを出さない（一時障害と紛らわしくしない）。
+          <Text size="sm" c="dimmed">
+            {dict.matchDetail.lineupPending}
+          </Text>
         ) : null}
 
         <MatchEvents events={events} match={match} dict={dict} locale={locale} />

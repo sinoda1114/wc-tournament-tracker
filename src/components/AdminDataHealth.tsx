@@ -15,6 +15,9 @@ const KIND_LABELS: Record<AuditFindingKind, string> = {
   scorers_excess: '得点者過多',
   scorers_side_mismatch: '左右割当ズレ',
   finished_no_subs: '交代0件(TheSportsDBのみ疑い)',
+  lineup_missing: '先発XI欠落',
+  lineup_partial: '先発XI部分取得',
+  lineup_fetch_failed: '先発XI取得失敗',
 };
 
 const SEVERITY_COLOR: Record<AuditSeverity, string> = {
@@ -73,6 +76,9 @@ export function AdminDataHealth({ report }: AdminDataHealthProps) {
         </Badge>
         <Badge color="orange" variant="light">
           交代0件 {report.counts.finishedNoSubs}
+        </Badge>
+        <Badge color="grape" variant="light">
+          先発XI {report.counts.lineupIssues}
         </Badge>
         <Text size="sm" c="dimmed">
           {report.checkedMatches} 試合を監査・{generatedJst} 時点

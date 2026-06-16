@@ -383,6 +383,7 @@ export const es: Dictionary = {
   },
   matchDetail: {
     number: 'Partido {n}',
+    lineupPending: 'La alineación titular aún no está disponible (aparecerá cuando se obtenga).',
   },
   timezone: {
     label: 'Zona horaria',

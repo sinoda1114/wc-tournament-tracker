@@ -406,6 +406,7 @@ export const ja = {
   // 試合詳細ページ（/matches/[id]）。{n}=試合番号。
   matchDetail: {
     number: '第{n}試合',
+    lineupPending: 'スターティングメンバーは未反映です（取得でき次第表示されます）。',
   },
   timezone: {
     label: 'タイムゾーン',
