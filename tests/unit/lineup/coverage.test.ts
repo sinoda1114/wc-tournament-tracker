@@ -135,3 +135,36 @@ describe('fetchMatchLineupCoverage（T-92 先発XI被覆）', () => {
     expect(cov).toEqual({ status: 'partial', homeCount: 11, awayCount: 8 });
   });
 });
+
+/**
+ * T-92 追補: DB の nameEn と Wikipedia 見出し名が食い違うチームのエイリアス回帰。
+ *
+ * /matches/14（Spain vs Cape Verde）が本番で欠落した真因は、DB の nameEn が 'Cabo Verde' なのに
+ * Wikipedia 見出しが 'Cape Verde' で、WIKI_TEAM_NAME_ALIAS に CPV が無く見出しに一致しなかったこと。
+ * 既存テストは fixture を 'Cape Verde'（=Wikipedia名）でハードコードしていたため緑のまま本番だけ落ちた。
+ * 以後は **実 DB 値**を渡し、エイリアスで Wikipedia 見出しへ橋渡しできることを検証する（全グループ網羅監査で判明した3件）。
+ */
+describe('fetchMatchLineupCoverage（DB名→Wikipedia見出しエイリアス回帰）', () => {
+  const cases: ReadonlyArray<{ dbNameEn: string; fifaCode: string; wikiName: string; group: string }> = [
+    { dbNameEn: 'Cabo Verde', fifaCode: 'CPV', wikiName: 'Cape Verde', group: 'H' },
+    { dbNameEn: 'Congo DR', fifaCode: 'COD', wikiName: 'DR Congo', group: 'K' },
+    { dbNameEn: 'IR Iran', fifaCode: 'IRN', wikiName: 'Iran', group: 'G' },
+  ];
+
+  for (const c of cases) {
+    it(`DB '${c.dbNameEn}'(${c.fifaCode}) は Wikipedia見出し '${c.wikiName}' に一致して ok になる`, async () => {
+      // 記事の見出しは Wikipedia 表記。away に実 DB の nameEn を渡す。
+      const html = articleHtml('Spain', c.wikiName, 11, 11);
+      const cov = await fetchMatchLineupCoverage(
+        {
+          home: SPAIN,
+          away: { nameEn: c.dbNameEn, fifaCode: c.fifaCode },
+          groupLetter: c.group,
+        },
+        withHtml(html),
+      );
+      // エイリアスが無いと missing(section) になる（＝本番で起きた欠落）。
+      expect(cov).toEqual({ status: 'ok', homeCount: 11, awayCount: 11 });
+    });
+  }
+});
