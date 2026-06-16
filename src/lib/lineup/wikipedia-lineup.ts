@@ -37,6 +37,16 @@ const WIKI_USER_AGENT = 'MatchFav/1.0 (https://matchfav.com; info@matchfav.com)'
  * 短め(10分)にしてミスのstale固定を防ぐ。掲載後は内容安定なので負荷も小さい。
  */
 const REVALIDATE_SECONDS = 600;
+/**
+ * デプロイ識別子（fetch Data Cache のキー回し用）。
+ * T-92続: Next の fetch Data Cache は URL をキーにし、Vercel ではデプロイをまたいで残る。
+ * このため KO直後に掴んだ「先発XI未掲載」HTML（=null）が revalidate 窓の間ずっと配信され、
+ * revalidate を 600 に縮めても**既存の古いエントリは寿命まで置き換わらず**、デプロイしても直らない
+ * （/matches/14 が本番で「未反映」に固定化した実害）。URL にデプロイSHAを混ぜてキャッシュキーを
+ * デプロイ毎に回すことで、毒入りエントリを確実にバストし、次デプロイで必ず再取得させる。
+ * MediaWiki API は未知クエリ（_cv）を無視するため Wikipedia への挙動は不変。ローカルは 'dev' 固定。
+ */
+const DEPLOY_CACHE_VERSION = process.env.VERCEL_GIT_COMMIT_SHA ?? 'dev';
 /** Wikipedia 応答遅延で SSR がぶら下がるのを防ぐ取得タイムアウト（ms）。超過時は throw → 呼び出し側で null。 */
 const WIKI_FETCH_TIMEOUT_MS = 8000;
 /** 次の試合見出しが見つからない場合に切り出すセクションの上限文字数（1試合分の実測は概ね 5〜10KB）。 */
@@ -67,7 +77,8 @@ type FetchHtml = (articleTitle: string) => Promise<string | null>;
 async function defaultFetchHtml(articleTitle: string): Promise<string | null> {
   const url =
     `${WIKI_API}?action=parse&page=${encodeURIComponent(articleTitle)}` +
-    `&prop=text&format=json&formatversion=2&redirects=1`;
+    `&prop=text&format=json&formatversion=2&redirects=1` +
+    `&_cv=${encodeURIComponent(DEPLOY_CACHE_VERSION)}`;
   const res = await fetch(url, {
     headers: { Accept: 'application/json', 'User-Agent': WIKI_USER_AGENT },
     signal: AbortSignal.timeout(WIKI_FETCH_TIMEOUT_MS),
