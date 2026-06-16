@@ -2,6 +2,7 @@ import { revalidatePath } from 'next/cache';
 import { NextResponse } from 'next/server';
 
 import { runDataAudit } from '@/lib/ingest/run-audit';
+import { notifyDiscordHealth } from '@/lib/ingest/health-notification';
 import { runIngestion } from '@/lib/ingest/run';
 import { createTheSportsDbProvider } from '@/lib/ingest/thesportsdb';
 import { createWikipediaMatchEventProvider, withWikipediaEvents } from '@/lib/ingest/wikipedia';
@@ -61,8 +62,17 @@ export async function GET(request: Request) {
           staleUnfinished: audit.counts.staleUnfinished,
           scoreMismatch: audit.counts.scoreMismatch,
           finishedNoSubs: audit.counts.finishedNoSubs,
+          lineupIssues: audit.counts.lineupIssues,
           findings: audit.findings,
         });
+      }
+      try {
+        const notification = await notifyDiscordHealth(audit);
+        if (notification !== 'unchanged') {
+          console.info('[ingest] data audit Discord notification', { status: notification });
+        }
+      } catch (notificationError) {
+        console.error('[ingest] data audit Discord notification failed', notificationError);
       }
     } catch (auditError) {
       console.error('[ingest] data audit failed', auditError);
