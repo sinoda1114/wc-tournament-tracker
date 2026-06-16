@@ -95,3 +95,110 @@ export async function createCheckoutSession(input: CreateCheckoutInput): Promise
   }
   return session.url;
 }
+
+/**
+ * 価格設定の自動検証（運用ガード）。
+ *
+ * 背景: 2026-06-16 に STRIPE_SECRET_KEY へ別アカウントの鍵が入っていて checkout が 500 になった。
+ * 早割は実機で気づけたが、通常価格は切り替わる 6/29 まで一度も使われず、誤りに気づけない穴があった。
+ * → market×tier の全 Price ID を Stripe に問い合わせ、鍵と価格 ID の整合を「使われる前に」検出する。
+ */
+export type PriceCheckResult = {
+  envName: string;
+  market: Market;
+  tier: PriceTier;
+  /** env に Price ID が設定されているか。 */
+  configured: boolean;
+  /** Stripe 上で実在し有効（active）か。 */
+  valid: boolean;
+  /** 失敗理由（No such price / 鍵不正 / 未設定 等）。正常時は null。 */
+  error: string | null;
+};
+
+export type StripeConfigReport = {
+  /** 秘密鍵があり、かつ全 Price が有効なら true。 */
+  ok: boolean;
+  /** STRIPE_SECRET_KEY が読み込めたか。 */
+  secretConfigured: boolean;
+  checks: PriceCheckResult[];
+  checkedAt: string;
+};
+
+/** verifyStripeConfig が必要とする最小インターフェース（テストで差し替え可能にする）。 */
+type PriceRetriever = {
+  prices: { retrieve: (id: string) => Promise<{ active?: boolean | null }> };
+};
+
+const ALL_MARKET_TIERS: ReadonlyArray<{ market: Market; tier: PriceTier }> = [
+  { market: 'jp', tier: 'early' },
+  { market: 'jp', tier: 'regular' },
+  { market: 'intl', tier: 'early' },
+  { market: 'intl', tier: 'regular' },
+];
+
+/** 実 Stripe クライアントを最小インターフェースに包む。鍵未設定なら null。 */
+function buildRetriever(): PriceRetriever | null {
+  try {
+    const stripe = getStripe();
+    return { prices: { retrieve: (id: string) => stripe.prices.retrieve(id) } };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * 設定済みの全 Price ID を Stripe に問い合わせ、設定の正しさを検証する。
+ * `client` を渡すとそれを使う（テスト用）。省略時は env の秘密鍵から実クライアントを作る。
+ */
+export async function verifyStripeConfig(
+  client?: PriceRetriever,
+  now: Date = new Date(),
+): Promise<StripeConfigReport> {
+  let retriever: PriceRetriever | null = client ?? null;
+  let secretConfigured = true;
+  if (!retriever) {
+    retriever = buildRetriever();
+    if (!retriever) secretConfigured = false;
+  }
+
+  const checks: PriceCheckResult[] = [];
+  for (const { market, tier } of ALL_MARKET_TIERS) {
+    const envName = PRICE_ENV[market][tier];
+    const priceId = process.env[envName]?.trim();
+
+    if (!priceId) {
+      checks.push({ envName, market, tier, configured: false, valid: false, error: 'Price ID が未設定です' });
+      continue;
+    }
+    if (!retriever) {
+      checks.push({
+        envName,
+        market,
+        tier,
+        configured: true,
+        valid: false,
+        error: 'STRIPE_SECRET_KEY が未設定/無効のため確認できません',
+      });
+      continue;
+    }
+
+    try {
+      const price = await retriever.prices.retrieve(priceId);
+      const active = price.active !== false;
+      checks.push({
+        envName,
+        market,
+        tier,
+        configured: true,
+        valid: active,
+        error: active ? null : '価格が無効化されています（active=false）',
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Stripe への問い合わせに失敗しました';
+      checks.push({ envName, market, tier, configured: true, valid: false, error: message });
+    }
+  }
+
+  const ok = secretConfigured && checks.every((check) => check.valid);
+  return { ok, secretConfigured, checks, checkedAt: now.toISOString() };
+}
