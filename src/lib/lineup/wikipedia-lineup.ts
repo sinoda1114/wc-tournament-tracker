@@ -22,6 +22,9 @@ const WIKI_TEAM_NAME_ALIAS: Record<string, string> = {
   CZE: 'Czech Republic', // FIFA/DB: Czechia
   TUR: 'Turkey', // FIFA/DB: Türkiye
   CIV: 'Ivory Coast', // FIFA/DB: Côte d'Ivoire
+  CPV: 'Cape Verde', // DB: Cabo Verde（見出しは "Spain vs Cape Verde"）
+  COD: 'DR Congo', // DB: Congo DR（見出しは "... vs DR Congo"）
+  IRN: 'Iran', // DB: IR Iran（見出しは "... vs Iran"）
 };
 
 /** Wikipedia 見出しで使うチーム名に正規化する。 */
