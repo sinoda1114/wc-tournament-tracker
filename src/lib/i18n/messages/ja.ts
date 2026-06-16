@@ -350,7 +350,9 @@ export const ja = {
   paywall: {
     bannerAria: '課金のお知らせ',
     bannerMessage:
-      '決勝トーナメント（6/29）から有料 買い切り {price}。グループリーグは無料でお楽しみいただけます。',
+      '⏳ 早割 {earlyPrice} は6/28まで。🏆 6/29から {regularPrice}。グループリーグは無料！',
+    bannerCta: '→ 購入する',
+    bannerCtaAria: '決勝トーナメントを購入する（予想ページへ）',
     lockTitle: '決勝トーナメントは買い切りでフルアクセス',
     lockBody:
       '決勝トーナメントの予想・対戦表は買い切り {price}（MatchFav フルアクセス）でご利用いただけます。一度のお支払いで大会終了まで使えます。',

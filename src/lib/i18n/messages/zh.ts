@@ -324,7 +324,9 @@ export const zh: Dictionary = {
   paywall: {
     bannerAria: '收费提示',
     bannerMessage:
-      '淘汰赛阶段（6月29日起）为一次性买断 {price}。小组赛阶段现在即可免费畅享。',
+      '⏳ 早鸟价 {earlyPrice} 截至 6 月 28 日。🏆 6 月 29 日起 {regularPrice}。小组赛阶段免费！',
+    bannerCta: '立即购买 →',
+    bannerCtaAria: '购买淘汰赛阶段完整权限（前往预测页面）',
     lockTitle: '解锁淘汰赛阶段',
     lockBody:
       '淘汰赛预测与对阵表可通过一次性买断 {price}（MatchFav Full Access）使用。一次付费，用到赛事结束。',

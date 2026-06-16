@@ -325,7 +325,9 @@ export const en: Dictionary = {
   paywall: {
     bannerAria: 'Pricing notice',
     bannerMessage:
-      'The knockout stage (from June 29) is a one-time {price}. The group stage is free to enjoy right now.',
+      '⏳ Early-bird {earlyPrice} ends Jun 28. 🏆 From Jun 29 it’s {regularPrice}. The group stage is free!',
+    bannerCta: 'Get full access →',
+    bannerCtaAria: 'Get full access to the knockout stage (go to the predictions page)',
     lockTitle: 'Unlock the knockout stage',
     lockBody:
       'Knockout predictions and the bracket are available with a one-time {price} (MatchFav Full Access). Pay once, use it through the end of the tournament.',

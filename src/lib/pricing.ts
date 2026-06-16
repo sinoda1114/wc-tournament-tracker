@@ -88,6 +88,22 @@ export function priceDisplayForLocale(locale: Locale): string {
 }
 
 /**
+ * ロケールの早割表示価格（時刻に依存しない・PRICE_TABLE の early が単一情報源）。
+ * 予告バナー等、現在時刻に関わらず「早割 → 通常」を併記したい表示で使う。
+ */
+export function earlyPriceDisplayForLocale(locale: Locale): string {
+  return PRICE_TABLE[marketForLocale(locale)].early.display;
+}
+
+/**
+ * ロケールの通常表示価格（時刻に依存しない・PRICE_TABLE の regular が単一情報源）。
+ * {@link priceDisplayForLocale} と同値だが、早割と対で読む箇所の意図を明示するための別名。
+ */
+export function regularPriceDisplayForLocale(locale: Locale): string {
+  return PRICE_TABLE[marketForLocale(locale)].regular.display;
+}
+
+/**
  * 与えられた時刻が無料期間（決勝トーナメント開始前）か。
  * 予告バナーの表示可否に使う純粋関数（テスト可能・タイムゾーン非依存＝UTC 比較）。
  */

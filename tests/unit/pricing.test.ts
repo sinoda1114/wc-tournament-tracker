@@ -2,7 +2,13 @@ import { describe, expect, it } from 'vitest';
 
 import { LOCALES } from '@/lib/i18n/config';
 import { getDictionary } from '@/lib/i18n/dictionary';
-import { isFreePeriod, KNOCKOUT_START_UTC, priceDisplayForLocale } from '@/lib/pricing';
+import {
+  earlyPriceDisplayForLocale,
+  isFreePeriod,
+  KNOCKOUT_START_UTC,
+  priceDisplayForLocale,
+  regularPriceDisplayForLocale,
+} from '@/lib/pricing';
 
 describe('KNOCKOUT_START_UTC', () => {
   it('決勝T開始=6/29 00:00 JST(=6/28 15:00Z)に固定されている', () => {
@@ -22,13 +28,46 @@ describe('priceDisplayForLocale', () => {
   });
 });
 
-describe('バナー文言のプレースホルダ置換', () => {
-  it('全言語で {price} が価格に置換され、プレースホルダが残らない', () => {
+describe('早割/通常の表示価格ヘルパー（PRICE_TABLE 由来）', () => {
+  it('日本語は早割 ¥680 / 通常 ¥980', () => {
+    expect(earlyPriceDisplayForLocale('ja')).toBe('¥680');
+    expect(regularPriceDisplayForLocale('ja')).toBe('¥980');
+  });
+
+  it('日本語以外は早割 $5 / 通常 $7', () => {
+    for (const locale of ['en', 'es', 'pt', 'zh'] as const) {
+      expect(earlyPriceDisplayForLocale(locale)).toBe('$5');
+      expect(regularPriceDisplayForLocale(locale)).toBe('$7');
+    }
+  });
+
+  it('regularPriceDisplayForLocale は priceDisplayForLocale と一致する（通常価格＝上限）', () => {
     for (const locale of LOCALES) {
-      const price = priceDisplayForLocale(locale);
-      const message = getDictionary(locale).paywall.bannerMessage.replace('{price}', price);
-      expect(message).not.toContain('{price}');
-      expect(message).toContain(price);
+      expect(regularPriceDisplayForLocale(locale)).toBe(priceDisplayForLocale(locale));
+    }
+  });
+});
+
+describe('バナー文言のプレースホルダ置換', () => {
+  it('全言語で {earlyPrice}/{regularPrice} が価格に置換され、プレースホルダが残らない', () => {
+    for (const locale of LOCALES) {
+      const earlyPrice = earlyPriceDisplayForLocale(locale);
+      const regularPrice = regularPriceDisplayForLocale(locale);
+      const message = getDictionary(locale)
+        .paywall.bannerMessage.replace('{earlyPrice}', earlyPrice)
+        .replace('{regularPrice}', regularPrice);
+      expect(message).not.toContain('{earlyPrice}');
+      expect(message).not.toContain('{regularPrice}');
+      expect(message).toContain(earlyPrice);
+      expect(message).toContain(regularPrice);
+    }
+  });
+
+  it('全言語で購入導線CTAのラベル/ariaが空でない', () => {
+    for (const locale of LOCALES) {
+      const { bannerCta, bannerCtaAria } = getDictionary(locale).paywall;
+      expect(bannerCta.trim().length).toBeGreaterThan(0);
+      expect(bannerCtaAria.trim().length).toBeGreaterThan(0);
     }
   });
 });
