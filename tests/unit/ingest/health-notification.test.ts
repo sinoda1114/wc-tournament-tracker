@@ -73,10 +73,18 @@ describe('data health Discord notification', () => {
   it('Discordメッセージに件数・代表所見・adminリンクを含める', () => {
     const message = buildDiscordHealthMessage(report([finding()]), 'alert');
 
+    expect(message).toContain('@everyone');
     expect(message).toContain('🔴 MatchFav データヘルス異常');
     expect(message).toContain('先発XI: 1');
     expect(message).toContain('#14 lineup_missing');
     expect(message).toContain('https://matchfav.com/admin/health');
+  });
+
+  it('復旧メッセージには全体メンションを含めない', () => {
+    const message = buildDiscordHealthMessage(report(), 'recovered');
+
+    expect(message).not.toContain('@everyone');
+    expect(message).toContain('✅ MatchFav データヘルス復旧');
   });
 
   it('Webhook URL未設定なら何もしない', async () => {
@@ -101,7 +109,10 @@ describe('data health Discord notification', () => {
 
     expect(fetchMock).toHaveBeenCalledWith(
       'https://discord.example/webhook',
-      expect.objectContaining({ method: 'POST' }),
+      expect.objectContaining({
+        method: 'POST',
+        body: expect.stringContaining('"allowed_mentions":{"parse":["everyone"]}'),
+      }),
     );
     expect(store.markAlert).toHaveBeenCalledWith(auditSignature(report([finding()])));
     expect(store.markRecovered).not.toHaveBeenCalled();
@@ -122,8 +133,14 @@ describe('data health Discord notification', () => {
 
     await expect(notifyDiscordHealth(report(), { store })).resolves.toBe('recovered');
 
+    expect(globalThis.fetch).toHaveBeenCalledWith(
+      'https://discord.example/webhook',
+      expect.objectContaining({
+        method: 'POST',
+        body: expect.stringContaining('"allowed_mentions":{"parse":[]}'),
+      }),
+    );
     expect(store.markRecovered).toHaveBeenCalledOnce();
     expect(store.markAlert).not.toHaveBeenCalled();
   });
 });
-
