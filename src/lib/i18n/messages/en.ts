@@ -326,7 +326,7 @@ export const en: Dictionary = {
     bannerAria: 'Pricing notice',
     bannerMessage:
       '⏳ Early-bird {earlyPrice} ends Jun 28. 🏆 From Jun 29 it’s {regularPrice}. The group stage is free!',
-    bannerCta: 'Get full access →',
+    bannerCta: 'Get full access',
     bannerCtaAria: 'Get full access to the knockout stage (go to the predictions page)',
     lockTitle: 'Unlock the knockout stage',
     lockBody:

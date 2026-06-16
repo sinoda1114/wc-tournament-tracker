@@ -330,7 +330,7 @@ export const pt: Dictionary = {
     bannerAria: 'Aviso de preço',
     bannerMessage:
       '⏳ Preço promocional {earlyPrice} até 28 de junho. 🏆 A partir de 29 de junho, {regularPrice}. A fase de grupos é gratuita!',
-    bannerCta: 'Quero acesso →',
+    bannerCta: 'Quero acesso',
     bannerCtaAria: 'Tenha acesso completo ao mata-mata (ir para a página de palpites)',
     lockTitle: 'Libere o mata-mata',
     lockBody:
