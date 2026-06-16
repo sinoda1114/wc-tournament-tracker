@@ -121,8 +121,10 @@ export default async function RootLayout({
             {dict.header.skipToContent}
           </a>
           <div className="wc-shell" style={{ display: 'flex', flexDirection: 'column' }}>
-            <SiteHeader locale={locale} dict={dict} />
-            <PaywallBanner locale={locale} dict={dict} />
+            <div className="wc-sticky-header-group">
+              <SiteHeader locale={locale} dict={dict} />
+              <PaywallBanner locale={locale} dict={dict} />
+            </div>
             <main id="main-content" style={{ flex: 1 }}>
               {children}
             </main>

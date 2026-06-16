@@ -106,13 +106,16 @@ a {
   min-height: 100vh;
 }
 
+.wc-sticky-header-group {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
 .wc-header {
   border-bottom: 1px solid var(--wc-border);
   backdrop-filter: blur(10px);
   background: rgba(11, 18, 32, 0.82);
-  position: sticky;
-  top: 0;
-  z-index: 20;
 }
 
 /* ヘッダ内側の余白。デスクトップは従来どおり、モバイルで圧縮する（T-55）。 */
