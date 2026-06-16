@@ -1,8 +1,7 @@
-import Link from 'next/link';
-
 import { auth } from '@clerk/nextjs/server';
-import { Button, Card, Stack, Text, Title } from '@mantine/core';
+import { Card, Stack, Text, Title } from '@mantine/core';
 
+import { ButtonLink } from '@/components/RouterLink';
 import { PurchaseButton } from '@/components/billing/PurchaseButton';
 import type { Locale } from '@/lib/i18n/config';
 import type { Dictionary } from '@/lib/i18n/dictionary';
@@ -51,9 +50,9 @@ export async function PaywallLock({ locale, dict }: PaywallLockProps) {
             errorLabel={t.purchaseError}
           />
         ) : (
-          <Button component={Link} href={signInUrl} size="md">
+          <ButtonLink href={signInUrl} size="md">
             {t.lockSignIn}
-          </Button>
+          </ButtonLink>
         )}
       </Stack>
     </Card>

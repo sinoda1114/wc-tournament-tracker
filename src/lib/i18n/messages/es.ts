@@ -335,6 +335,10 @@ export const es: Dictionary = {
       'Los pronósticos y el cuadro de la fase eliminatoria están disponibles con un único pago de {price} (MatchFav Full Access). Paga una vez y úsalo hasta el final del torneo.',
     lockCta: 'Comprar por {price}',
     lockSignIn: 'Inicia sesión para comprar',
+    earlyTitle: 'Precompra anticipada por tiempo limitado',
+    earlyBody:
+      'Consigue ahora los pronósticos y el cuadro de la fase eliminatoria al precio anticipado de {earlyPrice}. A partir del 29 de junio el precio será {regularPrice}. Pago único: paga una vez y úsalo hasta el final del torneo.',
+    earlyCta: 'Precomprar por {earlyPrice}',
     offerPeriod: 'Disponible hasta el {offerEnd}',
     purchasing: 'Abriendo el pago…',
     purchaseError: 'No se pudo abrir el pago. Inténtalo de nuevo más tarde.',

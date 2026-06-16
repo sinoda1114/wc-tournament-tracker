@@ -330,6 +330,10 @@ export const zh: Dictionary = {
       '淘汰赛预测与对阵表可通过一次性买断 {price}（MatchFav Full Access）使用。一次付费，用到赛事结束。',
     lockCta: '以 {price} 购买',
     lockSignIn: '登录后购买',
+    earlyTitle: '限时早鸟预购',
+    earlyBody:
+      '现在即可以早鸟价 {earlyPrice} 预购淘汰赛预测与对阵表。6 月 29 日起价格将变为 {regularPrice}。一次性买断——付费一次，用到赛事结束。',
+    earlyCta: '以 {earlyPrice} 预购',
     offerPeriod: '提供期间：截至 {offerEnd}',
     purchasing: '正在打开结账页面…',
     purchaseError: '无法打开结账页面，请稍后再试。',

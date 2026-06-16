@@ -331,6 +331,10 @@ export const en: Dictionary = {
       'Knockout predictions and the bracket are available with a one-time {price} (MatchFav Full Access). Pay once, use it through the end of the tournament.',
     lockCta: 'Buy for {price}',
     lockSignIn: 'Sign in to purchase',
+    earlyTitle: 'Early-bird pre-purchase, limited time',
+    earlyBody:
+      'Get the knockout predictions and bracket now at the early-bird price of {earlyPrice}. From June 29 the price becomes {regularPrice}. One-time purchase — pay once, use it through the end of the tournament.',
+    earlyCta: 'Pre-purchase for {earlyPrice}',
     offerPeriod: 'Available until {offerEnd}',
     purchasing: 'Opening checkout…',
     purchaseError: 'Could not open checkout. Please try again later.',

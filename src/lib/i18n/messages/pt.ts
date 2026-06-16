@@ -335,6 +335,10 @@ export const pt: Dictionary = {
       'Os palpites e o chaveamento do mata-mata estão disponíveis com uma compra única de {price} (MatchFav Full Access). Pague uma vez e use até o fim do torneio.',
     lockCta: 'Comprar por {price}',
     lockSignIn: 'Entre para comprar',
+    earlyTitle: 'Pré-compra promocional por tempo limitado',
+    earlyBody:
+      'Garanta agora os palpites e o chaveamento do mata-mata pelo preço promocional de {earlyPrice}. A partir de 29 de junho o preço passa a ser {regularPrice}. Compra única: pague uma vez e use até o fim do torneio.',
+    earlyCta: 'Pré-comprar por {earlyPrice}',
     offerPeriod: 'Disponível até {offerEnd}',
     purchasing: 'Abrindo o checkout…',
     purchaseError: 'Não foi possível abrir o checkout. Tente novamente mais tarde.',
