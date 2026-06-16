@@ -73,6 +73,8 @@ export function buildDiscordHealthMessage(
 
   const counts = report.counts;
   const lines = [
+    '@everyone',
+    '',
     '🔴 MatchFav データヘルス異常',
     '',
     `未取込疑い: ${counts.staleUnfinished}`,
@@ -94,14 +96,18 @@ export function buildDiscordHealthMessage(
     : message;
 }
 
-async function postDiscordMessage(webhookUrl: string, content: string): Promise<void> {
+async function postDiscordMessage(
+  webhookUrl: string,
+  content: string,
+  options: { mentionEveryone: boolean },
+): Promise<void> {
   const res = await fetch(webhookUrl, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({
       username: 'MatchFav Health',
       content,
-      allowed_mentions: { parse: [] },
+      allowed_mentions: { parse: options.mentionEveryone ? ['everyone'] : [] },
     }),
   });
 
@@ -131,7 +137,9 @@ export async function notifyDiscordHealth(
   const decision = decideHealthNotification(report, state);
   if (decision.status === 'unchanged') return 'unchanged';
 
-  await postDiscordMessage(webhookUrl, buildDiscordHealthMessage(report, decision.status));
+  await postDiscordMessage(webhookUrl, buildDiscordHealthMessage(report, decision.status), {
+    mentionEveryone: decision.status === 'alert',
+  });
 
   if (decision.status === 'alert') {
     await store.markAlert(decision.signature);
