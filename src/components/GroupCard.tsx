@@ -111,6 +111,7 @@ export function GroupCard({
             matches={matches}
             emptyText={t.favoriteNoMatches}
             showContextLabel={false}
+            teamNameMode="code"
           />
         )}
       </div>

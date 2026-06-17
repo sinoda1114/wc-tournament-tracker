@@ -20,6 +20,8 @@ type MatchVersusProps = {
   nameMode?: 'code' | 'full';
 };
 
+export type MatchTeamNameMode = NonNullable<MatchVersusProps['nameMode']>;
+
 export function MatchVersus({
   match,
   size = 'md',
@@ -36,6 +38,8 @@ export function MatchVersus({
     nameMode === 'full' && match.awayTeam
       ? localizedTeamName(match.awayTeam, locale)
       : match.awayTeam?.fifaCode;
+  const homeFullName = match.homeTeam ? localizedTeamName(match.homeTeam, locale) : null;
+  const awayFullName = match.awayTeam ? localizedTeamName(match.awayTeam, locale) : null;
   const homeWin = isWinner(match.homeTeamId, match.winnerTeamId);
   const awayWin = isWinner(match.awayTeamId, match.winnerTeamId);
   const hasScore = match.homeScore !== null && match.awayScore !== null;
@@ -54,7 +58,13 @@ export function MatchVersus({
                 size={starSize}
               />
             ) : null}
-            <span className="wc-versus-name">{homeName}</span>
+            <span
+              className="wc-versus-name"
+              title={nameMode === 'code' ? homeFullName ?? undefined : undefined}
+              aria-label={nameMode === 'code' ? homeFullName ?? undefined : undefined}
+            >
+              {homeName}
+            </span>
             <CountryFlag
               fifaCode={match.homeTeam.fifaCode}
               size={flagSize}
@@ -86,7 +96,13 @@ export function MatchVersus({
               size={flagSize}
               ariaLabel={match.awayTeam.nameJa}
             />
-            <span className="wc-versus-name">{awayName}</span>
+            <span
+              className="wc-versus-name"
+              title={nameMode === 'code' ? awayFullName ?? undefined : undefined}
+              aria-label={nameMode === 'code' ? awayFullName ?? undefined : undefined}
+            >
+              {awayName}
+            </span>
             {showFavoriteStar ? (
               <FavoriteStar
                 fifaCode={match.awayTeam.fifaCode}
