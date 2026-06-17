@@ -102,11 +102,14 @@ const listMatchesMock = vi.mocked(listTournamentMatches);
 
 type AnyEl = ReactElement<{ children?: unknown; cardLock?: unknown }>;
 
-/** HomeView の返り値（Container > Stack[gap=lg]）から最後の子＝ゲート分岐ノードを取り出す。 */
+/**
+ * HomeView の返り値（Container > Stack[gap=lg]）からゲート分岐ノードを取り出す。
+ * 末尾には常設の FaqSection（T-94）が入るため、その1つ手前がゲート分岐。
+ */
 function gatedBranch(result: AnyEl): AnyEl | AnyEl[] {
   const innerStack = result.props.children as AnyEl;
   const kids = innerStack.props.children as AnyEl[];
-  return kids[kids.length - 1];
+  return kids[kids.length - 2];
 }
 
 async function render(params: HomeSearchParams): Promise<AnyEl> {
