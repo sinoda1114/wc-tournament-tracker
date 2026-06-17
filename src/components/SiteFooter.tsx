@@ -45,7 +45,7 @@ export function SiteFooter({ t }: { t: Dictionary['footer'] }) {
 
   return (
     <footer className={styles.footer}>
-      <Container size="xl" py="md">
+      <Container size="xl" py="sm">
         <FooterReveal label={t.reveal}>
           <div className={styles.inner}>
             <p className={styles.brandTitle}>{t.brandTitle}</p>
