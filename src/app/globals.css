@@ -2737,3 +2737,93 @@ a {
     );
   }
 }
+
+/* ===== FAQ（トップ下部・T-94） ===== */
+.wc-faq {
+  margin-top: 2.5rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--wc-border);
+}
+
+.wc-faq-title {
+  margin: 0 0 1.25rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--wc-text);
+}
+
+.wc-faq-category {
+  margin-bottom: 1.75rem;
+}
+
+.wc-faq-category-heading {
+  margin: 0 0 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--wc-accent);
+  letter-spacing: 0.02em;
+}
+
+.wc-faq-item {
+  border: 1px solid var(--wc-border);
+  border-radius: 10px;
+  background: var(--wc-surface);
+  margin-bottom: 0.5rem;
+  overflow: hidden;
+}
+
+.wc-faq-q {
+  list-style: none;
+  cursor: pointer;
+  padding: 0.85rem 2.25rem 0.85rem 1rem;
+  position: relative;
+  font-weight: 600;
+  color: var(--wc-text);
+  user-select: none;
+}
+
+.wc-faq-q::-webkit-details-marker {
+  display: none;
+}
+
+/* 開閉インジケータ（＋ / ×）。compositor-friendly な transform のみアニメーション。 */
+.wc-faq-q::after {
+  content: '';
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  width: 0.7rem;
+  height: 0.7rem;
+  margin-top: -0.35rem;
+  background:
+    linear-gradient(var(--wc-muted), var(--wc-muted)) center / 100% 2px no-repeat,
+    linear-gradient(var(--wc-muted), var(--wc-muted)) center / 2px 100% no-repeat;
+  transition: transform var(--duration-normal, 200ms) ease;
+}
+
+.wc-faq-item[open] .wc-faq-q::after {
+  transform: rotate(45deg);
+}
+
+.wc-faq-q:hover {
+  color: var(--wc-accent);
+}
+
+.wc-faq-a {
+  padding: 0 1rem 1rem;
+  color: var(--wc-muted);
+  line-height: 1.7;
+}
+
+.wc-faq-a p {
+  margin: 0 0 0.5rem;
+}
+
+.wc-faq-a p:last-child {
+  margin-bottom: 0;
+}
+
+.wc-faq-a a {
+  color: var(--wc-accent);
+  text-decoration: underline;
+}
