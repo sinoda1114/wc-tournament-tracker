@@ -80,6 +80,12 @@ describe('data health Discord notification', () => {
     expect(message).toContain('https://matchfav.com/admin/health');
   });
 
+  it('代表所見に対象試合の深リンクを含める', () => {
+    const message = buildDiscordHealthMessage(report([finding({ matchId: 19 })]), 'alert');
+
+    expect(message).toContain('https://matchfav.com/matches/19');
+  });
+
   it('復旧メッセージには全体メンションを含めない', () => {
     const message = buildDiscordHealthMessage(report(), 'recovered');
 
@@ -142,5 +148,59 @@ describe('data health Discord notification', () => {
     );
     expect(store.markRecovered).toHaveBeenCalledOnce();
     expect(store.markAlert).not.toHaveBeenCalled();
+  });
+
+  // T-111: ヘルス画面に出る未取込疑い（第19試合型）が、取込とは独立した監視 cron 経由で
+  // Discord へ橋渡しされ、alert → 連投なし(unchanged) → 解消で復旧通知、まで一連で回ることを
+  // 疑似データで検証する。state は cron 間で永続する想定なので可変ストアで模す。
+  it('未取込疑い(第19試合型)を疑似データで alert→連投なし→復旧まで通知する', async () => {
+    process.env.DISCORD_HEALTH_WEBHOOK_URL = 'https://discord.example/webhook';
+    const fetchMock = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValue(new Response(null, { status: 204 }));
+
+    let persisted: HealthNotificationState | null = null;
+    const store = {
+      get: vi.fn(async () => persisted),
+      markAlert: vi.fn(async (signature: string) => {
+        persisted = { channel: 'discord-health', activeSignature: signature, lastStatus: 'alert' };
+      }),
+      markRecovered: vi.fn(async () => {
+        persisted = { channel: 'discord-health', activeSignature: null, lastStatus: 'ok' };
+      }),
+    };
+
+    const stale = finding({
+      matchId: 19,
+      kind: 'stale_unfinished',
+      severity: 'error',
+      message: 'KO後 約2.5 時間以上経過しても未終了（status=scheduled）。試合結果が未取込の可能性。',
+      context: { status: 'scheduled', group: 'C' },
+    });
+    const staleReport = report([stale]);
+
+    // 1) 初回検知 → 異常通知（@everyone 付き）。
+    await expect(notifyDiscordHealth(staleReport, { store })).resolves.toBe('alert');
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock).toHaveBeenLastCalledWith(
+      'https://discord.example/webhook',
+      expect.objectContaining({
+        body: expect.stringContaining('https://matchfav.com/matches/19'),
+      }),
+    );
+
+    // 2) 次回 cron でも同じ異常なら連投しない。
+    await expect(notifyDiscordHealth(staleReport, { store })).resolves.toBe('unchanged');
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+
+    // 3) 取込が追いついて所見0件になったら復旧通知（メンションなし）。
+    await expect(notifyDiscordHealth(report(), { store })).resolves.toBe('recovered');
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(fetchMock).toHaveBeenLastCalledWith(
+      'https://discord.example/webhook',
+      expect.objectContaining({
+        body: expect.stringContaining('"allowed_mentions":{"parse":[]}'),
+      }),
+    );
   });
 });

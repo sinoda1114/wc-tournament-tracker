@@ -49,10 +49,11 @@ export function decideHealthNotification(
   return { status: 'alert', signature };
 }
 
-function summarizeFinding(finding: AuditFinding): string {
+function summarizeFinding(finding: AuditFinding, siteUrl: string): string {
   const message =
     finding.message.length > 180 ? `${finding.message.slice(0, 177)}...` : finding.message;
-  return `#${finding.matchId} ${finding.kind}: ${message}`;
+  // 検知理由（kind＋本文）に対象試合の深リンクを添える。受け手がワンタップで現物を確認できる。
+  return `#${finding.matchId} ${finding.kind}: ${message} → ${siteUrl}/matches/${finding.matchId}`;
 }
 
 export function buildDiscordHealthMessage(
@@ -86,7 +87,7 @@ export function buildDiscordHealthMessage(
   const examples = report.findings.slice(0, MAX_FINDINGS_IN_MESSAGE);
   if (examples.length > 0) {
     lines.push('', '代表所見:');
-    lines.push(...examples.map((finding) => `- ${summarizeFinding(finding)}`));
+    lines.push(...examples.map((finding) => `- ${summarizeFinding(finding, getSiteUrl())}`));
   }
 
   lines.push('', `確認: ${adminUrl}`, `時刻: ${report.generatedAt}`);
