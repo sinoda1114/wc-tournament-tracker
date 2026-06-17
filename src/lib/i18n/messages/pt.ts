@@ -336,17 +336,17 @@ export const pt: Dictionary = {
   paywall: {
     bannerAria: 'Aviso de preço',
     bannerMessage:
-      '⏳ Preço promocional {earlyPrice} até 28 de junho. 🏆 A partir de 29 de junho, {regularPrice}. A fase de grupos é gratuita!',
+      '⏳ Preço promocional {earlyPrice} (pagamento único) até 28 de junho. 🏆 A partir de 29 de junho, {regularPrice} (pagamento único). A fase de grupos é gratuita!',
     bannerCta: 'Quero acesso',
     bannerCtaAria: 'Tenha acesso completo ao mata-mata (ir para a página de palpites)',
     lockTitle: 'Libere o mata-mata',
     lockBody:
-      'Os palpites e o chaveamento do mata-mata estão disponíveis com uma compra única de {price} (MatchFav Full Access). Pague uma vez e use até o fim do torneio.',
+      'Os palpites e o chaveamento do mata-mata estão disponíveis com uma compra única de {price} (MatchFav Full Access). Pague uma vez e use até o fim da Copa do Mundo 2026.',
     lockCta: 'Comprar por {price}',
     lockSignIn: 'Entre para comprar',
     earlyTitle: 'Pré-compra promocional por tempo limitado',
     earlyBody:
-      'Garanta agora os palpites e o chaveamento do mata-mata pelo preço promocional de {earlyPrice}. A partir de 29 de junho o preço passa a ser {regularPrice}. Compra única: pague uma vez e use até o fim do torneio.',
+      'Garanta agora os palpites e o chaveamento do mata-mata pelo preço promocional de {earlyPrice}. A partir de 29 de junho o preço passa a ser {regularPrice}. Compra única: pague uma vez e use até o fim da Copa do Mundo 2026.',
     earlyCta: 'Pré-comprar por {earlyPrice}',
     offerPeriod: 'Disponível até {offerEnd}',
     purchasing: 'Abrindo o checkout…',

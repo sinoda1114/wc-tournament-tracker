@@ -332,17 +332,17 @@ export const en: Dictionary = {
   paywall: {
     bannerAria: 'Pricing notice',
     bannerMessage:
-      '⏳ Early-bird {earlyPrice} ends Jun 28. 🏆 From Jun 29 it’s {regularPrice}. The group stage is free!',
+      '⏳ Early-bird {earlyPrice} (one-time) ends Jun 28. 🏆 From Jun 29 it’s {regularPrice} (one-time). The group stage is free!',
     bannerCta: 'Get full access',
     bannerCtaAria: 'Get full access to the knockout stage (go to the predictions page)',
     lockTitle: 'Unlock the knockout stage',
     lockBody:
-      'Knockout predictions and the bracket are available with a one-time {price} (MatchFav Full Access). Pay once, use it through the end of the tournament.',
+      'Knockout predictions and the bracket are available with a one-time {price} (MatchFav Full Access). Pay once, use it through the end of World Cup 2026.',
     lockCta: 'Buy for {price}',
     lockSignIn: 'Sign in to purchase',
     earlyTitle: 'Early-bird pre-purchase, limited time',
     earlyBody:
-      'Get the knockout predictions and bracket now at the early-bird price of {earlyPrice}. From June 29 the price becomes {regularPrice}. One-time purchase — pay once, use it through the end of the tournament.',
+      'Get the knockout predictions and bracket now at the early-bird price of {earlyPrice}. From June 29 the price becomes {regularPrice}. One-time purchase — pay once, use it through the end of World Cup 2026.',
     earlyCta: 'Pre-purchase for {earlyPrice}',
     offerPeriod: 'Available until {offerEnd}',
     purchasing: 'Opening checkout…',

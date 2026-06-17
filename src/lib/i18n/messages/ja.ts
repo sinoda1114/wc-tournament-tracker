@@ -357,17 +357,17 @@ export const ja = {
   paywall: {
     bannerAria: '課金のお知らせ',
     bannerMessage:
-      '⏳ 早割 {earlyPrice} は6/28まで。🏆 6/29から {regularPrice}。グループリーグは無料！',
+      '⏳ 早割 {earlyPrice}(買い切り) は6/28まで。🏆 6/29から {regularPrice}(買い切り)。グループリーグは無料！',
     bannerCta: '購入する',
     bannerCtaAria: '決勝トーナメントを購入する（予想ページへ）',
     lockTitle: '決勝トーナメントは買い切りでフルアクセス',
     lockBody:
-      '決勝トーナメントの予想・対戦表は買い切り {price}（MatchFav フルアクセス）でご利用いただけます。一度のお支払いで大会終了まで使えます。',
+      '決勝トーナメントの予想・対戦表は買い切り {price}（MatchFav フルアクセス）でご利用いただけます。一度のお支払いでW杯2026 終了まで使えます。',
     lockCta: '{price} で購入する',
     lockSignIn: 'ログインして購入する',
     earlyTitle: '今だけ早割で先行購入',
     earlyBody:
-      '決勝トーナメント（6/29〜）の予想・対戦表を、いまなら早割 {earlyPrice} で先行購入できます。6/29 以降は {regularPrice} になります。買い切り・一度のお支払いで大会終了まで使えます。',
+      '決勝トーナメント（6/29〜）の予想・対戦表を、いまなら早割 {earlyPrice} で先行購入できます。6/29 以降は {regularPrice} になります。買い切り・一度のお支払いでW杯2026 終了まで使えます。',
     earlyCta: '{earlyPrice} で先行購入する',
     offerPeriod: '提供期間: 〜{offerEnd}',
     purchasing: '決済ページへ移動中…',

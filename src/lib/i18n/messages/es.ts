@@ -336,17 +336,17 @@ export const es: Dictionary = {
   paywall: {
     bannerAria: 'Aviso de precio',
     bannerMessage:
-      '⏳ Precio anticipado {earlyPrice} hasta el 28 de junio. 🏆 Desde el 29 de junio, {regularPrice}. ¡La fase de grupos es gratis!',
+      '⏳ Precio anticipado {earlyPrice} (pago único) hasta el 28 de junio. 🏆 Desde el 29 de junio, {regularPrice} (pago único). ¡La fase de grupos es gratis!',
     bannerCta: 'Consíguelo',
     bannerCtaAria: 'Consigue el acceso completo a la fase eliminatoria (ir a la página de pronósticos)',
     lockTitle: 'Desbloquea la fase eliminatoria',
     lockBody:
-      'Los pronósticos y el cuadro de la fase eliminatoria están disponibles con un único pago de {price} (MatchFav Full Access). Paga una vez y úsalo hasta el final del torneo.',
+      'Los pronósticos y el cuadro de la fase eliminatoria están disponibles con un único pago de {price} (MatchFav Full Access). Paga una vez y úsalo hasta el final del Mundial 2026.',
     lockCta: 'Comprar por {price}',
     lockSignIn: 'Inicia sesión para comprar',
     earlyTitle: 'Precompra anticipada por tiempo limitado',
     earlyBody:
-      'Consigue ahora los pronósticos y el cuadro de la fase eliminatoria al precio anticipado de {earlyPrice}. A partir del 29 de junio el precio será {regularPrice}. Pago único: paga una vez y úsalo hasta el final del torneo.',
+      'Consigue ahora los pronósticos y el cuadro de la fase eliminatoria al precio anticipado de {earlyPrice}. A partir del 29 de junio el precio será {regularPrice}. Pago único: paga una vez y úsalo hasta el final del Mundial 2026.',
     earlyCta: 'Precomprar por {earlyPrice}',
     offerPeriod: 'Disponible hasta el {offerEnd}',
     purchasing: 'Abriendo el pago…',
