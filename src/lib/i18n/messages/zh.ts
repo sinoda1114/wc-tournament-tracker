@@ -331,17 +331,17 @@ export const zh: Dictionary = {
   paywall: {
     bannerAria: '收费提示',
     bannerMessage:
-      '⏳ 早鸟价 {earlyPrice} 截至 6 月 28 日。🏆 6 月 29 日起 {regularPrice}。小组赛阶段免费！',
+      '⏳ 早鸟价 {earlyPrice}（买断）截至 6 月 28 日。🏆 6 月 29 日起 {regularPrice}（买断）。小组赛阶段免费！',
     bannerCta: '立即购买',
     bannerCtaAria: '购买淘汰赛阶段完整权限（前往预测页面）',
     lockTitle: '解锁淘汰赛阶段',
     lockBody:
-      '淘汰赛预测与对阵表可通过一次性买断 {price}（MatchFav Full Access）使用。一次付费，用到赛事结束。',
+      '淘汰赛预测与对阵表可通过一次性买断 {price}（MatchFav Full Access）使用。一次付费，用到 2026 世界杯结束。',
     lockCta: '以 {price} 购买',
     lockSignIn: '登录后购买',
     earlyTitle: '限时早鸟预购',
     earlyBody:
-      '现在即可以早鸟价 {earlyPrice} 预购淘汰赛预测与对阵表。6 月 29 日起价格将变为 {regularPrice}。一次性买断——付费一次，用到赛事结束。',
+      '现在即可以早鸟价 {earlyPrice} 预购淘汰赛预测与对阵表。6 月 29 日起价格将变为 {regularPrice}。一次性买断——付费一次，用到 2026 世界杯结束。',
     earlyCta: '以 {earlyPrice} 预购',
     offerPeriod: '提供期间：截至 {offerEnd}',
     purchasing: '正在打开结账页面…',
