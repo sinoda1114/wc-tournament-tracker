@@ -2363,6 +2363,34 @@ a {
   align-items: center;
   gap: 0.4rem;
 }
+/* 歴代得点者: 選手名＋現役バッジを横並び（折り返し可）。T-109 */
+.wc-historical-player {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+/* 2026大会に現役出場中を示す小バッジ（緑系・小さく目立ちすぎない）。 */
+.wc-active-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.05rem 0.4rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  line-height: 1.4;
+  color: #34d399;
+  background: color-mix(in oklch, #34d399 16%, transparent);
+  border: 1px solid color-mix(in oklch, #34d399 38%, transparent);
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.wc-active-badge-dot {
+  width: 0.42rem;
+  height: 0.42rem;
+  border-radius: 999px;
+  background: #34d399;
+}
 /* 出場停止セル: 赤バッジ＋次戦(M/D vs 相手)を横並び。狭い時は折り返す。 */
 .wc-ranking-susp {
   display: inline-flex;

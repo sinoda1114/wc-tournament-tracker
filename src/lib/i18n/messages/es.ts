@@ -96,6 +96,14 @@ export const es: Dictionary = {
     allScorersTitle: 'Todos los goleadores',
     allCardsTitle: 'Todas las tarjetas',
     allRowsMeta: 'Mostrando {total} registros.',
+    historicalScorersTitle: 'Goleadores históricos del Mundial',
+    historicalNote:
+      'Goles históricos en Mundiales (masculino). Los totales están fijados al Mundial 2022; a los jugadores en activo se les suman sus goles actuales automáticamente.',
+    colSpan: 'Ediciones',
+    showAllHistorical: 'Abrir la clasificación histórica (los {total})',
+    allHistoricalScorersTitle: 'Goleadores históricos del Mundial (los {total})',
+    activeBadge: 'En activo',
+    activeBadgeAria: 'Juega en el Mundial 2026',
     empty: 'Aún no hay registros. Los goles y las tarjetas se contarán aquí a medida que se jueguen los partidos.',
   },
   header: {

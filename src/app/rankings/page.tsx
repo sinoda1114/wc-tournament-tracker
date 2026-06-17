@@ -5,6 +5,7 @@ import { MiniHero } from '@/components/MiniHero';
 import { RankingsView } from '@/components/RankingsView';
 import { getRankingEvents } from '@/db/match-events';
 import { listTournamentMatches } from '@/db/queries';
+import { mergeHistoricalScorers } from '@/lib/historical-scorers';
 import { ogLocale } from '@/lib/i18n/alternates';
 import { getDictionary } from '@/lib/i18n/dictionary';
 import { resolveLocale } from '@/lib/i18n/server';
@@ -36,6 +37,10 @@ export default async function RankingsPage() {
   const scorers = aggregateScorers(events);
   const cards = aggregateCards(events);
 
+  // 歴代W杯通算得点ランキング（T-109）。静的ベース（〜2022確定）に、現役選手の2026ライブ得点
+  // （上の scorers＝同じDB集計）を加算して通算を自動更新する。外部API・手動更新なし。
+  const historical = mergeHistoricalScorers(scorers);
+
   // 出場停止を算出してカード行に合流（リセット窓考慮・消化済みは非表示）。
   const fixtures: SuspensionFixture[] = matches.map((m) => ({
     matchDate: m.matchDate,
@@ -64,6 +69,7 @@ export default async function RankingsPage() {
     <RankingsView
       scorers={scorers}
       cards={cardsWithSuspension}
+      historical={historical}
       heroSlot={<MiniHero dict={dict} />}
       purchaseSlot={<EarlyBirdPurchase locale={locale} dict={dict} />}
     />
