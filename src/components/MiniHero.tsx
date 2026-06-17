@@ -30,6 +30,7 @@ export async function MiniHero({ dict }: MiniHeroProps) {
           <li>{t.heroPoint1}</li>
           <li>{t.heroPoint2}</li>
           <li>{t.heroPoint3}</li>
+          <li>{t.heroPoint4}</li>
         </ul>
       </div>
       <div className="wc-mini-hero-action">

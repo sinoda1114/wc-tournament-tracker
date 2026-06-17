@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Container } from '@mantine/core';
+import { Container, Stack } from '@mantine/core';
 
 import { TeamExplorer } from '@/components/TeamExplorer';
 import { listAllTeams } from '@/db/queries';
@@ -27,7 +27,9 @@ export default async function TeamsPage() {
 
   return (
     <Container size="xl" py="xl">
-      <TeamExplorer teams={teams} />
+      <Stack gap="lg">
+        <TeamExplorer teams={teams} />
+      </Stack>
     </Container>
   );
 }

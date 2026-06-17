@@ -2363,6 +2363,34 @@ a {
   align-items: center;
   gap: 0.4rem;
 }
+/* 歴代得点者: 選手名＋現役バッジを横並び（折り返し可）。T-109 */
+.wc-historical-player {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+/* 2026大会に現役出場中を示す小バッジ（緑系・小さく目立ちすぎない）。 */
+.wc-active-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.05rem 0.4rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  line-height: 1.4;
+  color: #34d399;
+  background: color-mix(in oklch, #34d399 16%, transparent);
+  border: 1px solid color-mix(in oklch, #34d399 38%, transparent);
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.wc-active-badge-dot {
+  width: 0.42rem;
+  height: 0.42rem;
+  border-radius: 999px;
+  background: #34d399;
+}
 /* 出場停止セル: 赤バッジ＋次戦(M/D vs 相手)を横並び。狭い時は折り返す。 */
 .wc-ranking-susp {
   display: inline-flex;
@@ -2376,6 +2404,66 @@ a {
   text-align: center;
   border: 1px dashed var(--wc-border);
   border-radius: 10px;
+}
+
+.wc-ranking-preview-meta {
+  margin-bottom: 0.45rem;
+}
+
+.wc-ranking-show-all {
+  display: flex;
+  justify-content: center;
+  padding-top: 0.85rem;
+}
+
+.wc-ranking-show-all .mantine-Button-root {
+  min-height: 2.6rem;
+  border: 1px solid rgba(59, 130, 246, 0.35);
+  background: var(--wc-accent-soft);
+  color: var(--wc-text);
+  font-weight: 700;
+}
+
+.wc-ranking-drawer .mantine-Drawer-content {
+  background: var(--wc-bg);
+  color: var(--wc-text);
+}
+
+.wc-ranking-drawer .mantine-Drawer-header {
+  background: var(--wc-bg);
+  border-bottom: 1px solid var(--wc-border);
+}
+
+.wc-ranking-drawer .mantine-Drawer-title {
+  font-weight: 800;
+}
+
+.wc-ranking-drawer-table {
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+
+.wc-ranking-drawer-table .wc-ranking-table {
+  width: 100%;
+}
+
+@media (max-width: 767px) {
+  .wc-ranking-show-all {
+    justify-content: stretch;
+  }
+
+  .wc-ranking-show-all .mantine-Button-root {
+    width: 100%;
+  }
+
+  .wc-ranking-drawer .mantine-Drawer-content {
+    width: 100vw;
+    max-width: 100vw;
+  }
+
+  .wc-ranking-drawer .mantine-Drawer-body {
+    padding-inline: 0.85rem;
+  }
 }
 
 /* =====================================================================

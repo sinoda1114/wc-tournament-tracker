@@ -45,6 +45,10 @@ let nextMatchId = 1;
 /**
  * 1グループ（4チーム）と、順位が t1>t2>t3>t4 に一意確定する総当たり6試合を投入。
  * @param played true: 全6試合 finished（順位確定）/ false: 全6試合 scheduled（未消化）。
+ *
+ * 勝者の得点差はグループごとに変える（A=1点差 … L=12点差）。これにより各組の3位の
+ * 得失点差/総得点が組ごとに異なり、ベスト3位ランキングの「上位8と9位」が一意に分離する
+ * （T-104 のカットオフ確定判定が成立する。全組同点だと未確定で3位枠が埋まらない）。
  */
 async function seedGroup(client: Client, group: GroupLetter, played: boolean) {
   const ids = [1, 2, 3, 4].map((n) => `${group.toLowerCase()}${n}`);
@@ -56,7 +60,9 @@ async function seedGroup(client: Client, group: GroupLetter, played: boolean) {
     });
   }
 
-  // 各 [home, away]。勝者が常にホーム 1-0。t1=3勝, t2=2勝, t3=1勝, t4=0勝 で一意。
+  // 勝者は常にホームで margin-0 勝ち。t1=3勝, t2=2勝, t3=1勝, t4=0勝 で順位は一意。
+  // margin は組ごとに変える（A=1 … L=12）ので、各組3位の得失点差/総得点が組間で異なる。
+  const margin = ALL_GROUPS.indexOf(group) + 1;
   const pairs: [string, string][] = [
     [ids[0], ids[1]],
     [ids[0], ids[2]],
@@ -73,8 +79,8 @@ async function seedGroup(client: Client, group: GroupLetter, played: boolean) {
         sql: `INSERT INTO matches
                 (id, stage, match_date, venue_id, home_slot, away_slot, status,
                  home_team_id, away_team_id, home_score, away_score, winner_team_id, group_letter)
-              VALUES (?, 'group_stage', '2026-06-11', 'v1', '-', '-', 'finished', ?, ?, 1, 0, ?, ?)`,
-        args: [id, home, away, home, group],
+              VALUES (?, 'group_stage', '2026-06-11', 'v1', '-', '-', 'finished', ?, ?, ?, 0, ?, ?)`,
+        args: [id, home, away, margin, home, group],
       });
     } else {
       await client.execute({
@@ -160,7 +166,7 @@ describe('resolveAndPersistRoundOf32', () => {
     expect(updated).toBe(0);
   });
 
-  // ---- T-46: グループ未確定なら前倒し充填しない（確定ゲート） ----
+  // ---- T-104: 未消化は埋めない／消化済みグループは順次反映 ----
 
   it('全組未消化（played=0）なら R32 入口を一切埋めない（updated=0・NULL のまま）', async () => {
     await seedAllGroups(testClient, []); // どのグループも未消化
@@ -174,17 +180,34 @@ describe('resolveAndPersistRoundOf32', () => {
     expect(slots.away).toBeNull();
   });
 
-  it('一部グループだけ消化済み（A 組のみ）でも確定単位は全組なので埋めない', async () => {
+  it('A 組だけ消化済みなら、その 1位/2位は埋める（T-104・確定分は順次反映）', async () => {
     await seedAllGroups(testClient, ['A']); // A 組だけ finished、残りは scheduled
     await seedR32Match(testClient, 200, 'Group A winners', 'Group A runners-up');
+    // 未消化グループ（B）のスロット試合は埋まらないことの対照。
+    await seedR32Match(testClient, 201, 'Group B winners', 'Group B runners-up');
 
     const { updated } = await resolveAndPersistRoundOf32();
-    expect(updated).toBe(0);
+    expect(updated).toBe(2); // A の 1位/2位の2件のみ
 
-    const slots = await slotsOf(200);
-    // A 組は順位確定しているが、全組確定までは前倒し bind しない。
-    expect(slots.home).toBeNull();
-    expect(slots.away).toBeNull();
+    const a = await slotsOf(200);
+    expect(a.home).toBe('a1'); // Group A winners = 1位（消化完了で確定）
+    expect(a.away).toBe('a2'); // Group A runners-up = 2位
+
+    const b = await slotsOf(201);
+    expect(b.home).toBeNull(); // 未消化グループは bind しない
+    expect(b.away).toBeNull();
+  });
+
+  it('3位枠は全12組消化前は埋まらない（A 組のみ消化では third place は NULL）', async () => {
+    await seedAllGroups(testClient, ['A']);
+    // host 試合 74（Group E winners / 3位枠）。E 未消化＆全組未消化なので 3位枠は NULL。
+    await seedR32Match(testClient, 74, 'Group E winners', 'Group A/B/C/D/F third place');
+
+    await resolveAndPersistRoundOf32();
+
+    const slots = await slotsOf(74);
+    expect(slots.home).toBeNull(); // E 組未消化
+    expect(slots.away).toBeNull(); // 3位枠は全組消化前は出さない
   });
 
   it('全12組消化済みなら third place スロットも実チームで埋まる', async () => {
