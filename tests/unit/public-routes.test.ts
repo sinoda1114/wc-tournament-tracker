@@ -29,6 +29,7 @@ describe('isPublicRoute', () => {
 
   it('独自に認証を持つ公開APIは保護対象外（公開扱い）', () => {
     expect(isPublicRoute('/api/ingest')).toBe(true);
+    expect(isPublicRoute('/api/ingest/hot')).toBe(true);
     expect(isPublicRoute('/api/stripe/webhook')).toBe(true);
   });
 

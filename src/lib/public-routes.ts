@@ -94,6 +94,6 @@ export const PUBLIC_ROUTE_GLOBS: readonly string[] = [
   '/llms.txt',
   '/icon.png',
   '/apple-icon.png',
-  '/api/ingest',
+  '/api/ingest(.*)',
   '/api/stripe/webhook',
 ];
