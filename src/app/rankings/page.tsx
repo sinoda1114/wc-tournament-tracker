@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 
 import { EarlyBirdPurchase } from '@/components/billing/EarlyBirdPurchase';
-import { MiniHero } from '@/components/MiniHero';
 import { RankingsView } from '@/components/RankingsView';
 import { getRankingEvents } from '@/db/match-events';
 import { listTournamentMatches } from '@/db/queries';
@@ -70,7 +69,6 @@ export default async function RankingsPage() {
       scorers={scorers}
       cards={cardsWithSuspension}
       historical={historical}
-      heroSlot={<MiniHero dict={dict} />}
       purchaseSlot={<EarlyBirdPurchase locale={locale} dict={dict} />}
     />
   );

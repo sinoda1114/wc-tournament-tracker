@@ -26,11 +26,6 @@ type RankingsViewProps = {
    * 直接 import せず、サーバー側（page）で生成して slot として受け取る。
    */
   purchaseSlot?: ReactNode;
-  /**
-   * ページ最上部に差し込むヒーロー帯（未ログイン初見向け・トップと共通）。
-   * MiniHero はサーバーコンポーネント（auth による自己ゲート）なので、page 側で生成して slot で受け取る。
-   */
-  heroSlot?: ReactNode;
 };
 
 const PREVIEW_LIMIT = 20;
@@ -193,7 +188,6 @@ export function RankingsView({
   cards,
   historical,
   purchaseSlot,
-  heroSlot,
 }: RankingsViewProps) {
   const { locale, dict } = useI18n();
   const t = dict.rankings;
@@ -325,7 +319,6 @@ export function RankingsView({
   return (
     <Container size="lg" py="xl">
       <Stack gap="lg">
-        {heroSlot}
         <Stack gap={4}>
           <Title order={1}>{t.title}</Title>
           <Text c="dimmed">{t.description}</Text>

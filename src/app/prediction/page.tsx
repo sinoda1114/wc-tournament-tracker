@@ -4,7 +4,6 @@ import { Container, Stack, Text, Title } from '@mantine/core';
 import { EarlyBirdPurchase } from '@/components/billing/EarlyBirdPurchase';
 import { PaywallLock } from '@/components/billing/PaywallLock';
 import { ChampionPrediction } from '@/components/ChampionPrediction';
-import { MiniHero } from '@/components/MiniHero';
 import { VotePanel } from '@/components/VotePanel';
 import { resolveAccess } from '@/lib/billing/access';
 import {
@@ -132,8 +131,6 @@ export default async function PredictionPage() {
   return (
     <Container size="xl" py="xl">
       <Stack gap="lg">
-        {/* 未ログイン初見にサイトの趣旨を伝えるヒーロー帯（トップと共通・未ログイン時のみ）。 */}
-        <MiniHero dict={dict} />
         <Stack gap={4}>
           <Title order={1}>{dict.prediction.title}</Title>
           <Text c="dimmed">{dict.prediction.description}</Text>
