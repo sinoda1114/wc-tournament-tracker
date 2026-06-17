@@ -92,7 +92,7 @@ export const zh: Dictionary = {
     tbd: '待定',
     previewMeta: '正在显示前 {shown} 条，共 {total} 条',
     showAllScorers: '查看完整射手榜（{total}人）',
-    showAllCards: '查看完整红黄牌榜（{total}人）',
+    showAllCards: '查看完整红黄牌累积（{total}人）',
     allScorersTitle: '完整射手榜',
     allCardsTitle: '完整红黄牌榜',
     allRowsMeta: '正在显示全部 {total} 条记录。',

@@ -92,7 +92,7 @@ export const en: Dictionary = {
     tbd: 'TBD',
     previewMeta: 'Showing top {shown} of {total}',
     showAllScorers: 'Show all scorers ({total})',
-    showAllCards: 'Show all cards ({total})',
+    showAllCards: 'Show all cumulative cards ({total})',
     allScorersTitle: 'All top scorers',
     allCardsTitle: 'All cards',
     allRowsMeta: 'Showing all {total} rows.',

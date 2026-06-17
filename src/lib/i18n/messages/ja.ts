@@ -100,7 +100,7 @@ export const ja = {
     tbd: '未定',
     previewMeta: '上位{shown}件を表示中（全{total}件）',
     showAllScorers: '得点ランキングをすべて表示（{total}人）',
-    showAllCards: 'カードランキングをすべて表示（{total}人）',
+    showAllCards: 'カード累積をすべて表示（{total}人）',
     allScorersTitle: '得点ランキングすべて',
     allCardsTitle: 'カードランキングすべて',
     allRowsMeta: '全{total}件を表示しています。',
