@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 
 import type { MatchDetail } from '@/db/queries';
 import { useDictionary } from '@/lib/i18n/context';
@@ -12,9 +12,14 @@ type ViewMode = 'bracket' | 'cards';
 
 type TournamentViewToggleProps = {
   matches: MatchDetail[];
+  /**
+   * カード表示（cards）が決勝T課金壁のとき、カード本体の代わりに描画するロック要素。
+   * サーバ側で生成した <PaywallLock /> を渡す（T-68 面①）。ブラケット表示は常に無料。
+   */
+  cardLock?: ReactNode;
 };
 
-export function TournamentViewToggle({ matches }: TournamentViewToggleProps) {
+export function TournamentViewToggle({ matches, cardLock }: TournamentViewToggleProps) {
   const [mode, setMode] = useState<ViewMode>('bracket');
   const t = useDictionary().tournament;
 
@@ -44,6 +49,8 @@ export function TournamentViewToggle({ matches }: TournamentViewToggleProps) {
       </div>
       {mode === 'bracket' ? (
         <BracketLayout matches={matches} />
+      ) : cardLock ? (
+        cardLock
       ) : (
         <TournamentBracket matches={matches} />
       )}
