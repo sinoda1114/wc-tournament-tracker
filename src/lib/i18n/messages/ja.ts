@@ -70,6 +70,11 @@ export const ja = {
       title: '特定商取引法に基づく表記 | MatchFav',
       description: 'MatchFav の特定商取引法に基づく表記です。',
     },
+    faq: {
+      title: 'よくある質問 | MatchFav',
+      description:
+        'MatchFav（マッチファボ）のよくある質問。料金・無料期間・データ・お気に入り・優勝予想・お問い合わせなどをまとめています。',
+    },
   },
   nav: {
     label: '主要ページ',
@@ -393,6 +398,7 @@ export const ja = {
     brandDesc:
       '2026年に開催される国際サッカー大会の試合日程・結果・出場国を、ファン向けに見やすくまとめる非公式の情報サイトです。',
     navAria: 'フッターナビゲーション',
+    linkFaq: 'よくある質問',
     linkTerms: '利用規約',
     linkPrivacy: 'プライバシーポリシー',
     linkTokushoho: '特定商取引法に基づく表記',

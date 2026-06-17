@@ -62,6 +62,10 @@ export const zh: Dictionary = {
       title: '日本特定商业交易法标示 | MatchFav',
       description: 'MatchFav 依据日本《特定商业交易法》的标示。',
     },
+    faq: {
+      title: '常见问题 | MatchFav',
+      description: '关于 MatchFav 的常见问题：价格、免费期间、数据、收藏、夺冠预测、联系方式等。',
+    },
   },
   nav: {
     label: '主导航',
@@ -367,6 +371,7 @@ export const zh: Dictionary = {
     brandDesc:
       '面向球迷、汇总2026年国际足球赛事赛程、结果与参赛球队的非官方信息网站。',
     navAria: '页脚导航',
+    linkFaq: '常见问题',
     linkTerms: '使用条款',
     linkPrivacy: '隐私政策',
     linkTokushoho: '特定商业交易法标示',

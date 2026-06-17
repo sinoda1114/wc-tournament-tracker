@@ -6,11 +6,12 @@ type FaqSectionProps = {
 };
 
 /**
- * トップページ下部の FAQ セクション（T-94）。
+ * よくある質問（FAQ）の本体（T-94）。専用ページ `/faq` で使う。
  *
  * - サーバーコンポーネント。`<details>/<summary>` で JS なしの開閉を実現（アクセシブル＆SEO）。
  * - schema.org FAQPage の JSON-LD を併せて出力する（検索リッチリザルト対応）。
  * - メールアドレス単体の段落は mailto リンクにする。
+ * - 見出し（ページタイトル）は呼び出し側（/faq ページ）が持つため、ここでは描画しない。
  */
 export function FaqSection({ locale }: FaqSectionProps) {
   const content = FAQ_CONTENT[locale];
@@ -18,11 +19,7 @@ export function FaqSection({ locale }: FaqSectionProps) {
   const jsonLd = JSON.stringify(faqJsonLd(content)).replace(/</g, '\\u003c');
 
   return (
-    <section className="wc-faq" aria-labelledby="wc-faq-title">
-      <h2 id="wc-faq-title" className="wc-faq-title">
-        {content.title}
-      </h2>
-
+    <section className="wc-faq" aria-label={content.title}>
       {content.categories.map((category) => (
         <div key={category.heading} className="wc-faq-category">
           <h3 className="wc-faq-category-heading">{category.heading}</h3>

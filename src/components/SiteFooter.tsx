@@ -16,7 +16,11 @@ import styles from './SiteFooter.module.css';
  * - FIFA 非公認・商標の全文表記は利用規約ページに記載するため footer では持たない
  *   （公開・課金前に弁護士レビューを受けること）。
  */
-const FOOTER_LINKS: { href: string; key: 'linkTerms' | 'linkPrivacy' | 'linkTokushoho' }[] = [
+const FOOTER_LINKS: {
+  href: string;
+  key: 'linkFaq' | 'linkTerms' | 'linkPrivacy' | 'linkTokushoho';
+}[] = [
+  { href: '/faq', key: 'linkFaq' },
   { href: '/terms', key: 'linkTerms' },
   { href: '/privacy', key: 'linkPrivacy' },
   { href: '/tokushoho', key: 'linkTokushoho' },
