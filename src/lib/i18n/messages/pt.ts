@@ -90,6 +90,12 @@ export const pt: Dictionary = {
     colStatus: 'Status',
     suspended: 'Suspenso',
     tbd: 'A definir',
+    previewMeta: 'Mostrando os {shown} primeiros de {total}',
+    showAllScorers: 'Ver toda a artilharia ({total})',
+    showAllCards: 'Ver todos os cartões ({total})',
+    allScorersTitle: 'Artilharia completa',
+    allCardsTitle: 'Todos os cartões',
+    allRowsMeta: 'Mostrando todos os {total} registros.',
     empty: 'Ainda não há registros. Gols e cartões serão contabilizados aqui conforme as partidas forem disputadas.',
   },
   header: {

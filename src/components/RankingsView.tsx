@@ -1,6 +1,7 @@
 'use client';
 
-import { Container, Stack, Table, Text, Title } from '@mantine/core';
+import { Button, Container, Drawer, Stack, Table, Text, Title } from '@mantine/core';
+import { useState } from 'react';
 
 import { CountryFlag } from '@/components/CountryFlag';
 import type { Locale } from '@/lib/i18n/config';
@@ -17,6 +18,8 @@ type RankingsViewProps = {
   scorers: ScorerStat[];
   cards: CardStat[];
 };
+
+const PREVIEW_LIMIT = 20;
 
 type TeamLike = { fifaCode: string | null; nameEn: string | null; nameJa: string | null };
 
@@ -111,9 +114,19 @@ function SuspensionCell({
   );
 }
 
+function RankingPreviewMeta({ shown, total, label }: { shown: number; total: number; label: string }) {
+  if (total <= shown) return null;
+  return (
+    <Text c="dimmed" size="xs" className="wc-ranking-preview-meta">
+      {label.replace('{shown}', String(shown)).replace('{total}', String(total))}
+    </Text>
+  );
+}
+
 export function RankingsView({ scorers, cards }: RankingsViewProps) {
   const { locale, dict } = useI18n();
   const t = dict.rankings;
+  const [drawer, setDrawer] = useState<'scorers' | 'cards' | null>(null);
 
   const isEmpty = scorers.length === 0 && cards.length === 0;
 
@@ -121,6 +134,72 @@ export function RankingsView({ scorers, cards }: RankingsViewProps) {
   const scorerRanks = standardCompetitionRanks(scorers, (s) => s.goals);
   // カードランキングはソート基準（赤→黄）に合わせ、合成キー値で同順位を判定。
   const cardRanks = standardCompetitionRanks(cards, (c) => c.red * 1000 + c.yellow);
+  const previewScorers = scorers.slice(0, PREVIEW_LIMIT);
+  const previewCards = cards.slice(0, PREVIEW_LIMIT);
+
+  const renderScorerTable = (rows: ScorerStat[], ranks: number[]) => (
+    <Table className="wc-ranking-table" highlightOnHover>
+      <Table.Thead>
+        <Table.Tr>
+          <Table.Th aria-label={t.colRank}>{t.colRank}</Table.Th>
+          <Table.Th>{t.colPlayer}</Table.Th>
+          <Table.Th>{t.colTeam}</Table.Th>
+          <Table.Th ta="right">{t.colGoals}</Table.Th>
+        </Table.Tr>
+      </Table.Thead>
+      <Table.Tbody>
+        {rows.map((s, i) => (
+          <Table.Tr key={`${s.playerName}-${s.fifaCode ?? ''}-${i}`}>
+            <Table.Td>{ranks[i]}</Table.Td>
+            <Table.Td>{s.playerName}</Table.Td>
+            <Table.Td>
+              <TeamCell team={s} locale={locale} />
+            </Table.Td>
+            <Table.Td ta="right" fw={700}>
+              {s.goals}
+            </Table.Td>
+          </Table.Tr>
+        ))}
+      </Table.Tbody>
+    </Table>
+  );
+
+  const renderCardTable = (rows: CardStat[], ranks: number[]) => (
+    <Table className="wc-ranking-table" highlightOnHover>
+      <Table.Thead>
+        <Table.Tr>
+          <Table.Th aria-label={t.colRank}>{t.colRank}</Table.Th>
+          <Table.Th>{t.colPlayer}</Table.Th>
+          <Table.Th>{t.colTeam}</Table.Th>
+          <Table.Th ta="right" title={t.colYellowAria} aria-label={t.colYellowAria}>
+            <CardGlyph color="yellow" />
+          </Table.Th>
+          <Table.Th ta="right" title={t.colRedAria} aria-label={t.colRedAria}>
+            <CardGlyph color="red" />
+          </Table.Th>
+          <Table.Th aria-label={t.colStatus} />
+        </Table.Tr>
+      </Table.Thead>
+      <Table.Tbody>
+        {rows.map((c, i) => (
+          <Table.Tr key={`${c.playerName}-${c.fifaCode ?? ''}-${i}`}>
+            <Table.Td>{ranks[i]}</Table.Td>
+            <Table.Td>{c.playerName}</Table.Td>
+            <Table.Td>
+              <TeamCell team={c} locale={locale} />
+            </Table.Td>
+            <Table.Td ta="right">{c.yellow}</Table.Td>
+            <Table.Td ta="right" fw={c.red > 0 ? 700 : 400}>
+              {c.red}
+            </Table.Td>
+            <Table.Td>
+              <SuspensionCell suspension={c.suspension} locale={locale} t={t} />
+            </Table.Td>
+          </Table.Tr>
+        ))}
+      </Table.Tbody>
+    </Table>
+  );
 
   return (
     <Container size="lg" py="xl">
@@ -141,35 +220,31 @@ export function RankingsView({ scorers, cards }: RankingsViewProps) {
               <Title id="ranking-scorers" order={2} size="h4" mb="xs">
                 {t.scorersTitle}
               </Title>
+              <RankingPreviewMeta
+                shown={previewScorers.length}
+                total={scorers.length}
+                label={t.previewMeta}
+              />
               {scorers.length === 0 ? (
                 <Text c="dimmed" size="sm">
                   {t.empty}
                 </Text>
               ) : (
-                <Table className="wc-ranking-table" highlightOnHover>
-                  <Table.Thead>
-                    <Table.Tr>
-                      <Table.Th aria-label={t.colRank}>{t.colRank}</Table.Th>
-                      <Table.Th>{t.colPlayer}</Table.Th>
-                      <Table.Th>{t.colTeam}</Table.Th>
-                      <Table.Th ta="right">{t.colGoals}</Table.Th>
-                    </Table.Tr>
-                  </Table.Thead>
-                  <Table.Tbody>
-                    {scorers.map((s, i) => (
-                      <Table.Tr key={`${s.playerName}-${s.fifaCode ?? ''}`}>
-                        <Table.Td>{scorerRanks[i]}</Table.Td>
-                        <Table.Td>{s.playerName}</Table.Td>
-                        <Table.Td>
-                          <TeamCell team={s} locale={locale} />
-                        </Table.Td>
-                        <Table.Td ta="right" fw={700}>
-                          {s.goals}
-                        </Table.Td>
-                      </Table.Tr>
-                    ))}
-                  </Table.Tbody>
-                </Table>
+                <>
+                  {renderScorerTable(previewScorers, scorerRanks)}
+                  {scorers.length > PREVIEW_LIMIT ? (
+                    <div className="wc-ranking-show-all">
+                      <Button
+                        variant="light"
+                        radius="xl"
+                        onClick={() => setDrawer('scorers')}
+                        aria-haspopup="dialog"
+                      >
+                        {t.showAllScorers.replace('{total}', String(scorers.length))}
+                      </Button>
+                    </div>
+                  ) : null}
+                </>
               )}
             </section>
 
@@ -182,50 +257,64 @@ export function RankingsView({ scorers, cards }: RankingsViewProps) {
               <Text c="dimmed" size="xs" mb="sm" className="wc-ranking-cards-note">
                 {t.cardsNote}
               </Text>
+              <RankingPreviewMeta shown={previewCards.length} total={cards.length} label={t.previewMeta} />
               {cards.length === 0 ? (
                 <Text c="dimmed" size="sm">
                   {t.empty}
                 </Text>
               ) : (
-                <Table className="wc-ranking-table" highlightOnHover>
-                  <Table.Thead>
-                    <Table.Tr>
-                      <Table.Th aria-label={t.colRank}>{t.colRank}</Table.Th>
-                      <Table.Th>{t.colPlayer}</Table.Th>
-                      <Table.Th>{t.colTeam}</Table.Th>
-                      <Table.Th ta="right" title={t.colYellowAria} aria-label={t.colYellowAria}>
-                        <CardGlyph color="yellow" />
-                      </Table.Th>
-                      <Table.Th ta="right" title={t.colRedAria} aria-label={t.colRedAria}>
-                        <CardGlyph color="red" />
-                      </Table.Th>
-                      <Table.Th aria-label={t.colStatus} />
-                    </Table.Tr>
-                  </Table.Thead>
-                  <Table.Tbody>
-                    {cards.map((c, i) => (
-                      <Table.Tr key={`${c.playerName}-${c.fifaCode ?? ''}`}>
-                        <Table.Td>{cardRanks[i]}</Table.Td>
-                        <Table.Td>{c.playerName}</Table.Td>
-                        <Table.Td>
-                          <TeamCell team={c} locale={locale} />
-                        </Table.Td>
-                        <Table.Td ta="right">{c.yellow}</Table.Td>
-                        <Table.Td ta="right" fw={c.red > 0 ? 700 : 400}>
-                          {c.red}
-                        </Table.Td>
-                        <Table.Td>
-                          <SuspensionCell suspension={c.suspension} locale={locale} t={t} />
-                        </Table.Td>
-                      </Table.Tr>
-                    ))}
-                  </Table.Tbody>
-                </Table>
+                <>
+                  {renderCardTable(previewCards, cardRanks)}
+                  {cards.length > PREVIEW_LIMIT ? (
+                    <div className="wc-ranking-show-all">
+                      <Button
+                        variant="light"
+                        radius="xl"
+                        onClick={() => setDrawer('cards')}
+                        aria-haspopup="dialog"
+                      >
+                        {t.showAllCards.replace('{total}', String(cards.length))}
+                      </Button>
+                    </div>
+                  ) : null}
+                </>
               )}
             </section>
           </Stack>
         )}
       </Stack>
+      <Drawer
+        opened={drawer === 'scorers'}
+        onClose={() => setDrawer(null)}
+        position="right"
+        size="xl"
+        zIndex={1000}
+        title={t.allScorersTitle}
+        className="wc-ranking-drawer"
+      >
+        <Stack gap="sm">
+          <Text c="dimmed" size="sm">
+            {t.allRowsMeta.replace('{total}', String(scorers.length))}
+          </Text>
+          <div className="wc-ranking-drawer-table">{renderScorerTable(scorers, scorerRanks)}</div>
+        </Stack>
+      </Drawer>
+      <Drawer
+        opened={drawer === 'cards'}
+        onClose={() => setDrawer(null)}
+        position="right"
+        size="xl"
+        zIndex={1000}
+        title={t.allCardsTitle}
+        className="wc-ranking-drawer"
+      >
+        <Stack gap="sm">
+          <Text c="dimmed" size="sm">
+            {t.allRowsMeta.replace('{total}', String(cards.length))}
+          </Text>
+          <div className="wc-ranking-drawer-table">{renderCardTable(cards, cardRanks)}</div>
+        </Stack>
+      </Drawer>
     </Container>
   );
 }
