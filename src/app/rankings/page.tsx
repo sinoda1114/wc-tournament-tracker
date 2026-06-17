@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 
+import { EarlyBirdPurchase } from '@/components/billing/EarlyBirdPurchase';
 import { RankingsView } from '@/components/RankingsView';
 import { getRankingEvents } from '@/db/match-events';
 import { listTournamentMatches } from '@/db/queries';
@@ -53,5 +54,16 @@ export default async function RankingsPage() {
     suspension: suspensions.get(playerTeamKey(c.playerName, c.fifaCode)) ?? null,
   }));
 
-  return <RankingsView scorers={scorers} cards={cardsWithSuspension} />;
+  // 早割先行購入カードはサーバーコンポーネント（auth による自己ゲート）なので、ここで生成して
+  // クライアントの RankingsView に slot として渡す（得点と警告の間に配置・T-107）。
+  const locale = await resolveLocale();
+  const dict = getDictionary(locale);
+
+  return (
+    <RankingsView
+      scorers={scorers}
+      cards={cardsWithSuspension}
+      purchaseSlot={<EarlyBirdPurchase locale={locale} dict={dict} />}
+    />
+  );
 }

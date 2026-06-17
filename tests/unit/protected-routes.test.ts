@@ -25,6 +25,9 @@ describe('isProtectedRoute', () => {
       '/privacy',
       '/sign-in',
       '/sign-up',
+      '/rankings', // 得点王/スタッツ（T-107 で無料閲覧化）
+      '/rankings/', // 末尾スラッシュ
+      '/rankings/scorers', // 配下も公開
     ];
 
     it.each(publicPaths)('%s は保護しない', (path) => {
@@ -39,9 +42,6 @@ describe('isProtectedRoute', () => {
       '/matches/abc?x=1', // クエリ付き
       '/teams/jpn', // チーム詳細
       '/teams/bra/', // 末尾スラッシュ
-      '/rankings', // 得点王/スタッツ
-      '/rankings/', // 末尾スラッシュ
-      '/rankings/scorers', // 配下も保護
     ];
 
     it.each(protectedPaths)('%s は保護する', (path) => {
@@ -54,8 +54,6 @@ describe('isProtectedRoute', () => {
       '/en/matches/51',
       '/es/teams/bra',
       '/pt/matches/9',
-      '/zh/rankings',
-      '/zh/rankings/scorers',
     ])('%s は保護する（locale 素通り穴を塞ぐ）', (path) => {
       expect(isProtectedRoute(path)).toBe(true);
     });
@@ -67,6 +65,8 @@ describe('isProtectedRoute', () => {
       '/es/teams', // チーム一覧は公開
       '/pt/matches', // 試合一覧は公開
       '/zh/prediction', // 予想トップは公開
+      '/zh/rankings', // ランキングは T-107 で無料閲覧化
+      '/zh/rankings/scorers', // 配下も公開
     ])('%s は保護しない（一覧・トップは公開）', (path) => {
       expect(isProtectedRoute(path)).toBe(false);
     });
