@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
-import { Container } from '@mantine/core';
+import { Container, Stack } from '@mantine/core';
 
+import { ChampionPredictionSection } from '@/components/ChampionPredictionSection';
 import { TeamExplorer } from '@/components/TeamExplorer';
 import { listAllTeams } from '@/db/queries';
 import { ogLocale } from '@/lib/i18n/alternates';
@@ -27,7 +28,11 @@ export default async function TeamsPage() {
 
   return (
     <Container size="xl" py="xl">
-      <TeamExplorer teams={teams} />
+      <Stack gap="lg">
+        {/* 優勝予想を上部に表示（/prediction と共通・T-47系の横展開）。 */}
+        <ChampionPredictionSection />
+        <TeamExplorer teams={teams} />
+      </Stack>
     </Container>
   );
 }

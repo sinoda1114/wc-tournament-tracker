@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Container, Group, Stack, Text, Title } from '@mantine/core';
 
+import { ChampionPredictionSection } from '@/components/ChampionPredictionSection';
 import { DateFilterBar } from '@/components/DateFilterBar';
 import { FavoriteFilterToggle } from '@/components/FavoriteFilterToggle';
 import { GroupsFilterableGrid } from '@/components/GroupsFilterableGrid';
@@ -93,6 +94,9 @@ export default async function GroupsPage({ searchParams }: GroupsPageProps) {
           </Group>
           <Text c="dimmed">{dict.groups.description}</Text>
         </Stack>
+
+        {/* 優勝予想を上部に表示（/prediction と共通・T-47系の横展開）。 */}
+        <ChampionPredictionSection />
 
         <div className="wc-groups-toolbar">
           <DateFilterBar />
