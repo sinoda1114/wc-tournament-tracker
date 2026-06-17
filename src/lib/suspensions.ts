@@ -12,7 +12,13 @@
  *    その試合が終了済みなら消化済みとみなし表示しない（誤って残さない）。
  *  - レッドの複数試合停止はFIFAが個別決定のため自動表示は「次戦」のみ。
  */
-import { playerTeamKey, type CardSuspension, type RankingEvent, type TeamRef } from '@/lib/rankings';
+import {
+  playerTeamKey,
+  windowOf,
+  type CardSuspension,
+  type RankingEvent,
+  type TeamRef,
+} from '@/lib/rankings';
 
 /** 出場停止判定に使う試合（日程）。listTournamentMatches() の MatchDetail から必要分だけ。 */
 export type SuspensionFixture = {
@@ -24,20 +30,7 @@ export type SuspensionFixture = {
   awayTeam: TeamRef | null;
 };
 
-/** stage → リセット窓番号（窓が変わると有効警告は 0 にリセット）。 */
-const STAGE_WINDOW: Record<string, number> = {
-  group_stage: 1,
-  round_of_32: 2,
-  round_of_16: 2,
-  quarter_final: 2,
-  semi_final: 3,
-  third_place: 3,
-  final: 3,
-};
-
-function windowOf(stage: string): number {
-  return STAGE_WINDOW[stage] ?? 0;
-}
+/** リセット窓ロジック（windowOf / STAGE_WINDOW）は lib/rankings に集約（T-101・循環import回避）。 */
 
 /** team の、afterDate より後で最も早い試合（次戦）を返す。 */
 function nextFixtureAfter(

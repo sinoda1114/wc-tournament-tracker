@@ -8,7 +8,7 @@ import { mergeHistoricalScorers } from '@/lib/historical-scorers';
 import { ogLocale } from '@/lib/i18n/alternates';
 import { getDictionary } from '@/lib/i18n/dictionary';
 import { resolveLocale } from '@/lib/i18n/server';
-import { aggregateCards, aggregateScorers, playerTeamKey } from '@/lib/rankings';
+import { aggregateCards, aggregateScorers, currentResetWindow, playerTeamKey } from '@/lib/rankings';
 import { computeSuspensions, type SuspensionFixture } from '@/lib/suspensions';
 
 // 試合結果・カードが入るたびに集計が変わるので毎回最新を出す。
@@ -34,7 +34,9 @@ export default async function RankingsPage() {
   ]);
 
   const scorers = aggregateScorers(events);
-  const cards = aggregateCards(events);
+  // カードのイエロー枚数は現在のリセット窓に属する分だけ数える（WC2026の累積リセット反映・T-101）。
+  // GL終了後・準々決勝終了後に窓が進むと、過去窓のイエローは集計から落ちる。
+  const cards = aggregateCards(events, currentResetWindow(matches));
 
   // 歴代W杯通算得点ランキング（T-109）。静的ベース（〜2022確定）に、現役選手の2026ライブ得点
   // （上の scorers＝同じDB集計）を加算して通算を自動更新する。外部API・手動更新なし。
