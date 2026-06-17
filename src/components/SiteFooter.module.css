@@ -6,7 +6,7 @@
  */
 
 .footer {
-  margin-top: 2rem;
+  margin-top: 1.5rem;
   border-top: 1px solid var(--wc-border);
   background: var(--wc-surface);
   /* 半透明の薄いブルーを上から重ねてヘッダーと色調を揃える。 */
@@ -109,10 +109,9 @@
   gap: 0.4rem 0.9rem;
 }
 
-/* コピーライトは右寄せ（狭幅では折り返して左の行の下に回る）。 */
+/* コピーライトはリンク行に続けて左詰めで並べる（右端への押し出し＝間延びを避ける・篠田FB）。 */
 .copyright {
   margin: 0;
-  margin-left: auto;
 }
 
 .sep {
@@ -149,11 +148,6 @@
 
   .navLink {
     font-size: 0.72rem;
-  }
-
-  /* 狭幅ではコピーライトを左の行の下へ自然に回す（右寄せのための auto を解除）。 */
-  .copyright {
-    margin-left: 0;
   }
 }
 
