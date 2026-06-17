@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { Container, Stack } from '@mantine/core';
 
-import { ChampionPredictionSection } from '@/components/ChampionPredictionSection';
+import { MiniHero } from '@/components/MiniHero';
 import { TeamExplorer } from '@/components/TeamExplorer';
 import { listAllTeams } from '@/db/queries';
 import { ogLocale } from '@/lib/i18n/alternates';
@@ -25,12 +25,13 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function TeamsPage() {
   const teams = await listAllTeams();
+  const dict = getDictionary(await resolveLocale());
 
   return (
     <Container size="xl" py="xl">
       <Stack gap="lg">
-        {/* 優勝予想を上部に表示（/prediction と共通・T-47系の横展開）。 */}
-        <ChampionPredictionSection />
+        {/* 未ログイン初見にサイトの趣旨を伝えるヒーロー帯（トップと共通・未ログイン時のみ）。 */}
+        <MiniHero dict={dict} />
         <TeamExplorer teams={teams} />
       </Stack>
     </Container>
