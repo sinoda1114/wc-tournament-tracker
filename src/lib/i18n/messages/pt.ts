@@ -4,7 +4,7 @@ import type { Dictionary } from './ja';
 export const pt: Dictionary = {
   meta: {
     home: {
-      title: 'Copa do Mundo 2026: jogos, resultados e palpites (não oficial)',
+      title: 'MatchFav — Futebol 2026: jogos, resultados e palpites (não oficial)',
       description:
         'Jogos, resultados, classificações, sedes e elencos da Copa do Mundo 2026, além dos palpites de todos, em um só lugar. Salve suas seleções favoritas e encontre seus jogos rapidamente. Site de fãs não oficial (sem vínculo com a FIFA).',
     },

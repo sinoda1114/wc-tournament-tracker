@@ -46,7 +46,8 @@ export async function generateMetadata({
   const { title, description } = getDictionary(loc).meta.home;
   const alternates = buildAlternates('home', loc);
   return {
-    title,
+    // 文字列にブランド名を内包したので template（%s | MatchFav）の二重付与を防ぐ＝absolute。
+    title: { absolute: title },
     description,
     alternates,
     openGraph: {
