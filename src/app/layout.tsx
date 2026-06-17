@@ -45,6 +45,13 @@ export const metadata: Metadata = {
   keywords: ['MatchFav', 'マッチファボ', 'マッチファブ', 'ワールドカップ2026', 'W杯2026', '優勝予想'],
   // manifest.ts を参照（PWA）。
   manifest: '/manifest.webmanifest',
+  icons: {
+    icon: [
+      { url: '/favicon.ico', type: 'image/x-icon' },
+      { url: '/icon.png', type: 'image/png', sizes: '512x512' },
+    ],
+    apple: [{ url: '/apple-icon.png', type: 'image/png', sizes: '180x180' }],
+  },
   // canonical/hreflang は各ページの generateMetadata で出す（layout に置くと全ページ
   // canonical='/' になり得るため。トップは #19 でロケール別 canonical＋hreflang を出力）。
   openGraph: {
