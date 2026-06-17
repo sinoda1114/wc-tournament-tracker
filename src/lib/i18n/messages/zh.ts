@@ -4,7 +4,7 @@ import type { Dictionary } from './ja';
 export const zh: Dictionary = {
   meta: {
     home: {
-      title: '2026世界杯 赛程、比分与夺冠预测（非官方）',
+      title: 'MatchFav — 2026足球 赛程、比分与夺冠预测（非官方）',
       description:
         '2026世界杯的赛程、比分、积分榜、球场与阵容，以及大家的夺冠预测，全部集中在一处。收藏你喜欢的球队，快速找到想看的比赛。非官方球迷网站（与FIFA无关）。',
     },

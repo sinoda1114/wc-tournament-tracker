@@ -27,7 +27,7 @@ const SITE_NAME = 'MatchFav';
 // 指名検索（ブランド名検索）でカタカナ「マッチファボ」でも当たるよう、英字とカタカナを併記する。
 const SITE_NAME_WITH_KANA = 'MatchFav（マッチファボ）';
 const SITE_TITLE_DEFAULT =
-  'MatchFav（マッチファボ）— W杯2026 試合・優勝予想・お気に入りトラッカー（非公式）';
+  'MatchFav（マッチファボ）— サッカー2026 試合・優勝予想・お気に入りトラッカー（非公式）';
 const SITE_DESCRIPTION =
   'MatchFav（マッチファボ）は、ワールドカップ2026の日程・結果・優勝予想・お気に入りをひとつにまとめる非公式ファンサイトです（FIFA非公認）。';
 

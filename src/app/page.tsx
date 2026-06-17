@@ -17,7 +17,8 @@ export async function generateMetadata(): Promise<Metadata> {
   const { title, description } = getDictionary(locale).meta.home;
   const alternates = buildAlternates('home', locale);
   return {
-    title,
+    // 文字列にブランド名を内包したので template（%s | MatchFav）の二重付与を防ぐ＝absolute。
+    title: { absolute: title },
     description,
     alternates,
     openGraph: {
