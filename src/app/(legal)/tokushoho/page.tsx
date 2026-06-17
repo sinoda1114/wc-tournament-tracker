@@ -4,7 +4,9 @@ import Link from 'next/link';
 import { getDictionary } from '@/lib/i18n/dictionary';
 import { resolveLocale } from '@/lib/i18n/server';
 
+import { LegalItemsArticle } from '../legalShared';
 import styles from '../legal.module.css';
+import { TOKUSHOHO_CONTENT } from './content';
 
 /*
  * 特定商取引法に基づく表記ページ（清書版・弁護士レビュー前ドラフト完成版）。
@@ -89,7 +91,12 @@ const ITEMS: { label: string; value: React.ReactNode }[] = [
   },
 ];
 
-export default function TokushohoPage() {
+export default async function TokushohoPage() {
+  // 日本語は正本（下記JSX）をそのまま。en/es/pt/zh は参考訳コンテンツを描画（T-114）。
+  const locale = await resolveLocale();
+  if (locale !== 'ja') {
+    return <LegalItemsArticle doc={TOKUSHOHO_CONTENT[locale]} />;
+  }
   return (
     <article className={styles.page}>
       <header className={styles.header}>
