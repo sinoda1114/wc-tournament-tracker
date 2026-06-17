@@ -98,6 +98,12 @@ export const ja = {
     colStatus: '状態',
     suspended: '出場停止',
     tbd: '未定',
+    previewMeta: '上位{shown}件を表示中（全{total}件）',
+    showAllScorers: '得点ランキングをすべて表示（{total}人）',
+    showAllCards: 'カードランキングをすべて表示（{total}人）',
+    allScorersTitle: '得点ランキングすべて',
+    allCardsTitle: 'カードランキングすべて',
+    allRowsMeta: '全{total}件を表示しています。',
     empty: 'まだ記録がありません。試合が進むと得点・カードがここに集計されます。',
   },
   header: {

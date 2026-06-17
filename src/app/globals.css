@@ -2378,6 +2378,66 @@ a {
   border-radius: 10px;
 }
 
+.wc-ranking-preview-meta {
+  margin-bottom: 0.45rem;
+}
+
+.wc-ranking-show-all {
+  display: flex;
+  justify-content: center;
+  padding-top: 0.85rem;
+}
+
+.wc-ranking-show-all .mantine-Button-root {
+  min-height: 2.6rem;
+  border: 1px solid rgba(59, 130, 246, 0.35);
+  background: var(--wc-accent-soft);
+  color: var(--wc-text);
+  font-weight: 700;
+}
+
+.wc-ranking-drawer .mantine-Drawer-content {
+  background: var(--wc-bg);
+  color: var(--wc-text);
+}
+
+.wc-ranking-drawer .mantine-Drawer-header {
+  background: var(--wc-bg);
+  border-bottom: 1px solid var(--wc-border);
+}
+
+.wc-ranking-drawer .mantine-Drawer-title {
+  font-weight: 800;
+}
+
+.wc-ranking-drawer-table {
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+
+.wc-ranking-drawer-table .wc-ranking-table {
+  width: 100%;
+}
+
+@media (max-width: 767px) {
+  .wc-ranking-show-all {
+    justify-content: stretch;
+  }
+
+  .wc-ranking-show-all .mantine-Button-root {
+    width: 100%;
+  }
+
+  .wc-ranking-drawer .mantine-Drawer-content {
+    width: 100vw;
+    max-width: 100vw;
+  }
+
+  .wc-ranking-drawer .mantine-Drawer-body {
+    padding-inline: 0.85rem;
+  }
+}
+
 /* =====================================================================
    スマホ画面最適化（T-56）
    <768px のみ。デスクトップ表示は一切変更しない。

@@ -90,6 +90,12 @@ export const es: Dictionary = {
     colStatus: 'Estado',
     suspended: 'Sancionado',
     tbd: 'Por definir',
+    previewMeta: 'Mostrando los {shown} primeros de {total}',
+    showAllScorers: 'Ver todos los goleadores ({total})',
+    showAllCards: 'Ver todas las tarjetas ({total})',
+    allScorersTitle: 'Todos los goleadores',
+    allCardsTitle: 'Todas las tarjetas',
+    allRowsMeta: 'Mostrando {total} registros.',
     empty: 'Aún no hay registros. Los goles y las tarjetas se contarán aquí a medida que se jueguen los partidos.',
   },
   header: {

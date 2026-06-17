@@ -90,6 +90,12 @@ export const en: Dictionary = {
     colStatus: 'Status',
     suspended: 'Suspended',
     tbd: 'TBD',
+    previewMeta: 'Showing top {shown} of {total}',
+    showAllScorers: 'Show all scorers ({total})',
+    showAllCards: 'Show all cards ({total})',
+    allScorersTitle: 'All top scorers',
+    allCardsTitle: 'All cards',
+    allRowsMeta: 'Showing all {total} rows.',
     empty: 'No records yet. Goals and cards will be tallied here as matches are played.',
   },
   header: {
