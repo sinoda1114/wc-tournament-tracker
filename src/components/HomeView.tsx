@@ -1,7 +1,6 @@
 import { Container, Group, Stack, Text, Title } from '@mantine/core';
 
 import { DateFilterBar } from '@/components/DateFilterBar';
-import { FaqSection } from '@/components/FaqSection';
 import { FavoriteFilterToggle } from '@/components/FavoriteFilterToggle';
 import { GroupsFilterableGrid } from '@/components/GroupsFilterableGrid';
 import { MatchDayList } from '@/components/MatchDayList';
@@ -121,9 +120,6 @@ export async function HomeView({ searchParams }: { searchParams: Promise<HomeSea
         ) : (
           <GroupsFilterableGrid groupData={groupData} />
         )}
-
-        {/* ページ下部の FAQ（T-94・全ユーザー向け・JS なし開閉＋FAQPage 構造化データ）。 */}
-        <FaqSection locale={locale} />
       </Stack>
     </Container>
   );

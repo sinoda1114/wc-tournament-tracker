@@ -62,6 +62,11 @@ export const es: Dictionary = {
       title: 'Aviso de la Ley de Transacciones Comerciales | MatchFav',
       description: 'Aviso de MatchFav conforme a la Ley japonesa sobre Transacciones Comerciales Especificadas.',
     },
+    faq: {
+      title: 'Preguntas frecuentes | MatchFav',
+      description:
+        'Preguntas frecuentes sobre MatchFav: precios, periodo gratuito, datos, favoritos, pronósticos de campeón, contacto y más.',
+    },
   },
   nav: {
     label: 'Navegación principal',
@@ -372,6 +377,7 @@ export const es: Dictionary = {
     brandDesc:
       'Un sitio informativo no oficial que organiza el calendario, los resultados y las selecciones participantes del torneo internacional de fútbol de 2026 para los aficionados.',
     navAria: 'Navegación del pie de página',
+    linkFaq: 'Preguntas frecuentes',
     linkTerms: 'Términos del servicio',
     linkPrivacy: 'Política de privacidad',
     linkTokushoho: 'Aviso de la Ley de Transacciones Comerciales',

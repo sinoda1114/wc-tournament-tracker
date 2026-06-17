@@ -62,6 +62,11 @@ export const en: Dictionary = {
       title: 'Commercial Transactions Act Notice | MatchFav',
       description: 'MatchFav notice based on Japan’s Act on Specified Commercial Transactions.',
     },
+    faq: {
+      title: 'FAQ | MatchFav',
+      description:
+        'Frequently asked questions about MatchFav: pricing, the free period, data, favorites, champion predictions, contact and more.',
+    },
   },
   nav: {
     label: 'Main navigation',
@@ -368,6 +373,7 @@ export const en: Dictionary = {
     brandDesc:
       'An unofficial information site that organizes the schedule, results, and participating nations of the 2026 international football tournament for fans.',
     navAria: 'Footer navigation',
+    linkFaq: 'FAQ',
     linkTerms: 'Terms of Service',
     linkPrivacy: 'Privacy Policy',
     linkTokushoho: 'Commercial Transactions Act Notice',

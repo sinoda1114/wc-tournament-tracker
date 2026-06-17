@@ -2738,18 +2738,9 @@ a {
   }
 }
 
-/* ===== FAQ（トップ下部・T-94） ===== */
+/* ===== FAQ（専用ページ /faq・T-94） ===== */
 .wc-faq {
-  margin-top: 2.5rem;
-  padding-top: 2rem;
-  border-top: 1px solid var(--wc-border);
-}
-
-.wc-faq-title {
-  margin: 0 0 1.25rem;
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--wc-text);
+  margin-top: 1.5rem;
 }
 
 .wc-faq-category {
