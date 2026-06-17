@@ -96,6 +96,14 @@ export const zh: Dictionary = {
     allScorersTitle: '完整射手榜',
     allCardsTitle: '完整红黄牌榜',
     allRowsMeta: '正在显示全部 {total} 条记录。',
+    historicalScorersTitle: '世界杯历史总射手榜',
+    historicalNote:
+      '世界杯（男子）历史总进球。数据以 2022 年世界杯结束时为准，现役球员的本届进球会自动累加。',
+    colSpan: '参赛',
+    showAllHistorical: '展开历史总射手榜（共 {total} 人）',
+    allHistoricalScorersTitle: '世界杯历史总射手榜（共 {total} 人）',
+    activeBadge: '现役',
+    activeBadgeAria: '正在参加 2026 世界杯',
     empty: '暂无记录。随着比赛进行，进球和红黄牌将在此汇总。',
   },
   header: {

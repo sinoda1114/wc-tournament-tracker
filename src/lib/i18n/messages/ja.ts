@@ -104,6 +104,14 @@ export const ja = {
     allScorersTitle: '得点ランキングすべて',
     allCardsTitle: 'カードランキングすべて',
     allRowsMeta: '全{total}件を表示しています。',
+    historicalScorersTitle: '歴代W杯通算得点ランキング',
+    historicalNote:
+      '歴代ワールドカップ（男子）の通算得点。2022年大会終了時点の確定記録に、現役選手は本大会の得点を自動加算しています。',
+    colSpan: '出場',
+    showAllHistorical: '歴代ランキングを引き出す（全{total}名）',
+    allHistoricalScorersTitle: '歴代W杯通算得点ランキング（全{total}名）',
+    activeBadge: '現役',
+    activeBadgeAria: '2026大会に出場中',
     empty: 'まだ記録がありません。試合が進むと得点・カードがここに集計されます。',
   },
   header: {

@@ -96,6 +96,14 @@ export const en: Dictionary = {
     allScorersTitle: 'All top scorers',
     allCardsTitle: 'All cards',
     allRowsMeta: 'Showing all {total} rows.',
+    historicalScorersTitle: 'All-time World Cup top scorers',
+    historicalNote:
+      'Career World Cup goals (men’s). Totals are fixed as of the 2022 tournament; active players have their current goals added automatically.',
+    colSpan: 'Editions',
+    showAllHistorical: 'Open the all-time ranking (all {total})',
+    allHistoricalScorersTitle: 'All-time World Cup top scorers (all {total})',
+    activeBadge: 'Active',
+    activeBadgeAria: 'Playing in the 2026 tournament',
     empty: 'No records yet. Goals and cards will be tallied here as matches are played.',
   },
   header: {
