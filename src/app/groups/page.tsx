@@ -1,11 +1,11 @@
 import type { Metadata } from 'next';
 import { Container, Group, Stack, Text, Title } from '@mantine/core';
 
-import { ChampionPredictionSection } from '@/components/ChampionPredictionSection';
 import { DateFilterBar } from '@/components/DateFilterBar';
 import { FavoriteFilterToggle } from '@/components/FavoriteFilterToggle';
 import { GroupsFilterableGrid } from '@/components/GroupsFilterableGrid';
 import { MatchDayList } from '@/components/MatchDayList';
+import { MiniHero } from '@/components/MiniHero';
 import {
   getGroupTeams,
   listGroupStageMatches,
@@ -87,6 +87,8 @@ export default async function GroupsPage({ searchParams }: GroupsPageProps) {
   return (
     <Container size="xl" py="xl">
       <Stack gap="lg">
+        {/* 未ログイン初見にサイトの趣旨を伝えるヒーロー帯（トップと共通・未ログイン時のみ）。 */}
+        <MiniHero dict={dict} />
         <Stack gap={4}>
           <Group align="center" wrap="wrap" gap="sm">
             <Title order={1}>{dict.groups.title}</Title>
@@ -94,9 +96,6 @@ export default async function GroupsPage({ searchParams }: GroupsPageProps) {
           </Group>
           <Text c="dimmed">{dict.groups.description}</Text>
         </Stack>
-
-        {/* 優勝予想を上部に表示（/prediction と共通・T-47系の横展開）。 */}
-        <ChampionPredictionSection />
 
         <div className="wc-groups-toolbar">
           <DateFilterBar />
