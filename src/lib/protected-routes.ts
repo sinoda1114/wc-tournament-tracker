@@ -11,10 +11,10 @@
  * 【保護対象】
  *   - /matches/[id]   試合詳細（イベント/会場/天気）
  *   - /teams/[code]   チーム詳細（選手/スカッド）
- *   - /rankings       得点王/スタッツ
  *
  * 【公開のまま（保護しない）】
  *   - /  /groups  /groups/[group]  /teams(一覧)  /matches(一覧/カレンダー)  /prediction
+ *   - /rankings（得点王/スタッツ）… T-107 で無料閲覧化（課金は早割カード/ヘッダー導線で担保）
  *   - 上記詳細の OGP/メタ画像ルート（opengraph-image / twitter-image / icon 等。
  *     クローラのカード生成のため protect しない）
  *
@@ -73,12 +73,12 @@ function isMetaImagePath(path: string): boolean {
  * 保護対象パターン（locale 接頭辞を剥がした後のパスに対して判定）。
  *  - /matches/<id>    … 一覧 /matches 自身はマッチしない（後続セグメント必須）
  *  - /teams/<code>    … 一覧 /teams 自身はマッチしない
- *  - /rankings        … /rankings 自身および配下
+ *
+ * /rankings は T-107 で公開（無料閲覧）に変更したため保護対象から除外。
  */
 const PROTECTED_PATTERNS: readonly RegExp[] = [
   /^\/matches\/.+/, // /matches/[id]（一覧 /matches は除外）
   /^\/teams\/.+/, // /teams/[code]（一覧 /teams は除外）
-  /^\/rankings(?:\/.*)?$/, // /rankings および /rankings/...
 ];
 
 /**

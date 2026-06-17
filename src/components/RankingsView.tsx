@@ -1,7 +1,7 @@
 'use client';
 
 import { Button, Container, Drawer, Stack, Table, Text, Title } from '@mantine/core';
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 
 import { CountryFlag } from '@/components/CountryFlag';
 import type { Locale } from '@/lib/i18n/config';
@@ -17,6 +17,12 @@ import {
 type RankingsViewProps = {
   scorers: ScorerStat[];
   cards: CardStat[];
+  /**
+   * 得点ランキングと警告カードランキングの間に差し込むノード（早割購入カード・T-107）。
+   * RankingsView はクライアントなので、サーバーコンポーネント（EarlyBirdPurchase）は
+   * 直接 import せず、サーバー側（page）で生成して slot として受け取る。
+   */
+  purchaseSlot?: ReactNode;
 };
 
 const PREVIEW_LIMIT = 20;
@@ -123,7 +129,7 @@ function RankingPreviewMeta({ shown, total, label }: { shown: number; total: num
   );
 }
 
-export function RankingsView({ scorers, cards }: RankingsViewProps) {
+export function RankingsView({ scorers, cards, purchaseSlot }: RankingsViewProps) {
   const { locale, dict } = useI18n();
   const t = dict.rankings;
   const [drawer, setDrawer] = useState<'scorers' | 'cards' | null>(null);
@@ -247,6 +253,10 @@ export function RankingsView({ scorers, cards }: RankingsViewProps) {
                 </>
               )}
             </section>
+
+            {/* 早割先行購入カード（自己ゲート：無料期間中＆未購入のみ表示）。
+                得点ランキングと警告カードの間に置く（T-107・優勝予想ページと同じ導線）。 */}
+            {purchaseSlot}
 
             {/* カード */}
             <section aria-labelledby="ranking-cards">
