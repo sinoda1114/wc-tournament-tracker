@@ -92,7 +92,7 @@ export const es: Dictionary = {
     tbd: 'Por definir',
     previewMeta: 'Mostrando los {shown} primeros de {total}',
     showAllScorers: 'Ver todos los goleadores ({total})',
-    showAllCards: 'Ver todas las tarjetas ({total})',
+    showAllCards: 'Ver todas las tarjetas acumuladas ({total})',
     allScorersTitle: 'Todos los goleadores',
     allCardsTitle: 'Todas las tarjetas',
     allRowsMeta: 'Mostrando {total} registros.',
