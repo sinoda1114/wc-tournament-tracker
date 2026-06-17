@@ -8,7 +8,7 @@ import { useFavoriteTeams } from '@/hooks/useFavoriteTeams';
 import { formatKickoff, formatMatchDateZoned, type MatchStage } from '@/lib/bracket';
 import { useDictionary, useTimeZone } from '@/lib/i18n/context';
 
-import { MatchVersus } from './MatchVersus';
+import { MatchVersus, type MatchTeamNameMode } from './MatchVersus';
 
 type MatchCardProps = {
   match: MatchDetail;
@@ -18,9 +18,15 @@ type MatchCardProps = {
    * グループ別ビューのように見出しで所属が自明な場合のみ false を渡して冗長表示を抑止する。
    */
   showContextLabel?: boolean;
+  /** チーム名の表示形式。既定は正式名。グループカードなど狭い文脈では code を渡す。 */
+  teamNameMode?: MatchTeamNameMode;
 };
 
-export function MatchCard({ match, showContextLabel = true }: MatchCardProps) {
+export function MatchCard({
+  match,
+  showContextLabel = true,
+  teamNameMode = 'full',
+}: MatchCardProps) {
   const dict = useDictionary();
   const timeZone = useTimeZone();
   const kickoff = formatKickoff(match.kickoffAt, timeZone);
@@ -90,7 +96,7 @@ export function MatchCard({ match, showContextLabel = true }: MatchCardProps) {
           ) : null}
         </div>
 
-        <MatchVersus match={match} nameMode="full" />
+        <MatchVersus match={match} nameMode={teamNameMode} />
       </Stack>
     </Link>
   );

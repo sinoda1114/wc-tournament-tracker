@@ -8,6 +8,7 @@ import { matchHasFavorite } from '@/lib/favorites';
 import { useDictionary } from '@/lib/i18n/context';
 
 import { MatchCard } from './MatchCard';
+import type { MatchTeamNameMode } from './MatchVersus';
 
 type FilterableMatchListProps = {
   matches: MatchDetail[];
@@ -21,6 +22,8 @@ type FilterableMatchListProps = {
    * 既定は MatchCard 側の既定（true）に従う。
    */
   showContextLabel?: boolean;
+  /** 各カード内のチーム名表示。既定は MatchCard 側の正式名表示。 */
+  teamNameMode?: MatchTeamNameMode;
 };
 
 /**
@@ -34,6 +37,7 @@ export function FilterableMatchList({
   emptyText,
   hideWhenEmpty = false,
   showContextLabel,
+  teamNameMode,
 }: FilterableMatchListProps) {
   const { filterOn, ready: filterReady } = useFavoriteFilter();
   const { favorites, ready: favReady } = useFavoriteTeams();
@@ -60,6 +64,7 @@ export function FilterableMatchList({
           key={match.id}
           match={match}
           showContextLabel={showContextLabel ?? true}
+          teamNameMode={teamNameMode}
         />
       ))}
     </>
