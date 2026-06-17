@@ -47,6 +47,18 @@
   color: var(--wc-muted);
 }
 
+/* 翻訳版(ja以外)の先頭に出す「参考訳・正本は日本語版」免責注記（T-114）。控えめな囲み。 */
+.referenceNote {
+  margin: 0;
+  padding: 0.7rem 0.9rem;
+  font-size: 0.82rem;
+  line-height: 1.7;
+  color: var(--wc-muted);
+  background: rgba(148, 163, 184, 0.08);
+  border: 1px solid var(--wc-border);
+  border-radius: 10px;
+}
+
 .list {
   margin: 0;
   padding-left: 1.25rem;

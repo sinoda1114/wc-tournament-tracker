@@ -4,7 +4,9 @@ import Link from 'next/link';
 import { getDictionary } from '@/lib/i18n/dictionary';
 import { resolveLocale } from '@/lib/i18n/server';
 
+import { LegalSectionsArticle } from '../legalShared';
 import styles from '../legal.module.css';
+import { PRIVACY_CONTENT } from './content';
 
 /*
  * プライバシーポリシーページ（清書版・弁護士レビュー前ドラフト）。
@@ -27,7 +29,12 @@ export async function generateMetadata(): Promise<Metadata> {
 
 const UPDATED = '2026年6月11日';
 
-export default function PrivacyPage() {
+export default async function PrivacyPage() {
+  // 日本語は正本（下記JSX）をそのまま。en/es/pt/zh は参考訳コンテンツを描画（T-114）。
+  const locale = await resolveLocale();
+  if (locale !== 'ja') {
+    return <LegalSectionsArticle doc={PRIVACY_CONTENT[locale]} />;
+  }
   return (
     <article className={styles.page}>
       <header className={styles.header}>
