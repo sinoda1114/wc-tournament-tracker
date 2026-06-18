@@ -317,6 +317,7 @@ export const ja = {
     title: '優勝国予想',
     description:
       '過去W杯成績・FIFAランク・WC2026成績・みんなの予想を掛け合わせて優勝確率を算出します。指標のON/OFFで予想が変わります。',
+    fifaRankFreshness: 'ⓘ FIFAランク: 2026年6月11日公式発表分を反映',
     sectionAria: '優勝国予想',
     togglesAria: '予想に使う指標の切替',
     factorPastWorldCup: '過去W杯成績',
