@@ -8,6 +8,7 @@ loadEnv({ path: resolve(process.cwd(), '.env') });
 import { seedTeams } from '../src/data/seed-teams';
 import { getDb } from '../src/db/client';
 import { fetchJsonWithRetry } from '../src/lib/fetch-retry';
+import { MANUAL_COACH_LOCK } from '../src/lib/manual-coaches';
 
 import {
   CODE_TO_ISO,
@@ -281,7 +282,11 @@ async function main() {
 
     await db.execute({ sql: 'DELETE FROM players WHERE team_id = ?', args: [team.id] });
 
-    if (coach) {
+    if (MANUAL_COACH_LOCK.has(team.fifaCode)) {
+      // 監督交代の併記など自動パースが誤る国は手動ロック。coaches 行は上書きしない
+      // （手動設定した正規値を保持）。選手名簿は上で更新済み。詳細: src/lib/manual-coaches.ts。
+      console.log(`  🔒 ${team.fifaCode}: 監督は手動ロック中。coaches 行は保持します（上書きスキップ）。`);
+    } else if (coach) {
       // fail-safe: 監督が読めたチームだけ既存行を消して入れ直す。
       // パース失敗時に既存の coaches 行を消さない（2026-06-11 の欠落事故の再発防止）。
       await db.execute({ sql: 'DELETE FROM coaches WHERE team_id = ?', args: [team.id] });
