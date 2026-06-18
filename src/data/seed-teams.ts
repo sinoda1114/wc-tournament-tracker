@@ -82,70 +82,70 @@ export type TeamRatingSeed = {
 };
 
 // 優勝国予想で使う静的レーティング。teamId をキーに seed 時へ投入する。
-// snapshot: FIFAランク = 2026-06-10 時点 (football-ranking.com)。
+// snapshot: FIFAランク = 2026-06-11 FIFA/Coca-Cola Men's World Ranking 公式API。
 //           過去順位 = 2014/2018/2022 各大会の FIFA 公式最終順位。
 // ※ 商用公開前に必ず最終検算すること（特に 2022 大会 17〜32 位の並び、
 //    および各国の出場/未出場の取り違えに注意）。
 export const teamRatings: Record<string, TeamRatingSeed> = {
-  mex: { fifaRank: 15, wc2014Place: 10, wc2018Place: 12, wc2022Place: 21 },
+  mex: { fifaRank: 14, wc2014Place: 10, wc2018Place: 12, wc2022Place: 21 },
   rsa: { fifaRank: 60, wc2014Place: null, wc2018Place: null, wc2022Place: null },
   kor: { fifaRank: 25, wc2014Place: 27, wc2018Place: 19, wc2022Place: 16 },
-  cze: { fifaRank: 41, wc2014Place: null, wc2018Place: null, wc2022Place: null },
+  cze: { fifaRank: 40, wc2014Place: null, wc2018Place: null, wc2022Place: null },
 
   can: { fifaRank: 30, wc2014Place: null, wc2018Place: null, wc2022Place: 31 },
   bih: { fifaRank: 64, wc2014Place: 20, wc2018Place: null, wc2022Place: null },
-  qat: { fifaRank: 55, wc2014Place: null, wc2018Place: null, wc2022Place: 32 },
+  qat: { fifaRank: 56, wc2014Place: null, wc2018Place: null, wc2022Place: 32 },
   sui: { fifaRank: 19, wc2014Place: 11, wc2018Place: 14, wc2022Place: 12 },
 
   bra: { fifaRank: 6, wc2014Place: 4, wc2018Place: 6, wc2022Place: 7 },
   mar: { fifaRank: 7, wc2014Place: null, wc2018Place: 25, wc2022Place: 4 },
-  hai: { fifaRank: 82, wc2014Place: null, wc2018Place: null, wc2022Place: null },
-  sco: { fifaRank: 43, wc2014Place: null, wc2018Place: null, wc2022Place: null },
+  hai: { fifaRank: 83, wc2014Place: null, wc2018Place: null, wc2022Place: null },
+  sco: { fifaRank: 42, wc2014Place: null, wc2018Place: null, wc2022Place: null },
 
-  usa: { fifaRank: 16, wc2014Place: 15, wc2018Place: null, wc2022Place: 14 },
-  par: { fifaRank: 40, wc2014Place: null, wc2018Place: null, wc2022Place: null },
+  usa: { fifaRank: 17, wc2014Place: 15, wc2018Place: null, wc2022Place: 14 },
+  par: { fifaRank: 41, wc2014Place: null, wc2018Place: null, wc2022Place: null },
   aus: { fifaRank: 27, wc2014Place: 30, wc2018Place: 28, wc2022Place: 11 },
   tur: { fifaRank: 22, wc2014Place: null, wc2018Place: null, wc2022Place: null },
 
   ger: { fifaRank: 10, wc2014Place: 1, wc2018Place: 22, wc2022Place: 25 },
-  cuw: { fifaRank: 83, wc2014Place: null, wc2018Place: null, wc2022Place: null },
-  civ: { fifaRank: 34, wc2014Place: 21, wc2018Place: null, wc2022Place: null },
-  ecu: { fifaRank: 24, wc2014Place: 17, wc2018Place: null, wc2022Place: 18 },
+  cuw: { fifaRank: 82, wc2014Place: null, wc2018Place: null, wc2022Place: null },
+  civ: { fifaRank: 33, wc2014Place: 21, wc2018Place: null, wc2022Place: null },
+  ecu: { fifaRank: 23, wc2014Place: 17, wc2018Place: null, wc2022Place: 18 },
 
   ned: { fifaRank: 8, wc2014Place: 3, wc2018Place: null, wc2022Place: 5 },
   jpn: { fifaRank: 18, wc2014Place: 29, wc2018Place: 13, wc2022Place: 9 },
   swe: { fifaRank: 38, wc2014Place: null, wc2018Place: 7, wc2022Place: null },
-  tun: { fifaRank: 46, wc2014Place: null, wc2018Place: 24, wc2022Place: 19 },
+  tun: { fifaRank: 45, wc2014Place: null, wc2018Place: 24, wc2022Place: 19 },
 
   bel: { fifaRank: 9, wc2014Place: 6, wc2018Place: 3, wc2022Place: 22 },
   egy: { fifaRank: 29, wc2014Place: null, wc2018Place: 29, wc2022Place: null },
-  irn: { fifaRank: 21, wc2014Place: 28, wc2018Place: 18, wc2022Place: 29 },
+  irn: { fifaRank: 20, wc2014Place: 28, wc2018Place: 18, wc2022Place: 29 },
   nzl: { fifaRank: 85, wc2014Place: null, wc2018Place: null, wc2022Place: null },
 
   esp: { fifaRank: 2, wc2014Place: 23, wc2018Place: 10, wc2022Place: 13 },
-  cpv: { fifaRank: 68, wc2014Place: null, wc2018Place: null, wc2022Place: null },
+  cpv: { fifaRank: 67, wc2014Place: null, wc2018Place: null, wc2022Place: null },
   ksa: { fifaRank: 61, wc2014Place: null, wc2018Place: 31, wc2022Place: 20 },
-  uru: { fifaRank: 17, wc2014Place: 12, wc2018Place: 5, wc2022Place: 23 },
+  uru: { fifaRank: 16, wc2014Place: 12, wc2018Place: 5, wc2022Place: 23 },
 
-  fra: { fifaRank: 1, wc2014Place: 7, wc2018Place: 1, wc2022Place: 2 },
-  sen: { fifaRank: 14, wc2014Place: null, wc2018Place: 17, wc2022Place: 10 },
+  fra: { fifaRank: 3, wc2014Place: 7, wc2018Place: 1, wc2022Place: 2 },
+  sen: { fifaRank: 15, wc2014Place: null, wc2018Place: 17, wc2022Place: 10 },
   irq: { fifaRank: 57, wc2014Place: null, wc2018Place: null, wc2022Place: null },
   nor: { fifaRank: 31, wc2014Place: null, wc2018Place: null, wc2022Place: null },
 
-  arg: { fifaRank: 3, wc2014Place: 2, wc2018Place: 15, wc2022Place: 1 },
+  arg: { fifaRank: 1, wc2014Place: 2, wc2018Place: 15, wc2022Place: 1 },
   alg: { fifaRank: 28, wc2014Place: 14, wc2018Place: null, wc2022Place: null },
-  aut: { fifaRank: 23, wc2014Place: null, wc2018Place: null, wc2022Place: null },
+  aut: { fifaRank: 24, wc2014Place: null, wc2018Place: null, wc2022Place: null },
   jor: { fifaRank: 63, wc2014Place: null, wc2018Place: null, wc2022Place: null },
 
   por: { fifaRank: 5, wc2014Place: 18, wc2018Place: 16, wc2022Place: 8 },
-  cod: { fifaRank: 45, wc2014Place: null, wc2018Place: null, wc2022Place: null },
+  cod: { fifaRank: 46, wc2014Place: null, wc2018Place: null, wc2022Place: null },
   uzb: { fifaRank: 50, wc2014Place: null, wc2018Place: null, wc2022Place: null },
   col: { fifaRank: 13, wc2014Place: 5, wc2018Place: 9, wc2022Place: null },
 
   eng: { fifaRank: 4, wc2014Place: 26, wc2018Place: 4, wc2022Place: 6 },
   cro: { fifaRank: 11, wc2014Place: 19, wc2018Place: 2, wc2022Place: 3 },
   gha: { fifaRank: 73, wc2014Place: 25, wc2018Place: null, wc2022Place: 24 },
-  pan: { fifaRank: 33, wc2014Place: null, wc2018Place: 32, wc2022Place: null },
+  pan: { fifaRank: 34, wc2014Place: null, wc2018Place: 32, wc2022Place: null },
 };
 
 // Group → Position → teamId への参照テーブル。
