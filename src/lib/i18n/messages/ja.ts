@@ -309,6 +309,8 @@ export const ja = {
       '※ スコットランド代表は Billy Gilmour 選手が膝の負傷により離脱し、Tyler Fletcher 選手（背番号8）が追加招集されました。',
     noteAut:
       '※ オーストリア代表は Christoph Baumgartner 選手が右太ももの負傷により離脱し、Dejan Ljubičić 選手が追加招集されました。',
+    noteTun:
+      '※ チュニジア代表はグループF初戦（スウェーデンに1-5）後に Sabri Lamouchi 監督が解任され、2026年大会終了までの契約で Hervé Renard 監督が新たに就任しました。',
   },
   // 優勝国予想（ChampionPrediction）。{count}=チーム数・{name}=国名。
   prediction: {

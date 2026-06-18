@@ -290,6 +290,8 @@ export const es: Dictionary = {
       'Nota: Billy Gilmour dejó la convocatoria de Escocia por una lesión de rodilla y Tyler Fletcher (dorsal 8) fue convocado en su lugar.',
     noteAut:
       'Nota: Christoph Baumgartner dejó la convocatoria de Austria por una lesión en el muslo derecho y Dejan Ljubičić fue convocado en su lugar.',
+    noteTun:
+      'Nota: Tras su primer partido del Grupo F (derrota por 1-5 ante Suecia), Túnez destituyó al seleccionador Sabri Lamouchi y nombró a Hervé Renard con contrato hasta el final del Mundial 2026.',
   },
   prediction: {
     title: 'Pronóstico del campeón',

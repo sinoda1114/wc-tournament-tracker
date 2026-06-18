@@ -25,4 +25,6 @@ export const SQUAD_NOTES: Partial<Record<string, SquadNoteKey>> = {
   SCO: 'noteSco',
   // Baumgartner 右太もも負傷→Ljubičić 補充招集（2026-06-13）。
   AUT: 'noteAut',
+  // 監督交代: 初戦(スウェーデン1-5)後に Lamouchi 解任→Renard 就任（2026-06-16）。
+  TUN: 'noteTun',
 };

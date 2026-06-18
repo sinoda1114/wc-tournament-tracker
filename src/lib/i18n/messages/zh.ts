@@ -288,6 +288,8 @@ export const zh: Dictionary = {
       '注：比利·吉尔莫因膝伤退出苏格兰名单，泰勒·弗莱彻（8号）获得递补征召。',
     noteAut:
       '注：克里斯托夫·鲍姆加特纳因右大腿伤势退出奥地利名单，德扬·柳比契奇获得递补征召。',
+    noteTun:
+      '注：突尼斯队在 F 组首战（1-5 不敌瑞典）后解任主帅 Sabri Lamouchi，并任命 Hervé Renard 为新帅，合同至 2026 年世界杯结束。',
   },
   prediction: {
     title: '夺冠预测',
