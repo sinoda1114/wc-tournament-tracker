@@ -134,6 +134,9 @@ export default async function PredictionPage() {
         <Stack gap={4}>
           <Title order={1}>{dict.prediction.title}</Title>
           <Text c="dimmed">{dict.prediction.description}</Text>
+          <Text className="wc-prediction-freshness" c="dimmed" size="xs">
+            {dict.prediction.fifaRankFreshness}
+          </Text>
         </Stack>
 
         <ChampionPrediction

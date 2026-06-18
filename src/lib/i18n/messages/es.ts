@@ -297,6 +297,7 @@ export const es: Dictionary = {
     title: 'Pronóstico del campeón',
     description:
       'Estimamos las opciones de título de cada selección combinando resultados de Mundiales anteriores, el ranking FIFA, el rendimiento en WC2026 y los pronósticos de la gente. Activa o desactiva cada factor para cambiar el pronóstico.',
+    fifaRankFreshness: 'ⓘ Ranking FIFA: refleja la clasificación oficial publicada el 11 de junio de 2026',
     sectionAria: 'Pronóstico del campeón',
     togglesAria: 'Alternar factores del pronóstico',
     factorPastWorldCup: 'Mundiales anteriores',
