@@ -4,6 +4,48 @@ import type { WeatherForecast } from './types';
 export const FORECAST_WINDOW_DAYS = 3;
 
 const MS_PER_DAY = 86_400_000;
+const OFFSET_RE = /(Z|[+-]\d{2}:\d{2})$/;
+
+function offsetMinutesFromIso(value: string): number | null {
+  const match = value.match(OFFSET_RE);
+  if (!match) {
+    return null;
+  }
+  const offset = match[1];
+  if (offset === 'Z') {
+    return 0;
+  }
+  const sign = offset[0] === '-' ? -1 : 1;
+  const hours = Number(offset.slice(1, 3));
+  const minutes = Number(offset.slice(4, 6));
+  if (!Number.isFinite(hours) || !Number.isFinite(minutes)) {
+    return null;
+  }
+  return sign * (hours * 60 + minutes);
+}
+
+/** YYYY-MM-DD の当日（UTC 暦日）。 */
+export function todayUtc(now: Date): string {
+  return now.toISOString().slice(0, 10);
+}
+
+/**
+ * kickoffAt の TZ オフセットを会場ローカル時刻の近似として使い、予報判定の基準日を作る。
+ * 北米夜の試合は日本時間の翌朝に見られるため、UTC 当日ではなく会場側の今日で判定する。
+ */
+export function forecastReferenceDate(
+  now: Date,
+  kickoffAt: string | null | undefined,
+): string {
+  if (!kickoffAt) {
+    return todayUtc(now);
+  }
+  const offsetMinutes = offsetMinutesFromIso(kickoffAt);
+  if (offsetMinutes === null) {
+    return todayUtc(now);
+  }
+  return new Date(now.getTime() + offsetMinutes * 60_000).toISOString().slice(0, 10);
+}
 
 /**
  * 試合日が予報ウィンドウ内か判定する。today を基準に [today, today+(windowDays-1)] を対象。

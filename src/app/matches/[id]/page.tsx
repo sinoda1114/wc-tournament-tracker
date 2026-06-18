@@ -255,6 +255,7 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
           <VenueWeather
             venueId={match.venueId}
             matchDate={match.matchDate}
+            kickoffAt={match.kickoffAt}
             dateLabel={formatMatchDateZoned(match, timeZone, dict.match.weekdays)}
             locale={locale}
             dict={dict}

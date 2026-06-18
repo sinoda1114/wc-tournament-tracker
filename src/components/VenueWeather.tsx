@@ -7,6 +7,8 @@ type VenueWeatherProps = {
   venueId: string;
   /** 試合日 (YYYY-MM-DD)。WeatherAPI の予報日マッチングに使う（会場ローカル暦日）。 */
   matchDate: string;
+  /** TZ 付きキックオフ。予報ウィンドウを会場ローカルの当日基準で判定するために使う。 */
+  kickoffAt: string | null;
   /** 見出しに併記する表示用の試合日（タイムゾーン整形済み。例「6/12（金）」）。 */
   dateLabel: string;
   locale: Locale;
@@ -18,8 +20,8 @@ type VenueWeatherProps = {
  * 取得失敗時は何も描画しない（null）。WeatherAPI 無料プラン・会場座標でサーバーキャッシュ。
  * async server component なので呼び出し側は <Suspense> で包むとページ本体をブロックしない。
  */
-export async function VenueWeather({ venueId, matchDate, dateLabel, locale, dict }: VenueWeatherProps) {
-  const weather = await getVenueWeather(venueId, matchDate);
+export async function VenueWeather({ venueId, matchDate, kickoffAt, dateLabel, locale, dict }: VenueWeatherProps) {
+  const weather = await getVenueWeather(venueId, matchDate, kickoffAt);
   if (!weather) {
     return null;
   }

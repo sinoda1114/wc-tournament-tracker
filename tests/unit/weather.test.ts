@@ -3,9 +3,11 @@ import { describe, expect, it } from 'vitest';
 import { VENUE_COORDINATES, getVenueCoordinate } from '@/lib/weather/coordinates';
 import {
   FORECAST_WINDOW_DAYS,
+  forecastReferenceDate,
   isWithinForecastWindow,
   normalizeIconUrl,
   parseForecastForDate,
+  todayUtc,
 } from '@/lib/weather/forecast';
 
 describe('getVenueCoordinate', () => {
@@ -60,6 +62,27 @@ describe('isWithinForecastWindow', () => {
 
   it('ウィンドウ日数は無料プランの3日', () => {
     expect(FORECAST_WINDOW_DAYS).toBe(3);
+  });
+});
+
+describe('forecastReferenceDate', () => {
+  it('UTC の当日を返す', () => {
+    expect(todayUtc(new Date('2026-06-18T00:02:00Z'))).toBe('2026-06-18');
+  });
+
+  it('北米夜の試合を日本時間翌朝に見ても会場側の日付で判定できる', () => {
+    const now = new Date('2026-06-18T00:02:00Z');
+    expect(forecastReferenceDate(now, '2026-06-17T19:00:00-04:00')).toBe('2026-06-17');
+    expect(
+      isWithinForecastWindow(
+        '2026-06-17',
+        forecastReferenceDate(now, '2026-06-17T19:00:00-04:00'),
+      ),
+    ).toBe(true);
+  });
+
+  it('kickoffAt が無い場合は UTC 当日にフォールバックする', () => {
+    expect(forecastReferenceDate(new Date('2026-06-18T00:02:00Z'), null)).toBe('2026-06-18');
   });
 });
 
