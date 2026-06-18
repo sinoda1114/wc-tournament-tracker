@@ -2,12 +2,16 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { MatchDetail } from '@/db/queries';
 import {
+  addAnonPending,
+  clearAnonPending,
   FAVORITES_KEY,
   FILTER_KEY,
   isFavorite,
   matchHasFavorite,
+  readAnonPending,
   readFavorites,
   readFilterEnabled,
+  removeAnonPending,
   toggleFavorite,
   writeFavorites,
   writeFilterEnabled,
@@ -128,6 +132,36 @@ describe('favorites storage (window あり)', () => {
   it('壊れた JSON が保存されていても readFavorites は [] を返す（耐障害性）', () => {
     storage.setItem(FAVORITES_KEY, '{not-json');
     expect(readFavorites()).toEqual([]);
+  });
+});
+
+describe('anon-pending（ログアウト中に付けた★の保留）', () => {
+  beforeEach(() => {
+    installFakeWindow();
+  });
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('初回は空、addAnonPending で加算され、正規化・重複排除される', () => {
+    expect(readAnonPending()).toEqual([]);
+    addAnonPending(' jpn ');
+    addAnonPending('JPN'); // 重複は無視
+    addAnonPending('bra');
+    expect(readAnonPending()).toEqual(['JPN', 'BRA']);
+  });
+
+  it('removeAnonPending で1件だけ外れる', () => {
+    addAnonPending('JPN');
+    addAnonPending('BRA');
+    removeAnonPending('jpn');
+    expect(readAnonPending()).toEqual(['BRA']);
+  });
+
+  it('clearAnonPending で全消去される（ログイン反映後の一掃）', () => {
+    addAnonPending('JPN');
+    clearAnonPending();
+    expect(readAnonPending()).toEqual([]);
   });
 });
 

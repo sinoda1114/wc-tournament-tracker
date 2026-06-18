@@ -3,14 +3,22 @@
 import { useAuth } from '@clerk/nextjs';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { saveFavoritesAction, syncFavoritesAction } from '@/app/favorites/actions';
 import {
+  addFavoriteAction,
+  removeFavoriteAction,
+  saveFavoritesAction,
+  syncFavoritesAction,
+} from '@/app/favorites/actions';
+import {
+  addAnonPending,
+  clearAnonPending,
   FAVORITES_CHANGED_EVENT,
   FAVORITES_KEY,
   FILTER_KEY,
-  mergeFavoriteCodes,
+  readAnonPending,
   readFavorites,
   readFilterEnabled,
+  removeAnonPending,
   toggleFavorite as toggleFavoriteStorage,
   writeFavorites,
   writeFilterEnabled,
@@ -28,6 +36,8 @@ function toSet(list: readonly string[]): Set<string> {
  * モジュールスコープで集約し、ログアウト時にリセットする。
  */
 let globalSyncDone = false;
+/** focus/可視化時の再取得が多数インスタンスで重複しないよう、進行中フラグで1回に集約する。 */
+let revalidateInFlight = false;
 
 /**
  * お気に入りチーム集合をクライアント側で扱う Hook。
@@ -35,9 +45,11 @@ let globalSyncDone = false;
  * - SSR 初回は空集合で hydrate される（DOM 側がサーバー描画と一致するように）。
  * - localStorage を即時キャッシュとして使い、`storage`（他タブ）/`wc:favorites-changed`
  *   （同タブ）イベントで最新に保つ。
- * - **ログイン中はサーバ（user_favorites）と同期**して端末間で一致させる:
- *   初回マウントで localStorage 分とサーバ分をマージ→両方へ反映。トグル時は localStorage を
- *   即時更新（楽観的UI）し、全件をサーバへ保存する（失敗は握りつぶしてローカルは維持）。
+ * - **ログイン中はサーバ（user_favorites）を正として同期**して端末間で一致させる:
+ *   マウント時とフォーカス/可視化時にサーバ状態を採用する（古いローカルとは和集合しない＝
+ *   他端末で消した★を蘇らせない）。トグルは楽観的UI＋**単品デルタ**（add/remove）でサーバへ
+ *   反映する（全件上書きしないので古い端末が他端末の削除を巻き戻さない）。ログアウト中に
+ *   付けた★だけ、次回ログインで加算マージする。
  */
 export function useFavoriteTeams(): {
   favorites: Set<string>;
@@ -86,13 +98,16 @@ export function useFavoriteTeams(): {
       globalSyncDone = true;
 
       let cancelled = false;
-      void syncFavoritesAction(readFavorites()).then(({ codes }) => {
-        // 同期の往復中にユーザーがトグルした分を失わないよう、解決「時点」のローカル最新と
-        // 和集合してから書き戻す（古いスナップショットでの上書き＝巻き戻りを防ぐ）。
-        // ※ 同期中の「削除」は和集合では戻りうるが、窓は一往復ぶんと短いため許容する。
-        const merged = mergeFavoriteCodes(codes, readFavorites());
-        writeFavorites(merged); // localStorage を更新＝全 FavoriteStar へイベント伝播。
-        if (!cancelled) setFavorites(toSet(merged));
+      // サーバを正として採用する。ローカルの古いキャッシュとは**和集合しない**（他端末で消した
+      // ★が蘇る経路を断つ）。ログアウト中に付けた★（anon-pending）だけは加算マージする。
+      const snapshot = JSON.stringify(readFavorites());
+      void syncFavoritesAction(readAnonPending()).then(({ codes }) => {
+        clearAnonPending(); // 保留分はサーバへ反映済み。
+        // 同期の往復中にユーザーがトグルしていたら、その操作（単品デルタは永続済み）を上書き
+        // しない。ローカルが変わっていない（idle）ときだけサーバ状態を採用する。
+        if (JSON.stringify(readFavorites()) !== snapshot) return;
+        writeFavorites(codes); // localStorage を更新＝全 FavoriteStar へイベント伝播。
+        if (!cancelled) setFavorites(toSet(codes));
       });
       return () => {
         cancelled = true;
@@ -109,24 +124,55 @@ export function useFavoriteTeams(): {
     if (wasSignedInRef.current) {
       wasSignedInRef.current = false;
       writeFavorites([]); // CustomEvent 発火で同タブの他コンポーネント表示も即クリア。
+      clearAnonPending();
       setFavorites(new Set());
     }
   }, [isSignedIn]);
 
-  const persist = useCallback(
-    (next: readonly string[]) => {
-      if (isSignedIn) void saveFavoritesAction([...next]);
-    },
-    [isSignedIn],
-  );
+  // (B) 端末復帰（フォーカス/可視化）時にサーバを取り直して採用＝端末間を“見た瞬間”に同期する。
+  useEffect(() => {
+    if (isSignedIn !== true) return;
+    const revalidate = () => {
+      if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return;
+      if (revalidateInFlight) return; // 多数インスタンスの同時発火を1リクエストに集約。
+      revalidateInFlight = true;
+      const snapshot = JSON.stringify(readFavorites());
+      void syncFavoritesAction([])
+        .then(({ codes }) => {
+          // 取得中にユーザーがトグルしていたら上書きしない（操作のデルタは永続済み）。
+          if (JSON.stringify(readFavorites()) !== snapshot) return;
+          writeFavorites(codes);
+        })
+        .finally(() => {
+          revalidateInFlight = false;
+        });
+    };
+    window.addEventListener('focus', revalidate);
+    document.addEventListener('visibilitychange', revalidate);
+    return () => {
+      window.removeEventListener('focus', revalidate);
+      document.removeEventListener('visibilitychange', revalidate);
+    };
+  }, [isSignedIn]);
 
   const toggle = useCallback(
     (code: string) => {
+      const normalized = code.trim().toUpperCase();
+      if (!normalized) return;
       const next = toggleFavoriteStorage(code);
       setFavorites(toSet(next));
-      persist(next);
+      const nowFavorite = next.includes(normalized);
+      if (isSignedIn) {
+        // 単品デルタで保存（全件上書きしない＝古い端末が他端末の削除を巻き戻す事故を防ぐ）。
+        void (nowFavorite ? addFavoriteAction(normalized) : removeFavoriteAction(normalized));
+      } else if (nowFavorite) {
+        // 未ログイン時はローカルのみ。ログアウト中に付けた★は次回ログインで加算マージする。
+        addAnonPending(normalized);
+      } else {
+        removeAnonPending(normalized);
+      }
     },
-    [persist],
+    [isSignedIn],
   );
 
   const isFavorite = useCallback(
@@ -137,8 +183,10 @@ export function useFavoriteTeams(): {
   const clear = useCallback(() => {
     writeFavorites([]);
     setFavorites(new Set());
-    persist([]);
-  }, [persist]);
+    clearAnonPending();
+    // 「すべて解除」は端末の意思による全件クリア＝全件置換で空にする（単品デルタではない）。
+    if (isSignedIn) void saveFavoritesAction([]);
+  }, [isSignedIn]);
 
   return { favorites, toggle, isFavorite, clear, ready };
 }

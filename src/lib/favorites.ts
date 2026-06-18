@@ -12,6 +12,12 @@ import type { MatchDetail } from '@/db/queries';
 
 export const FAVORITES_KEY = 'wc:favorite-teams';
 export const FILTER_KEY = 'wc:favorite-filter';
+/**
+ * ログアウト中に付けた★（次回ログイン時にアカウントへ「加算」マージする保留分）。
+ * これを「ログイン端末に残った古いキャッシュ」と区別することで、サーバ権威の同期でも
+ * ログアウト中の★を失わず、かつ他端末の削除を蘇らせない（fix: 端末間お気に入り整合）。
+ */
+export const ANON_PENDING_KEY = 'wc:favorites-anon-pending';
 
 /** 同タブ内の他コンポーネントへ「お気に入り状態が変わった」ことを通知するカスタムイベント名。 */
 export const FAVORITES_CHANGED_EVENT = 'wc:favorites-changed';
@@ -63,6 +69,55 @@ export function writeFavorites(codes: readonly string[]): void {
     window.dispatchEvent(new CustomEvent(FAVORITES_CHANGED_EVENT));
   } catch {
     // CustomEvent が無い環境（古いブラウザ／テスト）では何もしない。
+  }
+}
+
+/** ログアウト中に付けた★の保留リストを読む（次回ログインで加算マージする）。 */
+export function readAnonPending(): string[] {
+  if (!hasStorage()) return [];
+  try {
+    const raw = window.localStorage.getItem(ANON_PENDING_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return normalizeList(parsed);
+  } catch {
+    return [];
+  }
+}
+
+function writeAnonPending(codes: readonly string[]): void {
+  if (!hasStorage()) return;
+  try {
+    window.localStorage.setItem(ANON_PENDING_KEY, JSON.stringify(normalizeList(codes)));
+  } catch {
+    return;
+  }
+}
+
+/** ログアウト中の★追加を保留に記録する。 */
+export function addAnonPending(code: string): void {
+  const target = normalizeCode(code);
+  if (!target) return;
+  const current = readAnonPending();
+  if (current.includes(target)) return;
+  writeAnonPending([...current, target]);
+}
+
+/** ログアウト中に付けた★を（まだログイン前に）外したら保留からも消す。 */
+export function removeAnonPending(code: string): void {
+  const target = normalizeCode(code);
+  if (!target) return;
+  writeAnonPending(readAnonPending().filter((c) => c !== target));
+}
+
+/** 保留分をログインでアカウントへ反映し終えたら一掃する。 */
+export function clearAnonPending(): void {
+  if (!hasStorage()) return;
+  try {
+    window.localStorage.removeItem(ANON_PENDING_KEY);
+  } catch {
+    return;
   }
 }
 

@@ -419,6 +419,33 @@ export async function setUserFavorites(userId: string, codes: readonly string[])
   );
 }
 
+/**
+ * お気に入りを1件追加する（端末間同期の単品デルタ・冪等）。
+ * 全件上書き（setUserFavorites）と違い、他端末で消した別コードを巻き戻さない。
+ * PRIMARY KEY(user_id, fifa_code) 前提で ON CONFLICT は何もしない。コードは大文字前提。
+ */
+export async function addUserFavorite(userId: string, code: string): Promise<void> {
+  const normalized = code.trim().toUpperCase();
+  if (!normalized) return;
+  await db().execute({
+    sql: 'INSERT INTO user_favorites (user_id, fifa_code) VALUES (?, ?) ON CONFLICT(user_id, fifa_code) DO NOTHING',
+    args: [userId, normalized],
+  });
+}
+
+/**
+ * お気に入りを1件削除する（端末間同期の単品デルタ）。
+ * その1コードだけを消すので、他端末の追加分を巻き戻さない。コードは大文字前提。
+ */
+export async function removeUserFavorite(userId: string, code: string): Promise<void> {
+  const normalized = code.trim().toUpperCase();
+  if (!normalized) return;
+  await db().execute({
+    sql: 'DELETE FROM user_favorites WHERE user_id = ? AND fifa_code = ?',
+    args: [userId, normalized],
+  });
+}
+
 export async function getGroupTeams(group: string): Promise<Team[]> {
   const result = await db().execute({
     sql: `

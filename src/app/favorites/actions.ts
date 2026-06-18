@@ -2,20 +2,63 @@
 
 import { auth } from '@clerk/nextjs/server';
 
-import { getUserFavorites, setUserFavorites } from '@/db/queries';
+import {
+  addUserFavorite,
+  getUserFavorites,
+  removeUserFavorite,
+  setUserFavorites,
+} from '@/db/queries';
 import { hasKnockoutAccess } from '@/lib/billing/access';
 import { mergeFavoriteCodes } from '@/lib/favorites';
 
 /**
- * ログインユーザーのお気に入りを保存する（端末間同期の書き込み側）。
- * クライアントは常に全件を送る。未ログインなら no-op（クライアントは localStorage のみで動く）。
+ * 課金壁（T-68 面④）の fail-closed 共通チェック。
+ * 未ログイン or 未購入×決勝T期間なら false（書き込み禁止）。UIゲートに依存せず毎回サーバで再判定する。
+ */
+async function canWriteFavorites(): Promise<{ ok: boolean; userId: string | null }> {
+  const { userId } = await auth();
+  if (!userId) return { ok: false, userId: null };
+  if (!(await hasKnockoutAccess())) return { ok: false, userId };
+  return { ok: true, userId };
+}
+
+/**
+ * お気に入りを1件追加する（端末間同期の単品デルタ）。
+ * 全件上書きしないので、他端末で消した別コードを巻き戻さない（蘇生防止）。
+ */
+export async function addFavoriteAction(code: string): Promise<{ ok: boolean }> {
+  const { ok, userId } = await canWriteFavorites();
+  if (!ok || !userId) return { ok: false };
+  try {
+    await addUserFavorite(userId, code);
+    return { ok: true };
+  } catch {
+    return { ok: false };
+  }
+}
+
+/**
+ * お気に入りを1件削除する（端末間同期の単品デルタ）。
+ * その1コードだけ消すので、他端末の追加分を巻き戻さない。
+ */
+export async function removeFavoriteAction(code: string): Promise<{ ok: boolean }> {
+  const { ok, userId } = await canWriteFavorites();
+  if (!ok || !userId) return { ok: false };
+  try {
+    await removeUserFavorite(userId, code);
+    return { ok: true };
+  } catch {
+    return { ok: false };
+  }
+}
+
+/**
+ * 全件置換（「すべて解除」など、端末の意思で全体を上書きする操作専用）。
+ * 通常のトグルは add/remove の単品デルタを使う（全件上書きは古い端末が削除を巻き戻すため）。
  */
 export async function saveFavoritesAction(codes: string[]): Promise<{ ok: boolean }> {
-  const { userId } = await auth();
-  if (!userId) return { ok: false };
-  // 決勝T課金壁（T-68 面④）の fail-closed 再チェック。UIゲートに依存せず、書き込み直前に
-  // サーバ側でも必ず再判定する（未購入×決勝T期間ならクライアント経由の書き込みでも拒否）。
-  if (!(await hasKnockoutAccess())) return { ok: false };
+  const { ok, userId } = await canWriteFavorites();
+  if (!ok || !userId) return { ok: false };
   try {
     await setUserFavorites(userId, codes);
     return { ok: true };
@@ -25,27 +68,29 @@ export async function saveFavoritesAction(codes: string[]): Promise<{ ok: boolea
 }
 
 /**
- * 初回ログイン/マウント時の同期。サーバ側の保存分とクライアントの localStorage 分を
- * マージして永続化し、マージ後の全件を返す（端末間で和集合になる）。
- * 未ログインなら受け取ったローカル分をそのまま返す。
+ * 端末同期：**サーバ（user_favorites）を正**として現在の全件を返す。
+ *
+ * - 通常のロード/再取得（`anonAdds` 空）: サーバ状態をそのまま返す＝サーバ権威。
+ *   端末ローカルの古いキャッシュとは**和集合しない**（他端末の削除が蘇る経路を断つ）。
+ * - 初回ログイン等で `anonAdds`（ログアウト中に付けた★）がある場合のみ、それを**加算**して
+ *   から返す（加算のみ＝他端末の削除を蘇らせない）。
+ * - 未ログイン: 受け取った anonAdds をそのまま返す（localStorage のみで動作）。
+ * - 未購入×決勝T期間（fail-closed）: 書き込まず anonAdds をそのまま返す（DB に触れない）。
  */
-export async function syncFavoritesAction(localCodes: string[]): Promise<{ codes: string[] }> {
+export async function syncFavoritesAction(anonAdds: string[]): Promise<{ codes: string[] }> {
   const { userId } = await auth();
-  if (!userId) return { codes: localCodes };
-  // 決勝T課金壁（T-68 面④）の fail-closed 再チェック。お気に入りの書き込み経路は
-  // saveFavoritesAction だけでなく、この同期マージ書き戻しも該当する。未購入×決勝T期間では
-  // どちらの経路でもサーバ永続化を行わない（saveFavoritesAction と同一境界で迂回を塞ぐ）。
-  // 書き戻さず受け取ったローカル分をそのまま返すので、データ消失もログアウト挙動の変化もない。
-  if (!(await hasKnockoutAccess())) return { codes: localCodes };
+  if (!userId) return { codes: anonAdds };
+  // 書き込みは課金壁の対象。アクセス不可なら DB に触れず受け取った分をそのまま返す（既存挙動を維持）。
+  if (!(await hasKnockoutAccess())) return { codes: anonAdds };
   try {
     const remote = await getUserFavorites(userId);
-    const merged = mergeFavoriteCodes(remote, localCodes);
-    // マージで増えた場合のみ書き戻す（不要な書き込みを避ける）。
+    if (anonAdds.length === 0) return { codes: remote }; // サーバ権威：そのまま採用。
+    const merged = mergeFavoriteCodes(remote, anonAdds); // 加算のみ（ログアウト中の★を救済）。
     if (merged.length !== remote.length) {
       await setUserFavorites(userId, merged);
     }
     return { codes: merged };
   } catch {
-    return { codes: localCodes };
+    return { codes: anonAdds };
   }
 }
