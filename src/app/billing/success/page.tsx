@@ -25,7 +25,9 @@ export default async function BillingSuccessPage() {
           {t.successTitle}
         </Title>
         <Text ta="center">{t.successBody}</Text>
-        <ButtonLink href="/prediction" size="md">
+        {/* 「決勝トーナメントへ」は決勝Tブラケット（/?view=kt・SiteNav の「決勝T」と同一導線）へ。
+            /prediction は優勝国予想で文言と不一致だったため修正。 */}
+        <ButtonLink href="/?view=kt" size="md">
           {t.successCta}
         </ButtonLink>
       </Stack>
