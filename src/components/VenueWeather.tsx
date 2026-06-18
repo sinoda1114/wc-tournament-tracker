@@ -4,6 +4,7 @@ import { getVenueWeather } from '@/lib/weather';
 import { CONDITION_JA } from '@/lib/weather/conditions-ja';
 
 type VenueWeatherProps = {
+  matchId: number;
   venueId: string;
   /** 試合日 (YYYY-MM-DD)。WeatherAPI の予報日マッチングに使う（会場ローカル暦日）。 */
   matchDate: string;
@@ -20,8 +21,8 @@ type VenueWeatherProps = {
  * 取得失敗時は何も描画しない（null）。WeatherAPI 無料プラン・会場座標でサーバーキャッシュ。
  * async server component なので呼び出し側は <Suspense> で包むとページ本体をブロックしない。
  */
-export async function VenueWeather({ venueId, matchDate, kickoffAt, dateLabel, locale, dict }: VenueWeatherProps) {
-  const weather = await getVenueWeather(venueId, matchDate, kickoffAt);
+export async function VenueWeather({ matchId, venueId, matchDate, kickoffAt, dateLabel, locale, dict }: VenueWeatherProps) {
+  const weather = await getVenueWeather(matchId, venueId, matchDate, kickoffAt);
   if (!weather) {
     return null;
   }

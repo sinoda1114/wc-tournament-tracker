@@ -2,6 +2,8 @@ import type { WeatherForecast } from './types';
 
 /** WeatherAPI 無料プランの予報提供日数（当日含め3日先まで）。 */
 export const FORECAST_WINDOW_DAYS = 3;
+/** WeatherAPI Free プランのHistory取得範囲。Pricing上は過去1日。 */
+export const HISTORY_WINDOW_DAYS = 1;
 
 const MS_PER_DAY = 86_400_000;
 const OFFSET_RE = /(Z|[+-]\d{2}:\d{2})$/;
@@ -63,6 +65,43 @@ export function isWithinForecastWindow(
   }
   const diffDays = Math.round((match - base) / MS_PER_DAY);
   return diffDays >= 0 && diffDays <= windowDays - 1;
+}
+
+/**
+ * 試合日が無料History APIの範囲内か判定する。
+ * today の前日だけを対象にし、今日/未来はForecast側へ任せる。
+ */
+export function isWithinHistoryWindow(
+  matchDate: string,
+  today: string,
+  windowDays: number = HISTORY_WINDOW_DAYS,
+): boolean {
+  const match = Date.parse(`${matchDate}T00:00:00Z`);
+  const base = Date.parse(`${today}T00:00:00Z`);
+  if (Number.isNaN(match) || Number.isNaN(base)) {
+    return false;
+  }
+  const diffDays = Math.round((base - match) / MS_PER_DAY);
+  return diffDays >= 1 && diffDays <= windowDays;
+}
+
+/**
+ * 予報値をスナップショットとして固定してよいか判定する。
+ * 未来の試合を早く見た時点の予報を保存すると、より近い予報へ更新できなくなるため、
+ * kickoffAt が取れる試合はKO後だけ保存する。
+ */
+export function shouldPersistForecastSnapshot(
+  kickoffAt: string | null | undefined,
+  now: Date,
+): boolean {
+  if (!kickoffAt) {
+    return false;
+  }
+  const kickoff = Date.parse(kickoffAt);
+  if (Number.isNaN(kickoff)) {
+    return false;
+  }
+  return kickoff <= now.getTime();
 }
 
 /** WeatherAPI のアイコン URL は先頭が `//` のことがあるため https を補う。 */

@@ -1,8 +1,16 @@
 import 'server-only';
 
-import { fetchForecast } from './client';
+import { getWeatherSnapshot, upsertWeatherSnapshot } from '@/db/weather-snapshots';
+
+import { fetchForecast, fetchHistory } from './client';
 import { getVenueCoordinate } from './coordinates';
-import { forecastReferenceDate, isWithinForecastWindow, parseForecastForDate } from './forecast';
+import {
+  forecastReferenceDate,
+  isWithinForecastWindow,
+  isWithinHistoryWindow,
+  parseForecastForDate,
+  shouldPersistForecastSnapshot,
+} from './forecast';
 import type { WeatherForecast } from './types';
 
 /**
@@ -11,23 +19,50 @@ import type { WeatherForecast } from './types';
  * 取得データは表示言語に依らず共通（天候テキストの日本語化は呼び出し側でコードから行う）。
  */
 export async function getVenueWeather(
+  matchId: number,
   venueId: string,
   matchDate: string,
   kickoffAt: string | null = null,
   now: Date = new Date(),
 ): Promise<WeatherForecast | null> {
-  if (!isWithinForecastWindow(matchDate, forecastReferenceDate(now, kickoffAt))) {
-    return null;
+  const snapshot = await getWeatherSnapshot(matchId).catch(() => null);
+  if (snapshot) {
+    return snapshot;
   }
+
   const coord = getVenueCoordinate(venueId);
   if (!coord) {
     return null;
   }
-  const payload = await fetchForecast(coord);
+
+  const referenceDate = forecastReferenceDate(now, kickoffAt);
+  const source = isWithinForecastWindow(matchDate, referenceDate)
+    ? 'forecast'
+    : isWithinHistoryWindow(matchDate, referenceDate)
+      ? 'history'
+      : null;
+  if (!source) {
+    return null;
+  }
+
+  const payload =
+    source === 'forecast'
+      ? await fetchForecast(coord)
+      : await fetchHistory(coord, matchDate);
   if (!payload) {
     return null;
   }
-  return parseForecastForDate(payload, matchDate);
+  const weather = parseForecastForDate(payload, matchDate);
+  if (!weather) {
+    return null;
+  }
+
+  const shouldPersist =
+    source === 'history' || shouldPersistForecastSnapshot(kickoffAt, now);
+  if (shouldPersist) {
+    await upsertWeatherSnapshot({ matchId, weather, source }).catch(() => undefined);
+  }
+  return weather;
 }
 
 export type { WeatherForecast } from './types';
