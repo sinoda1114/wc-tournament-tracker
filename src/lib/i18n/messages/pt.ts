@@ -290,6 +290,8 @@ export const pt: Dictionary = {
       'Nota: Billy Gilmour deixou a convocação da Escócia com uma lesão no joelho e Tyler Fletcher (camisa 8) foi convocado em seu lugar.',
     noteAut:
       'Nota: Christoph Baumgartner deixou a convocação da Áustria com uma lesão na coxa direita e Dejan Ljubičić foi convocado em seu lugar.',
+    noteTun:
+      'Nota: Após a estreia no Grupo F (derrota por 1-5 para a Suécia), a Tunísia demitiu o técnico Sabri Lamouchi e contratou Hervé Renard com contrato até o fim da Copa de 2026.',
   },
   prediction: {
     title: 'Palpite do campeão',

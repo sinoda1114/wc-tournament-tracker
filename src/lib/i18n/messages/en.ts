@@ -289,6 +289,8 @@ export const en: Dictionary = {
       'Note: Billy Gilmour left the Scotland squad with a knee injury, and Tyler Fletcher (No. 8) was called up as his replacement.',
     noteAut:
       'Note: Christoph Baumgartner left the Austria squad with a right-thigh injury, and Dejan Ljubičić was called up as his replacement.',
+    noteTun:
+      'Note: After their opening Group F match (a 1-5 loss to Sweden), Tunisia dismissed manager Sabri Lamouchi and appointed Hervé Renard on a contract through the end of the 2026 tournament.',
   },
   prediction: {
     title: 'Champion prediction',
