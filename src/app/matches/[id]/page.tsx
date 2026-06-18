@@ -253,6 +253,7 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
 
         <Suspense fallback={null}>
           <VenueWeather
+            matchId={match.id}
             venueId={match.venueId}
             matchDate={match.matchDate}
             kickoffAt={match.kickoffAt}

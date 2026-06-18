@@ -42,3 +42,36 @@ export async function fetchForecast(coord: VenueCoordinate): Promise<unknown | n
     return null;
   }
 }
+
+/**
+ * 指定座標・指定日の過去天気を WeatherAPI から取得する（サーバー専用）。
+ * Free プランでは過去1日までのため、呼び出し側で対象日を絞ってから使う。
+ */
+export async function fetchHistory(
+  coord: VenueCoordinate,
+  date: string,
+): Promise<unknown | null> {
+  const apiKey = process.env.WEATHER_API_KEY;
+  if (!apiKey) {
+    return null;
+  }
+
+  const params = new URLSearchParams({
+    key: apiKey,
+    q: `${coord.lat},${coord.lon}`,
+    dt: date,
+  });
+
+  try {
+    const res = await fetch(
+      `https://api.weatherapi.com/v1/history.json?${params.toString()}`,
+      { next: { revalidate: REVALIDATE_SECONDS } },
+    );
+    if (!res.ok) {
+      return null;
+    }
+    return (await res.json()) as unknown;
+  } catch {
+    return null;
+  }
+}

@@ -3,10 +3,13 @@ import { describe, expect, it } from 'vitest';
 import { VENUE_COORDINATES, getVenueCoordinate } from '@/lib/weather/coordinates';
 import {
   FORECAST_WINDOW_DAYS,
+  HISTORY_WINDOW_DAYS,
   forecastReferenceDate,
+  isWithinHistoryWindow,
   isWithinForecastWindow,
   normalizeIconUrl,
   parseForecastForDate,
+  shouldPersistForecastSnapshot,
   todayUtc,
 } from '@/lib/weather/forecast';
 
@@ -65,6 +68,23 @@ describe('isWithinForecastWindow', () => {
   });
 });
 
+describe('isWithinHistoryWindow', () => {
+  const today = '2026-06-18';
+
+  it('無料プランの過去1日は対象', () => {
+    expect(isWithinHistoryWindow('2026-06-17', today)).toBe(true);
+  });
+
+  it('今日と2日前以前は対象外', () => {
+    expect(isWithinHistoryWindow('2026-06-18', today)).toBe(false);
+    expect(isWithinHistoryWindow('2026-06-16', today)).toBe(false);
+  });
+
+  it('ウィンドウ日数は無料プランの1日', () => {
+    expect(HISTORY_WINDOW_DAYS).toBe(1);
+  });
+});
+
 describe('forecastReferenceDate', () => {
   it('UTC の当日を返す', () => {
     expect(todayUtc(new Date('2026-06-18T00:02:00Z'))).toBe('2026-06-18');
@@ -83,6 +103,20 @@ describe('forecastReferenceDate', () => {
 
   it('kickoffAt が無い場合は UTC 当日にフォールバックする', () => {
     expect(forecastReferenceDate(new Date('2026-06-18T00:02:00Z'), null)).toBe('2026-06-18');
+  });
+});
+
+describe('shouldPersistForecastSnapshot', () => {
+  it('KO後だけ予報スナップショットを保存対象にする', () => {
+    const now = new Date('2026-06-18T12:00:00Z');
+    expect(shouldPersistForecastSnapshot('2026-06-18T11:59:00Z', now)).toBe(true);
+    expect(shouldPersistForecastSnapshot('2026-06-18T12:01:00Z', now)).toBe(false);
+  });
+
+  it('KO時刻が無い・壊れている場合は保存しない', () => {
+    const now = new Date('2026-06-18T12:00:00Z');
+    expect(shouldPersistForecastSnapshot(null, now)).toBe(false);
+    expect(shouldPersistForecastSnapshot('not-a-date', now)).toBe(false);
   });
 });
 
