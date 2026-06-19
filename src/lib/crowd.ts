@@ -164,12 +164,17 @@ export function archivedVotingStages(
  * 敗退が確定したチームの teamId 集合。
  * 決勝T（KO）で勝者が確定した試合の「敗者」を敗退扱いにする（third_place 含む）。
  * 優勝予想で敗退チームをグレー化・選択不可にするのに使う。
+ *
+ * 注意: グループステージは対象外。1試合落としても勝ち抜け可能なので、group_stage の
+ * 敗者を敗退扱いにしてはいけない（以前 stage を無視して全 finished 敗者を拾い、グループ
+ * 1敗のチームが誤って取り消し線になっていた）。数学的なグループ敗退の判定は別途。
  */
 export function eliminatedTeamIds(
-  matches: Pick<Match, 'homeTeamId' | 'awayTeamId' | 'winnerTeamId' | 'status'>[],
+  matches: Pick<Match, 'stage' | 'homeTeamId' | 'awayTeamId' | 'winnerTeamId' | 'status'>[],
 ): Set<string> {
   const eliminated = new Set<string>();
   for (const m of matches) {
+    if (m.stage === 'group_stage') continue; // グループ戦の敗者は敗退ではない
     if (m.status !== 'finished' || !m.winnerTeamId) continue;
     if (!m.homeTeamId || !m.awayTeamId) continue;
     const loser = m.winnerTeamId === m.homeTeamId ? m.awayTeamId : m.homeTeamId;

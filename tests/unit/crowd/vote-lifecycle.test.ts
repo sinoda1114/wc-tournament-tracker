@@ -198,4 +198,22 @@ describe('eliminatedTeamIds', () => {
     ];
     expect(eliminatedTeamIds(matches).has('ned')).toBe(true);
   });
+
+  it('グループ戦の敗者は敗退扱いにしない（1敗では敗退ではない）', () => {
+    const matches = [
+      // group_stage: mex が rsa に勝利。rsa は1敗だが勝ち抜け可能なので敗退ではない。
+      m({ stage: 'group_stage', homeTeamId: 'mex', awayTeamId: 'rsa', homeScore: 2, awayScore: 0, winnerTeamId: 'mex', status: 'finished' }),
+    ];
+    expect(eliminatedTeamIds(matches).size).toBe(0);
+  });
+
+  it('グループ戦とKOが混在しても、敗退扱いはKOの敗者のみ', () => {
+    const matches = [
+      m({ stage: 'group_stage', homeTeamId: 'mex', awayTeamId: 'rsa', homeScore: 2, awayScore: 0, winnerTeamId: 'mex', status: 'finished' }),
+      m({ stage: 'round_of_32', homeTeamId: 'fra', awayTeamId: 'eng', homeScore: 2, awayScore: 1, winnerTeamId: 'fra', status: 'finished' }),
+    ];
+    const out = eliminatedTeamIds(matches);
+    expect(out.has('rsa')).toBe(false); // グループ1敗は敗退ではない
+    expect(out.has('eng')).toBe(true); // KO 敗者は敗退
+  });
 });
