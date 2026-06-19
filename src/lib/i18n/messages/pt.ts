@@ -94,6 +94,7 @@ export const pt: Dictionary = {
     colRedAria: 'Cartões vermelhos',
     colStatus: 'Status',
     suspended: 'Suspenso',
+    suspensionServed: 'Suspensão cumprida',
     tbd: 'A definir',
     previewMeta: 'Mostrando os {shown} primeiros de {total}',
     showAllScorers: 'Ver toda a artilharia ({total})',

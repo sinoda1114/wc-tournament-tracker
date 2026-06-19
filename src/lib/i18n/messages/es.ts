@@ -94,6 +94,7 @@ export const es: Dictionary = {
     colRedAria: 'Tarjetas rojas',
     colStatus: 'Estado',
     suspended: 'Sancionado',
+    suspensionServed: 'Sanción cumplida',
     tbd: 'Por definir',
     previewMeta: 'Mostrando los {shown} primeros de {total}',
     showAllScorers: 'Ver todos los goleadores ({total})',

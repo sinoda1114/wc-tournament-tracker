@@ -60,6 +60,7 @@ describe('computeSuspensions', () => {
     expect(s?.matchDate).toBe('2026-06-24');
     expect(s?.reason).toBe('yellows');
     expect(s?.opponent?.fifaCode).toBe('BRA');
+    expect(s?.status).toBe('pending'); // 未消化（次戦が scheduled）
   });
 
   it('レッド → 次戦出場停止', () => {
@@ -68,15 +69,37 @@ describe('computeSuspensions', () => {
     const s = computeSuspensions(events, fixtures).get(KEY('Busquets', 'ESP'));
     expect(s?.reason).toBe('red');
     expect(s?.opponent?.fifaCode).toBe('GER'); // ESP の相手は home 側 GER
+    expect(s?.status).toBe('pending');
   });
 
-  it('次戦が終了済みなら消化済み＝出場停止に出さない', () => {
+  it('次戦が終了済みなら status=served（対象試合つき）で返す', () => {
+    // 消化済みでも一覧に残す（赤は通算記録）。注記を「消化済み」に切替えるため
+    // 捨てずに status=served で返す。
     const events = [
       card('Romero', 'ARG', 'yellow', 1, '2026-06-12', 'group_stage'),
       card('Romero', 'ARG', 'yellow', 2, '2026-06-18', 'group_stage'),
     ];
     const fixtures = [fixture('2026-06-24', 'ARG', 'BRA', 'finished')]; // 既に消化
-    expect(computeSuspensions(events, fixtures).size).toBe(0);
+    const s = computeSuspensions(events, fixtures).get(KEY('Romero', 'ARG'));
+    expect(s).toBeDefined();
+    expect(s?.status).toBe('served');
+    expect(s?.matchDate).toBe('2026-06-24'); // 消化した対象試合
+    expect(s?.opponent?.fifaCode).toBe('BRA');
+    expect(s?.reason).toBe('yellows');
+  });
+
+  it('レッドの出場停止を消化済み（次戦 finished）なら status=served', () => {
+    const events = [card('Sithole', 'RSA', 'red', 1, '2026-06-11', 'group_stage')];
+    const fixtures = [
+      fixture('2026-06-11', 'MEX', 'RSA', 'finished'), // 退場した試合（次戦判定の対象外）
+      fixture('2026-06-18', 'CZE', 'RSA', 'finished'), // 消化試合（次戦・終了済み）
+      fixture('2026-06-24', 'RSA', 'KOR', 'scheduled'),
+    ];
+    const s = computeSuspensions(events, fixtures).get(KEY('Sithole', 'RSA'));
+    expect(s?.status).toBe('served');
+    expect(s?.reason).toBe('red');
+    expect(s?.matchDate).toBe('2026-06-18');
+    expect(s?.opponent?.fifaCode).toBe('CZE');
   });
 
   it('警告1枚だけなら出場停止にならない', () => {

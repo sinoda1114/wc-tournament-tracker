@@ -8,8 +8,9 @@
  *  - 同一リセット窓で警告2枚 → 次戦出場停止。退場 → 次戦出場停止。
  *  - イエローの累積はリセット窓ごとに 0 へ戻る:
  *      W1 = グループステージ / W2 = R32・R16・準々決勝 / W3 = 準決勝・3位決定戦・決勝。
- *  - 直近トリガーの「次戦」が未消化(scheduled/in_progress)なら現在出場停止＝表示。
- *    その試合が終了済みなら消化済みとみなし表示しない（誤って残さない）。
+ *  - 直近トリガーの「次戦」が未消化(scheduled/in_progress)なら status='pending'（🚫 表示）。
+ *    その試合が終了済みなら status='served'（消化済み）。赤(通算)・黄累積(同一窓内)とも
+ *    一覧に残る間は捨てず、UI 側で「消化済み」注記に切り替える。
  *  - レッドの複数試合停止はFIFAが個別決定のため自動表示は「次戦」のみ。
  */
 import {
@@ -99,13 +100,15 @@ export function computeSuspensions(
 
     if (!lastBan) continue;
     const target = nextFixtureAfter(teamId, lastBan.matchDate, fixtures);
-    if (!target) continue; // 次戦が無い（大会終了等）
-    if (target.status === 'finished') continue; // 既に消化済み → 現在は出場停止でない
+    if (!target) continue; // 次戦が無い（大会終了/敗退等）→ 注記なし
 
+    // 対象試合が終了済み＝出場停止を消化済み。赤(通算)・黄累積(同一窓内)とも一覧に残る間は
+    // 注記を出すため捨てずに status='served' で返し、UI 側で「消化済み」表記に切替（pending の🚫と区別）。
     result.set(key, {
       matchDate: target.matchDate,
       opponent: opponentOf(target, teamId),
       reason: lastBan.reason,
+      status: target.status === 'finished' ? 'served' : 'pending',
     });
   }
   return result;

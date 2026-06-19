@@ -91,9 +91,12 @@ function SuspensionGlyph({ label }: { label: string }) {
 }
 
 /**
- * 出場停止セル。直感アイコン（🚫）＋次戦（M/D vs 対戦相手）を併記する（T-65）。
- * 無ければダッシュ。情報を失わないよう次戦テキストは残し、アイコンには次戦込みの
- * aria-label/title を付与して支援技術にテキスト相当を渡す。
+ * 出場停止セル。状態で表示を分岐する（T-65 / 消化済み表記）。
+ * - pending: 🚫 ＋ 次戦（M/D vs 対戦相手）。現在出場停止中。
+ * - served : 「出場停止 消化済み（M/D vs 対戦相手）」。赤は通算で一覧に残るため、
+ *   消化した事実を注記で示す（🚫 は使わない＝もう停止ではないため）。
+ * - 無し   : ダッシュ。
+ * 情報を失わないよう対象試合テキストは残し、aria-label/title に状態込みのテキストを付ける。
  */
 function SuspensionCell({
   suspension,
@@ -112,14 +115,31 @@ function SuspensionCell({
     );
   }
   const opponentLabel = suspension.opponent ? teamLabel(suspension.opponent, locale) : t.tbd;
-  const nextMatch = `${formatMonthDay(suspension.matchDate)} vs ${opponentLabel}`;
-  // 例: 「出場停止（6/18 vs 韓国）」をアイコンの代替テキストとして渡す。
-  const ariaLabel = `${t.suspended}（${nextMatch}）`;
+  const targetMatch = `${formatMonthDay(suspension.matchDate)} vs ${opponentLabel}`;
+
+  if (suspension.status === 'served') {
+    // 消化済み：🚫 ではなくテキスト注記。例: 「出場停止 消化済み（6/18 vs チェコ）」。
+    const servedLabel = `${t.suspensionServed}（${targetMatch}）`;
+    return (
+      <Text
+        component="span"
+        size="xs"
+        c="dimmed"
+        className="wc-ranking-susp-served"
+        title={servedLabel}
+      >
+        {servedLabel}
+      </Text>
+    );
+  }
+
+  // pending：現在出場停止中。例: 「出場停止（6/24 vs 韓国）」をアイコン代替テキストに。
+  const ariaLabel = `${t.suspended}（${targetMatch}）`;
   return (
     <span className="wc-ranking-susp">
       <SuspensionGlyph label={ariaLabel} />
       <Text component="span" size="xs" c="dimmed">
-        {nextMatch}
+        {targetMatch}
       </Text>
     </span>
   );
