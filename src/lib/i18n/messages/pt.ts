@@ -104,7 +104,8 @@ export const pt: Dictionary = {
     allRowsMeta: 'Mostrando todos os {total} registros.',
     historicalScorersTitle: 'Maiores artilheiros da história da Copa',
     historicalNote:
-      'Gols na história das Copas (masculino). Os totais estão fixados na Copa de 2022; jogadores em atividade têm seus gols atuais somados automaticamente.',
+      'Gols na história das Copas (masculino). Os totais estão fixados na Copa de 2022; jogadores em atividade têm seus gols atuais somados automaticamente. O “+N” em verde são gols da Copa de 2026, já incluídos no total (não precisa somar de novo).',
+    historicalLiveHint: '{n} desses gols na Copa de 2026 (incluídos no total)',
     colSpan: 'Edições',
     showAllHistorical: 'Abrir o ranking histórico (todos os {total})',
     allHistoricalScorersTitle: 'Maiores artilheiros da história da Copa (todos os {total})',
