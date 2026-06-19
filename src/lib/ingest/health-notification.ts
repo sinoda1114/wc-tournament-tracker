@@ -97,7 +97,7 @@ export function buildDiscordHealthMessage(
     : message;
 }
 
-async function postDiscordMessage(
+export async function postDiscordMessage(
   webhookUrl: string,
   content: string,
   options: { mentionEveryone: boolean },
