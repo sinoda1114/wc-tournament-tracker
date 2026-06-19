@@ -104,7 +104,8 @@ export const es: Dictionary = {
     allRowsMeta: 'Mostrando {total} registros.',
     historicalScorersTitle: 'Goleadores históricos del Mundial',
     historicalNote:
-      'Goles históricos en Mundiales (masculino). Los totales están fijados al Mundial 2022; a los jugadores en activo se les suman sus goles actuales automáticamente.',
+      'Goles históricos en Mundiales (masculino). Los totales están fijados al Mundial 2022; a los jugadores en activo se les suman sus goles actuales automáticamente. El “+N” en verde son goles del Mundial 2026, ya incluidos en el total (no hay que volver a sumarlos).',
+    historicalLiveHint: '{n} de esos goles en el Mundial 2026 (incluidos en el total)',
     colSpan: 'Ediciones',
     showAllHistorical: 'Abrir la clasificación histórica (los {total})',
     allHistoricalScorersTitle: 'Goleadores históricos del Mundial (los {total})',

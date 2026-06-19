@@ -288,7 +288,16 @@ export function RankingsView({
             <Table.Td ta="right" fw={700}>
               {h.goals}
               {h.liveGoals2026 > 0 ? (
-                <Text component="span" size="xs" c="teal.4" ml={4}>
+                // 緑の「+N」は通算(h.goals)に「含まれる」本大会得点。足し直しではないことを
+                // title/aria で明示し、「16 +3 = 19」と誤読されないようにする。
+                <Text
+                  component="span"
+                  size="xs"
+                  c="teal.4"
+                  ml={4}
+                  title={t.historicalLiveHint.replace('{n}', String(h.liveGoals2026))}
+                  aria-label={t.historicalLiveHint.replace('{n}', String(h.liveGoals2026))}
+                >
                   +{h.liveGoals2026}
                 </Text>
               ) : null}
