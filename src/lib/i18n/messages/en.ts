@@ -104,7 +104,8 @@ export const en: Dictionary = {
     allRowsMeta: 'Showing all {total} rows.',
     historicalScorersTitle: 'All-time World Cup top scorers',
     historicalNote:
-      'Career World Cup goals (men’s). Totals are fixed as of the 2022 tournament; active players have their current goals added automatically. The green “+N” is goals scored at the 2026 tournament, already included in the total (no need to add it again).',
+      'Career World Cup goals (men’s). Totals are fixed as of the 2022 tournament; active players have their current goals added automatically.',
+    historicalNoteLive: 'Goals in green are from the 2026 tournament.',
     historicalLiveHint: '{n} of these scored at the 2026 tournament (included in the total)',
     colSpan: 'Editions',
     showAllHistorical: 'Open the all-time ranking (all {total})',

@@ -103,7 +103,8 @@ export const zh: Dictionary = {
     allRowsMeta: '正在显示全部 {total} 条记录。',
     historicalScorersTitle: '世界杯历史总射手榜',
     historicalNote:
-      '世界杯（男子）历史总进球。数据以 2022 年世界杯结束时为准，现役球员的本届进球会自动累加。绿色「+N」是已计入总数的本届（2026）进球（无需再相加）。',
+      '世界杯（男子）历史总进球。数据以 2022 年世界杯结束时为准，现役球员的本届进球会自动累加。',
+    historicalNoteLive: '绿色的进球为本届（2026）进球。',
     historicalLiveHint: '其中本届（2026）进 {n} 球（已计入总数）',
     colSpan: '参赛',
     showAllHistorical: '展开历史总射手榜（共 {total} 人）',

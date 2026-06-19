@@ -225,6 +225,18 @@ export function RankingsView({
   const historicalRanks = standardCompetitionRanks(historical, (h) => h.goals);
   const previewHistorical = historical.slice(0, HISTORICAL_PREVIEW);
 
+  // 歴代得点の注記。2文目（緑文）は改行して、得点列の「+N」と同じ teal.4 で表示し
+  // 「緑＝本大会得点」を実データと視覚的にリンクさせる（プレビュー/ドロワー共通）。
+  const historicalNoteNode = (
+    <>
+      {t.historicalNote}
+      <br />
+      <Text component="span" c="teal.4" fw={600}>
+        {t.historicalNoteLive}
+      </Text>
+    </>
+  );
+
   const renderScorerTable = (rows: ScorerStat[], ranks: number[]) => (
     <Table className="wc-ranking-table" highlightOnHover>
       <Table.Thead>
@@ -400,7 +412,7 @@ export function RankingsView({
                   {t.historicalScorersTitle}
                 </Title>
                 <Text c="dimmed" size="xs" mb="sm" className="wc-ranking-cards-note">
-                  {t.historicalNote}
+                  {historicalNoteNode}
                 </Text>
                 {renderHistoricalTable(previewHistorical, historicalRanks)}
                 {historical.length > HISTORICAL_PREVIEW ? (
@@ -501,7 +513,7 @@ export function RankingsView({
       >
         <Stack gap="sm">
           <Text c="dimmed" size="sm">
-            {t.historicalNote}
+            {historicalNoteNode}
           </Text>
           <div className="wc-ranking-drawer-table">
             {renderHistoricalTable(historical, historicalRanks)}
