@@ -42,7 +42,7 @@ export default async function RankingsPage() {
   // （上の scorers＝同じDB集計）を加算して通算を自動更新する。外部API・手動更新なし。
   const historical = mergeHistoricalScorers(scorers);
 
-  // 出場停止を算出してカード行に合流（リセット窓考慮・消化済みは非表示）。
+  // 出場停止を算出してカード行に合流（pending=🚫 / served=「消化済み」注記で表示）。
   const fixtures: SuspensionFixture[] = matches.map((m) => ({
     matchDate: m.matchDate,
     status: m.status,

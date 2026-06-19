@@ -94,6 +94,7 @@ export const en: Dictionary = {
     colRedAria: 'Red cards',
     colStatus: 'Status',
     suspended: 'Suspended',
+    suspensionServed: 'Suspension served',
     tbd: 'TBD',
     previewMeta: 'Showing top {shown} of {total}',
     showAllScorers: 'Show all scorers ({total})',

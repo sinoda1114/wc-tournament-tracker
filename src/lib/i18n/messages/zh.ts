@@ -93,6 +93,7 @@ export const zh: Dictionary = {
     colRedAria: '红牌',
     colStatus: '状态',
     suspended: '停赛',
+    suspensionServed: '停赛已执行',
     tbd: '待定',
     previewMeta: '正在显示前 {shown} 条，共 {total} 条',
     showAllScorers: '查看完整射手榜（{total}人）',

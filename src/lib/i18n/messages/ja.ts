@@ -102,6 +102,7 @@ export const ja = {
     colRedAria: 'レッドカード',
     colStatus: '状態',
     suspended: '出場停止',
+    suspensionServed: '出場停止 消化済み',
     tbd: '未定',
     previewMeta: '上位{shown}件を表示中（全{total}件）',
     showAllScorers: '得点ランキングをすべて表示（{total}人）',
