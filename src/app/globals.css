@@ -490,7 +490,9 @@ a {
 }
 
 /* 会場の国旗はカード上辺に外付けする小チップ（対戦国の旗と区別できる）。
-   カード上パディングを広く取り、ヘッダーの日付テキストと重ならないようにしている。 */
+   カード上パディングを広く取り、ヘッダーの日付テキストと重ならないようにしている。
+   開催国の旗は「対戦カードの2国旗」を主役にするため脇役化する: グレースケール＋半透明＋影オフ
+   （色・浮きを抑えてノイズを下げる。会場名は hover の title で参照可能）。 */
 .wc-mini-card-venue-badge {
   position: absolute;
   top: -10px;
@@ -505,7 +507,8 @@ a {
   border-radius: 999px;
   line-height: 0;
   z-index: 2;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+  filter: grayscale(1);
+  opacity: 0.55;
 }
 
 .wc-bracket-final .wc-mini-card-venue-badge {
