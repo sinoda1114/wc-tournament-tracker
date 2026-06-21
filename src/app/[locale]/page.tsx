@@ -16,6 +16,12 @@ export const dynamicParams = false;
 
 /** プレフィックス付きで有効なロケール（既定 ja は `/` なので除外）。 */
 const PREFIX_LOCALES = LOCALES.filter((l) => l !== 'ja');
+const ROOT_OG_IMAGE = {
+  url: '/opengraph-image.png',
+  width: 1200,
+  height: 630,
+  alt: 'MatchFav',
+};
 
 /**
  * 無効なロケール（/zzz・/ja 等）の多重防御。通常は上記 dynamicParams=false が
@@ -57,8 +63,14 @@ export async function generateMetadata({
       description,
       url: alternates.canonical,
       locale: ogLocale(loc),
+      images: [ROOT_OG_IMAGE],
     },
-    twitter: { title, description },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [ROOT_OG_IMAGE.url],
+    },
   };
 }
 

@@ -30,6 +30,12 @@ const SITE_TITLE_DEFAULT =
   'MatchFav（マッチファボ）— サッカー2026 試合・優勝予想・お気に入りトラッカー（非公式）';
 const SITE_DESCRIPTION =
   'MatchFav（マッチファボ）は、ワールドカップ2026の日程・結果・優勝予想・お気に入りをひとつにまとめる非公式ファンサイトです（FIFA非公認）。';
+const SITE_OG_IMAGE = {
+  url: '/opengraph-image.png',
+  width: 1200,
+  height: 630,
+  alt: 'MatchFav（マッチファボ）',
+};
 
 export const metadata: Metadata = {
   // 相対 URL（OGP 画像・canonical 等）の基準。env 依存（未設定時はフォールバック）。
@@ -61,11 +67,13 @@ export const metadata: Metadata = {
     description: SITE_DESCRIPTION,
     locale: 'ja_JP',
     url: '/',
+    images: [SITE_OG_IMAGE],
   },
   twitter: {
     card: 'summary_large_image',
     title: SITE_TITLE_DEFAULT,
     description: SITE_DESCRIPTION,
+    images: [SITE_OG_IMAGE.url],
   },
   // 非公式サイトである旨を明示（FIFA 等との混同回避／知財対策の補強）。
   other: {
