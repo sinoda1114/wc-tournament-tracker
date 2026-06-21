@@ -8,10 +8,21 @@ import {
   parseWikipediaGroupArticle,
   wikiMatchToResult,
   withWikipediaEvents,
+  withWikipediaPrimaryResults,
   type WikiMatch,
   type WikiMatchEvent,
 } from '@/lib/ingest/wikipedia';
-import type { MatchEventContext, NormalizedMatchEvent, NormalizedResult } from '@/lib/ingest/types';
+import type {
+  MatchEventContext,
+  MatchEventProvider,
+  NormalizedMatchEvent,
+  NormalizedResult,
+  ResultProvider,
+} from '@/lib/ingest/types';
+
+/** "2026 FIFA World Cup Group A" だけ実 fixture を返し、他組は null（テスト用）。 */
+const onlyGroupA = async (title: string): Promise<string | null> =>
+  title.endsWith('Group A') ? GROUP_A_WIKITEXT : null;
 
 const GROUP_A_WIKITEXT = readFileSync(
   fileURLToPath(new URL('../../fixtures/wikipedia/group-a.wikitext', import.meta.url)),
@@ -360,5 +371,72 @@ describe('withWikipediaEvents（フォールバック合成）', () => {
     });
     const events = await withWikipediaEvents(base, wiki).fetchMatchEvents(context);
     expect(events).toEqual([baseEvent]);
+  });
+});
+
+describe('createWikipediaMatchEventProvider.fetchResults（主ソース用）', () => {
+  it('全12組から score の入った試合を source=wikipedia・dateEvent空 で返す', async () => {
+    const provider = createWikipediaMatchEventProvider({ fetchWikitext: onlyGroupA });
+    const results = await provider.fetchResults();
+    expect(results.length).toBeGreaterThan(0);
+    for (const r of results) {
+      expect(r.finished).toBe(true);
+      expect(r.source).toBe('wikipedia');
+      expect(r.dateEvent).toBe('');
+      expect(r.homeScore).not.toBeNull();
+    }
+    // fixture の MEX vs RSA（確定スコアあり）が含まれる。
+    const found = results.find(
+      (r) => [r.homeName, r.awayName].sort().join('-') === ['MEX', 'RSA'].sort().join('-'),
+    );
+    expect(found).toBeDefined();
+  });
+
+  it('1組が取得失敗(throw)でも他組を落とさない', async () => {
+    const provider = createWikipediaMatchEventProvider({
+      fetchWikitext: async (title) => {
+        if (title.endsWith('Group B')) throw new Error('boom');
+        return onlyGroupA(title);
+      },
+    });
+    const results = await provider.fetchResults();
+    expect(results.length).toBeGreaterThan(0); // Group A は取れる
+  });
+});
+
+describe('withWikipediaPrimaryResults（Wikipedia主合成）', () => {
+  const base: ResultProvider & MatchEventProvider = {
+    fetchResults: async () => [
+      {
+        dateEvent: '2026-06-20',
+        homeName: 'Germany',
+        awayName: 'Ivory Coast',
+        homeScore: 2,
+        awayScore: 1,
+        finished: true,
+        externalEventId: '9',
+      },
+    ],
+    fetchMatchEvents: async () => [],
+  };
+
+  it('Wikipedia と base を union し source を付与する', async () => {
+    const wiki = createWikipediaMatchEventProvider({ fetchWikitext: onlyGroupA });
+    const merged = await withWikipediaPrimaryResults(base, wiki).fetchResults();
+    expect(merged.some((r) => r.source === 'thesportsdb' && r.homeName === 'Germany')).toBe(true);
+    expect(merged.some((r) => r.source === 'wikipedia')).toBe(true);
+  });
+
+  it('Wikipedia fetchResults が落ちても base のみで継続', async () => {
+    const wiki = {
+      fetchResults: async (): Promise<NormalizedResult[]> => {
+        throw new Error('wiki down');
+      },
+      fetchMatchEvents: async (): Promise<NormalizedMatchEvent[]> => [],
+      fetchFallbackResults: async (): Promise<NormalizedResult[]> => [],
+    };
+    const merged = await withWikipediaPrimaryResults(base, wiki).fetchResults();
+    expect(merged).toHaveLength(1);
+    expect(merged.every((r) => r.source === 'thesportsdb')).toBe(true);
   });
 });

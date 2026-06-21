@@ -439,9 +439,12 @@ async function defaultFetchWikitext(articleTitle: string): Promise<string | null
  * グループステージのみ対応。記事は run 中グループ単位でキャッシュし、6試合分を1フェッチで賄う。
  * 該当試合が見つからない/解析できない場合は空を返し、呼び出し側のフォールバックに委ねる。
  */
+/** グループステージの全 12 組（fetchResults の走査対象）。 */
+const GROUP_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'] as const;
+
 export function createWikipediaMatchEventProvider(
   options: WikipediaProviderOptions = {},
-): MatchEventProvider & ResultFallbackProvider {
+): MatchEventProvider & ResultFallbackProvider & ResultProvider {
   const fetchWikitext = options.fetchWikitext ?? defaultFetchWikitext;
   // グループ文字 → 解析済み試合一覧（run 内キャッシュ。同グループの複数試合で再フェッチしない）。
   const cache = new Map<string, WikiMatch[]>();
@@ -456,6 +459,34 @@ export function createWikipediaMatchEventProvider(
   }
 
   return {
+    async fetchResults(): Promise<NormalizedResult[]> {
+      // 全 12 組の記事から score の入った（=終了した）試合を結果として返す（主ソース用途）。
+      // 日付は記事から取らないため dateEvent は空＝reconcile はペアのみで一意化する
+      // （グループ内では同一ペアは1試合なので衝突しない）。組ごと try/catch で1組失敗を局所化。
+      const out: NormalizedResult[] = [];
+      for (const letter of GROUP_LETTERS) {
+        try {
+          const groupMatches = await getGroupMatches(letter);
+          for (const match of groupMatches) {
+            if (!match.score) continue;
+            out.push({
+              dateEvent: '',
+              homeName: match.team1Code,
+              awayName: match.team2Code,
+              homeScore: match.score.team1,
+              awayScore: match.score.team2,
+              finished: true,
+              externalEventId: null,
+              source: 'wikipedia',
+            });
+          }
+        } catch (error) {
+          console.error('[ingest] Wikipedia fetchResults failed for group', letter, error);
+        }
+      }
+      return out;
+    },
+
     async fetchMatchEvents(context: MatchEventContext): Promise<NormalizedMatchEvent[]> {
       // グループステージのみ対応。決勝Tや文脈不足は空でフォールバックさせる。
       if (context.stage !== 'group_stage' || !context.groupLetter) return [];
@@ -535,6 +566,46 @@ export function withWikipediaEvents(
     },
     // 結果フォールバック（T-82③）は Wikipedia に委譲する。base（TheSportsDB）が確定できなかった
     // 試合だけを run 層が targets として渡すため、主ソース優先は保たれる。
+    fetchFallbackResults: (targets: FallbackResultTarget[]): Promise<NormalizedResult[]> =>
+      wiki.fetchFallbackResults(targets),
+  };
+}
+
+/**
+ * 「Wikipedia をグループ結果の主ソースにする」合成 provider（INGEST_RESULTS_SOURCE=wikipedia 用）。
+ *
+ * - fetchResults: Wikipedia（全12組・完全）と TheSportsDB（決勝T含む全体）を union して返す。
+ *   各結果に source を付け、reconcile が試合単位で **グループ戦は Wikipedia を優先**する
+ *   （TheSportsDB が取りこぼした/古いグループ結果も Wikipedia が埋める）。
+ * - Wikipedia の fetchResults が落ちたら TheSportsDB のみで継続（取込全体は止めない）。
+ * - イベントは従来どおり Wikipedia 優先（得点者/カードの完全性）。
+ * - fetchFallbackResults は安全網として Wikipedia に委譲（変更なし）。
+ */
+export function withWikipediaPrimaryResults(
+  base: ResultProvider & MatchEventProvider,
+  wiki: MatchEventProvider & ResultFallbackProvider & ResultProvider,
+): ResultProvider & MatchEventProvider & ResultFallbackProvider {
+  return {
+    async fetchResults(): Promise<NormalizedResult[]> {
+      let wikiResults: NormalizedResult[] = [];
+      try {
+        wikiResults = (await wiki.fetchResults()).map((r) => ({ ...r, source: 'wikipedia' as const }));
+      } catch (error) {
+        console.error('[ingest] Wikipedia primary results failed, using base only', error);
+      }
+      const baseResults = (await base.fetchResults()).map((r) => ({ ...r, source: 'thesportsdb' as const }));
+      // 両方渡す。試合単位の採否（グループは Wikipedia 勝ち）は reconcile.planMatchUpdates が決める。
+      return [...baseResults, ...wikiResults];
+    },
+    async fetchMatchEvents(context: MatchEventContext): Promise<NormalizedMatchEvent[]> {
+      try {
+        const events = await wiki.fetchMatchEvents(context);
+        if (events.length > 0) return events;
+      } catch (error) {
+        console.error('[ingest] Wikipedia events failed, falling back to base', error);
+      }
+      return base.fetchMatchEvents(context);
+    },
     fetchFallbackResults: (targets: FallbackResultTarget[]): Promise<NormalizedResult[]> =>
       wiki.fetchFallbackResults(targets),
   };
