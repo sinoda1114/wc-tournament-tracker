@@ -13,6 +13,7 @@ import {
   updateMatchEvent,
 } from '@/db/match-events';
 import { updateMatchResult, type UpdateMatchResultInput } from '@/db/queries';
+import { resolveAndPersistRoundOf32 } from '@/db/queries/round-of-32';
 import { isAdmin } from '@/lib/auth';
 import { STAGE_LABELS } from '@/lib/crowd';
 import { requireVoterId } from '@/lib/voter';
@@ -36,7 +37,17 @@ export async function updateAdminMatchAction(input: UpdateMatchResultInput) {
 
   try {
     await updateMatchResult(parsed.data);
+    // ゲート1（T-105）: 結果が変わったら、順位クリンチ（数学的確定）で R32 入口を即解決する。
+    // ingest 経路（lib/ingest/run.ts）と同じ流儀＝冪等・best-effort。手入力でも
+    // グループ順位の確定が決勝T表へ即反映されるようにする（経路間で挙動を揃える）。
+    // R32 解決の失敗はスコア保存の成功を覆さない（ログのみ）。
+    try {
+      await resolveAndPersistRoundOf32();
+    } catch (error) {
+      console.error('[admin] R32 入口解決に失敗', error);
+    }
     revalidatePath('/');
+    revalidatePath('/groups');
     revalidatePath('/prediction');
     revalidatePath(`/matches/${input.matchId}`);
     revalidatePath('/admin');
