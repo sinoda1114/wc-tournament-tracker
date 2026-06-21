@@ -33,6 +33,12 @@ type GroupCardProps = {
    * confirmed が false の間は参照されない。
    */
   thirdPlaceQualified?: boolean;
+  /**
+   * 決勝T進出が「数学的に確定（クリンチ）」したチームの id 集合（T-105）。
+   * 1-2位の突破はグループ完了を待たず、確定した瞬間にこの集合へ入り緑になる。
+   * 3位通過枠は他組比較が要るので従来どおり confirmed（全組消化後）でのみ着色する。
+   */
+  clinchedTeamIds?: ReadonlySet<string>;
 };
 
 function teamLookup(teams: Team[]): Map<string, Team> {
@@ -46,6 +52,7 @@ export function GroupCard({
   standingsMatches,
   confirmed = false,
   thirdPlaceQualified = false,
+  clinchedTeamIds,
 }: GroupCardProps) {
   const { locale, dict } = useI18n();
   const t = dict.standings;
@@ -90,6 +97,7 @@ export function GroupCard({
               locale={locale}
               confirmed={confirmed}
               thirdPlaceQualified={thirdPlaceQualified}
+              clinched={clinchedTeamIds?.has(row.teamId) ?? false}
             />
           ))}
         </tbody>
@@ -120,18 +128,20 @@ export function GroupCard({
 }
 
 /**
- * 行に付ける確定カラーのクラス（#33）。
- * - 未確定（confirmed=false）の間は空＝完全フラット（色なし）。
- * - 確定後: 1-2位＝進出（緑）、3位はベスト3位上位8なら進出（緑）、それ以外はフラット。
+ * 行に付ける進出カラーのクラス（#33 / T-105）。
+ * - 1-2位の突破は「数学的確定（クリンチ）」で着色＝グループ完了を待たない（clinched=true で緑）。
+ * - 3位はベスト3位上位8の判定が他組比較を要するため、従来どおり confirmed（全12組消化後）かつ
+ *   thirdPlaceQualified のときだけ緑。
+ * - それ以外はフラット（色なし）。
  */
-function confirmedRowClass(
+function advancingRowClass(
   position: number,
+  clinched: boolean,
   confirmed: boolean,
   thirdPlaceQualified: boolean,
 ): string {
-  if (!confirmed) return '';
-  if (position <= 2) return 'is-advancing';
-  if (position === 3 && thirdPlaceQualified) return 'is-advancing';
+  if (clinched) return 'is-advancing';
+  if (confirmed && position === 3 && thirdPlaceQualified) return 'is-advancing';
   return '';
 }
 
@@ -141,14 +151,16 @@ function StandingRow({
   locale,
   confirmed,
   thirdPlaceQualified,
+  clinched,
 }: {
   row: GroupStanding;
   team: Team | undefined;
   locale: Locale;
   confirmed: boolean;
   thirdPlaceQualified: boolean;
+  clinched: boolean;
 }) {
-  const rowClass = confirmedRowClass(row.position, confirmed, thirdPlaceQualified);
+  const rowClass = advancingRowClass(row.position, clinched, confirmed, thirdPlaceQualified);
   return (
     <tr className={`wc-standings-row ${rowClass}`.trim()}>
       <td>

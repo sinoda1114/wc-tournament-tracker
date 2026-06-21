@@ -47,7 +47,8 @@ export async function resolveAndPersistRoundOf32(): Promise<{ updated: number }>
     if (teams.length === 0) continue;
     const matches = await listGroupMatches(group);
     const standings = calculateGroupStandings(teams, matches);
-    groups.push({ group, standings });
+    // matches を渡すと 1位/2位 はクリンチ（数学的確定）で解決される（T-105・グループ完了を待たない）。
+    groups.push({ group, standings, matches });
   }
 
   // 2. R32 全試合のスロット（home/away 各 1）と現在値を取得。
