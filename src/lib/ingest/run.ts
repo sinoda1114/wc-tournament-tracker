@@ -194,16 +194,16 @@ export async function runIngestion(
     }
   }
 
-  // グループ結果が入ったら、順位表から R32 入口（home/away_team_id）を埋める。
-  // 冪等（確定済み・変化なしは 0 更新）。R32 解決の失敗は取込成功を覆さない。
+  // 順位表から R32 入口（home/away_team_id）を埋める。
+  // 毎 ingest で無条件に実行する（冪等＝確定済み・変化なしは 0 更新で軽量）。今回スコア更新が
+  // 無くても走らせる理由: クリンチ判定ロジックの更新やデータ揺れがあっても、次の cron で必ず
+  // 「順位確定 → R32 入口」へ収束させる（自己収束モデル）。R32 解決の失敗は取込成功を覆さない。
   let roundOf32Updated = 0;
-  if (matchIds.length > 0) {
-    try {
-      const r32 = await resolveAndPersistRoundOf32();
-      roundOf32Updated = r32.updated;
-    } catch (error) {
-      console.error('[ingest] R32 解決に失敗', error);
-    }
+  try {
+    const r32 = await resolveAndPersistRoundOf32();
+    roundOf32Updated = r32.updated;
+  } catch (error) {
+    console.error('[ingest] R32 解決に失敗', error);
   }
 
   // イベントタイムライン同期（任意機能）。

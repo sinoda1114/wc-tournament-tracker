@@ -115,6 +115,9 @@ describe('runIngestion', () => {
     expect(summary.planned).toBe(0);
     expect(summary.updated).toBe(0);
     expect(updateMatchResult).not.toHaveBeenCalled();
+    // スコア更新が無くても R32 入口解決は毎回走る（自己収束モデル）。
+    // ロジック更新やデータ揺れがあっても次の ingest で順位確定→R32 へ収束させるため。
+    expect(resolveAndPersistRoundOf32).toHaveBeenCalledTimes(1);
   });
 
   it('部分失敗: 1 件が throw しても残りは継続し、failures に集約する', async () => {
