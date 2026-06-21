@@ -7,6 +7,13 @@ import { resolveLocale } from '@/lib/i18n/server';
 
 export const dynamic = 'force-dynamic';
 
+const ROOT_OG_IMAGE = {
+  url: '/opengraph-image.png',
+  width: 1200,
+  height: 630,
+  alt: 'MatchFav（マッチファボ）',
+};
+
 /**
  * 既定ロケール（ja）トップの metadata。ロケール別 title/description＋
  * hreflang（全ロケール＋x-default=ja）を出す。ja は `/`（プレフィックス無し）。
@@ -29,8 +36,14 @@ export async function generateMetadata(): Promise<Metadata> {
       description,
       url: alternates.canonical,
       locale: ogLocale(locale),
+      images: [ROOT_OG_IMAGE],
     },
-    twitter: { title, description },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [ROOT_OG_IMAGE.url],
+    },
   };
 }
 
