@@ -14,6 +14,11 @@ export type NormalizedResult = {
   finished: boolean;
   /** 取得元の試合ID（イベントタイムライン取得用）。取得元が返さない場合は省略/null。 */
   externalEventId?: string | null;
+  /**
+   * この結果の取得元。複数ソースを union したとき、reconcile が試合単位で優先順位を
+   * 決めるのに使う（グループ戦は Wikipedia を優先＝公式に近く完全）。未指定なら無印。
+   */
+  source?: 'wikipedia' | 'thesportsdb';
 };
 
 /**

@@ -5,7 +5,11 @@ import { notifyDiscordHealth } from '@/lib/ingest/health-notification';
 import { runIngestion } from '@/lib/ingest/run';
 import { runDataAudit } from '@/lib/ingest/run-audit';
 import { createTheSportsDbProvider } from '@/lib/ingest/thesportsdb';
-import { createWikipediaMatchEventProvider, withWikipediaEvents } from '@/lib/ingest/wikipedia';
+import {
+  createWikipediaMatchEventProvider,
+  withWikipediaEvents,
+  withWikipediaPrimaryResults,
+} from '@/lib/ingest/wikipedia';
 
 type IngestMode = 'full' | 'hot';
 
@@ -46,14 +50,17 @@ function revalidateIngestedPaths(summary: Awaited<ReturnType<typeof runIngestion
 }
 
 /**
- * スコア/日程は TheSportsDB、イベント・結果補完は Wikipedia 優先の合成 provider。
+ * 取込 provider を組み立てる。`INGEST_RESULTS_SOURCE` で結果の主ソースを切替える:
+ *  - 'wikipedia' … グループ結果を Wikipedia 主に（TheSportsDB は決勝T含む補助＋相互チェック）。
+ *  - 未設定/その他 … 従来どおり TheSportsDB 主・Wikipedia は補完（既定・revert 経路）。
  * `dates` 指定時は TheSportsDB 側の取得日だけを絞り、ホット取込で過剰フェッチを避ける。
  */
 function createIngestProvider(dates?: string[]) {
-  return withWikipediaEvents(
-    createTheSportsDbProvider(dates ? { dates } : undefined),
-    createWikipediaMatchEventProvider(),
-  );
+  const tsdb = createTheSportsDbProvider(dates ? { dates } : undefined);
+  const wiki = createWikipediaMatchEventProvider();
+  return process.env.INGEST_RESULTS_SOURCE === 'wikipedia'
+    ? withWikipediaPrimaryResults(tsdb, wiki)
+    : withWikipediaEvents(tsdb, wiki);
 }
 
 export async function handleIngestRequest(request: Request, options: HandleIngestOptions) {

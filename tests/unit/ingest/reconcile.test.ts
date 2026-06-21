@@ -188,3 +188,36 @@ describe('planMatchUpdates', () => {
     ]);
   });
 });
+
+describe('planMatchUpdates（ソース優先・空日付）', () => {
+  it('グループ戦は Wikipedia(source) が TheSportsDB を上書きする', () => {
+    const matches = [match({ id: 1, homeTeamId: 'mex', awayTeamId: 'rsa' })];
+    const tsdb = result({ source: 'thesportsdb', homeScore: 1, awayScore: 1 });
+    const wiki = result({ source: 'wikipedia', dateEvent: '', homeScore: 2, awayScore: 0 });
+    // 順序に依らず Wikipedia が勝つ（毎 run の入れ替わり防止）。
+    expect(planMatchUpdates([tsdb, wiki], matches, teams)).toEqual([
+      { matchId: 1, homeScore: 2, awayScore: 0, status: 'finished' },
+    ]);
+    expect(planMatchUpdates([wiki, tsdb], matches, teams)).toEqual([
+      { matchId: 1, homeScore: 2, awayScore: 0, status: 'finished' },
+    ]);
+  });
+
+  it('Wikipedia と DB が同点なら冪等（優先選択後に冪等判定）', () => {
+    const matches = [
+      match({ id: 1, homeTeamId: 'mex', awayTeamId: 'rsa', status: 'finished', homeScore: 2, awayScore: 0 }),
+    ];
+    const tsdb = result({ source: 'thesportsdb', homeScore: 1, awayScore: 1 }); // 古い別ソース値
+    const wiki = result({ source: 'wikipedia', dateEvent: '', homeScore: 2, awayScore: 0 }); // DBと一致
+    // Wikipedia 優先で選ばれ、DB と一致するので更新ゼロ（TheSportsDB の差分で上書きされない）。
+    expect(planMatchUpdates([tsdb, wiki], matches, teams)).toEqual([]);
+  });
+
+  it('空 dateEvent はチームペアのみで突き合う（日付が未来でも一致）', () => {
+    const matches = [match({ id: 1, homeTeamId: 'mex', awayTeamId: 'rsa', matchDate: '2026-06-24' })];
+    const wiki = result({ source: 'wikipedia', dateEvent: '', homeScore: 2, awayScore: 0 });
+    expect(planMatchUpdates([wiki], matches, teams)).toEqual([
+      { matchId: 1, homeScore: 2, awayScore: 0, status: 'finished' },
+    ]);
+  });
+});

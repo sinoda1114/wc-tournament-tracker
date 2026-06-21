@@ -53,7 +53,13 @@ function findClosestMatch(
   awayId: string,
   dateEvent: string,
 ): ReconcileMatch | null {
-  const candidates = (byPair.get(pairKey(homeId, awayId)) ?? [])
+  const all = byPair.get(pairKey(homeId, awayId)) ?? [];
+  // 日付が無い結果（Wikipedia 主ソースは記事から日付を取らない）はペアのみで一意化する。
+  // グループ内では同一ペアは1試合なので衝突しない。稀な決勝T再戦を避けるため group を優先。
+  if (!dateEvent) {
+    return all.find((m) => m.stage === 'group_stage') ?? all[0] ?? null;
+  }
+  const candidates = all
     .map((m) => ({ m, diff: dayDiff(m.matchDate, dateEvent) }))
     .filter((c) => c.diff <= DATE_TOLERANCE_DAYS)
     .sort((x, y) => x.diff - y.diff);
@@ -76,7 +82,12 @@ export function planMatchUpdates(
 ): UpdateMatchResultInput[] {
   const byPair = buildPairIndex(matches);
 
-  const updates: UpdateMatchResultInput[] = [];
+  // 試合単位で1件に絞る。複数ソースが同一試合に異なるスコアを返しても、
+  // 先にソース優先で1件を選び（グループ戦は Wikipedia 勝ち）、その後に冪等判定する。
+  // 順序やソース欠落（冪等スキップ）で run ごとに値が入れ替わる現象を防ぐ。
+  type Candidate = { match: ReconcileMatch; ourHome: number; ourAway: number; source?: string };
+  const chosen = new Map<number, Candidate>();
+
   for (const r of results) {
     if (!r.finished) continue;
 
@@ -95,15 +106,24 @@ export function planMatchUpdates(
     // 決勝Tの同点は PK 決着で、スコアだけでは勝者不明 → 手入力フォールバックに委ねる。
     if (ourHome === ourAway && m.stage !== 'group_stage') continue;
 
-    // 冪等: 既に同じ確定結果なら更新不要。
-    if (m.status === 'finished' && m.homeScore === ourHome && m.awayScore === ourAway) {
+    const candidate: Candidate = { match: m, ourHome, ourAway, source: r.source };
+    const existing = chosen.get(m.id);
+    // 既存が無ければ採用。グループ戦で Wikipedia が来たら他ソースより優先（上書き）。
+    const wikipediaWins =
+      m.stage === 'group_stage' && candidate.source === 'wikipedia' && existing?.source !== 'wikipedia';
+    if (!existing || wikipediaWins) chosen.set(m.id, candidate);
+  }
+
+  const updates: UpdateMatchResultInput[] = [];
+  for (const c of chosen.values()) {
+    // 冪等: 既に同じ確定結果なら更新不要（優先選択の後に判定するのが要点）。
+    if (c.match.status === 'finished' && c.match.homeScore === c.ourHome && c.match.awayScore === c.ourAway) {
       continue;
     }
-
     updates.push({
-      matchId: m.id,
-      homeScore: ourHome,
-      awayScore: ourAway,
+      matchId: c.match.id,
+      homeScore: c.ourHome,
+      awayScore: c.ourAway,
       status: 'finished',
     });
   }
@@ -146,7 +166,7 @@ export function planMatchEventSyncs(
 
   const syncs: MatchEventSync[] = [];
   for (const r of results) {
-    if (!r.finished || !r.externalEventId) continue;
+    if (!r.finished) continue;
 
     const homeId = resolveTeamId(r.homeName, teams);
     const awayId = resolveTeamId(r.awayName, teams);
@@ -154,11 +174,15 @@ export function planMatchEventSyncs(
 
     const m = findClosestMatch(byPair, homeId, awayId, r.dateEvent);
     if (!m || seen.has(m.id)) continue;
+
+    // グループ戦は Wikipedia が stage/group/コードで特定するため externalEventId 不要。
+    // それ以外（決勝T等の TheSportsDB タイムライン）は externalEventId が無ければ同期できない。
+    if (!r.externalEventId && m.stage !== 'group_stage') continue;
     seen.add(m.id);
 
     syncs.push({
       matchId: m.id,
-      externalEventId: r.externalEventId,
+      externalEventId: r.externalEventId ?? '',
       homeTeamId: homeId,
       awayTeamId: awayId,
       // MatchEventContext: 取得元の home/away の向きで FIFAコード・stage・group を持つ。

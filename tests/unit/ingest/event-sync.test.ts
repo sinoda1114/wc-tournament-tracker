@@ -81,13 +81,23 @@ describe('planMatchEventSyncs', () => {
     expect(plans).toHaveLength(1);
   });
 
-  it('externalEventId の無い結果は対象外', () => {
-    const plans = planMatchEventSyncs(
-      [result({ externalEventId: null }), result({ externalEventId: undefined })],
+  it('externalEventId 無し: グループ戦は同期対象（Wikipedia主・id空）、決勝T等は対象外', () => {
+    // グループ戦は stage/group/コードで特定できるため externalEventId 不要（Wikipedia主の得点者対応）。
+    const groupPlans = planMatchEventSyncs(
+      [result({ externalEventId: null })],
       [matchRow(1, 'mex', 'rsa')],
       TEAMS,
     );
-    expect(plans).toEqual([]);
+    expect(groupPlans).toHaveLength(1);
+    expect(groupPlans[0].externalEventId).toBe('');
+
+    // 決勝T等は TheSportsDB タイムライン id が無いと同期できない＝対象外。
+    const koPlans = planMatchEventSyncs(
+      [result({ externalEventId: null })],
+      [matchRow(2, 'mex', 'rsa', { stage: 'round_of_32', groupLetter: null })],
+      TEAMS,
+    );
+    expect(koPlans).toEqual([]);
   });
 
   it('未終了の結果は対象外', () => {
