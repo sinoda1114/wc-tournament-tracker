@@ -11,6 +11,9 @@
  * （lib/third-place）でホスト試合に配る。本モジュールはこの解決を純関数で行い、
  * DB 反映は呼び出し側（queries 等）に委ねる。
  */
+import type { Match } from '@/db/queries';
+
+import { clinchGroupQualification, type GroupClinch } from './clinch';
 import type { GroupStanding } from './standings';
 import {
   assignThirdPlaceSlots,
@@ -18,10 +21,18 @@ import {
   type GroupLetter,
 } from './third-place';
 
-/** 1グループ分の順位表（グループ識別子付き）。position 昇順である必要はない（内部で参照）。 */
+/**
+ * 1グループ分の順位表（グループ識別子付き）。position 昇順である必要はない（内部で参照）。
+ * `matches` を渡すと 1位/2位 の解決に「数学的確定（クリンチ）」を使う（グループ完了を待たず
+ * 確定した瞬間に埋める・T-105）。未指定なら従来どおりグループ完了をゲートにする（後方互換）。
+ */
 export type GroupStandingsEntry = {
   group: GroupLetter;
   standings: GroupStanding[];
+  matches?: readonly Pick<
+    Match,
+    'homeTeamId' | 'awayTeamId' | 'homeScore' | 'awayScore' | 'status'
+  >[];
 };
 
 /** position(1..4) のチームを取り出す。無ければ null。 */
@@ -140,8 +151,14 @@ export function resolveRoundOf32Assignments(
   groups: readonly GroupStandingsEntry[],
 ): SlotResolution[] {
   const standingsByGroup = new Map<GroupLetter, GroupStanding[]>();
-  for (const { group, standings } of groups) {
+  // matches を渡されたグループはクリンチ（数学的確定）で 1位/2位 を解決する。
+  const clinchByGroup = new Map<GroupLetter, Map<string, GroupClinch>>();
+  for (const { group, standings, matches } of groups) {
     standingsByGroup.set(group, standings);
+    if (matches) {
+      const teams = standings.map((s) => ({ id: s.teamId }));
+      clinchByGroup.set(group, clinchGroupQualification(teams, matches));
+    }
   }
 
   // 3位通過枠は全12組消化＋カットオフ確定後にのみ成立（他組比較が定まらないと割当不能）。
@@ -158,12 +175,30 @@ export function resolveRoundOf32Assignments(
     for (const a of thirdAssignment) thirdGroupByMatch.set(a.matchId, a.thirdPlaceGroup);
   }
 
-  /** そのグループが消化完了していれば position の teamId、未消化/未投入なら null。 */
-  function teamIdIfDecided(group: GroupLetter, position: number): string | null {
+  /** 完了グループの position の teamId。未完了なら null（3位枠や後方互換パス用）。 */
+  function teamIdIfGroupComplete(group: GroupLetter, position: number): string | null {
     const standings = standingsByGroup.get(group);
     if (!standings) return null;
     if (!isGroupComplete(standings)) return null;
     return teamAtPosition(standings, position)?.teamId ?? null;
+  }
+
+  /**
+   * position(1/2/3) の teamId を「確定していれば」返す。
+   * - 1位/2位: matches があればクリンチ（数学的確定）で解決＝グループ完了を待たない。
+   *   matches 無し（後方互換）はグループ完了をゲートにする。
+   * - 3位: 常にグループ完了の順位表から（3位枠は全消化＋カットオフ後にしか呼ばれない）。
+   */
+  function teamIdIfDecided(group: GroupLetter, position: number): string | null {
+    if (position === 3) return teamIdIfGroupComplete(group, 3);
+    const clinch = clinchByGroup.get(group);
+    if (clinch) {
+      for (const [teamId, c] of clinch) {
+        if (c.clinchedPosition === position) return teamId;
+      }
+      return null; // クリンチ未確定
+    }
+    return teamIdIfGroupComplete(group, position);
   }
 
   return slots.map(({ matchId, side, slot }) => {

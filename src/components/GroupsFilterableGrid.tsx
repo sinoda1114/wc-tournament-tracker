@@ -6,6 +6,7 @@ import { Stack, Text } from '@mantine/core';
 import { GroupCard } from '@/components/GroupCard';
 import type { MatchDetail, Team } from '@/db/queries';
 import { useFavoriteFilter, useFavoriteTeams } from '@/hooks/useFavoriteTeams';
+import { clinchGroupQualification } from '@/lib/clinch';
 import { useDictionary } from '@/lib/i18n/context';
 import {
   resolveThirdPlaceQualification,
@@ -52,8 +53,19 @@ export function GroupsFilterableGrid({ groupData }: GroupsFilterableGridProps) {
     return resolveThirdPlaceQualification(entries);
   }, [groupData]);
 
-  // 確定 = 3位判定が null でない（全組消化済み）こと。null=未確定の間は全カード フラット。
+  // 確定 = 3位判定が null でない（全組消化済み）こと。3位通過枠の着色のみこれをゲートにする。
   const confirmed = [...thirdPlaceQualified.values()].some((v) => v !== null);
+
+  // T-105: 1-2位の突破が「数学的に確定（クリンチ）」したチームの id 集合。
+  // グループ完了を待たず、確定した瞬間に緑になる（全組消化を待つ confirmed とは別系統）。
+  const clinchedTeamIds = useMemo(() => {
+    const ids = new Set<string>();
+    for (const g of groupData) {
+      const clinch = clinchGroupQualification(g.teams, g.standingsMatches ?? g.matches);
+      for (const [teamId, c] of clinch) if (c.clinchedTop2) ids.add(teamId);
+    }
+    return ids;
+  }, [groupData]);
 
   const activeFilter = filterReady && favReady && filterOn && favorites.size > 0;
   const visible = activeFilter
@@ -79,6 +91,7 @@ export function GroupsFilterableGrid({ groupData }: GroupsFilterableGridProps) {
           standingsMatches={g.standingsMatches}
           confirmed={confirmed}
           thirdPlaceQualified={thirdPlaceQualified.get(g.letter as GroupLetter) === true}
+          clinchedTeamIds={clinchedTeamIds}
         />
       ))}
     </div>
