@@ -7,6 +7,7 @@ import { DateFilterBar } from '@/components/DateFilterBar';
 import { FavoriteFilterToggle } from '@/components/FavoriteFilterToggle';
 import { GroupCard } from '@/components/GroupCard';
 import { getGroupTeams, listGroupMatches } from '@/db/queries';
+import { clinchGroupQualification } from '@/lib/clinch';
 import { filterMatchesByDates, parseDatesParam, parseQuickDayParam, resolveQuickDay } from '@/lib/date-filter';
 import { ogLocale } from '@/lib/i18n/alternates';
 import { getDictionary } from '@/lib/i18n/dictionary';
@@ -88,6 +89,13 @@ export default async function GroupDetailPage({ params, searchParams }: PageProp
   const filteredMatches = filterMatchesByDates(matches, selectedDates);
   const showEmptyDate = selectedDates.length > 0 && filteredMatches.length === 0;
 
+  // T-105: 一覧（/groups）と同様、1-2位の突破が数学的に確定（クリンチ）したチームを緑にする。
+  // 日付フィルターに依らず、順位判定は必ず全試合（matches）で行う。
+  const clinchedTeamIds = new Set<string>();
+  for (const [teamId, c] of clinchGroupQualification(teams, matches)) {
+    if (c.clinchedTop2) clinchedTeamIds.add(teamId);
+  }
+
   const dict = getDictionary(await resolveLocale());
   const heading = dict.groups.groupHeading.replace('{letter}', letter);
 
@@ -118,6 +126,7 @@ export default async function GroupDetailPage({ params, searchParams }: PageProp
               teams={teams}
               matches={filteredMatches}
               standingsMatches={matches}
+              clinchedTeamIds={clinchedTeamIds}
             />
           )}
         </div>
