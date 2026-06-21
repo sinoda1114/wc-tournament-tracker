@@ -116,7 +116,7 @@ export const ja = {
     historicalNoteLive: '緑色の得点は本大会（2026）での得点です。',
     historicalLiveHint: 'うち本大会（2026）で{n}得点（通算に含む）',
     colSpan: '出場',
-    showAllHistorical: '歴代ランキングを引き出す（全{total}名）',
+    showAllHistorical: '歴代ランキングを表示(上位{total}名)',
     allHistoricalScorersTitle: '歴代W杯通算得点ランキング（全{total}名）',
     activeBadge: '現役',
     activeBadgeAria: '2026大会に出場中',
