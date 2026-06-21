@@ -1089,7 +1089,10 @@ a {
 .wc-nav-favorites {
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
+  justify-content: center;
+  /* gap は付けない: 件数バッジが無いとき ::before（高さ確保用ゼロ幅スペース）と
+     星アイコンの間に gap が入り、星が右へ寄って見える不具合になるため。
+     件数バッジ側の margin-left で間隔を確保する（下記 .wc-nav-link-count）。 */
 }
 
 /* 中身がSVGだけだと文字バッジより背が低くなるため、ゼロ幅スペースで
@@ -1109,7 +1112,8 @@ a {
 .wc-nav-link-count {
   font-size: 0.75rem;
   color: var(--wc-muted);
-  margin-left: 0.1rem;
+  /* 旧 .wc-nav-favorites の gap(0.3rem) 相当を星アイコンとの間隔としてここで担保する。 */
+  margin-left: 0.3rem;
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.02em;
 }
