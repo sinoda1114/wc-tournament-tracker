@@ -639,6 +639,24 @@ export async function updateMatchResult(input: UpdateMatchResultInput) {
   return getMatchDetail(input.matchId);
 }
 
+/**
+ * キックオフ時刻を過ぎた試合を in_progress にマークする。
+ * スコア・勝者には触れない（scheduled → in_progress の最小遷移）。
+ * WHERE に status = 'scheduled' を含むため冪等。
+ */
+export async function markMatchesInProgress(matchIds: readonly number[]): Promise<number> {
+  if (matchIds.length === 0) return 0;
+  let marked = 0;
+  for (const id of matchIds) {
+    const result = await db().execute({
+      sql: `UPDATE matches SET status = 'in_progress', updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now') WHERE id = ? AND status = 'scheduled'`,
+      args: [id],
+    });
+    if ((result.rowsAffected ?? 0) > 0) marked++;
+  }
+  return marked;
+}
+
 function resolveWinnerTeamId(
   input: UpdateMatchResultInput,
   match: Pick<Match, 'homeTeamId' | 'awayTeamId'>,

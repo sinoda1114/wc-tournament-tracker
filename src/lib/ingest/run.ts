@@ -1,5 +1,5 @@
 import { replaceAutoMatchEvents } from '@/db/match-events';
-import { listAllTeams, listTournamentMatches, updateMatchResult } from '@/db/queries';
+import { listAllTeams, listTournamentMatches, markMatchesInProgress, updateMatchResult } from '@/db/queries';
 import { resolveAndPersistRoundOf32 } from '@/db/queries/round-of-32';
 
 import {
@@ -55,6 +55,8 @@ export type IngestionSummary = {
   roundOf32Updated: number;
   /** 補完ソース（Wikipedia）で確定できた試合数（T-82③）。provider 非対応時は 0。 */
   fallbackUpdated: number;
+  /** キックオフ時刻を過ぎて in_progress に遷移させた試合 id。 */
+  liveTransitioned: number[];
   /** イベントタイムライン同期の集約。provider 非対応時は全て 0。 */
   events: MatchEventsSummary;
 };
@@ -206,6 +208,24 @@ export async function runIngestion(
     console.error('[ingest] R32 解決に失敗', error);
   }
 
+  // キックオフ時刻を過ぎた scheduled 試合を in_progress に自動遷移。
+  // スコアには触れず status だけ更新する（markMatchesInProgress は scheduled のみ対象・冪等）。
+  // TheSportsDB がスコアを返した次の cron で finished に上書きされるため、試合中バッジの
+  // 最大表示時間 = cron 間隔（hot: 15分）程度。遷移の失敗は ingest 全体を止めない。
+  const liveTransitioned: number[] = [];
+  try {
+    const now = new Date();
+    const toTransition = matches
+      .filter((m) => m.status === 'scheduled' && m.kickoffAt !== null && new Date(m.kickoffAt) <= now)
+      .map((m) => m.id);
+    if (toTransition.length > 0) {
+      await markMatchesInProgress(toTransition);
+      liveTransitioned.push(...toTransition);
+    }
+  } catch (error) {
+    console.error('[ingest] in_progress 自動遷移に失敗', error);
+  }
+
   // イベントタイムライン同期（任意機能）。
   // - スコア更新と独立に計画する（手入力済み試合のイベント補完にも効く）。
   // - 空タイムラインは既存 auto を消さずスキップ（無料キーの欠落で蓄積を失わない）。
@@ -302,6 +322,7 @@ export async function runIngestion(
     failures,
     roundOf32Updated,
     fallbackUpdated,
+    liveTransitioned,
     events,
   };
 }
