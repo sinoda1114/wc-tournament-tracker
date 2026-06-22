@@ -18,14 +18,14 @@ type MatchCardProps = {
    * グループ別ビューのように見出しで所属が自明な場合のみ false を渡して冗長表示を抑止する。
    */
   showContextLabel?: boolean;
-  /** チーム名の表示形式。既定は正式名。グループカードなど狭い文脈では code を渡す。 */
+  /** チーム名の表示形式。既定は FIFA 3文字コード。 */
   teamNameMode?: MatchTeamNameMode;
 };
 
 export function MatchCard({
   match,
   showContextLabel = true,
-  teamNameMode = 'full',
+  teamNameMode = 'code',
 }: MatchCardProps) {
   const dict = useDictionary();
   const timeZone = useTimeZone();
