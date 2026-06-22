@@ -85,14 +85,14 @@ export function MatchCard({
             </span>
           </span>
           {/* 「予定(scheduled)」はバッジを出さない。終了/試合中のみ表示する。 */}
-          {match.status === 'finished' || match.status === 'in_progress' ? (
-            <Badge
-              variant="light"
-              size="sm"
-              color={match.status === 'finished' ? 'green' : 'yellow'}
-            >
-              {dict.match.status[match.status]}
+          {match.status === 'finished' ? (
+            <Badge variant="light" size="sm" color="green">
+              {dict.match.status.finished}
             </Badge>
+          ) : match.status === 'in_progress' ? (
+            <span className="wc-live-badge" aria-label={dict.match.status.in_progress}>
+              {dict.match.status.in_progress}
+            </span>
           ) : null}
         </div>
 

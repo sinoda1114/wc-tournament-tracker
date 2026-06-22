@@ -214,10 +214,12 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
                 {kickoff} {kickoffAbbrev}
               </Badge>
             ) : null}
-            {match.status !== 'scheduled' ? (
-              <Badge color={match.status === 'finished' ? 'green' : 'yellow'}>
-                {dict.match.status[match.status]}
-              </Badge>
+            {match.status === 'finished' ? (
+              <Badge color="green">{dict.match.status.finished}</Badge>
+            ) : match.status === 'in_progress' ? (
+              <span className="wc-live-badge wc-live-badge--lg" aria-label={dict.match.status.in_progress}>
+                {dict.match.status.in_progress}
+              </span>
             ) : null}
           </Group>
         </Stack>

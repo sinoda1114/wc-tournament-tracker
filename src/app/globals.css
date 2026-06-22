@@ -2228,6 +2228,47 @@ a {
   }
 }
 
+/* ===== 試合中バッジ（● 試合中）===== */
+/* 赤い点滅ドット＋テキストで「今やってる感」を演出。
+   リアルタイムスコアを提供しないため "LIVE" ではなく "試合中" を使う。
+   reduced-motion ではドットを静止させる（WCAG 2.2.2）。 */
+@keyframes wc-pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.35; transform: scale(0.75); }
+}
+.wc-live-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--mantine-color-red-6);
+  line-height: 1;
+}
+.wc-live-badge::before {
+  content: '';
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--mantine-color-red-6);
+  flex-shrink: 0;
+  animation: wc-pulse-dot 1.4s ease-in-out infinite;
+}
+/* 試合詳細ページ用の少し大きいサイズ */
+.wc-live-badge--lg {
+  font-size: 0.85rem;
+}
+.wc-live-badge--lg::before {
+  width: 9px;
+  height: 9px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .wc-live-badge::before {
+    animation: none;
+  }
+}
+
 /* ===== 未ログイン訪問者向けヒーロー（#37・トップのみ） ===== */
 /* 独立LPの代替。パレット変数でライト/ダーク両対応。 */
 .wc-mini-hero {
