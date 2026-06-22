@@ -117,7 +117,7 @@ export const ja = {
     historicalLiveHint: 'うち本大会（2026）で{n}得点（通算に含む）',
     colSpan: '出場',
     showAllHistorical: '歴代ランキングを表示(上位{total}名)',
-    allHistoricalScorersTitle: '歴代W杯通算得点ランキング（全{total}名）',
+    allHistoricalScorersTitle: '歴代W杯通算得点ランキング（上位{total}名）',
     activeBadge: '現役',
     activeBadgeAria: '2026大会に出場中',
     empty: 'まだ記録がありません。試合が進むと得点・カードがここに集計されます。',
