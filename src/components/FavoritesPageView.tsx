@@ -80,7 +80,6 @@ export function FavoritesPageView({ teams, matches }: FavoritesPageViewProps) {
                 return (
                   <li key={team.id} className="wc-favorite-list-item">
                     <CountryFlag fifaCode={team.fifaCode} size="sm" ariaLabel={name} />
-                    <span className="wc-favorite-list-name">{name}</span>
                     <span className="wc-favorite-list-code">{team.fifaCode}</span>
                     <button
                       type="button"

@@ -68,7 +68,7 @@ export function BracketMiniCard({ match, emphasized = false }: BracketMiniCardPr
         match={match}
         size="sm"
         showFavoriteStar={false}
-        nameMode={emphasized ? 'full' : 'code'}
+        nameMode="code"
       />
       {emphasized ? (
         <div style={{ textAlign: 'center', color: 'var(--wc-gold)', fontSize: '0.72rem' }}>
