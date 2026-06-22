@@ -2146,8 +2146,8 @@ a {
   justify-content: center;
   gap: 0.5rem;
   padding: 0.5rem 1rem;
-  background: var(--wc-accent-soft);
-  border-bottom: 1px solid var(--wc-border);
+  background: var(--wc-surface-elevated);
+  border-bottom: 1px solid var(--wc-accent);
   color: var(--wc-text);
   font-size: 0.82rem;
   line-height: 1.4;
