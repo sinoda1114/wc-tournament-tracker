@@ -28,9 +28,9 @@ type RankingsViewProps = {
   purchaseSlot?: ReactNode;
 };
 
-const PREVIEW_LIMIT = 20;
-/** 歴代ランキングは面積を取りすぎないよう本体は上位3名だけ。全件は引き出しドロワー（T-109）。 */
-const HISTORICAL_PREVIEW = 3;
+const PREVIEW_LIMIT = 10;
+/** 歴代ランキングは本体は上位5名。全件は引き出しドロワー（T-109）。 */
+const HISTORICAL_PREVIEW = 5;
 
 type TeamLike = { fifaCode: string | null; nameEn: string | null; nameJa: string | null };
 

@@ -109,7 +109,7 @@ export const en: Dictionary = {
     historicalLiveHint: '{n} of these scored at the 2026 tournament (included in the total)',
     colSpan: 'Editions',
     showAllHistorical: 'Open the all-time ranking (all {total})',
-    allHistoricalScorersTitle: 'All-time World Cup top scorers (all {total})',
+    allHistoricalScorersTitle: 'All-time World Cup top scorers (top {total})',
     activeBadge: 'Active',
     activeBadgeAria: 'Playing in the 2026 tournament',
     empty: 'No records yet. Goals and cards will be tallied here as matches are played.',
