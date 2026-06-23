@@ -116,7 +116,7 @@ export function mergeHistoricalScorers(
       country: h.country,
       fifaCode: h.fifaCode,
       goals: h.baseGoals + liveGoals,
-      span: h.span,
+      span: h.live2026 ? h.span.replace(/\d{4}$/, '2026') : h.span,
       active2026: Boolean(h.live2026),
       liveGoals2026: liveGoals,
     } satisfies ResolvedHistoricalScorer;
