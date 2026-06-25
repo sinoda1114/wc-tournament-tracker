@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import { Container, Divider, Group, Stack, Text, Title } from '@mantine/core';
 
 import { AdminMatchTable } from '@/components/AdminMatchTable';
+import { AdminR32Resolve } from '@/components/AdminR32Resolve';
 import { ButtonLink } from '@/components/RouterLink';
 import { AdminVoteReset } from '@/components/AdminVoteReset';
 import { listTournamentMatches } from '@/db/queries';
@@ -47,6 +48,19 @@ export default async function AdminPage() {
         </Stack>
 
         <AdminVoteReset />
+
+        <Divider my="sm" />
+
+        <Stack gap={4}>
+          <Title order={2} size="h3">
+            決勝Tスロット解決
+          </Title>
+          <Text c="dimmed">
+            グループが確定したのにブラケットに反映されていない場合に手動で実行します。
+          </Text>
+        </Stack>
+
+        <AdminR32Resolve />
       </Stack>
     </Container>
   );

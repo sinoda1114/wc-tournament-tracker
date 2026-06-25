@@ -37,7 +37,7 @@ function revalidateIngestedPaths(summary: Awaited<ReturnType<typeof runIngestion
     touchedMatchIds.add(matchId);
   }
 
-  if (summary.updated > 0 || summary.events.synced > 0 || summary.liveTransitioned.length > 0) {
+  if (summary.updated > 0 || summary.events.synced > 0 || summary.liveTransitioned.length > 0 || summary.roundOf32Updated > 0) {
     revalidatePath('/');
     revalidatePath('/groups');
     revalidatePath('/prediction');
