@@ -118,6 +118,24 @@ export async function resetMyCrowdVoteByStageAction(stage: string) {
   }
 }
 
+/** 決勝T（R32）のスロット（home/away_team_id）を今すぐ再解決する。所有者のみ。 */
+export async function resolveRoundOf32Action() {
+  if (!(await isAdmin())) {
+    return { ok: false as const, message: '管理者権限が必要です' };
+  }
+  try {
+    const { updated } = await resolveAndPersistRoundOf32();
+    revalidatePath('/');
+    revalidatePath('/groups');
+    revalidatePath('/prediction');
+    revalidatePath('/admin');
+    return { ok: true as const, updated };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'R32 解決に失敗しました';
+    return { ok: false as const, message };
+  }
+}
+
 /** 試合イベントを追加（手動・source='manual'）。所有者のみ。 */
 export async function createMatchEventAction(input: unknown) {
   if (!(await isAdmin())) {
