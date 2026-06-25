@@ -277,4 +277,45 @@ describe('resolveRoundOf32Assignments', () => {
     expect(thirds.length).toBeGreaterThan(0);
     expect(thirds.every((r) => r.teamId === null)).toBe(true);
   });
+
+  it('勝点+H2H同点でclinchedPosition=nullでも、グループ完了済みならstandingsのpositionで解決する', () => {
+    // BRA/MAR が同勝点(7pt)かつH2H引き分け(1-1)→ clinchがポジション確定できないが
+    // 得失点差でBRA(+6)> MAR(+3)なのでstandings.positionはBRA=1, MAR=2。
+    // グループ完了(全員played=3)なら teamIdIfGroupComplete フォールバックで正しく埋まること。
+    const finishedMatch = (
+      homeTeamId: string,
+      awayTeamId: string,
+      homeScore: number,
+      awayScore: number,
+    ) => ({ homeTeamId, awayTeamId, homeScore, awayScore, status: 'finished' as const });
+
+    const groupC: GroupStandingsEntry = {
+      group: 'C',
+      standings: [
+        { teamId: 'bra', played: 3, wins: 2, draws: 1, losses: 0, goalsFor: 7, goalsAgainst: 1, goalDifference: 6,  points: 7, position: 1 },
+        { teamId: 'mar', played: 3, wins: 2, draws: 1, losses: 0, goalsFor: 5, goalsAgainst: 2, goalDifference: 3,  points: 7, position: 2 },
+        { teamId: 'sco', played: 3, wins: 1, draws: 0, losses: 2, goalsFor: 2, goalsAgainst: 5, goalDifference: -3, points: 3, position: 3 },
+        { teamId: 'hai', played: 3, wins: 0, draws: 0, losses: 3, goalsFor: 0, goalsAgainst: 6, goalDifference: -6, points: 0, position: 4 },
+      ],
+      matches: [
+        finishedMatch('bra', 'mar', 1, 1), // BRA vs MAR: 1-1 → H2H同点
+        finishedMatch('bra', 'sco', 4, 0),
+        finishedMatch('bra', 'hai', 2, 0),
+        finishedMatch('mar', 'sco', 3, 0),
+        finishedMatch('mar', 'hai', 0, 0),
+        finishedMatch('sco', 'hai', 2, 0),
+      ],
+    };
+    // Group C のみを渡す（他グループはmatchesなし）
+    const otherGroups = ALL_GROUPS.filter((g) => g !== 'C').map((g) => groupStandings(g));
+    const result = resolveRoundOf32Assignments(R32_SLOTS, [groupC, ...otherGroups]);
+    const find = (matchId: number, side: 'home' | 'away') =>
+      result.find((r) => r.matchId === matchId && r.side === side)!;
+
+    // matchId=76 home: 'Group C winners' → bra
+    expect(find(76, 'home').teamId).toBe('bra');
+    // matchId=75 away: 'Group C runners-up' → mar
+    const runnersUp = result.find((r) => r.slot === 'Group C runners-up')!;
+    expect(runnersUp.teamId).toBe('mar');
+  });
 });
