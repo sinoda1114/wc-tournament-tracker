@@ -196,7 +196,8 @@ export function resolveRoundOf32Assignments(
       for (const [teamId, c] of clinch) {
         if (c.clinchedPosition === position) return teamId;
       }
-      return null; // クリンチ未確定
+      // clinchが確定できなくてもグループ完了済みならstandingsで解決（勝点+H2H同点時のGD等）
+      return teamIdIfGroupComplete(group, position);
     }
     return teamIdIfGroupComplete(group, position);
   }
