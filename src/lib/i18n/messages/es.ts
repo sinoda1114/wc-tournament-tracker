@@ -113,6 +113,11 @@ export const es: Dictionary = {
     activeBadge: 'En activo',
     activeBadgeAria: 'Juega en el Mundial 2026',
     empty: 'Aún no hay registros. Los goles y las tarjetas se contarán aquí a medida que se jueguen los partidos.',
+    cardPhaseW1: 'Fase de grupos',
+    cardPhaseW2: 'R32–Cuartos de final',
+    cardPhaseW3: 'Semifinales–Final',
+    cardPhaseCurrent: 'Actual',
+    cardPhaseNotStarted: 'Aún no ha comenzado',
   },
   header: {
     admin: 'Admin',

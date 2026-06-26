@@ -113,6 +113,11 @@ export const pt: Dictionary = {
     activeBadge: 'Em atividade',
     activeBadgeAria: 'Joga na Copa de 2026',
     empty: 'Ainda não há registros. Gols e cartões serão contabilizados aqui conforme as partidas forem disputadas.',
+    cardPhaseW1: 'Fase de grupos',
+    cardPhaseW2: 'R32–Quartas de final',
+    cardPhaseW3: 'Semifinais–Final',
+    cardPhaseCurrent: 'Atual',
+    cardPhaseNotStarted: 'Ainda não começou',
   },
   header: {
     admin: 'Admin',

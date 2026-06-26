@@ -121,6 +121,11 @@ export const ja = {
     activeBadge: '現役',
     activeBadgeAria: '2026大会に出場中',
     empty: 'まだ記録がありません。試合が進むと得点・カードがここに集計されます。',
+    cardPhaseW1: 'グループステージ',
+    cardPhaseW2: '決勝T〜準々決勝',
+    cardPhaseW3: '準決勝〜決勝',
+    cardPhaseCurrent: '現在',
+    cardPhaseNotStarted: 'まだ始まっていません',
   },
   header: {
     admin: '管理画面',

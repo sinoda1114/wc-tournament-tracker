@@ -112,6 +112,11 @@ export const zh: Dictionary = {
     activeBadge: '现役',
     activeBadgeAria: '正在参加 2026 世界杯',
     empty: '暂无记录。随着比赛进行，进球和红黄牌将在此汇总。',
+    cardPhaseW1: '小组赛',
+    cardPhaseW2: '32强至四分之一决赛',
+    cardPhaseW3: '半决赛至决赛',
+    cardPhaseCurrent: '当前',
+    cardPhaseNotStarted: '尚未开始',
   },
   header: {
     admin: '管理',
