@@ -113,6 +113,11 @@ export const en: Dictionary = {
     activeBadge: 'Active',
     activeBadgeAria: 'Playing in the 2026 tournament',
     empty: 'No records yet. Goals and cards will be tallied here as matches are played.',
+    cardPhaseW1: 'Group stage',
+    cardPhaseW2: 'R32–Quarter-finals',
+    cardPhaseW3: 'Semi-finals–Final',
+    cardPhaseCurrent: 'Current',
+    cardPhaseNotStarted: 'Not started yet',
   },
   header: {
     admin: 'Admin',

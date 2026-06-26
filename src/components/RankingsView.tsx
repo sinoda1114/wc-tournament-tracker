@@ -1,6 +1,7 @@
 'use client';
 
 import { Button, Container, Drawer, Stack, Table, Text, Title } from '@mantine/core';
+import Link from 'next/link';
 import { useState, type ReactNode } from 'react';
 
 import { CountryFlag } from '@/components/CountryFlag';
@@ -26,6 +27,10 @@ type RankingsViewProps = {
    * 直接 import せず、サーバー側（page）で生成して slot として受け取る。
    */
   purchaseSlot?: ReactNode;
+  /** 現在表示しているリセット窓（1=グループ / 2=決勝T〜QF / 3=SF〜Final）。 */
+  cardTargetWindow: number;
+  /** 大会が現在進行しているリセット窓の最大値（未到達フェーズをグレーアウトするために使う）。 */
+  cardActiveWindow: number;
 };
 
 const PREVIEW_LIMIT = 10;
@@ -203,11 +208,83 @@ function HistoricalTeamCell({ country, fifaCode }: { country: string; fifaCode: 
   );
 }
 
+const PHASE_WINDOWS = [1, 2, 3] as const;
+
+/** 累積カードのリセット窓切り替えタブ。 */
+function CardPhaseTabs({
+  targetWindow,
+  activeWindow,
+  t,
+}: {
+  targetWindow: number;
+  activeWindow: number;
+  t: Dictionary['rankings'];
+}) {
+  const phaseLabels: Record<number, string> = {
+    1: t.cardPhaseW1,
+    2: t.cardPhaseW2,
+    3: t.cardPhaseW3,
+  };
+
+  return (
+    <div className="wc-card-phase-tabs" role="tablist" aria-label={t.cardsTitle}>
+      {PHASE_WINDOWS.map((w) => {
+        const label = phaseLabels[w];
+        const isCurrent = w === targetWindow;
+        const isAvailable = w <= activeWindow;
+
+        if (!isAvailable) {
+          return (
+            <span
+              key={w}
+              className="wc-card-phase-tab wc-card-phase-tab--disabled"
+              aria-disabled="true"
+              title={t.cardPhaseNotStarted}
+            >
+              {label}
+            </span>
+          );
+        }
+
+        if (isCurrent) {
+          return (
+            <span
+              key={w}
+              className="wc-card-phase-tab wc-card-phase-tab--active"
+              role="tab"
+              aria-selected="true"
+            >
+              {label}
+              {w === activeWindow && (
+                <span className="wc-card-phase-tab-current">{t.cardPhaseCurrent}</span>
+              )}
+            </span>
+          );
+        }
+
+        return (
+          <Link
+            key={w}
+            href={`/rankings?w=${w}`}
+            className="wc-card-phase-tab wc-card-phase-tab--link"
+            role="tab"
+            aria-selected="false"
+          >
+            {label}
+          </Link>
+        );
+      })}
+    </div>
+  );
+}
+
 export function RankingsView({
   scorers,
   cards,
   historical,
   purchaseSlot,
+  cardTargetWindow,
+  cardActiveWindow,
 }: RankingsViewProps) {
   const { locale, dict } = useI18n();
   const t = dict.rankings;
@@ -440,6 +517,12 @@ export function RankingsView({
               <Title id="ranking-cards" order={2} size="h4" mb={4}>
                 {t.cardsTitle}
               </Title>
+              {/* フェーズ切り替えタブ（W1/W2/W3）。大会が進むと過去フェーズを振り返れる。 */}
+              <CardPhaseTabs
+                targetWindow={cardTargetWindow}
+                activeWindow={cardActiveWindow}
+                t={t}
+              />
               {/* カード規律（累積/リセット/退場）の注釈（WC2026 は警告リセットが2回）。 */}
               <Text c="dimmed" size="xs" mb="sm" className="wc-ranking-cards-note">
                 {t.cardsNote}

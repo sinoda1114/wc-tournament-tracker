@@ -27,16 +27,29 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function RankingsPage() {
-  const [events, matches] = await Promise.all([
+export default async function RankingsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ w?: string }>;
+}) {
+  const [events, matches, { w }] = await Promise.all([
     getRankingEvents(),
     listTournamentMatches(),
+    searchParams,
   ]);
 
   const scorers = aggregateScorers(events);
-  // カードのイエロー枚数は現在のリセット窓に属する分だけ数える（WC2026の累積リセット反映・T-101）。
-  // GL終了後・準々決勝終了後に窓が進むと、過去窓のイエローは集計から落ちる。
-  const cards = aggregateCards(events, currentResetWindow(matches));
+
+  // 大会が現在どの窓まで進んでいるか（W1〜W3）。
+  const activeWindow = currentResetWindow(matches);
+
+  // ?w=1|2|3 で過去フェーズの累積カードを振り返れる。範囲外・未指定は現在の窓にフォールバック。
+  const requestedWindow = Number(w);
+  const targetWindow =
+    requestedWindow >= 1 && requestedWindow <= 3 ? requestedWindow : activeWindow;
+
+  // カードのイエロー枚数は targetWindow に属する分だけ数える（WC2026の累積リセット反映・T-101）。
+  const cards = aggregateCards(events, targetWindow);
 
   // 歴代W杯通算得点ランキング（T-109）。静的ベース（〜2022確定）に、現役選手の2026ライブ得点
   // （上の scorers＝同じDB集計）を加算して通算を自動更新する。外部API・手動更新なし。
@@ -72,6 +85,8 @@ export default async function RankingsPage() {
       cards={cardsWithSuspension}
       historical={historical}
       purchaseSlot={<EarlyBirdPurchase locale={locale} dict={dict} />}
+      cardTargetWindow={targetWindow}
+      cardActiveWindow={activeWindow}
     />
   );
 }
