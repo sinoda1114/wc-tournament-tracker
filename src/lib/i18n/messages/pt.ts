@@ -100,6 +100,7 @@ export const pt: Dictionary = {
     showAllScorers: 'Ver toda a artilharia ({total})',
     showAllCards: 'Ver todos os cartões acumulados ({total})',
     showAllCountryCards: 'Ver todas as {total} seleções',
+    showAllCountryGoals: 'Ver todas as {total} seleções',
     allScorersTitle: 'Artilharia completa',
     allCardsTitle: 'Todos os cartões',
     allRowsMeta: 'Mostrando todos os {total} registros.',
