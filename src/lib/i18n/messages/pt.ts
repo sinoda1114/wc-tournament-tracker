@@ -115,6 +115,8 @@ export const pt: Dictionary = {
     empty: 'Ainda não há registros. Gols e cartões serão contabilizados aqui conforme as partidas forem disputadas.',
     chartGoalsByCountry: 'Gols por seleção',
     chartCardsByStage: 'Cartões acumulados por fase',
+    chartCardsByCountry: 'Cartões por seleção',
+    showAllCountryCards: 'Ver todas as {total} seleções',
     stageGroupStage: 'Fase de grupos',
     stageR32: 'R32',
     stageR16: 'R16',

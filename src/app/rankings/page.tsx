@@ -8,7 +8,7 @@ import { mergeHistoricalScorers } from '@/lib/historical-scorers';
 import { ogLocale } from '@/lib/i18n/alternates';
 import { getDictionary } from '@/lib/i18n/dictionary';
 import { resolveLocale } from '@/lib/i18n/server';
-import { aggregateCards, aggregateCardsByStage, aggregateCountryGoals, aggregateScorers, currentResetWindow, playerTeamKey } from '@/lib/rankings';
+import { aggregateCards, aggregateCountryCards, aggregateScorers, currentResetWindow, playerTeamKey } from '@/lib/rankings';
 import { computeSuspensions, type SuspensionFixture } from '@/lib/suspensions';
 
 // 試合結果・カードが入るたびに集計が変わるので毎回最新を出す。
@@ -54,8 +54,6 @@ export default async function RankingsPage({
   // 歴代W杯通算得点ランキング（T-109）。静的ベース（〜2022確定）に、現役選手の2026ライブ得点
   // （上の scorers＝同じDB集計）を加算して通算を自動更新する。外部API・手動更新なし。
   const historical = mergeHistoricalScorers(scorers);
-  const countryGoals = aggregateCountryGoals(scorers);
-  const cardsByStage = aggregateCardsByStage(events);
 
   // 出場停止を算出してカード行に合流（pending=🚫 / served=「消化済み」注記で表示）。
   const fixtures: SuspensionFixture[] = matches.map((m) => ({
@@ -86,8 +84,7 @@ export default async function RankingsPage({
       scorers={scorers}
       cards={cardsWithSuspension}
       historical={historical}
-      countryGoals={countryGoals}
-      cardsByStage={cardsByStage}
+      countryCards={aggregateCountryCards(cardsWithSuspension)}
       purchaseSlot={<EarlyBirdPurchase locale={locale} dict={dict} />}
       cardTargetWindow={targetWindow}
       cardActiveWindow={activeWindow}

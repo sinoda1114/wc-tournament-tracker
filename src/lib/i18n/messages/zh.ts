@@ -114,6 +114,8 @@ export const zh: Dictionary = {
     empty: '暂无记录。随着比赛进行，进球和红黄牌将在此汇总。',
     chartGoalsByCountry: '各国进球数',
     chartCardsByStage: '各阶段累计牌数',
+    chartCardsByCountry: '各国牌数',
+    showAllCountryCards: '查看全部 {total} 支球队',
     stageGroupStage: '小组赛',
     stageR32: 'R32',
     stageR16: 'R16',
