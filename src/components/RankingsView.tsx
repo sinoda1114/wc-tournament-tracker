@@ -231,20 +231,17 @@ function CountryCardChart({ data, t, title, locale }: { data: CountryCardStat[];
               </div>
               <div className="wc-chart-bar-wrap">
                 <div className="wc-chart-bar-stacked" aria-hidden>
-                  <div
-                    className="wc-chart-bar wc-chart-bar--yellow"
-                    style={{ width: `${(c.yellow / max) * 100}%` }}
-                  />
-                  <div
-                    className="wc-chart-bar wc-chart-bar--red"
-                    style={{ width: `${(c.red / max) * 100}%` }}
-                  />
+                  {c.yellow > 0 && (
+                    <div className="wc-chart-bar wc-chart-bar--yellow" style={{ width: `${(c.yellow / max) * 100}%` }}>
+                      <span className="wc-chart-bar-label">{c.yellow}</span>
+                    </div>
+                  )}
+                  {c.red > 0 && (
+                    <div className="wc-chart-bar wc-chart-bar--red" style={{ width: `${(c.red / max) * 100}%` }}>
+                      <span className="wc-chart-bar-label wc-chart-bar-label--red">{c.red}</span>
+                    </div>
+                  )}
                 </div>
-                <span className="wc-chart-bar-counts" aria-hidden>
-                  {c.yellow > 0 && <span className="wc-chart-bar-count--yellow">{c.yellow}</span>}
-                  {c.yellow > 0 && c.red > 0 && <span className="wc-chart-bar-sep">·</span>}
-                  {c.red > 0 && <span className="wc-chart-bar-count--red">{c.red}</span>}
-                </span>
               </div>
             </div>
           );

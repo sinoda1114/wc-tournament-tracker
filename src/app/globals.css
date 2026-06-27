@@ -2416,9 +2416,10 @@ a {
   align-items: center;
   gap: 0.4rem;
 }
-/* ===== 国別得点グラフ / ステージ別カードグラフ（T-117 / T-118）===== */
+/* ===== 国別カードグラフ（T-118）===== */
 .wc-chart {
   margin-top: 0.75rem;
+  max-width: 26rem;
 }
 .wc-chart-rows {
   display: flex;
@@ -2427,13 +2428,13 @@ a {
 }
 .wc-chart-row {
   display: grid;
-  grid-template-columns: 9rem 1fr;
+  grid-template-columns: 8rem 1fr;
   align-items: center;
   gap: 0.5rem;
 }
 @media (max-width: 480px) {
   .wc-chart-row {
-    grid-template-columns: 6.5rem 1fr;
+    grid-template-columns: 6rem 1fr;
   }
 }
 .wc-chart-label {
@@ -2450,25 +2451,13 @@ a {
 .wc-chart-bar-wrap {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
   min-width: 0;
-}
-/* 単色バー（得点） */
-.wc-chart-bar {
-  height: 0.85rem;
-  border-radius: 2px;
-  min-width: 2px;
-  flex-shrink: 0;
-  transition: width 0.3s ease;
-}
-.wc-chart-bar--goals {
-  background: var(--mantine-color-blue-5, #339af0);
 }
 /* 積み上げ（黄/赤カード）*/
 .wc-chart-bar-stacked {
   display: flex;
-  height: 0.85rem;
-  border-radius: 2px;
+  height: 1.15rem;
+  border-radius: 3px;
   overflow: hidden;
   flex: 1;
   min-width: 0;
@@ -2476,23 +2465,33 @@ a {
 .wc-chart-bar--yellow {
   background: #eab308;
   height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  overflow: hidden;
+  flex-shrink: 0;
+  transition: width 0.3s ease;
 }
 .wc-chart-bar--red {
   background: #dc2626;
   height: 100%;
-}
-.wc-chart-bar-counts {
   display: flex;
   align-items: center;
-  gap: 0.2rem;
+  justify-content: flex-end;
+  overflow: hidden;
   flex-shrink: 0;
-  font-size: 0.72rem;
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
+  transition: width 0.3s ease;
 }
-.wc-chart-bar-count--yellow { color: #b45309; font-weight: 700; }
-.wc-chart-bar-count--red    { color: #dc2626; font-weight: 700; }
-.wc-chart-bar-sep           { color: var(--wc-text-sub, #6b7280); }
+.wc-chart-bar-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  line-height: 1;
+  padding: 0 3px;
+  white-space: nowrap;
+  color: rgba(0, 0, 0, 0.75);
+  pointer-events: none;
+}
+.wc-chart-bar-label--red { color: rgba(255, 255, 255, 0.92); }
 .wc-chart-legend {
   display: flex;
   align-items: center;
