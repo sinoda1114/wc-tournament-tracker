@@ -2419,7 +2419,7 @@ a {
 /* ===== 国別カードグラフ（T-118）===== */
 .wc-chart {
   margin-top: 0.75rem;
-  max-width: 26rem;
+  max-width: 38rem;
 }
 .wc-chart-rows {
   display: flex;
