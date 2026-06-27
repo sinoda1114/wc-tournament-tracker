@@ -55,6 +55,7 @@ export type TeamSquad = {
   team: Team;
   coach: Coach | null;
   players: SquadPlayer[];
+  fifaRank: number | null;
 };
 
 export type VenueRoofType = 'retractable' | 'translucent' | 'open';
@@ -488,7 +489,7 @@ export async function getGroupTeams(group: string): Promise<Team[]> {
 export async function getTeamSquad(fifaCode: string): Promise<TeamSquad | null> {
   const teamResult = await db().execute({
     sql: `
-      SELECT id, name_ja, name_en, fifa_code, flag, group_name
+      SELECT id, name_ja, name_en, fifa_code, flag, group_name, fifa_rank
       FROM teams
       WHERE fifa_code = ?
     `,
@@ -505,6 +506,7 @@ export async function getTeamSquad(fifaCode: string): Promise<TeamSquad | null> 
     fifa_code: string;
     flag: string;
     group_name: string | null;
+    fifa_rank: number | null;
   }>(teamRow);
 
   const team: Team = {
@@ -587,7 +589,7 @@ export async function getTeamSquad(fifaCode: string): Promise<TeamSquad | null> 
     };
   });
 
-  return { team, coach, players };
+  return { team, coach, players, fifaRank: tr.fifa_rank };
 }
 
 export async function updateMatchResult(input: UpdateMatchResultInput) {
