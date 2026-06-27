@@ -526,7 +526,7 @@ export function RankingsView({
   );
 
   return (
-    <Container size="lg" py="xl">
+    <Container size="md" py="xl">
       <Stack gap="lg">
         <Stack gap={4}>
           <Title order={1}>{t.title}</Title>
