@@ -115,6 +115,7 @@ export const en: Dictionary = {
     empty: 'No records yet. Goals and cards will be tallied here as matches are played.',
     chartGoalsByCountry: 'Goals by country',
     chartCardsByStage: 'Cards accumulated by stage',
+    chartCardsByCountry: 'Cards by country',
     stageGroupStage: 'Group stage',
     stageR32: 'R32',
     stageR16: 'R16',

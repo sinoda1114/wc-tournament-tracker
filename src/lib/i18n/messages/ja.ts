@@ -123,6 +123,7 @@ export const ja = {
     empty: 'まだ記録がありません。試合が進むと得点・カードがここに集計されます。',
     chartGoalsByCountry: '国別得点数',
     chartCardsByStage: 'ステージ別カード累積',
+    chartCardsByCountry: '国別カード枚数',
     stageGroupStage: 'グループリーグ',
     stageR32: 'R32',
     stageR16: 'R16',
