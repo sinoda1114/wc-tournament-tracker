@@ -122,6 +122,11 @@ export const en: Dictionary = {
     stageSF: 'SF',
     stageThirdPlace: '3rd place',
     stageFinal: 'Final',
+    cardPhaseW1: 'Group stage',
+    cardPhaseW2: 'R32–Quarter-finals',
+    cardPhaseW3: 'Semi-finals–Final',
+    cardPhaseCurrent: 'Current',
+    cardPhaseNotStarted: 'Not started yet',
   },
   header: {
     admin: 'Admin',

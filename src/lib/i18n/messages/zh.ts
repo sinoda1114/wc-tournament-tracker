@@ -121,6 +121,11 @@ export const zh: Dictionary = {
     stageSF: 'SF',
     stageThirdPlace: '季军赛',
     stageFinal: '决赛',
+    cardPhaseW1: '小组赛',
+    cardPhaseW2: '32强至四分之一决赛',
+    cardPhaseW3: '半决赛至决赛',
+    cardPhaseCurrent: '当前',
+    cardPhaseNotStarted: '尚未开始',
   },
   header: {
     admin: '管理',

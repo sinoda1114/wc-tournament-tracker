@@ -130,6 +130,11 @@ export const ja = {
     stageSF: 'SF',
     stageThirdPlace: '3位決定',
     stageFinal: '決勝',
+    cardPhaseW1: 'グループステージ',
+    cardPhaseW2: '決勝T〜準々決勝',
+    cardPhaseW3: '準決勝〜決勝',
+    cardPhaseCurrent: '現在',
+    cardPhaseNotStarted: 'まだ始まっていません',
   },
   header: {
     admin: '管理画面',
