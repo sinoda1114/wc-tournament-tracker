@@ -313,7 +313,7 @@ export const zh: Dictionary = {
     title: '夺冠预测',
     description:
       '综合历届世界杯成绩、FIFA排名、WC2026表现和大家的预测来计算夺冠概率。开关各项指标会改变预测结果。',
-    fifaRankFreshness: 'ⓘ FIFA排名：已反映2026年6月11日发布的官方排名',
+    fifaRankFreshness: 'ⓘ FIFA排名：已反映WC2026赛事成绩（下次官方更新：2026年7月20日）',
     sectionAria: '夺冠预测',
     togglesAria: '切换预测指标',
     factorPastWorldCup: '历届世界杯成绩',

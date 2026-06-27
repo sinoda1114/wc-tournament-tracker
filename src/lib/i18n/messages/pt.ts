@@ -315,7 +315,7 @@ export const pt: Dictionary = {
     title: 'Palpite do campeão',
     description:
       'Estimamos as chances de título de cada seleção combinando resultados de Copas anteriores, o ranking da FIFA, o desempenho na WC2026 e os palpites do público. Ative ou desative cada fator para mudar o palpite.',
-    fifaRankFreshness: 'ⓘ Ranking da FIFA: reflete a classificação oficial publicada em 11 de junho de 2026',
+    fifaRankFreshness: 'ⓘ Ranking da FIFA: atualizado com resultados da WC2026 (próxima atualização oficial: 20 de julho de 2026)',
     sectionAria: 'Palpite do campeão',
     togglesAria: 'Alternar fatores do palpite',
     factorPastWorldCup: 'Copas anteriores',

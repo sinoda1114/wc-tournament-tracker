@@ -314,7 +314,7 @@ export const en: Dictionary = {
     title: 'Champion prediction',
     description:
       'We estimate the title chance of each nation by combining past World Cup results, FIFA ranking, WC2026 form, and the crowd picks. Toggle each factor on or off to change the prediction.',
-    fifaRankFreshness: 'ⓘ FIFA ranking: reflects the official ranking published on June 11, 2026',
+    fifaRankFreshness: 'ⓘ FIFA ranking: updated with WC2026 match results (next official update: July 20, 2026)',
     sectionAria: 'Champion prediction',
     togglesAria: 'Toggle prediction factors',
     factorPastWorldCup: 'Past World Cups',
