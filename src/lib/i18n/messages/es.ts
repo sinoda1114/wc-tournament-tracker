@@ -99,6 +99,7 @@ export const es: Dictionary = {
     previewMeta: 'Mostrando los {shown} primeros de {total}',
     showAllScorers: 'Ver todos los goleadores ({total})',
     showAllCards: 'Ver todas las tarjetas acumuladas ({total})',
+    showAllCountryCards: 'Ver las {total} selecciones',
     allScorersTitle: 'Todos los goleadores',
     allCardsTitle: 'Todas las tarjetas',
     allRowsMeta: 'Mostrando {total} registros.',
