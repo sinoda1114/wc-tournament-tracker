@@ -46,7 +46,7 @@ function groupPlayers(players: SquadPlayer[]) {
 
 export function SquadPanel({ squad }: SquadPanelProps) {
   const { locale, dict } = useI18n();
-  const { team, coach, players } = squad;
+  const { team, coach, players, fifaRank } = squad;
   const grouped = useMemo(() => groupPlayers(players), [players]);
   const squadNoteKey = SQUAD_NOTES[team.fifaCode];
 
@@ -54,7 +54,7 @@ export function SquadPanel({ squad }: SquadPanelProps) {
 
   return (
     <div className="wc-squad">
-      <Group gap="sm" align="center" wrap="nowrap" mb="xs">
+      <Group gap="sm" align="center" wrap="nowrap" mb={4}>
         <CountryFlag fifaCode={team.fifaCode} size="lg" ariaLabel={team.nameJa} />
         <Text fw={700} size="lg">
           {localizedTeamName(team, locale)}
@@ -63,7 +63,17 @@ export function SquadPanel({ squad }: SquadPanelProps) {
           {team.fifaCode}
         </Text>
         <FavoriteStar fifaCode={team.fifaCode} teamName={team.nameJa} size="md" />
+        {fifaRank !== null && (
+          <Badge color="blue" variant="light" radius="sm" size="sm">
+            {dict.squad.fifaRankLabel.replace('{rank}', String(fifaRank))}
+          </Badge>
+        )}
       </Group>
+      {fifaRank !== null && (
+        <Text size="xs" c="dimmed" mb="xs">
+          {dict.prediction.fifaRankFreshness}
+        </Text>
+      )}
 
       {isEmpty ? (
         <Text c="dimmed" size="sm">

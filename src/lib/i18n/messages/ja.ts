@@ -313,6 +313,7 @@ export const ja = {
     positionOther: 'その他',
     ageSuffix: '歳',
     groupCount: '{label}（{count}）',
+    fifaRankLabel: 'FIFAランク {rank}位',
     noteArg:
       '※ アルゼンチン代表は Leonardo Balerdi 選手が負傷のため離脱し、Marcos Senesi 選手が追加招集されました。',
     noteJpn:

@@ -294,6 +294,7 @@ export const pt: Dictionary = {
     positionOther: 'Outros',
     ageSuffix: ' anos',
     groupCount: '{label} ({count})',
+    fifaRankLabel: 'FIFA #{rank}',
     noteArg:
       'Nota: Leonardo Balerdi foi cortado da convocação da Argentina por lesão e Marcos Senesi foi convocado em seu lugar.',
     noteJpn:

@@ -293,6 +293,7 @@ export const en: Dictionary = {
     positionOther: 'Other',
     ageSuffix: '',
     groupCount: '{label} ({count})',
+    fifaRankLabel: 'FIFA #{rank}',
     noteArg:
       'Note: Leonardo Balerdi withdrew from the Argentina squad through injury, and Marcos Senesi was called up as his replacement.',
     noteJpn:

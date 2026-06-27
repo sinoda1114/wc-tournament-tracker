@@ -292,6 +292,7 @@ export const zh: Dictionary = {
     positionOther: '其他',
     ageSuffix: '岁',
     groupCount: '{label}（{count}）',
+    fifaRankLabel: 'FIFA {rank}位',
     noteArg:
       '注：莱昂纳多·巴莱尔迪因伤退出阿根廷名单，马科斯·塞内西获得递补征召。',
     noteJpn:
