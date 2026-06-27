@@ -2481,10 +2481,25 @@ a {
   background: #dc2626;
   height: 100%;
 }
-.wc-chart-value {
+.wc-chart-bar-counts {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
   flex-shrink: 0;
-  color: var(--wc-text-sub, #6b7280);
+  font-size: 0.72rem;
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.wc-chart-bar-count--yellow {
+  color: #b45309;
+  font-weight: 700;
+}
+.wc-chart-bar-count--red {
+  color: #dc2626;
+  font-weight: 700;
+}
+.wc-chart-bar-sep {
+  color: var(--wc-text-sub, #6b7280);
 }
 .wc-chart-legend {
   display: flex;

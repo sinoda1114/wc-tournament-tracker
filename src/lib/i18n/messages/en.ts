@@ -99,6 +99,8 @@ export const en: Dictionary = {
     previewMeta: 'Showing top {shown} of {total}',
     showAllScorers: 'Show all scorers ({total})',
     showAllCards: 'Show all cumulative cards ({total})',
+    showAllCountryCards: 'See all {total} nations',
+    showAllCountryGoals: 'See all {total} nations',
     allScorersTitle: 'All top scorers',
     allCardsTitle: 'All cards',
     allRowsMeta: 'Showing all {total} rows.',

@@ -54,7 +54,6 @@ export default async function RankingsPage({
   // 歴代W杯通算得点ランキング（T-109）。静的ベース（〜2022確定）に、現役選手の2026ライブ得点
   // （上の scorers＝同じDB集計）を加算して通算を自動更新する。外部API・手動更新なし。
   const historical = mergeHistoricalScorers(scorers);
-  const countryGoals = aggregateCountryGoals(scorers);
 
   // 出場停止を算出してカード行に合流（pending=🚫 / served=「消化済み」注記で表示）。
   const fixtures: SuspensionFixture[] = matches.map((m) => ({
@@ -85,7 +84,7 @@ export default async function RankingsPage({
       scorers={scorers}
       cards={cardsWithSuspension}
       historical={historical}
-      countryGoals={countryGoals}
+      countryGoals={aggregateCountryGoals(scorers)}
       countryCards={aggregateCountryCards(cardsWithSuspension)}
       purchaseSlot={<EarlyBirdPurchase locale={locale} dict={dict} />}
       cardTargetWindow={targetWindow}

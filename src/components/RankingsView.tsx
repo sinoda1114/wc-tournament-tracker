@@ -40,6 +40,7 @@ type RankingsViewProps = {
 const PREVIEW_LIMIT = 10;
 /** 歴代ランキングは本体は上位5名。全件は引き出しドロワー（T-109）。 */
 const HISTORICAL_PREVIEW = 5;
+const CHART_PREVIEW = 8;
 
 type TeamLike = { fifaCode: string | null; nameEn: string | null; nameJa: string | null };
 
@@ -210,51 +211,20 @@ const STAGE_LABEL_KEY: Record<string, keyof Dictionary['rankings']> = {
   final: 'stageFinal',
 };
 
-/** 国別得点数 横棒グラフ（T-117）。外部ライブラリ不使用・CSS バー。 */
-function GoalsByCountryChart({ data, locale, title }: { data: CountryGoalStat[]; locale: Locale; title: string }) {
-  if (data.length === 0) return null;
-  const max = data[0]?.goals ?? 1;
-  return (
-    <div className="wc-chart">
-      <Text size="sm" fw={600} mb="xs">{title}</Text>
-      <div className="wc-chart-rows">
-        {data.map((c) => (
-          <div key={c.fifaCode ?? c.nameEn ?? ''} className="wc-chart-row">
-            <div className="wc-chart-label">
-              {c.fifaCode && <CountryFlag fifaCode={c.fifaCode} size="sm" ariaLabel={locale === 'ja' ? (c.nameJa ?? c.nameEn ?? '') : (c.nameEn ?? '')} />}
-              <Text size="xs" className="wc-chart-label-text">
-                {locale === 'ja' ? c.nameJa ?? c.nameEn : c.nameEn}
-              </Text>
-            </div>
-            <div className="wc-chart-bar-wrap">
-              <div
-                className="wc-chart-bar wc-chart-bar--goals"
-                style={{ width: `${(c.goals / max) * 100}%` }}
-                aria-hidden
-              />
-              <Text component="span" size="xs" className="wc-chart-value">{c.goals}</Text>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 /** 国別カード累積 横棒グラフ（T-118 再設計）。国ごとの黄/赤を積み上げ表示。 */
 function CountryCardChart({ data, t, title, locale }: { data: CountryCardStat[]; t: Dictionary['rankings']; title: string; locale: Locale }) {
   if (data.length === 0) return null;
   const max = Math.max(...data.map((d) => d.yellow + d.red), 1);
   return (
     <div className="wc-chart">
-      <Text size="sm" fw={600} mb="xs">{title}</Text>
+      {title && <Text size="sm" fw={600} mb="xs">{title}</Text>}
       <div className="wc-chart-rows">
         {data.map((c) => {
-          const total = c.yellow + c.red;
+          const countryLabel = locale === 'ja' ? (c.nameJa ?? c.nameEn ?? '') : (c.nameEn ?? '');
           return (
-            <div key={c.fifaCode ?? c.nameEn ?? ''} className="wc-chart-row">
+            <div key={c.fifaCode ?? c.nameEn ?? ''} className="wc-chart-row" aria-label={`${countryLabel}: ${t.colYellowAria} ${c.yellow}, ${t.colRedAria} ${c.red}`}>
               <div className="wc-chart-label">
-                {c.fifaCode && <CountryFlag fifaCode={c.fifaCode} size="sm" ariaLabel={locale === 'ja' ? (c.nameJa ?? c.nameEn ?? '') : (c.nameEn ?? '')} />}
+                {c.fifaCode && <CountryFlag fifaCode={c.fifaCode} size="sm" ariaLabel={countryLabel} />}
                 <Text size="xs" className="wc-chart-label-text">
                   {locale === 'ja' ? c.nameJa ?? c.nameEn : c.nameEn}
                 </Text>
@@ -270,7 +240,11 @@ function CountryCardChart({ data, t, title, locale }: { data: CountryCardStat[];
                     style={{ width: `${(c.red / max) * 100}%` }}
                   />
                 </div>
-                <Text component="span" size="xs" className="wc-chart-value">{total}</Text>
+                <span className="wc-chart-bar-counts" aria-hidden>
+                  {c.yellow > 0 && <span className="wc-chart-bar-count--yellow">{c.yellow}</span>}
+                  {c.yellow > 0 && c.red > 0 && <span className="wc-chart-bar-sep">·</span>}
+                  {c.red > 0 && <span className="wc-chart-bar-count--red">{c.red}</span>}
+                </span>
               </div>
             </div>
           );
@@ -380,7 +354,7 @@ export function RankingsView({
 }: RankingsViewProps) {
   const { locale, dict } = useI18n();
   const t = dict.rankings;
-  const [drawer, setDrawer] = useState<'scorers' | 'cards' | 'historical' | null>(null);
+  const [drawer, setDrawer] = useState<'scorers' | 'cards' | 'historical' | 'countryGoals' | 'countryCards' | null>(null);
 
   const isEmpty = scorers.length === 0 && cards.length === 0;
 
@@ -393,6 +367,10 @@ export function RankingsView({
   // 歴代は通算得点で同点同順位を算出（既存ユーティリティ再利用）。本体は上位3名、全件はドロワー。
   const historicalRanks = standardCompetitionRanks(historical, (h) => h.goals);
   const previewHistorical = historical.slice(0, HISTORICAL_PREVIEW);
+
+  // 国別得点ランキング
+  const countryGoalRanks = standardCompetitionRanks(countryGoals, (cg) => cg.goals);
+  const previewCountryGoals = countryGoals.slice(0, CHART_PREVIEW);
 
   // 歴代得点の注記。2文目（緑文）は改行して、得点列の「+N」と同じ teal.4 で表示し
   // 「緑＝本大会得点」を実データと視覚的にリンクさせる（プレビュー/ドロワー共通）。
@@ -489,6 +467,31 @@ export function RankingsView({
     </Table>
   );
 
+  const renderCountryGoalTable = (rows: CountryGoalStat[], ranks: number[]) => (
+    <Table className="wc-ranking-table" highlightOnHover>
+      <Table.Thead>
+        <Table.Tr>
+          <Table.Th aria-label={t.colRank}>{t.colRank}</Table.Th>
+          <Table.Th>{t.colTeam}</Table.Th>
+          <Table.Th ta="right">{t.colGoals}</Table.Th>
+        </Table.Tr>
+      </Table.Thead>
+      <Table.Tbody>
+        {rows.map((cg, i) => (
+          <Table.Tr key={cg.fifaCode ?? cg.nameEn ?? i}>
+            <Table.Td>{ranks[i]}</Table.Td>
+            <Table.Td>
+              <TeamCell team={cg} locale={locale} />
+            </Table.Td>
+            <Table.Td ta="right" fw={700}>
+              {cg.goals}
+            </Table.Td>
+          </Table.Tr>
+        ))}
+      </Table.Tbody>
+    </Table>
+  );
+
   const renderCardTable = (rows: CardStat[], ranks: number[]) => (
     <Table className="wc-ranking-table" highlightOnHover>
       <Table.Thead>
@@ -573,6 +576,28 @@ export function RankingsView({
               )}
             </section>
 
+            {/* 国別得点数ランキング（テーブル形式・上位CHART_PREVIEW件＋ドロワー）。 */}
+            {countryGoals.length > 0 ? (
+              <section aria-labelledby="ranking-country-goals">
+                <Title id="ranking-country-goals" order={2} size="h4" mb="xs">
+                  {t.chartGoalsByCountry}
+                </Title>
+                {renderCountryGoalTable(previewCountryGoals, countryGoalRanks)}
+                {countryGoals.length > CHART_PREVIEW ? (
+                  <div className="wc-ranking-show-all">
+                    <Button
+                      variant="light"
+                      radius="xl"
+                      onClick={() => setDrawer('countryGoals')}
+                      aria-haspopup="dialog"
+                    >
+                      {t.showAllCountryGoals.replace('{total}', String(countryGoals.length))}
+                    </Button>
+                  </div>
+                ) : null}
+              </section>
+            ) : null}
+
             {/* 歴代W杯通算得点ランキング（T-109）。ライブ得点ランキングの直下に置く。
                 本体は上位3名のコンパクト表示・全件は右からの引き出しドロワー。 */}
             {historical.length > 0 ? (
@@ -639,8 +664,19 @@ export function RankingsView({
                       </Button>
                     </div>
                   ) : null}
-                  {/* 国別カード累積グラフ（T-118 再設計）。カードテーブルの直下。 */}
-                  <CountryCardChart data={countryCards} t={t} title={t.chartCardsByCountry} locale={locale} />
+                  {/* 国別カード累積グラフ（T-118 再設計）。上位CHART_PREVIEW件のみインライン・全件はドロワー。 */}
+                  {countryCards.length > 0 ? (
+                    <>
+                      <CountryCardChart data={countryCards.slice(0, CHART_PREVIEW)} t={t} title={t.chartCardsByCountry} locale={locale} />
+                      {countryCards.length > CHART_PREVIEW ? (
+                        <div className="wc-ranking-show-all">
+                          <Button variant="light" radius="xl" onClick={() => setDrawer('countryCards')} aria-haspopup="dialog">
+                            {t.showAllCountryCards.replace('{total}', String(countryCards.length))}
+                          </Button>
+                        </div>
+                      ) : null}
+                    </>
+                  ) : null}
                 </>
               )}
             </section>
@@ -660,8 +696,6 @@ export function RankingsView({
           <Text c="dimmed" size="sm">
             {t.allRowsMeta.replace('{total}', String(scorers.length))}
           </Text>
-          {/* 国別得点グラフ（T-117）。ドロワー内の全件テーブルの上に配置。 */}
-          <GoalsByCountryChart data={countryGoals} locale={locale} title={t.chartGoalsByCountry} />
           <div className="wc-ranking-drawer-table">{renderScorerTable(scorers, scorerRanks)}</div>
         </Stack>
       </Drawer>
@@ -698,6 +732,30 @@ export function RankingsView({
             {renderHistoricalTable(historical, historicalRanks)}
           </div>
         </Stack>
+      </Drawer>
+      <Drawer
+        opened={drawer === 'countryGoals'}
+        onClose={() => setDrawer(null)}
+        position="right"
+        size="xl"
+        zIndex={1000}
+        title={t.chartGoalsByCountry}
+        className="wc-ranking-drawer"
+      >
+        <div className="wc-ranking-drawer-table">
+          {renderCountryGoalTable(countryGoals, countryGoalRanks)}
+        </div>
+      </Drawer>
+      <Drawer
+        opened={drawer === 'countryCards'}
+        onClose={() => setDrawer(null)}
+        position="right"
+        size="xl"
+        zIndex={1000}
+        title={t.chartCardsByCountry}
+        className="wc-ranking-drawer"
+      >
+        <CountryCardChart data={countryCards} t={t} title="" locale={locale} />
       </Drawer>
     </Container>
   );
