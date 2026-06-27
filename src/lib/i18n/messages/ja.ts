@@ -108,6 +108,7 @@ export const ja = {
     showAllScorers: '得点ランキングをすべて表示（{total}人）',
     showAllCards: 'カード累積をすべて表示（{total}人）',
     showAllCountryCards: '全{total}か国を見る',
+    showAllCountryGoals: '全{total}か国を見る',
     allScorersTitle: '得点ランキングすべて',
     allCardsTitle: 'カードランキングすべて',
     allRowsMeta: '全{total}件を表示しています。',

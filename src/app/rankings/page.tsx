@@ -8,7 +8,7 @@ import { mergeHistoricalScorers } from '@/lib/historical-scorers';
 import { ogLocale } from '@/lib/i18n/alternates';
 import { getDictionary } from '@/lib/i18n/dictionary';
 import { resolveLocale } from '@/lib/i18n/server';
-import { aggregateCards, aggregateCountryCards, aggregateScorers, currentResetWindow, playerTeamKey } from '@/lib/rankings';
+import { aggregateCards, aggregateCountryCards, aggregateCountryGoals, aggregateScorers, currentResetWindow, playerTeamKey } from '@/lib/rankings';
 import { computeSuspensions, type SuspensionFixture } from '@/lib/suspensions';
 
 // 試合結果・カードが入るたびに集計が変わるので毎回最新を出す。
@@ -84,6 +84,7 @@ export default async function RankingsPage({
       scorers={scorers}
       cards={cardsWithSuspension}
       historical={historical}
+      countryGoals={aggregateCountryGoals(scorers)}
       countryCards={aggregateCountryCards(cardsWithSuspension)}
       purchaseSlot={<EarlyBirdPurchase locale={locale} dict={dict} />}
       cardTargetWindow={targetWindow}
