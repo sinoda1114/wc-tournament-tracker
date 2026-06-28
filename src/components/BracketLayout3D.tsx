@@ -304,10 +304,16 @@ function ConnectingLines({ positions }: { positions: THREE.Vector3[][] }) {
 }
 
 function FogSetup() {
-  const { scene } = useThree();
-  useMemo(() => {
-    scene.fog = new THREE.FogExp2(0x04060d, 0.017);
-  }, [scene]);
+  const scene = useThree((s) => s.scene);
+  useEffect(() => {
+    const fog = new THREE.FogExp2(0x04060d, 0.017);
+    // eslint-disable-next-line react-hooks/immutability -- R3F scene mutation is the canonical API
+    scene.fog = fog;
+    return () => {
+      scene.fog = null;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   return null;
 }
 
