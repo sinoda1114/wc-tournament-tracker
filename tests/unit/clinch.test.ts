@@ -95,6 +95,36 @@ describe('clinchGroupQualification', () => {
     expect(r.get('A')).toEqual({ clinchedTop2: true, clinchedPosition: 1 });
   });
 
+  it('全消化・直接対決引き分け同士: 全体得失点差で2位を確定（グループB実例 CAN/BIH）', () => {
+    // SUI=7, CAN=4, BIH=4, QAT=1。CAN-BIH直接対決は1-1（h2h同点）。
+    // CAN 全体GD=+5、BIH 全体GD=-2 → CAN が2位確定、BIH は3位。
+    const grpB = ['sui', 'can', 'bih', 'qat'].map((id) => ({ id }));
+    const r = clinchGroupQualification(grpB, [
+      fin('sui', 'qat', 1, 1), fin('can', 'bih', 1, 1),
+      fin('sui', 'bih', 4, 1), fin('can', 'qat', 6, 0),
+      fin('sui', 'can', 2, 1), fin('bih', 'qat', 3, 1),
+    ]);
+    expect(r.get('sui')).toEqual({ clinchedTop2: true, clinchedPosition: 1 });
+    expect(r.get('can')).toEqual({ clinchedTop2: true, clinchedPosition: 2 });
+    expect(r.get('bih')!.clinchedTop2).toBe(false);
+    expect(r.get('qat')!.clinchedTop2).toBe(false);
+  });
+
+  it('全消化・直接対決0-0: 全体得失点差で2位を確定（グループD実例 AUS/PAR）', () => {
+    // USA=6, AUS=4, PAR=4, TUR=3。AUS-PAR直接対決は0-0（h2h同点）。
+    // AUS 全体GD=0、PAR 全体GD=-2 → AUS が2位確定、PAR は3位。
+    const grpD = ['usa', 'par', 'aus', 'tur'].map((id) => ({ id }));
+    const r = clinchGroupQualification(grpD, [
+      fin('usa', 'par', 4, 1), fin('aus', 'tur', 2, 0),
+      fin('tur', 'par', 0, 1), fin('usa', 'aus', 2, 0),
+      fin('tur', 'usa', 3, 2), fin('par', 'aus', 0, 0),
+    ]);
+    expect(r.get('usa')).toEqual({ clinchedTop2: true, clinchedPosition: 1 });
+    expect(r.get('aus')).toEqual({ clinchedTop2: true, clinchedPosition: 2 });
+    expect(r.get('par')!.clinchedTop2).toBe(false);
+    expect(r.get('tur')!.clinchedTop2).toBe(false);
+  });
+
   it('2026タイブレーク: 同点になり得る相手に直接対決で負けていれば1位は未確定', () => {
     // 上のメキシコ例で A-B の結果だけ反転（B が A に勝っている）と、
     // B が6点で並んだとき直接対決で B 上 = A は2位もあり得る → 1位未確定。
