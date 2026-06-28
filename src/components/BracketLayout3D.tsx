@@ -110,6 +110,24 @@ function makeCardTexture(
   canvas.width = W;
   canvas.height = H;
   const ctx = canvas.getContext('2d')!;
+  // Undecided matchup (a later round whose teams are not yet determined):
+  // draw a faint dashed placeholder with no "TBD" text. The connecting
+  // bracket lines already say "this is a future match", so the acronym is
+  // redundant noise — a quiet ghost slot reads as intentional, not broken.
+  if (!match?.homeTeam || !match.awayTeam) {
+    roundRect(ctx, 8, 8, W - 16, H - 16, 22);
+    ctx.fillStyle = 'rgba(20,36,58,0.28)';
+    ctx.fill();
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = 'rgba(74,109,160,0.38)';
+    ctx.setLineDash([14, 12]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    const ghost = new THREE.CanvasTexture(canvas);
+    ghost.anisotropy = 8;
+    return ghost;
+  }
+
   const s = CARD_STYLES[style];
 
   const grad = ctx.createLinearGradient(0, 0, 0, H);
@@ -122,34 +140,46 @@ function makeCardTexture(
   ctx.strokeStyle = s.border;
   ctx.stroke();
 
-  if (match?.homeTeam && match.awayTeam) {
-    const rowY = [H * 0.34, H * 0.7];
-    const sides = [
-      { team: match.homeTeam, score: match.homeScore },
-      { team: match.awayTeam, score: match.awayScore },
-    ];
-    sides.forEach(({ team, score }, i) => {
-      const win = match.winnerTeamId === team.id;
-      if (win) {
-        roundRect(ctx, 22, rowY[i] - 58, W - 44, 108, 16);
-        ctx.fillStyle = s.hi;
-        ctx.fill();
-      }
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
+  const rowY = [H * 0.34, H * 0.7];
+  const hasScore = match.homeScore !== null && match.awayScore !== null;
+  const sides = [
+    { team: match.homeTeam, score: match.homeScore },
+    { team: match.awayTeam, score: match.awayScore },
+  ];
+
+  // Teams known but not played yet: a bare "—" where a digit belongs reads
+  // as missing/broken data (amplified across the 16 R32 cards). Omit the
+  // score glyph entirely and center the flag until a real score exists; a
+  // faint divider keeps the two sides legible.
+  if (!hasScore) {
+    ctx.strokeStyle = 'rgba(138,160,189,0.18)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(W * 0.2, H * 0.52);
+    ctx.lineTo(W * 0.8, H * 0.52);
+    ctx.stroke();
+  }
+
+  sides.forEach(({ team, score }, i) => {
+    const win = match.winnerTeamId === team.id;
+    if (hasScore && win) {
+      roundRect(ctx, 22, rowY[i] - 58, W - 44, 108, 16);
+      ctx.fillStyle = s.hi;
+      ctx.fill();
+    }
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    if (hasScore) {
       ctx.font = '118px "Apple Color Emoji","Segoe UI Emoji",serif';
       ctx.fillText(team.flag, W * 0.36, rowY[i]);
       ctx.font = 'bold 96px system-ui,sans-serif';
       ctx.fillStyle = win ? s.score : '#8aa0bd';
-      ctx.fillText(score !== null ? String(score) : '—', W * 0.74, rowY[i]);
-    });
-  } else {
-    ctx.fillStyle = '#4a6da0';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.font = 'bold 44px system-ui,sans-serif';
-    ctx.fillText('TBD', W / 2, H / 2);
-  }
+      ctx.fillText(String(score), W * 0.74, rowY[i]);
+    } else {
+      ctx.font = '132px "Apple Color Emoji","Segoe UI Emoji",serif';
+      ctx.fillText(team.flag, W / 2, rowY[i]);
+    }
+  });
 
   const tex = new THREE.CanvasTexture(canvas);
   tex.anisotropy = 8;
