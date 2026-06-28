@@ -2,9 +2,8 @@
 
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, Billboard, Stars } from '@react-three/drei';
-import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import * as THREE from 'three';
-import { useRef, useMemo, useEffect, Suspense } from 'react';
+import { useRef, useMemo, useEffect, Suspense, Component, type ReactNode } from 'react';
 
 import type { MatchDetail } from '@/db/queries';
 
@@ -403,11 +402,6 @@ function Scene({ matches }: { matches: MatchDetail[] }) {
       {/* Connecting lines */}
       <ConnectingLines positions={tierPositions} />
 
-      {/* Post-processing */}
-      <EffectComposer>
-        <Bloom luminanceThreshold={0.82} luminanceSmoothing={0.5} intensity={0.85} />
-      </EffectComposer>
-
       <OrbitControls
         target={[0, 1, 0]}
         enableDamping
@@ -421,28 +415,69 @@ function Scene({ matches }: { matches: MatchDetail[] }) {
   );
 }
 
+// --- Error boundary ---
+
+class SceneErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
+  constructor(props: { children: ReactNode }) {
+    super(props);
+    this.state = { error: null };
+  }
+  static getDerivedStateFromError(error: Error) {
+    return { error };
+  }
+  render() {
+    if (this.state.error) {
+      return (
+        <div
+          style={{
+            width: '100%',
+            height: '70vh',
+            background: '#04060d',
+            borderRadius: '12px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: '#7f93ad',
+            gap: '8px',
+          }}
+        >
+          <span style={{ fontSize: '2rem' }}>⚠️</span>
+          <span style={{ fontSize: '0.9rem' }}>3Dビューを読み込めませんでした</span>
+          <span style={{ fontSize: '0.75rem', color: '#4a5568', maxWidth: 360, textAlign: 'center' }}>
+            {this.state.error.message}
+          </span>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 // --- Exported component ---
 
 export function BracketLayout3D({ matches }: BracketLayout3DProps) {
   return (
-    <div
-      style={{
-        width: '100%',
-        height: '70vh',
-        background: '#04060d',
-        borderRadius: '12px',
-        overflow: 'hidden',
-      }}
-    >
-      <Canvas
-        camera={{ position: [0, 4, 27], fov: 55, near: 0.1, far: 200 }}
-        gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping }}
-        dpr={[1, 2]}
+    <SceneErrorBoundary>
+      <div
+        style={{
+          width: '100%',
+          height: '70vh',
+          background: '#04060d',
+          borderRadius: '12px',
+          overflow: 'hidden',
+        }}
       >
-        <Suspense fallback={null}>
-          <Scene matches={matches} />
-        </Suspense>
-      </Canvas>
-    </div>
+        <Canvas
+          camera={{ position: [0, 4, 27], fov: 55, near: 0.1, far: 200 }}
+          gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping }}
+          dpr={[1, 2]}
+        >
+          <Suspense fallback={null}>
+            <Scene matches={matches} />
+          </Suspense>
+        </Canvas>
+      </div>
+    </SceneErrorBoundary>
   );
 }
