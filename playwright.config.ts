@@ -2,10 +2,7 @@ import { defineConfig, devices } from '@playwright/test';
 import path from 'path';
 import os from 'os';
 
-const chromiumExec = path.join(
-  os.homedir(),
-  'Library/Caches/ms-playwright/chromium-1228/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing',
-);
+const chromiumExec = process.env.CHROMIUM_PATH || '';
 
 export default defineConfig({
   testDir: './e2e',
