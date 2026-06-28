@@ -168,6 +168,7 @@ export const ja = {
     viewLabel: '表示切替',
     bracket: 'ブラケット',
     cards: 'カード',
+    view3d: '3D',
     final: '🏆 決勝',
     thirdPlace: '🥉 3位決定戦',
   },

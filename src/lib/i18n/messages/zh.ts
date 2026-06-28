@@ -157,6 +157,7 @@ export const zh: Dictionary = {
     viewLabel: '视图',
     bracket: '对阵图',
     cards: '卡片',
+    view3d: '3D',
     final: '🏆 决赛',
     thirdPlace: '🥉 季军赛',
   },

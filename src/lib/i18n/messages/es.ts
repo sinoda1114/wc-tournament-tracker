@@ -158,6 +158,7 @@ export const es: Dictionary = {
     viewLabel: 'Vista',
     bracket: 'Cuadro',
     cards: 'Tarjetas',
+    view3d: '3D',
     final: '🏆 Final',
     thirdPlace: '🥉 Tercer puesto',
   },
