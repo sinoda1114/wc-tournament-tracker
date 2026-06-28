@@ -158,6 +158,7 @@ export const pt: Dictionary = {
     viewLabel: 'Visualização',
     bracket: 'Chave',
     cards: 'Cartões',
+    view3d: '3D',
     final: '🏆 Final',
     thirdPlace: '🥉 Terceiro lugar',
   },

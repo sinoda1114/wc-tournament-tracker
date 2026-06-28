@@ -1,5 +1,6 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import { useState, type ReactNode } from 'react';
 
 import type { MatchDetail } from '@/db/queries';
@@ -8,7 +9,32 @@ import { useDictionary } from '@/lib/i18n/context';
 import { BracketLayout } from './BracketLayout';
 import { TournamentBracket } from './TournamentBracket';
 
-type ViewMode = 'bracket' | 'cards';
+// Three.jsを初期バンドルから切り離す。3Dタブを押した時だけロード。
+const BracketLayout3D = dynamic(
+  () => import('./BracketLayout3D').then((m) => ({ default: m.BracketLayout3D })),
+  {
+    ssr: false,
+    loading: () => (
+      <div
+        style={{
+          width: '100%',
+          height: '70vh',
+          background: '#04060d',
+          borderRadius: '12px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: '#7f93ad',
+          fontSize: '0.9rem',
+        }}
+      >
+        3Dシーンを読み込み中…
+      </div>
+    ),
+  },
+);
+
+type ViewMode = 'bracket' | 'cards' | '3d';
 
 type TournamentViewToggleProps = {
   matches: MatchDetail[];
@@ -45,10 +71,21 @@ export function TournamentViewToggle({ matches, cardLock }: TournamentViewToggle
           >
             {t.cards}
           </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={mode === '3d'}
+            className={mode === '3d' ? 'is-active' : ''}
+            onClick={() => setMode('3d')}
+          >
+            {t.view3d}
+          </button>
         </div>
       </div>
       {mode === 'bracket' ? (
         <BracketLayout matches={matches} />
+      ) : mode === '3d' ? (
+        <BracketLayout3D matches={matches} />
       ) : cardLock ? (
         cardLock
       ) : (
