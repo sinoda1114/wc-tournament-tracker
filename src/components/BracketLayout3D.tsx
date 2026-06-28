@@ -2,6 +2,7 @@
 
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, Billboard, Stars } from '@react-three/drei';
+import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import * as THREE from 'three';
 import { useRef, useMemo, useEffect, Suspense, Component, type ReactNode } from 'react';
 
@@ -401,6 +402,11 @@ function Scene({ matches }: { matches: MatchDetail[] }) {
 
       {/* Connecting lines */}
       <ConnectingLines positions={tierPositions} />
+
+      {/* Post-processing */}
+      <EffectComposer>
+        <Bloom luminanceThreshold={0.82} luminanceSmoothing={0.5} intensity={0.85} />
+      </EffectComposer>
 
       <OrbitControls
         target={[0, 1, 0]}
