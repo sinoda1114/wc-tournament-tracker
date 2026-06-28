@@ -1,6 +1,6 @@
 'use client';
 
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Billboard, Stars } from '@react-three/drei';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import * as THREE from 'three';
@@ -304,11 +304,7 @@ function ConnectingLines({ positions }: { positions: THREE.Vector3[][] }) {
 }
 
 function FogSetup() {
-  const { scene } = useThree();
-  useMemo(() => {
-    scene.fog = new THREE.FogExp2(0x04060d, 0.017);
-  }, [scene]);
-  return null;
+  return <fogExp2 attach="fog" args={[0x04060d, 0.017]} />;
 }
 
 // --- Main scene ---
