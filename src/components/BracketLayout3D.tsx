@@ -4,7 +4,7 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, Billboard, Stars } from '@react-three/drei';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import * as THREE from 'three';
-import { useRef, useMemo, Suspense } from 'react';
+import { useRef, useMemo, useEffect, Suspense } from 'react';
 
 import type { MatchDetail } from '@/db/queries';
 
@@ -213,8 +213,9 @@ function MatchCard({
   const tex = useMemo(
     () => makeCardTexture(match, style),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [match?.id, style],
+    [match?.id, match?.homeScore, match?.awayScore, match?.winnerTeamId, match?.homeTeam?.id, match?.awayTeam?.id, style],
   );
+  useEffect(() => () => tex.dispose(), [tex]);
   return (
     <Billboard position={position}>
       <mesh>
@@ -237,6 +238,7 @@ function RoundLabel({
   scale?: number;
 }) {
   const tex = useMemo(() => makeLabelTexture(text, color), [text, color]);
+  useEffect(() => () => tex.dispose(), [tex]);
   return (
     <Billboard position={position}>
       <mesh scale={[4.6 * scale, 1.07 * scale, 1]}>
@@ -249,6 +251,7 @@ function RoundLabel({
 
 function Trophy({ position }: { position: [number, number, number] }) {
   const tex = useMemo(() => makeTrophyTexture(), []);
+  useEffect(() => () => tex.dispose(), [tex]);
   return (
     <Billboard position={position}>
       <mesh>
@@ -281,6 +284,15 @@ function ConnectingLines({ positions }: { positions: THREE.Vector3[][] }) {
       }),
     );
   }, [positions]);
+
+  useEffect(() => {
+    return () => {
+      for (const line of lineObjects) {
+        line.geometry.dispose();
+        (line.material as THREE.Material).dispose();
+      }
+    };
+  }, [lineObjects]);
 
   return (
     <>
