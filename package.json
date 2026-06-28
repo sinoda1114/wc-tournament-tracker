@@ -54,6 +54,14 @@
     "vitest": "4.1.8"
   },
   "overrides": {
-    "postcss": "8.5.15"
+    "postcss": "8.5.15",
+    "@react-three/fiber": {
+      "react": "$react",
+      "react-dom": "$react-dom"
+    },
+    "@react-three/drei": {
+      "react": "$react",
+      "react-dom": "$react-dom"
+    }
   }
 }
