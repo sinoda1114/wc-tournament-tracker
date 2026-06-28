@@ -168,6 +168,14 @@ describe('面① カード表示の課金壁（HomeView）', () => {
 });
 
 describe('非回帰: グループステージ期間の既定ビューは無料', () => {
+  beforeEach(() => {
+    // GL_COMPLETE_UTC (2026-06-28T04:00:00Z) より前をシミュレート
+    vi.useFakeTimers({ now: new Date('2026-06-25T00:00:00Z').getTime() });
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it('無料期間は GroupsFilterableGrid を出し、壁は出ない', async () => {
     // 無料期間は hasKnockoutAccess も true を返す（実装の単一真実）。
     hasAccessMock.mockResolvedValue(true);

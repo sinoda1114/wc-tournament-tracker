@@ -16,7 +16,7 @@ import { hasKnockoutAccess } from '@/lib/billing/access';
 import { parseDatesParam, parseQuickDayParam, resolveQuickDay } from '@/lib/date-filter';
 import { getDictionary } from '@/lib/i18n/dictionary';
 import { resolveLocale, resolveTimeZone } from '@/lib/i18n/server';
-import { isFreePeriod } from '@/lib/pricing';
+import { GL_COMPLETE_UTC, isFreePeriod } from '@/lib/pricing';
 
 const GROUP_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'] as const;
 
@@ -61,7 +61,8 @@ export async function HomeView({ searchParams }: { searchParams: Promise<HomeSea
   // 無料期間＝グループステージ期間（lib/pricing と同一境界）。PaywallBanner と同じ判定方法。
   // ?view=kt はグループステージ中でもブラケットを見るための明示指定（ナビ「決勝T」用）。
   const wantsKt = pickDateParam(params.view) === 'kt';
-  const isKnockoutPhase = wantsKt || !isFreePeriod(new Date());
+  const now = new Date();
+  const isKnockoutPhase = wantsKt || !isFreePeriod(now) || now.getTime() >= GL_COMPLETE_UTC;
 
   // 日付選択時は「その日の全試合」一覧（フェーズ問わず共通）。
   // NOTE: listTournamentMatches() は全試合（GL含む）を返すため、GL一覧と連結しない

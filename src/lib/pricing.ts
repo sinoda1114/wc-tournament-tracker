@@ -82,6 +82,14 @@ export function currentPriceDisplay(locale: Locale, now: Date): string {
  */
 export const KNOCKOUT_START_UTC = new Date('2026-06-28T15:00:00Z').getTime();
 
+/**
+ * グループステージ全試合完了の目安時刻（UTC）。
+ * GL最終戦は JST 6/28 11:00 KO（2時間前後で終了）→ UTC 04:00 に全試合終了。
+ * {@link KNOCKOUT_START_UTC}（課金・ペイウォール境界）とは別管理。
+ * この時刻以降はトップページのデフォルトビューを決勝Tに切り替える。
+ */
+export const GL_COMPLETE_UTC = new Date('2026-06-28T04:00:00Z').getTime();
+
 /** 現在ロケールの表示価格文字列（ja のみ ¥980、他は $10）。 */
 export function priceDisplayForLocale(locale: Locale): string {
   return locale === 'ja' ? PRICE.ja.display : PRICE.default.display;

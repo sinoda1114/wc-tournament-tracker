@@ -101,6 +101,103 @@ function headToHeadPoints(
 }
 
 /**
+ * 全試合消化済みグループの最終順位を WC2026 タイブレーク全段で確定する。
+ * 残り試合がある場合はシミュレーション側（clinchGroupQualification）に委ねる。
+ *
+ * タイブレーク順: 総勝点 → a)H2H勝点 → b)H2H得失点差 → c)H2H得点 → d)全体得失点差 → e)全体得点
+ */
+function computeCompleteGroupClinch(
+  teamIds: readonly string[],
+  finished: readonly MatchOutcome[],
+  matches: readonly ClinchMatch[],
+): Map<string, GroupClinch> {
+  const totalPts = new Map<string, number>(teamIds.map((id) => [id, 0]));
+  const totalGf = new Map<string, number>(teamIds.map((id) => [id, 0]));
+  const totalGa = new Map<string, number>(teamIds.map((id) => [id, 0]));
+  const teamSet = new Set(teamIds);
+
+  for (const o of finished) {
+    totalPts.set(o.home, totalPts.get(o.home)! + o.homePts);
+    totalPts.set(o.away, totalPts.get(o.away)! + o.awayPts);
+  }
+  for (const m of matches) {
+    if (!m.homeTeamId || !m.awayTeamId) continue;
+    if (m.homeScore === null || m.awayScore === null) continue;
+    const hs = m.homeScore as number;
+    const as_ = m.awayScore as number;
+    if (teamSet.has(m.homeTeamId)) {
+      totalGf.set(m.homeTeamId, totalGf.get(m.homeTeamId)! + hs);
+      totalGa.set(m.homeTeamId, totalGa.get(m.homeTeamId)! + as_);
+    }
+    if (teamSet.has(m.awayTeamId)) {
+      totalGf.set(m.awayTeamId, totalGf.get(m.awayTeamId)! + as_);
+      totalGa.set(m.awayTeamId, totalGa.get(m.awayTeamId)! + hs);
+    }
+  }
+
+  function h2hInGroup(group: string[]): {
+    pts: Map<string, number>;
+    gd: Map<string, number>;
+    gf: Map<string, number>;
+  } {
+    const pts = new Map<string, number>(group.map((id) => [id, 0]));
+    const gf = new Map<string, number>(group.map((id) => [id, 0]));
+    const ga = new Map<string, number>(group.map((id) => [id, 0]));
+    const set = new Set(group);
+    for (const m of matches) {
+      if (!m.homeTeamId || !m.awayTeamId) continue;
+      if (m.homeScore === null || m.awayScore === null) continue;
+      if (!set.has(m.homeTeamId) || !set.has(m.awayTeamId)) continue;
+      const hs = m.homeScore as number;
+      const as_ = m.awayScore as number;
+      const [hp, ap] = pointsFromScore(hs, as_);
+      pts.set(m.homeTeamId, pts.get(m.homeTeamId)! + hp);
+      pts.set(m.awayTeamId, pts.get(m.awayTeamId)! + ap);
+      gf.set(m.homeTeamId, gf.get(m.homeTeamId)! + hs);
+      ga.set(m.homeTeamId, ga.get(m.homeTeamId)! + as_);
+      gf.set(m.awayTeamId, gf.get(m.awayTeamId)! + as_);
+      ga.set(m.awayTeamId, ga.get(m.awayTeamId)! + hs);
+    }
+    const gd = new Map<string, number>(group.map((id) => [id, gf.get(id)! - ga.get(id)!]));
+    return { pts, gd, gf };
+  }
+
+  const sorted = [...teamIds].sort((a, b) => {
+    const pDiff = totalPts.get(b)! - totalPts.get(a)!;
+    if (pDiff !== 0) return pDiff;
+
+    const tiedPts = totalPts.get(a)!;
+    const tiedGroup = teamIds.filter((id) => totalPts.get(id)! === tiedPts);
+    const h2h = h2hInGroup(tiedGroup as string[]);
+
+    const h2hPtsDiff = h2h.pts.get(b)! - h2h.pts.get(a)!;
+    if (h2hPtsDiff !== 0) return h2hPtsDiff;
+
+    const h2hGdDiff = h2h.gd.get(b)! - h2h.gd.get(a)!;
+    if (h2hGdDiff !== 0) return h2hGdDiff;
+
+    const h2hGfDiff = h2h.gf.get(b)! - h2h.gf.get(a)!;
+    if (h2hGfDiff !== 0) return h2hGfDiff;
+
+    const overallGdDiff =
+      totalGf.get(b)! - totalGa.get(b)! - (totalGf.get(a)! - totalGa.get(a)!);
+    if (overallGdDiff !== 0) return overallGdDiff;
+
+    return totalGf.get(b)! - totalGf.get(a)!;
+  });
+
+  const result = new Map<string, GroupClinch>();
+  sorted.forEach((id, idx) => {
+    const pos = idx + 1;
+    result.set(id, {
+      clinchedTop2: pos <= 2,
+      clinchedPosition: pos === 1 ? 1 : pos === 2 ? 2 : null,
+    });
+  });
+  return result;
+}
+
+/**
  * グループ各チームの突破/順位クリンチを判定する。
  * @param teams グループの全チーム（通常 4）。
  * @param matches グループの全試合（消化済み＋未消化）。
@@ -111,6 +208,11 @@ export function clinchGroupQualification(
 ): Map<string, GroupClinch> {
   const teamIds = teams.map((t) => t.id);
   const { finished, remaining } = splitMatches(teamIds, matches);
+
+  // 全試合消化済みなら完全なタイブレーク計算で確定（シミュレーション不要）。
+  if (remaining.length === 0) {
+    return computeCompleteGroupClinch(teamIds, finished, matches);
+  }
 
   const result = new Map<string, GroupClinch>(
     teamIds.map((id) => [id, { clinchedTop2: false, clinchedPosition: null }]),
