@@ -121,6 +121,7 @@ function computeCompleteGroupClinch(
     totalPts.set(o.away, totalPts.get(o.away)! + o.awayPts);
   }
   for (const m of matches) {
+    if (!m.homeTeamId || !m.awayTeamId) continue;
     if (m.homeScore === null || m.awayScore === null) continue;
     if (!m.homeTeamId || !m.awayTeamId) continue;
     const hs = m.homeScore as number;
@@ -145,6 +146,7 @@ function computeCompleteGroupClinch(
     const ga = new Map<string, number>(group.map((id) => [id, 0]));
     const set = new Set(group);
     for (const m of matches) {
+      if (!m.homeTeamId || !m.awayTeamId) continue;
       if (m.homeScore === null || m.awayScore === null) continue;
       if (!m.homeTeamId || !m.awayTeamId) continue;
       if (!set.has(m.homeTeamId) || !set.has(m.awayTeamId)) continue;
