@@ -110,11 +110,10 @@ function makeCardTexture(
   canvas.width = W;
   canvas.height = H;
   const ctx = canvas.getContext('2d')!;
-  // Undecided matchup (a later round whose teams are not yet determined):
-  // draw a faint dashed placeholder with no "TBD" text. The connecting
-  // bracket lines already say "this is a future match", so the acronym is
-  // redundant noise — a quiet ghost slot reads as intentional, not broken.
-  if (!match?.homeTeam || !match.awayTeam) {
+  // Ghost card only when neither team is determined yet.
+  // If one team is already confirmed (e.g. Canada after winning R32), show
+  // whatever flags exist — the connecting lines convey the rest.
+  if (!match?.homeTeam && !match?.awayTeam) {
     roundRect(ctx, 8, 8, W - 16, H - 16, 22);
     ctx.fillStyle = 'rgba(20,36,58,0.28)';
     ctx.fill();
@@ -147,10 +146,7 @@ function makeCardTexture(
     { team: match.awayTeam, score: match.awayScore },
   ];
 
-  // Teams known but not played yet: a bare "—" where a digit belongs reads
-  // as missing/broken data (amplified across the 16 R32 cards). Omit the
-  // score glyph entirely and center the flag until a real score exists; a
-  // faint divider keeps the two sides legible.
+  // Faint divider when pre-match (no scores yet).
   if (!hasScore) {
     ctx.strokeStyle = 'rgba(138,160,189,0.18)';
     ctx.lineWidth = 2;
@@ -161,6 +157,7 @@ function makeCardTexture(
   }
 
   sides.forEach(({ team, score }, i) => {
+    if (!team) return; // one side not yet determined — skip silently
     const win = match.winnerTeamId === team.id;
     if (hasScore && win) {
       roundRect(ctx, 22, rowY[i] - 58, W - 44, 108, 16);
