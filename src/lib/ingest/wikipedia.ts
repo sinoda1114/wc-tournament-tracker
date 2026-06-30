@@ -307,7 +307,7 @@ function sortByMinute(events: WikiMatchEvent[]): WikiMatchEvent[] {
  */
 export function parseWikipediaGroupArticle(wikitext: string): WikiMatch[] {
   const matches: WikiMatch[] = [];
-  const boxRe = /\{\{#invoke:football box\|main\b/g;
+  const boxRe = /\{\{#invoke:football box\|main\b/gi;
 
   // すべての box の開始位置を集める（ラインナップ領域の終端＝次の box 開始に使う）。
   const boxStarts: number[] = [];
@@ -436,11 +436,24 @@ async function defaultFetchWikitext(articleTitle: string): Promise<string | null
 
 /**
  * Wikipedia を取得元とする MatchEventProvider。
- * グループステージのみ対応。記事は run 中グループ単位でキャッシュし、6試合分を1フェッチで賄う。
+ * グループステージ・決勝トーナメント両対応。記事は run 中ラウンド単位でキャッシュする。
  * 該当試合が見つからない/解析できない場合は空を返し、呼び出し側のフォールバックに委ねる。
  */
 /** グループステージの全 12 組（fetchResults の走査対象）。 */
 const GROUP_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'] as const;
+
+/**
+ * 決勝トーナメントの各ラウンドに対応する Wikipedia 記事タイトル。
+ * 記事が未作成/未整備の場合は fetchWikitext が null を返し、空配列としてキャッシュする。
+ */
+const KO_STAGE_ARTICLES: Readonly<Record<string, string>> = {
+  round_of_32: '2026 FIFA World Cup round of 32',
+  round_of_16: '2026 FIFA World Cup round of 16',
+  quarter_final: '2026 FIFA World Cup quarter-finals',
+  semi_final: '2026 FIFA World Cup semi-finals',
+  final: '2026 FIFA World Cup final',
+  third_place: '2026 FIFA World Cup third-place match',
+};
 
 export function createWikipediaMatchEventProvider(
   options: WikipediaProviderOptions = {},
@@ -448,6 +461,8 @@ export function createWikipediaMatchEventProvider(
   const fetchWikitext = options.fetchWikitext ?? defaultFetchWikitext;
   // グループ文字 → 解析済み試合一覧（run 内キャッシュ。同グループの複数試合で再フェッチしない）。
   const cache = new Map<string, WikiMatch[]>();
+  // 決勝Tラウンド → 解析済み試合一覧（同ラウンドの複数試合で再フェッチしない）。
+  const koCache = new Map<string, WikiMatch[]>();
 
   async function getGroupMatches(letter: string): Promise<WikiMatch[]> {
     const cached = cache.get(letter);
@@ -458,11 +473,43 @@ export function createWikipediaMatchEventProvider(
     return parsed;
   }
 
+  async function getKoMatches(stage: string): Promise<WikiMatch[]> {
+    const cached = koCache.get(stage);
+    if (cached) return cached;
+    const articleTitle = KO_STAGE_ARTICLES[stage];
+    if (!articleTitle) return [];
+    const wikitext = await fetchWikitext(articleTitle);
+    const parsed = wikitext ? parseWikipediaGroupArticle(wikitext) : [];
+    koCache.set(stage, parsed);
+    return parsed;
+  }
+
+  /** チームペアで WikiMatch を探す共通ヘルパー。 */
+  function findByTeams(matches: WikiMatch[], home: string, away: string): WikiMatch | undefined {
+    return matches.find(
+      (m) =>
+        (m.team1Code === home && m.team2Code === away) ||
+        (m.team1Code === away && m.team2Code === home),
+    );
+  }
+
+  /** WikiMatch のイベントを NormalizedMatchEvent に変換する共通ヘルパー。 */
+  function eventsFromWiki(found: WikiMatch, home: string, away: string): NormalizedMatchEvent[] {
+    return found.events.map((e, index) => ({
+      type: e.type,
+      minute: e.minute,
+      // isHome は「我々の home（=context.homeCode）の出来事か」。
+      isHome: e.teamCode === home ? true : e.teamCode === away ? false : null,
+      playerName: e.playerName,
+      playerOut: e.playerOut,
+      externalId: `wp-${index}`,
+    }));
+  }
+
   return {
     async fetchResults(): Promise<NormalizedResult[]> {
-      // 全 12 組の記事から score の入った（=終了した）試合を結果として返す（主ソース用途）。
-      // 日付は記事から取らないため dateEvent は空＝reconcile はペアのみで一意化する
-      // （グループ内では同一ペアは1試合なので衝突しない）。組ごと try/catch で1組失敗を局所化。
+      // GL 全 12 組 + 決勝T全ラウンドから score の入った試合を返す（Wikipedia 主ソース用途）。
+      // 日付は記事から取らないため dateEvent は空（reconcile はペアのみで一意化）。
       const out: NormalizedResult[] = [];
       for (const letter of GROUP_LETTERS) {
         try {
@@ -484,57 +531,72 @@ export function createWikipediaMatchEventProvider(
           console.error('[ingest] Wikipedia fetchResults failed for group', letter, error);
         }
       }
+      for (const stage of Object.keys(KO_STAGE_ARTICLES)) {
+        try {
+          const koMatches = await getKoMatches(stage);
+          for (const match of koMatches) {
+            if (!match.score) continue;
+            out.push({
+              dateEvent: '',
+              homeName: match.team1Code,
+              awayName: match.team2Code,
+              homeScore: match.score.team1,
+              awayScore: match.score.team2,
+              finished: true,
+              externalEventId: null,
+              source: 'wikipedia',
+            });
+          }
+        } catch (error) {
+          console.error('[ingest] Wikipedia fetchResults failed for stage', stage, error);
+        }
+      }
       return out;
     },
 
     async fetchMatchEvents(context: MatchEventContext): Promise<NormalizedMatchEvent[]> {
-      // グループステージのみ対応。決勝Tや文脈不足は空でフォールバックさせる。
-      if (context.stage !== 'group_stage' || !context.groupLetter) return [];
       const home = context.homeCode.toUpperCase();
       const away = context.awayCode.toUpperCase();
 
-      const groupMatches = await getGroupMatches(context.groupLetter.toUpperCase());
-      const found = groupMatches.find(
-        (m) =>
-          (m.team1Code === home && m.team2Code === away) ||
-          (m.team1Code === away && m.team2Code === home),
-      );
-      if (!found) return [];
+      if (context.stage === 'group_stage' && context.groupLetter) {
+        const groupMatches = await getGroupMatches(context.groupLetter.toUpperCase());
+        const found = findByTeams(groupMatches, home, away);
+        if (!found) return [];
+        return eventsFromWiki(found, home, away);
+      }
 
-      return found.events.map((e, index) => ({
-        type: e.type,
-        minute: e.minute,
-        // isHome は「我々の home（=context.homeCode）の出来事か」。toAutoMatchEvents が
-        // sync.homeTeamId/awayTeamId に解決するため、記事の team1/team2 の向きに依らず正しい。
-        isHome: e.teamCode === home ? true : e.teamCode === away ? false : null,
-        playerName: e.playerName,
-        playerOut: e.playerOut,
-        // 試合内で一意な冪等キー（replaceAutoMatchEvents の UNIQUE(match_id, external_id) 用）。
-        externalId: `wp-${index}`,
-      }));
+      if (context.stage in KO_STAGE_ARTICLES) {
+        const koMatches = await getKoMatches(context.stage);
+        const found = findByTeams(koMatches, home, away);
+        if (!found) return [];
+        return eventsFromWiki(found, home, away);
+      }
+
+      return [];
     },
 
     async fetchFallbackResults(targets: FallbackResultTarget[]): Promise<NormalizedResult[]> {
-      // グループ記事キャッシュ（getGroupMatches）を fetchMatchEvents と共有するため、
-      // イベント同期と同じ run 内では追加フェッチが発生しない（同グループは1回だけ取得）。
       const results: NormalizedResult[] = [];
       for (const t of targets) {
-        if (t.stage !== 'group_stage' || !t.groupLetter) continue;
         try {
-          const groupMatches = await getGroupMatches(t.groupLetter.toUpperCase());
           const home = t.homeCode.toUpperCase();
           const away = t.awayCode.toUpperCase();
-          const found = groupMatches.find(
-            (m) =>
-              (m.team1Code === home && m.team2Code === away) ||
-              (m.team1Code === away && m.team2Code === home),
-          );
-          if (!found) continue;
-          const result = wikiMatchToResult(found, t);
-          if (result) results.push(result);
+
+          if (t.stage === 'group_stage' && t.groupLetter) {
+            const groupMatches = await getGroupMatches(t.groupLetter.toUpperCase());
+            const found = findByTeams(groupMatches, home, away);
+            if (!found) continue;
+            const result = wikiMatchToResult(found, t);
+            if (result) results.push(result);
+          } else if (t.stage in KO_STAGE_ARTICLES) {
+            const koMatches = await getKoMatches(t.stage);
+            const found = findByTeams(koMatches, home, away);
+            if (!found) continue;
+            const result = wikiMatchToResult(found, t);
+            if (result) results.push(result);
+          }
         } catch (error) {
-          // 1グループの取得失敗で全フォールバックを止めない（他グループは継続）。
-          console.error('[ingest] Wikipedia fallback result failed', t.groupLetter, error);
+          console.error('[ingest] Wikipedia fallback result failed', t.stage, error);
         }
       }
       return results;
