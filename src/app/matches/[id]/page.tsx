@@ -229,7 +229,7 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
             background: 'var(--wc-surface)',
           }}
         >
-          <MatchVersus match={match} nameMode="full" size="md" />
+          <MatchVersus match={match} nameMode="full" size="md" showPenalty />
         </Stack>
 
         {lineup && match.homeTeam && match.awayTeam ? (
