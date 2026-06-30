@@ -7,6 +7,7 @@ import * as THREE from 'three';
 import { useRef, useMemo, useEffect, useState, Suspense, Component, type ReactNode } from 'react';
 
 import type { MatchDetail } from '@/db/queries';
+import { flagEmojiToISO2 } from '@/lib/flag-emoji';
 
 type BracketLayout3DProps = {
   matches: MatchDetail[];
@@ -101,17 +102,6 @@ const CARD_STYLES = {
   },
 } as const;
 
-// Flag emoji → lowercase ISO 3166-1 alpha-2 code for flagcdn.com
-// e.g. 🇨🇦 → "ca", 🇿🇦 → "za"
-// Subdivision flags (e.g. 🏴󠁧󠁢󠁥󠁮󠁧󁿢) return "" — caller falls back to FIFA code text.
-function flagEmojiToISO2(emoji: string): string {
-  return [...emoji]
-    .map((c) => c.codePointAt(0) ?? 0)
-    .filter((cp) => cp >= 0x1f1e6 && cp <= 0x1f1ff)
-    .map((cp) => String.fromCharCode(cp - 0x1f1e6 + 65))
-    .join('')
-    .toLowerCase();
-}
 
 function makeCardTexture(
   match: MatchDetail | null | undefined,
