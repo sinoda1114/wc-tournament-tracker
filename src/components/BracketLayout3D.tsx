@@ -397,10 +397,9 @@ function Scene({ matches }: { matches: MatchDetail[] }) {
       const iso2 = flagEmojiToISO2(emoji);
       if (!iso2) { finish(); continue; }
       const img = new Image();
-      img.crossOrigin = 'anonymous';
       img.onload = () => { cache.set(emoji, img); finish(); };
       img.onerror = finish;
-      img.src = `https://flagcdn.com/w80/${iso2}.png`;
+      img.src = `/api/flag/${iso2}`;
     }
   }, [matches]);
 
