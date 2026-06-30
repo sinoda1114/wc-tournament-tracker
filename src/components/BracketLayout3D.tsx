@@ -168,12 +168,14 @@ function makeCardTexture(
     ctx.textBaseline = 'middle';
     if (hasScore) {
       ctx.font = '118px "Apple Color Emoji","Segoe UI Emoji",serif';
+      ctx.fillStyle = 'white';
       ctx.fillText(team.flag, W * 0.36, rowY[i]);
       ctx.font = 'bold 96px system-ui,sans-serif';
       ctx.fillStyle = win ? s.score : '#8aa0bd';
       ctx.fillText(String(score), W * 0.74, rowY[i]);
     } else {
       ctx.font = '132px "Apple Color Emoji","Segoe UI Emoji",serif';
+      ctx.fillStyle = 'white';
       ctx.fillText(team.flag, W / 2, rowY[i]);
     }
   });
