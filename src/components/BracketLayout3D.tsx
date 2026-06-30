@@ -365,38 +365,16 @@ function FogSetup() {
 
 // --- Main scene ---
 
-function Scene({ matches }: { matches: MatchDetail[] }) {
+function Scene({
+  matches,
+  flagCache,
+  flagsReady,
+}: {
+  matches: MatchDetail[];
+  flagCache: Map<string, HTMLImageElement>;
+  flagsReady: boolean;
+}) {
   const byId = useMemo(() => new Map(matches.map((m) => [m.id, m])), [matches]);
-
-  const [flagCache, setFlagCache] = useState<Map<string, HTMLImageElement>>(new Map());
-  const [flagsReady, setFlagsReady] = useState(false);
-
-  useEffect(() => {
-    const emojis = [
-      ...new Set(
-        matches
-          .flatMap((m) => [m.homeTeam?.flag, m.awayTeam?.flag])
-          .filter((f): f is string => Boolean(f)),
-      ),
-    ];
-    if (emojis.length === 0) { setFlagsReady(true); return; }
-    let pending = emojis.length;
-    const cache = new Map<string, HTMLImageElement>();
-    const finish = () => {
-      if (--pending === 0) {
-        setFlagCache(cache);
-        setFlagsReady(true);
-      }
-    };
-    for (const emoji of emojis) {
-      const iso2 = flagEmojiToISO2(emoji);
-      if (!iso2) { finish(); continue; }
-      const img = new Image();
-      img.onload = () => { cache.set(emoji, img); finish(); };
-      img.onerror = finish;
-      img.src = `/api/flag/${iso2}`;
-    }
-  }, [matches]);
 
   const tierPositions = useMemo<THREE.Vector3[][]>(
     () =>
@@ -541,6 +519,36 @@ class SceneErrorBoundary extends Component<{ children: ReactNode }, { error: Err
 // --- Exported component ---
 
 export function BracketLayout3D({ matches }: BracketLayout3DProps) {
+  const [flagCache, setFlagCache] = useState<Map<string, HTMLImageElement>>(new Map());
+  const [flagsReady, setFlagsReady] = useState(false);
+
+  useEffect(() => {
+    const emojis = [
+      ...new Set(
+        matches
+          .flatMap((m) => [m.homeTeam?.flag, m.awayTeam?.flag])
+          .filter((f): f is string => Boolean(f)),
+      ),
+    ];
+    if (emojis.length === 0) { setFlagsReady(true); return; }
+    let pending = emojis.length;
+    const cache = new Map<string, HTMLImageElement>();
+    const finish = () => {
+      if (--pending === 0) {
+        setFlagCache(cache);
+        setFlagsReady(true);
+      }
+    };
+    for (const emoji of emojis) {
+      const iso2 = flagEmojiToISO2(emoji);
+      if (!iso2) { finish(); continue; }
+      const img = new Image();
+      img.onload = () => { cache.set(emoji, img); finish(); };
+      img.onerror = finish;
+      img.src = `/api/flag/${iso2}`;
+    }
+  }, [matches]);
+
   return (
     <SceneErrorBoundary>
       <div
@@ -550,6 +558,8 @@ export function BracketLayout3D({ matches }: BracketLayout3DProps) {
           background: '#04060d',
           borderRadius: '12px',
           overflow: 'hidden',
+          opacity: flagsReady ? 1 : 0,
+          transition: 'opacity 0.4s ease',
         }}
       >
         <Canvas
@@ -558,7 +568,7 @@ export function BracketLayout3D({ matches }: BracketLayout3DProps) {
           dpr={[1, 2]}
         >
           <Suspense fallback={null}>
-            <Scene matches={matches} />
+            <Scene matches={matches} flagCache={flagCache} flagsReady={flagsReady} />
           </Suspense>
         </Canvas>
       </div>
