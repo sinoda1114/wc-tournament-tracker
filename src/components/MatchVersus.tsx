@@ -18,6 +18,8 @@ type MatchVersusProps = {
    * - 'full': ロケール連動の正式名（試合カード用）。
    */
   nameMode?: 'code' | 'full';
+  /** PK スコアを表示するか。試合詳細ページのみ true にする（ブラケット/カードは false）。 */
+  showPenalty?: boolean;
 };
 
 export type MatchTeamNameMode = NonNullable<MatchVersusProps['nameMode']>;
@@ -27,6 +29,7 @@ export function MatchVersus({
   size = 'md',
   showFavoriteStar = true,
   nameMode = 'code',
+  showPenalty = false,
 }: MatchVersusProps) {
   const { locale, dict } = useI18n();
   const slotT = dict.match.slot;
@@ -83,7 +86,7 @@ export function MatchVersus({
             <strong className={homeWin ? 'is-winner' : ''}>{match.homeScore}</strong>
             <span aria-hidden>-</span>
             <strong className={awayWin ? 'is-winner' : ''}>{match.awayScore}</strong>
-            {match.penaltyHomeScore !== null && match.penaltyAwayScore !== null ? (
+            {showPenalty && match.penaltyHomeScore !== null && match.penaltyAwayScore !== null ? (
               <span className="wc-versus-penalty" aria-label={`PK ${match.penaltyHomeScore}-${match.penaltyAwayScore}`}>
                 {'PK '}
                 <strong className={homeWin ? 'is-winner' : ''}>{match.penaltyHomeScore}</strong>
