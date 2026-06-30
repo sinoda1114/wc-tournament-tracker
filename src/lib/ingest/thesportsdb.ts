@@ -33,7 +33,7 @@ function parseScore(value: string | number | null | undefined): number | null {
 
 const NOT_STARTED = /^(ns|not started|tbd|time to be defined)$/i;
 // ライブ進行中の代表的なステータス（前半 1H, 後半 2H, ハーフタイム HT, 延長 ET, PK P, 分表示 45'）。
-const LIVE = /^(1h|2h|ht|et|p|pen|live|half\s*time|\d{1,3}'?)$/i;
+const LIVE = /^(1h|2h|ht|et|p|live|half\s*time|\d{1,3}'?)$/i;
 
 function isFinished(
   homeScore: number | null,
