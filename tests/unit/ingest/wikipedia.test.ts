@@ -281,8 +281,10 @@ describe('createWikipediaMatchEventProvider', () => {
     expect(goals.every((g) => g.isHome === false)).toBe(true);
   });
 
-  it('グループステージ以外は空を返す（決勝Tはフォールバックに委ねる）', async () => {
-    const events = await provider().fetchMatchEvents({
+  it('決勝T記事が取得できない場合は空を返す', async () => {
+    const events = await createWikipediaMatchEventProvider({
+      fetchWikitext: async () => null,
+    }).fetchMatchEvents({
       ...baseContext,
       stage: 'round_of_32',
       groupLetter: null,
