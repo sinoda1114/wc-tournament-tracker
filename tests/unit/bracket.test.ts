@@ -28,6 +28,8 @@ function buildMatch(overrides: Partial<MatchDetail>): MatchDetail {
     awayTeamId: null,
     homeScore: null,
     awayScore: null,
+    penaltyHomeScore: null,
+    penaltyAwayScore: null,
     winnerTeamId: null,
     status: 'scheduled',
     groupLetter: null,

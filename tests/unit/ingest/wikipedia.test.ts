@@ -114,6 +114,7 @@ describe('wikiMatchToResult（T-82③・WikiMatch → NormalizedResult）', () =
     team1Code: 'MEX',
     team2Code: 'RSA',
     score: { team1: 2, team2: 0 },
+    penaltyScore: null,
     events: [],
   };
 

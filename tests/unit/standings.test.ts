@@ -49,6 +49,8 @@ function match({
     awayTeamId: away,
     homeScore,
     awayScore,
+    penaltyHomeScore: null,
+    penaltyAwayScore: null,
     winnerTeamId,
     status,
     groupLetter: 'A',
