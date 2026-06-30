@@ -132,18 +132,13 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
   const venueSummary = await getVenueMatchSummary(match.venueId);
   const events = await getMatchEvents(match.id);
 
-  // T-87/T-92: グループ戦の先発XIを Wikipedia から取得しピッチ表示。
-  // 先発XIを期待できるカード（両チーム確定済みのグループ戦）かを先に判定しておき、
+  // T-87/T-92: グループ戦 + 決勝Tの先発XIを Wikipedia から取得しピッチ表示。
+  // 先発XIを期待できるカード（両チーム確定済み）かを先に判定しておき、
   // 取得できなかったときに「未反映」を静かに示すために使う（無言で消えるのを防ぐ）。
-  const lineupExpected = Boolean(
-    match.stage === 'group_stage' &&
-      match.groupLetter &&
-      match.homeTeam?.nameEn &&
-      match.awayTeam?.nameEn,
-  );
+  const lineupExpected = Boolean(match.homeTeam?.nameEn && match.awayTeam?.nameEn);
 
   let lineup: MatchLineup | null = null;
-  if (lineupExpected && match.groupLetter && match.homeTeam?.nameEn && match.awayTeam?.nameEn) {
+  if (lineupExpected && match.homeTeam?.nameEn && match.awayTeam?.nameEn) {
     try {
       // 取得失敗（ネットワーク等）でページ全体を落とさないよう握りつぶすが、
       // T-92: サイレントにせず原因をサーバログに残す（本番で非表示の理由を追えるように）。
@@ -151,10 +146,12 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
         home: { nameEn: match.homeTeam.nameEn, fifaCode: match.homeTeam.fifaCode },
         away: { nameEn: match.awayTeam.nameEn, fifaCode: match.awayTeam.fifaCode },
         groupLetter: match.groupLetter,
+        stage: match.stage,
       });
     } catch (error) {
+      const stageInfo = match.groupLetter ?? match.stage;
       console.error(
-        `[match ${match.id}] fetchMatchLineup failed (group ${match.groupLetter}, ${match.homeTeam.nameEn} vs ${match.awayTeam.nameEn})`,
+        `[match ${match.id}] fetchMatchLineup failed (${stageInfo}, ${match.homeTeam.nameEn} vs ${match.awayTeam.nameEn})`,
         error,
       );
       lineup = null;
