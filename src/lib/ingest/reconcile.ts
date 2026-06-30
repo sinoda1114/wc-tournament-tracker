@@ -12,6 +12,8 @@ export type ReconcileMatch = {
   awayTeamId: string | null;
   homeScore: number | null;
   awayScore: number | null;
+  penaltyHomeScore: number | null;
+  penaltyAwayScore: number | null;
   status: MatchStatus;
   stage: string;
   /** グループ文字（'A'..'L'）。決勝T等は null。Wikipedia の記事特定に使う。 */
@@ -85,7 +87,14 @@ export function planMatchUpdates(
   // 試合単位で1件に絞る。複数ソースが同一試合に異なるスコアを返しても、
   // 先にソース優先で1件を選び（グループ戦は Wikipedia 勝ち）、その後に冪等判定する。
   // 順序やソース欠落（冪等スキップ）で run ごとに値が入れ替わる現象を防ぐ。
-  type Candidate = { match: ReconcileMatch; ourHome: number; ourAway: number; source?: string };
+  type Candidate = {
+    match: ReconcileMatch;
+    ourHome: number;
+    ourAway: number;
+    ourPenaltyHome: number | null;
+    ourPenaltyAway: number | null;
+    source?: string;
+  };
   const chosen = new Map<number, Candidate>();
 
   for (const r of results) {
@@ -103,27 +112,62 @@ export function planMatchUpdates(
     const ourAway = sameOrientation ? r.awayScore : r.homeScore;
     if (ourHome === null || ourAway === null) continue;
 
-    // 決勝Tの同点は PK 決着で、スコアだけでは勝者不明 → 手入力フォールバックに委ねる。
-    if (ourHome === ourAway && m.stage !== 'group_stage') continue;
+    const ourPenaltyHome = sameOrientation
+      ? (r.penaltyHomeScore ?? null)
+      : (r.penaltyAwayScore ?? null);
+    const ourPenaltyAway = sameOrientation
+      ? (r.penaltyAwayScore ?? null)
+      : (r.penaltyHomeScore ?? null);
 
-    const candidate: Candidate = { match: m, ourHome, ourAway, source: r.source };
+    // 決勝Tの同点は PK 決着。PK スコアが不明なら勝者を決められない → スキップ。
+    // PK スコアがある場合は PK 勝者付きで書き込む。
+    if (ourHome === ourAway && m.stage !== 'group_stage') {
+      if (ourPenaltyHome === null || ourPenaltyAway === null || ourPenaltyHome === ourPenaltyAway) {
+        continue;
+      }
+    }
+
+    const candidate: Candidate = { match: m, ourHome, ourAway, ourPenaltyHome, ourPenaltyAway, source: r.source };
     const existing = chosen.get(m.id);
     // 既存が無ければ採用。グループ戦で Wikipedia が来たら他ソースより優先（上書き）。
+    // KO 戦で Wikipedia が PK スコアを持ち、既存が持たない場合も Wikipedia を優先。
     const wikipediaWins =
-      m.stage === 'group_stage' && candidate.source === 'wikipedia' && existing?.source !== 'wikipedia';
+      candidate.source === 'wikipedia' &&
+      existing?.source !== 'wikipedia' &&
+      (m.stage === 'group_stage' || (ourPenaltyHome !== null && existing?.ourPenaltyHome === null));
     if (!existing || wikipediaWins) chosen.set(m.id, candidate);
   }
 
   const updates: UpdateMatchResultInput[] = [];
   for (const c of chosen.values()) {
-    // 冪等: 既に同じ確定結果なら更新不要（優先選択の後に判定するのが要点）。
-    if (c.match.status === 'finished' && c.match.homeScore === c.ourHome && c.match.awayScore === c.ourAway) {
-      continue;
+    // PK 勝者を解決する（KO 引き分けのとき penaltyHome > penaltyAway なら home 勝ち）。
+    let winnerTeamId: string | null | undefined = undefined;
+    if (c.ourHome !== c.ourAway) {
+      // 通常決着: スコア差から勝者は updateMatchResult が解決するため渡さない
+      winnerTeamId = undefined;
+    } else if (c.ourPenaltyHome !== null && c.ourPenaltyAway !== null) {
+      winnerTeamId =
+        c.ourPenaltyHome > c.ourPenaltyAway
+          ? c.match.homeTeamId
+          : c.match.awayTeamId;
     }
+
+    // 冪等: 既に同じ確定結果（スコア・PK・勝者）なら更新不要。
+    const alreadyDone =
+      c.match.status === 'finished' &&
+      c.match.homeScore === c.ourHome &&
+      c.match.awayScore === c.ourAway &&
+      c.match.penaltyHomeScore === (c.ourPenaltyHome ?? null) &&
+      c.match.penaltyAwayScore === (c.ourPenaltyAway ?? null);
+    if (alreadyDone) continue;
+
     updates.push({
       matchId: c.match.id,
       homeScore: c.ourHome,
       awayScore: c.ourAway,
+      penaltyHomeScore: c.ourPenaltyHome,
+      penaltyAwayScore: c.ourPenaltyAway,
+      ...(winnerTeamId !== undefined ? { winnerTeamId } : {}),
       status: 'finished',
     });
   }

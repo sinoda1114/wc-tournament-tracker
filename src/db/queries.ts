@@ -89,6 +89,9 @@ export type Match = {
   awayTeamId: string | null;
   homeScore: number | null;
   awayScore: number | null;
+  /** PK決着の場合のみ非null。homeScore/awayScore は 90+120分スコア。 */
+  penaltyHomeScore: number | null;
+  penaltyAwayScore: number | null;
   winnerTeamId: string | null;
   status: MatchStatus;
   /** グループステージ試合のグループ識別子（A〜L）。決勝Tは null。 */
@@ -116,6 +119,8 @@ type MatchRow = {
   away_team_id: string | null;
   home_score: number | null;
   away_score: number | null;
+  penalty_home_score: number | null;
+  penalty_away_score: number | null;
   winner_team_id: string | null;
   status: MatchStatus;
   group_letter: string | null;
@@ -170,6 +175,8 @@ export type UpdateMatchResultInput = {
   matchId: number;
   homeScore: number | null;
   awayScore: number | null;
+  penaltyHomeScore?: number | null;
+  penaltyAwayScore?: number | null;
   winnerTeamId?: string | null;
   status: MatchStatus;
 };
@@ -602,10 +609,7 @@ export async function updateMatchResult(input: UpdateMatchResultInput) {
   const winnerTeamId = resolveWinnerTeamId(input, currentMatch);
 
   // グループステージの引き分け（例: 1-1）は winner 不在が正常。
-  // これを許可しないと、cron 取込が引き分け試合を確定しようとして throw し、
-  // スコア/「終了」が永久に反映されない（イベントだけ入る不整合になる）。T-62。
-  // 決勝T（KO）は PK 決着で勝者が要るため従来どおり winner 必須を維持する
-  //（cron は reconcile 側で KO 引き分けをスキップし手入力に委ねている）。
+  // 決勝T（KO）の引き分けは PK 決着で、reconcile が PK スコアから勝者を解決して winnerTeamId を渡す。
   const isGroupStageDraw =
     currentMatch.stage === 'group_stage' &&
     input.homeScore !== null &&
@@ -622,6 +626,8 @@ export async function updateMatchResult(input: UpdateMatchResultInput) {
       SET
         home_score = ?,
         away_score = ?,
+        penalty_home_score = ?,
+        penalty_away_score = ?,
         winner_team_id = ?,
         status = ?,
         updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
@@ -630,6 +636,8 @@ export async function updateMatchResult(input: UpdateMatchResultInput) {
     args: [
       input.homeScore,
       input.awayScore,
+      input.penaltyHomeScore ?? null,
+      input.penaltyAwayScore ?? null,
       winnerTeamId,
       input.status,
       input.matchId,
@@ -749,6 +757,8 @@ async function getMatch(matchId: number) {
         away_team_id,
         home_score,
         away_score,
+        penalty_home_score,
+        penalty_away_score,
         winner_team_id,
         status,
         group_letter,
@@ -778,6 +788,8 @@ function matchDetailSql(suffix: string) {
       m.away_team_id,
       m.home_score,
       m.away_score,
+      m.penalty_home_score,
+      m.penalty_away_score,
       m.winner_team_id,
       m.status,
       m.group_letter,
@@ -830,6 +842,8 @@ function mapMatch(row: MatchRow): Match {
     awayTeamId: row.away_team_id,
     homeScore: row.home_score,
     awayScore: row.away_score,
+    penaltyHomeScore: row.penalty_home_score ?? null,
+    penaltyAwayScore: row.penalty_away_score ?? null,
     winnerTeamId: row.winner_team_id,
     status: row.status,
     groupLetter: row.group_letter,

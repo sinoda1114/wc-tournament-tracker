@@ -19,6 +19,8 @@ function match(partial: Partial<ReconcileMatch> & { id: number }): ReconcileMatc
     awayTeamId: null,
     homeScore: null,
     awayScore: null,
+    penaltyHomeScore: null,
+    penaltyAwayScore: null,
     status: 'scheduled',
     stage: 'group_stage',
     groupLetter: 'A',
@@ -45,7 +47,7 @@ describe('planMatchUpdates', () => {
     ];
     const updates = planMatchUpdates([result({})], matches, teams);
     expect(updates).toEqual([
-      { matchId: 1, homeScore: 2, awayScore: 1, status: 'finished' },
+      { matchId: 1, homeScore: 2, awayScore: 1, penaltyHomeScore: null, penaltyAwayScore: null, status: 'finished' },
     ]);
   });
 
@@ -56,7 +58,7 @@ describe('planMatchUpdates', () => {
     ];
     const updates = planMatchUpdates([result({})], matches, teams);
     expect(updates).toEqual([
-      { matchId: 7, homeScore: 1, awayScore: 2, status: 'finished' },
+      { matchId: 7, homeScore: 1, awayScore: 2, penaltyHomeScore: null, penaltyAwayScore: null, status: 'finished' },
     ]);
   });
 
@@ -71,7 +73,7 @@ describe('planMatchUpdates', () => {
       teams,
     );
     expect(updates).toEqual([
-      { matchId: 1, homeScore: 2, awayScore: 1, status: 'finished' },
+      { matchId: 1, homeScore: 2, awayScore: 1, penaltyHomeScore: null, penaltyAwayScore: null, status: 'finished' },
     ]);
   });
 
@@ -102,7 +104,7 @@ describe('planMatchUpdates', () => {
     ];
     const updates = planMatchUpdates([result({})], matches, teams);
     expect(updates).toEqual([
-      { matchId: 1, homeScore: 2, awayScore: 1, status: 'finished' },
+      { matchId: 1, homeScore: 2, awayScore: 1, penaltyHomeScore: null, penaltyAwayScore: null, status: 'finished' },
     ]);
   });
 
@@ -184,7 +186,7 @@ describe('planMatchUpdates', () => {
       teams,
     );
     expect(updates).toEqual([
-      { matchId: 2, homeScore: 0, awayScore: 0, status: 'finished' },
+      { matchId: 2, homeScore: 0, awayScore: 0, penaltyHomeScore: null, penaltyAwayScore: null, status: 'finished' },
     ]);
   });
 });
@@ -196,10 +198,10 @@ describe('planMatchUpdates（ソース優先・空日付）', () => {
     const wiki = result({ source: 'wikipedia', dateEvent: '', homeScore: 2, awayScore: 0 });
     // 順序に依らず Wikipedia が勝つ（毎 run の入れ替わり防止）。
     expect(planMatchUpdates([tsdb, wiki], matches, teams)).toEqual([
-      { matchId: 1, homeScore: 2, awayScore: 0, status: 'finished' },
+      { matchId: 1, homeScore: 2, awayScore: 0, penaltyHomeScore: null, penaltyAwayScore: null, status: 'finished' },
     ]);
     expect(planMatchUpdates([wiki, tsdb], matches, teams)).toEqual([
-      { matchId: 1, homeScore: 2, awayScore: 0, status: 'finished' },
+      { matchId: 1, homeScore: 2, awayScore: 0, penaltyHomeScore: null, penaltyAwayScore: null, status: 'finished' },
     ]);
   });
 
@@ -217,7 +219,7 @@ describe('planMatchUpdates（ソース優先・空日付）', () => {
     const matches = [match({ id: 1, homeTeamId: 'mex', awayTeamId: 'rsa', matchDate: '2026-06-24' })];
     const wiki = result({ source: 'wikipedia', dateEvent: '', homeScore: 2, awayScore: 0 });
     expect(planMatchUpdates([wiki], matches, teams)).toEqual([
-      { matchId: 1, homeScore: 2, awayScore: 0, status: 'finished' },
+      { matchId: 1, homeScore: 2, awayScore: 0, penaltyHomeScore: null, penaltyAwayScore: null, status: 'finished' },
     ]);
   });
 });

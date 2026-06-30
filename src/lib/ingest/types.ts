@@ -12,6 +12,12 @@ export type NormalizedResult = {
   awayScore: number | null;
   /** 試合が完全に終了しているか（延期・未実施・ライブは false）。 */
   finished: boolean;
+  /**
+   * PK得点（PK決着の場合のみ非null）。homeScore/awayScore は 90+120分スコア。
+   * penaltyHomeScore > penaltyAwayScore なら home が PK勝者。
+   */
+  penaltyHomeScore?: number | null;
+  penaltyAwayScore?: number | null;
   /** 取得元の試合ID（イベントタイムライン取得用）。取得元が返さない場合は省略/null。 */
   externalEventId?: string | null;
   /**

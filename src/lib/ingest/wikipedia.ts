@@ -47,6 +47,8 @@ export type WikiMatch = {
   team2Code: string;
   /** football box の `score`（"2–1" 等）。未実施/未記入なら null（=finished 判定にも使う）。 */
   score: WikiMatchScore | null;
+  /** PK決着の場合の `penaltyscore`（"3–4" 等）。通常は null。 */
+  penaltyScore: WikiMatchScore | null;
   events: WikiMatchEvent[];
 };
 
@@ -324,6 +326,7 @@ export function parseWikipediaGroupArticle(wikitext: string): WikiMatch[] {
     if (!team1Code || !team2Code) continue;
 
     const score = parseScore(params.score);
+    const penaltyScore = parseScore(params.penaltyscore);
 
     const events: WikiMatchEvent[] = [];
     if (params.goals1) events.push(...parseGoals(params.goals1, team1Code));
@@ -336,7 +339,7 @@ export function parseWikipediaGroupArticle(wikitext: string): WikiMatch[] {
     if (tables[0]) events.push(...parseLineupCardsAndSubs(tables[0], team1Code));
     if (tables[1]) events.push(...parseLineupCardsAndSubs(tables[1], team2Code));
 
-    matches.push({ team1Code, team2Code, score, events: sortByMinute(events) });
+    matches.push({ team1Code, team2Code, score, penaltyScore, events: sortByMinute(events) });
   }
   return matches;
 }
@@ -543,6 +546,8 @@ export function createWikipediaMatchEventProvider(
               homeScore: match.score.team1,
               awayScore: match.score.team2,
               finished: true,
+              penaltyHomeScore: match.penaltyScore?.team1 ?? null,
+              penaltyAwayScore: match.penaltyScore?.team2 ?? null,
               externalEventId: null,
               source: 'wikipedia',
             });

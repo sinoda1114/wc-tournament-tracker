@@ -83,6 +83,14 @@ export function MatchVersus({
             <strong className={homeWin ? 'is-winner' : ''}>{match.homeScore}</strong>
             <span aria-hidden>-</span>
             <strong className={awayWin ? 'is-winner' : ''}>{match.awayScore}</strong>
+            {match.penaltyHomeScore !== null && match.penaltyAwayScore !== null ? (
+              <span className="wc-versus-penalty" aria-label={`PK ${match.penaltyHomeScore}-${match.penaltyAwayScore}`}>
+                {'PK '}
+                <strong className={homeWin ? 'is-winner' : ''}>{match.penaltyHomeScore}</strong>
+                {'-'}
+                <strong className={awayWin ? 'is-winner' : ''}>{match.penaltyAwayScore}</strong>
+              </span>
+            ) : null}
           </>
         ) : (
           <span aria-hidden>{dict.match.versus}</span>
