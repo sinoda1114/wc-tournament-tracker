@@ -4,9 +4,10 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, Billboard, Stars } from '@react-three/drei';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import * as THREE from 'three';
-import { useRef, useMemo, useEffect, Suspense, Component, type ReactNode } from 'react';
+import { useRef, useMemo, useEffect, useState, Suspense, Component, type ReactNode } from 'react';
 
 import type { MatchDetail } from '@/db/queries';
+import { flagEmojiToISO2 } from '@/lib/flag-emoji';
 
 type BracketLayout3DProps = {
   matches: MatchDetail[];
@@ -101,9 +102,11 @@ const CARD_STYLES = {
   },
 } as const;
 
+
 function makeCardTexture(
   match: MatchDetail | null | undefined,
   style: CardStyle,
+  flagCache: Map<string, HTMLImageElement> = new Map(),
 ): THREE.CanvasTexture {
   const W = 300, H = 360;
   const canvas = document.createElement('canvas');
@@ -167,16 +170,26 @@ function makeCardTexture(
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     if (hasScore) {
-      ctx.font = '118px "Apple Color Emoji","Segoe UI Emoji",serif';
-      ctx.fillStyle = 'white';
-      ctx.fillText(team.flag, W * 0.36, rowY[i]);
+      const flagImg = flagCache.get(team.flag);
+      if (flagImg) {
+        ctx.drawImage(flagImg, Math.round(W * 0.36 - 45), rowY[i] - 30, 90, 60);
+      } else {
+        ctx.fillStyle = 'rgba(255,255,255,0.7)';
+        ctx.font = 'bold 48px system-ui,sans-serif';
+        ctx.fillText(team.fifaCode, W * 0.36, rowY[i]);
+      }
       ctx.font = 'bold 96px system-ui,sans-serif';
       ctx.fillStyle = win ? s.score : '#8aa0bd';
       ctx.fillText(String(score), W * 0.74, rowY[i]);
     } else {
-      ctx.font = '132px "Apple Color Emoji","Segoe UI Emoji",serif';
-      ctx.fillStyle = 'white';
-      ctx.fillText(team.flag, W / 2, rowY[i]);
+      const flagImg = flagCache.get(team.flag);
+      if (flagImg) {
+        ctx.drawImage(flagImg, Math.round(W / 2 - 60), rowY[i] - 40, 120, 80);
+      } else {
+        ctx.fillStyle = 'rgba(255,255,255,0.7)';
+        ctx.font = 'bold 56px system-ui,sans-serif';
+        ctx.fillText(team.fifaCode, W / 2, rowY[i]);
+      }
     }
   });
 
@@ -231,6 +244,8 @@ function MatchCard({
   height,
   style,
   opacity = 1,
+  flagCache,
+  flagsReady,
 }: {
   match: MatchDetail | null | undefined;
   position: [number, number, number];
@@ -238,11 +253,13 @@ function MatchCard({
   height: number;
   style: CardStyle;
   opacity?: number;
+  flagCache: Map<string, HTMLImageElement>;
+  flagsReady: boolean;
 }) {
   const tex = useMemo(
-    () => makeCardTexture(match, style),
+    () => makeCardTexture(match, style, flagCache),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [match?.id, match?.homeScore, match?.awayScore, match?.winnerTeamId, match?.homeTeam?.id, match?.awayTeam?.id, style],
+    [match?.id, match?.homeScore, match?.awayScore, match?.winnerTeamId, match?.homeTeam?.id, match?.awayTeam?.id, style, flagsReady],
   );
   useEffect(() => () => tex.dispose(), [tex]);
   return (
@@ -351,6 +368,33 @@ function FogSetup() {
 function Scene({ matches }: { matches: MatchDetail[] }) {
   const byId = useMemo(() => new Map(matches.map((m) => [m.id, m])), [matches]);
 
+  const flagCacheRef = useRef<Map<string, HTMLImageElement>>(new Map());
+  const [flagsReady, setFlagsReady] = useState(false);
+
+  useEffect(() => {
+    const emojis = [
+      ...new Set(
+        matches
+          .flatMap((m) => [m.homeTeam?.flag, m.awayTeam?.flag])
+          .filter((f): f is string => Boolean(f)),
+      ),
+    ];
+    if (emojis.length === 0) { setFlagsReady(true); return; }
+    let pending = emojis.length;
+    const cache = flagCacheRef.current;
+    const finish = () => { if (--pending === 0) setFlagsReady(true); };
+    for (const emoji of emojis) {
+      const iso2 = flagEmojiToISO2(emoji);
+      if (!iso2) { finish(); continue; }
+      const img = new Image();
+      img.onload = () => { cache.set(emoji, img); finish(); };
+      img.onerror = finish;
+      img.src = `/api/flag/${iso2}`;
+    }
+  }, [matches]);
+
+  const flagCache = flagCacheRef.current;
+
   const tierPositions = useMemo<THREE.Vector3[][]>(
     () =>
       TIERS.map((tier) => {
@@ -395,7 +439,7 @@ function Scene({ matches }: { matches: MatchDetail[] }) {
             Math.sin(ang) * tier.r,
           ];
           return (
-            <MatchCard key={id} match={byId.get(id)} position={pos} width={w} height={h} style={style} />
+            <MatchCard key={id} match={byId.get(id)} position={pos} width={w} height={h} style={style} flagCache={flagCache} flagsReady={flagsReady} />
           );
         });
       })}
@@ -421,6 +465,8 @@ function Scene({ matches }: { matches: MatchDetail[] }) {
         height={2.2}
         style="bronze"
         opacity={0.72}
+        flagCache={flagCache}
+        flagsReady={flagsReady}
       />
       <RoundLabel
         text="3RD PLACE"
