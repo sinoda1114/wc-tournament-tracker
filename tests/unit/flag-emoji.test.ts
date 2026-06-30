@@ -26,8 +26,12 @@ describe('flagEmojiToISO2', () => {
     expect(flagEmojiToISO2('🇳🇱')).toBe('nl');
   });
 
-  it('サブディビジョン旗 (🏴󠁧󠁢󠁥󠁮󠁧󁿢) は空文字を返す', () => {
-    expect(flagEmojiToISO2('🏴󠁧󠁢󠁥󠁮󠁧󁿢')).toBe('');
+  it('イングランド 🏴󠁧󠁢󠁥󠁮󠁧󁿢 → gb-eng', () => {
+    expect(flagEmojiToISO2('🏴󠁧󠁢󠁥󠁮󠁧󁿢')).toBe('gb-eng');
+  });
+
+  it('ウェールズ 🏴󠁧󠁢󠁷󠁬󠁳󠁿 → gb-wls', () => {
+    expect(flagEmojiToISO2('🏴󠁧󠁢󠁷󠁬󠁳󠁿')).toBe('gb-wls');
   });
 
   it('空文字は空文字を返す', () => {
