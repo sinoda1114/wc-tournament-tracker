@@ -15,6 +15,8 @@ function m(partial: Partial<Match> & { stage: string }): Match {
     awayTeamId: null,
     homeScore: null,
     awayScore: null,
+    penaltyHomeScore: null,
+    penaltyAwayScore: null,
     winnerTeamId: null,
     status: 'scheduled',
     groupLetter: null,

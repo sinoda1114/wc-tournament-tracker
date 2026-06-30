@@ -18,6 +18,8 @@ function matchRow(id: number, home: string | null, away: string | null, over: Pa
     awayTeamId: away,
     homeScore: null,
     awayScore: null,
+    penaltyHomeScore: null,
+    penaltyAwayScore: null,
     status: 'scheduled',
     stage: 'group_stage',
     groupLetter: 'A',

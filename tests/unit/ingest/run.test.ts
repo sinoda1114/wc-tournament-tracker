@@ -50,6 +50,8 @@ function matchRow(id: number, home: string, away: string) {
     awayTeamId: away,
     homeScore: null,
     awayScore: null,
+    penaltyHomeScore: null,
+    penaltyAwayScore: null,
     winnerTeamId: null,
     status: 'scheduled' as const,
     groupLetter: 'A',

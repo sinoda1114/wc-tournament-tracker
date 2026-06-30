@@ -368,7 +368,7 @@ function FogSetup() {
 function Scene({ matches }: { matches: MatchDetail[] }) {
   const byId = useMemo(() => new Map(matches.map((m) => [m.id, m])), [matches]);
 
-  const flagCacheRef = useRef<Map<string, HTMLImageElement>>(new Map());
+  const [flagCache, setFlagCache] = useState<Map<string, HTMLImageElement>>(new Map());
   const [flagsReady, setFlagsReady] = useState(false);
 
   useEffect(() => {
@@ -381,8 +381,13 @@ function Scene({ matches }: { matches: MatchDetail[] }) {
     ];
     if (emojis.length === 0) { setFlagsReady(true); return; }
     let pending = emojis.length;
-    const cache = flagCacheRef.current;
-    const finish = () => { if (--pending === 0) setFlagsReady(true); };
+    const cache = new Map<string, HTMLImageElement>();
+    const finish = () => {
+      if (--pending === 0) {
+        setFlagCache(cache);
+        setFlagsReady(true);
+      }
+    };
     for (const emoji of emojis) {
       const iso2 = flagEmojiToISO2(emoji);
       if (!iso2) { finish(); continue; }
@@ -392,8 +397,6 @@ function Scene({ matches }: { matches: MatchDetail[] }) {
       img.src = `/api/flag/${iso2}`;
     }
   }, [matches]);
-
-  const flagCache = flagCacheRef.current;
 
   const tierPositions = useMemo<THREE.Vector3[][]>(
     () =>
