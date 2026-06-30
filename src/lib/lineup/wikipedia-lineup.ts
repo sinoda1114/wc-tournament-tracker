@@ -254,15 +254,26 @@ export type WikipediaLineupOptions = {
   fetchHtml?: FetchHtml;
 };
 
-/**
- * 試合のスタメンを取得して home/away それぞれ配置済みで返す。
- * グループステージのみ対応（記事構造が異なる決勝Tは対象外＝null）。
- */
 export type LineupTeamRef = { nameEn: string; fifaCode: string | null };
 
 /** グループ記事タイトル（Wikipedia 英語版）。表示・監査で共通利用し表記揺れを防ぐ。 */
 export function groupArticleTitle(groupLetter: string): string {
   return `2026 FIFA World Cup Group ${groupLetter}`;
+}
+
+/** KOステージ→ Wikipedia 英語版記事タイトルのマッピング。 */
+const KO_ARTICLE_TITLES: Record<string, string> = {
+  round_of_32: '2026 FIFA World Cup round of 32',
+  round_of_16: '2026 FIFA World Cup round of 16',
+  quarter_final: '2026 FIFA World Cup quarter-finals',
+  semi_final: '2026 FIFA World Cup semi-finals',
+  third_place: '2026 FIFA World Cup third-place match',
+  final: '2026 FIFA World Cup final',
+};
+
+/** KOステージ記事タイトルを返す。未知のstageはnull。 */
+export function koArticleTitle(stage: string): string | null {
+  return KO_ARTICLE_TITLES[stage] ?? null;
 }
 
 /** グループ記事HTMLを取得（テスト用に fetchHtml 注入可）。取得失敗は throw、本文なしは null。 */
@@ -274,17 +285,40 @@ export async function fetchGroupArticleHtml(
   return fetchHtml(groupArticleTitle(groupLetter));
 }
 
+/** KOステージ記事HTMLを取得（テスト用に fetchHtml 注入可）。未知stageまたは取得失敗はnull。 */
+export async function fetchKoArticleHtml(
+  stage: string,
+  options: WikipediaLineupOptions = {},
+): Promise<string | null> {
+  const title = koArticleTitle(stage);
+  if (!title) return null;
+  const fetchHtml = options.fetchHtml ?? defaultFetchHtml;
+  return fetchHtml(title);
+}
+
 export async function fetchMatchLineup(
-  params: { home: LineupTeamRef; away: LineupTeamRef; groupLetter: string },
+  params: {
+    home: LineupTeamRef;
+    away: LineupTeamRef;
+    groupLetter?: string | null;
+    stage?: string;
+  },
   options: WikipediaLineupOptions = {},
 ): Promise<MatchLineup | null> {
-  const { home, away, groupLetter } = params;
-  if (!home?.nameEn || !away?.nameEn || !groupLetter) return null;
+  const { home, away, groupLetter, stage } = params;
+  if (!home?.nameEn || !away?.nameEn) return null;
 
   const homeName = wikiTeamName(home.fifaCode, home.nameEn);
   const awayName = wikiTeamName(away.fifaCode, away.nameEn);
 
-  const html = await fetchGroupArticleHtml(groupLetter, options);
+  let html: string | null;
+  if (groupLetter) {
+    html = await fetchGroupArticleHtml(groupLetter, options);
+  } else if (stage) {
+    html = await fetchKoArticleHtml(stage, options);
+  } else {
+    return null;
+  }
   if (!html) return null;
 
   const extracted = extractXIs(html, homeName, awayName);
