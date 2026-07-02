@@ -201,21 +201,38 @@ describe('eliminatedTeamIds', () => {
     expect(eliminatedTeamIds(matches).has('ned')).toBe(true);
   });
 
-  it('グループ戦の敗者は敗退扱いにしない（1敗では敗退ではない）', () => {
+  it('グループ戦進行中（未終了あり）は、KO に未出場でも敗退扱いにしない', () => {
     const matches = [
-      // group_stage: mex が rsa に勝利。rsa は1敗だが勝ち抜け可能なので敗退ではない。
+      // rsa は1敗だが、グループ戦にまだ未終了試合が残るため敗退ではない
       m({ stage: 'group_stage', homeTeamId: 'mex', awayTeamId: 'rsa', homeScore: 2, awayScore: 0, winnerTeamId: 'mex', status: 'finished' }),
+      m({ stage: 'group_stage', homeTeamId: 'rsa', awayTeamId: 'fra', status: 'scheduled' }),
     ];
     expect(eliminatedTeamIds(matches).size).toBe(0);
   });
 
-  it('グループ戦とKOが混在しても、敗退扱いはKOの敗者のみ', () => {
+  it('グループ戦とKOが混在しても、グループ戦進行中はKOの敗者のみ敗退扱い', () => {
     const matches = [
       m({ stage: 'group_stage', homeTeamId: 'mex', awayTeamId: 'rsa', homeScore: 2, awayScore: 0, winnerTeamId: 'mex', status: 'finished' }),
+      m({ stage: 'group_stage', homeTeamId: 'rsa', awayTeamId: 'fra', status: 'scheduled' }), // 未終了
       m({ stage: 'round_of_32', homeTeamId: 'fra', awayTeamId: 'eng', homeScore: 2, awayScore: 1, winnerTeamId: 'fra', status: 'finished' }),
     ];
     const out = eliminatedTeamIds(matches);
-    expect(out.has('rsa')).toBe(false); // グループ1敗は敗退ではない
+    expect(out.has('rsa')).toBe(false); // グループ戦進行中は敗退ではない
     expect(out.has('eng')).toBe(true); // KO 敗者は敗退
+  });
+
+  it('グループ戦全試合終了後、KO に出場していないチームは敗退扱い', () => {
+    const matches = [
+      // グループ戦: mex・fra が勝ち抜け、rsa・bra は敗退
+      m({ stage: 'group_stage', homeTeamId: 'mex', awayTeamId: 'rsa', homeScore: 2, awayScore: 0, winnerTeamId: 'mex', status: 'finished' }),
+      m({ stage: 'group_stage', homeTeamId: 'fra', awayTeamId: 'bra', homeScore: 1, awayScore: 0, winnerTeamId: 'fra', status: 'finished' }),
+      // KO: mex と fra が出場
+      m({ stage: 'round_of_32', homeTeamId: 'mex', awayTeamId: 'fra', status: 'scheduled' }),
+    ];
+    const out = eliminatedTeamIds(matches);
+    expect(out.has('rsa')).toBe(true);  // グループ敗退
+    expect(out.has('bra')).toBe(true);  // グループ敗退
+    expect(out.has('mex')).toBe(false); // KO 出場中
+    expect(out.has('fra')).toBe(false); // KO 出場中
   });
 });
