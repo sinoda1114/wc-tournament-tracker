@@ -173,13 +173,36 @@ export function eliminatedTeamIds(
   matches: Pick<Match, 'stage' | 'homeTeamId' | 'awayTeamId' | 'winnerTeamId' | 'status'>[],
 ): Set<string> {
   const eliminated = new Set<string>();
+
+  // KO 敗退: 決勝T試合の敗者
   for (const m of matches) {
-    if (m.stage === 'group_stage') continue; // グループ戦の敗者は敗退ではない
+    if (m.stage === 'group_stage') continue;
     if (m.status !== 'finished' || !m.winnerTeamId) continue;
     if (!m.homeTeamId || !m.awayTeamId) continue;
     const loser = m.winnerTeamId === m.homeTeamId ? m.awayTeamId : m.homeTeamId;
     eliminated.add(loser);
   }
+
+  // グループ敗退: グループ戦全試合終了後、KO ステージに1チームも未確定の間は判定しない。
+  // 両条件を満たしたとき、グループ戦出場チームのうち KO に出場していないチームを敗退とする。
+  const groupMatches = matches.filter((m) => m.stage === 'group_stage');
+  const allGroupFinished =
+    groupMatches.length > 0 && groupMatches.every((m) => m.status === 'finished');
+
+  const koTeams = new Set<string>();
+  for (const m of matches) {
+    if (m.stage === 'group_stage') continue;
+    if (m.homeTeamId) koTeams.add(m.homeTeamId);
+    if (m.awayTeamId) koTeams.add(m.awayTeamId);
+  }
+
+  if (allGroupFinished && koTeams.size > 0) {
+    for (const m of groupMatches) {
+      if (m.homeTeamId && !koTeams.has(m.homeTeamId)) eliminated.add(m.homeTeamId);
+      if (m.awayTeamId && !koTeams.has(m.awayTeamId)) eliminated.add(m.awayTeamId);
+    }
+  }
+
   return eliminated;
 }
 
