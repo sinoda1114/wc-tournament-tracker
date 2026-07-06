@@ -261,14 +261,21 @@ export function groupArticleTitle(groupLetter: string): string {
   return `2026 FIFA World Cup Group ${groupLetter}`;
 }
 
-/** KOステージ→ Wikipedia 英語版記事タイトルのマッピング。 */
+/**
+ * KOステージ→ Wikipedia 英語版記事タイトルのマッピング。
+ *
+ * R32 は専用記事（"round of 32"）が存在する。
+ * R16 以降は専用記事が作成されておらず、"knockout stage" 単一記事に
+ * 全 KO マッチが収録されている（2026-07-06 時点の実測）。
+ * 将来 Wikipedia が各ラウンド専用記事を作成した場合はここを更新する。
+ */
 const KO_ARTICLE_TITLES: Record<string, string> = {
   round_of_32: '2026 FIFA World Cup round of 32',
-  round_of_16: '2026 FIFA World Cup round of 16',
-  quarter_final: '2026 FIFA World Cup quarter-finals',
-  semi_final: '2026 FIFA World Cup semi-finals',
-  third_place: '2026 FIFA World Cup third-place match',
-  final: '2026 FIFA World Cup final',
+  round_of_16: '2026 FIFA World Cup knockout stage',
+  quarter_final: '2026 FIFA World Cup knockout stage',
+  semi_final: '2026 FIFA World Cup knockout stage',
+  third_place: '2026 FIFA World Cup knockout stage',
+  final: '2026 FIFA World Cup knockout stage',
 };
 
 /** KOステージ記事タイトルを返す。未知のstageはnull。 */
