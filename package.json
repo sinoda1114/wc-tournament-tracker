@@ -33,7 +33,7 @@
     "postprocessing": "6.36.4",
     "react": "19.2.7",
     "react-dom": "19.2.7",
-    "stripe": "22.2.0",
+    "stripe": "22.3.2",
     "three": "0.168.0",
     "zod": "4.4.3"
   },
