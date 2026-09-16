@@ -8,7 +8,7 @@ import { mergeHistoricalScorers } from '@/lib/historical-scorers';
 import { ogLocale } from '@/lib/i18n/alternates';
 import { getDictionary } from '@/lib/i18n/dictionary';
 import { resolveLocale } from '@/lib/i18n/server';
-import { aggregateCards, aggregateCountryCards, aggregateCountryGoals, aggregateScorers, currentResetWindow, playerTeamKey, windowOf } from '@/lib/rankings';
+import { aggregateCards, aggregateCountryCards, aggregateCountryGoals, aggregateScorers, currentResetWindow, hasCardInWindow, playerTeamKey, windowOf } from '@/lib/rankings';
 import { computeSuspensions, type SuspensionFixture } from '@/lib/suspensions';
 
 // 試合結果・カードが入るたびに集計が変わるので毎回最新を出す。
@@ -90,9 +90,13 @@ export default async function RankingsPage({
     if (c.yellow > 0) return true;
     if (c.red === 0) return false;
     const s = c.suspension;
-    if (!s) return false;
-    if (s.status === 'pending') return true;
-    return windowMatchDates.has(s.matchDate.slice(0, 10));
+    if (s) {
+      if (s.status === 'pending') return true;
+      return windowMatchDates.has(s.matchDate.slice(0, 10));
+    }
+    // 次戦が無い（大会終了・敗退等）→ 出場停止情報は無いが、当該窓で実際にカードを
+    // 受けた記録自体は残す（大会最終戦の退場が「次戦なし」を理由に一覧から消える不具合対策）。
+    return hasCardInWindow(events, c.playerName, c.fifaCode, targetWindow);
   });
 
   // 早割先行購入カードはサーバーコンポーネント（auth による自己ゲート）なので、ここで生成して

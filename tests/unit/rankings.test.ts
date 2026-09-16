@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { aggregateCards, aggregateScorers, type RankingEvent } from '@/lib/rankings';
+import { aggregateCards, aggregateScorers, hasCardInWindow, type RankingEvent } from '@/lib/rankings';
 
 /** 集計テストでは試合情報は使わないので固定値で埋める。 */
 const MATCH_META = { teamId: 'x', matchId: 1, matchDate: '2026-06-01', stage: 'group_stage' } as const;
@@ -105,5 +105,42 @@ describe('aggregateCards', () => {
 
   it('得点イベントは無視する', () => {
     expect(aggregateCards([goal('Kane', 'ENG')])).toEqual([]);
+  });
+});
+
+/** stage を指定できるカードイベントビルダ（hasCardInWindow の window 判定検証用）。 */
+function cardInStage(player: string, fifa: string, color: 'yellow' | 'red', stage: string): RankingEvent {
+  return {
+    type: color === 'yellow' ? 'yellow_card' : 'red_card',
+    playerName: player,
+    teamId: fifa,
+    teamFifaCode: fifa,
+    teamNameEn: fifa,
+    teamNameJa: fifa,
+    matchId: 1,
+    matchDate: '2026-06-01',
+    stage,
+  };
+}
+
+describe('hasCardInWindow（大会最終戦の退場が「次戦なし」でカード一覧から消える不具合の対策）', () => {
+  it('決勝(final=W3)でレッドを受けた選手は W3 で true', () => {
+    const events = [cardInStage('Fernández', 'ARG', 'red', 'final')];
+    expect(hasCardInWindow(events, 'Fernández', 'ARG', 3)).toBe(true);
+  });
+
+  it('別 window のカードは対象 window では false（過去窓の持ち越し表示を防ぐ）', () => {
+    const events = [cardInStage('Fernández', 'ARG', 'red', 'group_stage')]; // W1
+    expect(hasCardInWindow(events, 'Fernández', 'ARG', 3)).toBe(false);
+  });
+
+  it('該当選手のカードが無ければ false', () => {
+    const events = [cardInStage('Someone Else', 'ARG', 'red', 'final')];
+    expect(hasCardInWindow(events, 'Fernández', 'ARG', 3)).toBe(false);
+  });
+
+  it('同名でもチームが違えば別集計扱い（false）', () => {
+    const events = [cardInStage('Fernández', 'ESP', 'red', 'final')];
+    expect(hasCardInWindow(events, 'Fernández', 'ARG', 3)).toBe(false);
   });
 });
