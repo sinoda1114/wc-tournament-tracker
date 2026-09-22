@@ -22,7 +22,7 @@
     "@libsql/client": "0.15.15",
     "@mantine/core": "9.3.0",
     "@mantine/dates": "9.3.0",
-    "@mantine/form": "9.3.0",
+    "@mantine/form": "9.4.1",
     "@mantine/hooks": "9.3.0",
     "@react-three/drei": "10.7.7",
     "@react-three/fiber": "9.6.1",
