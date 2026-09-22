@@ -18,7 +18,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@clerk/nextjs": "7.4.3",
+    "@clerk/nextjs": "7.5.20",
     "@libsql/client": "0.15.15",
     "@mantine/core": "9.3.0",
     "@mantine/dates": "9.3.0",
