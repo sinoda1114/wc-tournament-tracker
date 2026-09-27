@@ -10,22 +10,33 @@
 #   AI_REVIEW_BYPASS=1 git push   （理由をコミットログか PR に残す）
 set -euo pipefail
 
-global_dir="$(git config --global --get core.hooksPath 2>/dev/null || true)"
-case "$global_dir" in
-  "~") global_dir="$HOME" ;;
-  "~/"*) global_dir="$HOME/${global_dir#"~/"}" ;;
-esac
+# ゲートがリポジトリ側の pre-push を呼び継ぐ作りだと、ここに戻ってくる。そのときゲートは通過済みなので終わる
+# （互いを呼び続けない）。
+if [ -n "${WC_PREPUSH_GATE_CALLED:-}" ]; then
+  exit 0
+fi
+export WC_PREPUSH_GATE_CALLED=1
+
+# ゲートの場所: リポジトリの設定を除いた core.hooksPath（グローバル、無ければ system）。
+# --includes で include / includeIf をたどり、--type=path で ~ や ~user/ の展開を git に任せる。
+global_dir="$(git config --global --includes --type=path --get core.hooksPath 2>/dev/null || true)"
+if [ -z "$global_dir" ]; then
+  global_dir="$(git config --system --includes --type=path --get core.hooksPath 2>/dev/null || true)"
+fi
 gate="${global_dir:-$HOME/.git-hooks}/pre-push"
 
-if [ ! -x "$gate" ]; then
+if [ ! -e "$gate" ]; then
   cat >&2 <<MSG
 ⛔ push 前ゲート（${gate}）が見つかりません。/ai-review の pre-push を導入してから push してください。
-   導入: ~/.claude/skills/ai-review/hooks/pre-push を ~/.git-hooks/pre-push にコピーし、
-         git config --global core.hooksPath ~/.git-hooks
+   導入: ~/.claude/skills/ai-review/hooks/pre-push を ${gate} に置き、chmod +x する
 MSG
   exit 1
 fi
-# グローバルの core.hooksPath がこのディレクトリを指していると、自分自身を呼び続ける。
+if [ ! -x "$gate" ]; then
+  echo "⛔ push 前ゲート（${gate}）はありますが、実行できません。chmod +x してから push してください。" >&2
+  exit 1
+fi
+# グローバルの core.hooksPath がこのディレクトリを指していると、自分自身を呼ぶことになる。
 if [ "$gate" -ef "$0" ]; then
   echo "⛔ グローバルの core.hooksPath が scripts/hooks を指しています（${gate}）。ゲートを呼べないため push を止めます。" >&2
   exit 1
