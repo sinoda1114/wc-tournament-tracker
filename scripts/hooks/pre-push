@@ -6,13 +6,14 @@
 # /ai-review の pre-push ゲートが黙って止まる。ここからそのゲートを呼び、git が渡す引数（remote 名と URL）と
 # 標準入力（push する ref の一覧）をそのまま渡す。
 #
-# ゲートが見つからないときは push を止める（黙って通さない）。回避はゲート自身の手段に従う:
-#   AI_REVIEW_BYPASS=1 git push   （理由をコミットログか PR に残す）
+# ゲートが見つからないときは push を止める（黙って通さない）。緊急回避はゲートと同じ手段:
+#   AI_REVIEW_BYPASS=1 git push   （理由をコミットログか PR に残す。ゲートが無いときもここで通す）
 set -euo pipefail
 
 # ゲートがリポジトリ側の pre-push を呼び継ぐ作りだと、ここに戻ってくる。そのときゲートは通過済みなので終わる
 # （互いを呼び続けない）。
 if [ -n "${WC_PREPUSH_GATE_CALLED:-}" ]; then
+  echo "[pre-push] ゲートから呼び戻されたため、ここでは何もしません（ゲートは通過済み）" >&2
   exit 0
 fi
 export WC_PREPUSH_GATE_CALLED=1
@@ -25,21 +26,25 @@ if [ -z "$global_dir" ]; then
 fi
 gate="${global_dir:-$HOME/.git-hooks}/pre-push"
 
-if [ ! -e "$gate" ]; then
-  cat >&2 <<MSG
-⛔ push 前ゲート（${gate}）が見つかりません。/ai-review の pre-push を導入してから push してください。
-   導入: ~/.claude/skills/ai-review/hooks/pre-push を ${gate} に置き、chmod +x する
-MSG
+# ゲートを呼べないとき: 明示の緊急回避だけは通し、それ以外は止める。
+refuse() {
+  if [ "${AI_REVIEW_BYPASS:-0}" = "1" ]; then
+    echo "[pre-push] AI_REVIEW_BYPASS=1 のため、ゲートを呼ばずに push します（${1}）。理由をコミットログか PR に残してください。" >&2
+    exit 0
+  fi
+  printf '%s\n' "⛔ ${1}" "   緊急時のみ: AI_REVIEW_BYPASS=1 git push （理由をコミットログか PR に残す）" >&2
   exit 1
+}
+
+if [ ! -e "$gate" ]; then
+  refuse "push 前ゲート（${gate}）が見つかりません。/ai-review の pre-push を ${gate} に置き、chmod +x してから push してください。"
 fi
 if [ ! -x "$gate" ]; then
-  echo "⛔ push 前ゲート（${gate}）はありますが、実行できません。chmod +x してから push してください。" >&2
-  exit 1
+  refuse "push 前ゲート（${gate}）はありますが、実行できません。chmod +x してから push してください。"
 fi
 # グローバルの core.hooksPath がこのディレクトリを指していると、自分自身を呼ぶことになる。
 if [ "$gate" -ef "$0" ]; then
-  echo "⛔ グローバルの core.hooksPath が scripts/hooks を指しています（${gate}）。ゲートを呼べないため push を止めます。" >&2
-  exit 1
+  refuse "グローバルの core.hooksPath が scripts/hooks を指しています（${gate}）。ゲートを呼べません。"
 fi
 
 exec "$gate" "$@"
