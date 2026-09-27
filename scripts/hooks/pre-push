@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# wc-tournament-tracker:pre-push-chain
 # push 前の AI レビューゲート（グローバルの pre-push）を呼び継ぐ。
 #
 # scripts/setup-dev.sh は core.hooksPath を scripts/hooks にする（pre-commit で本体での commit を拒否するため）。
@@ -6,28 +7,14 @@
 # /ai-review の pre-push ゲートが黙って止まる。ここからそのゲートを呼び、git が渡す引数（remote 名と URL）と
 # 標準入力（push する ref の一覧）をそのまま渡す。
 #
-# ゲートが見つからないときは push を止める（黙って通さない）。緊急回避はゲートと同じ手段:
-#   AI_REVIEW_BYPASS=1 git push   （理由をコミットログか PR に残す。ゲートが無いときもここで通す）
+# ゲートを呼べないときは push を止める（黙って通さない）。緊急回避はゲートと同じ手段:
+#   AI_REVIEW_BYPASS=1 git push   （理由をコミットログか PR に残す。ゲートを呼べないときもここで通す）
 set -euo pipefail
+. "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/find-gate.sh"
 
-# ゲートがリポジトリ側の pre-push を呼び継ぐ作りだと、ここに戻ってくる。そのときゲートは通過済みなので終わる
-# （互いを呼び続けない）。
-if [ -n "${WC_PREPUSH_GATE_CALLED:-}" ]; then
-  echo "[pre-push] ゲートから呼び戻されたため、ここでは何もしません（ゲートは通過済み）" >&2
-  exit 0
-fi
-export WC_PREPUSH_GATE_CALLED=1
-
-# ゲートの場所: リポジトリの設定を除いた core.hooksPath（グローバル、無ければ system）。
-# --includes で include / includeIf をたどり、--type=path で ~ や ~user/ の展開を git に任せる。
-global_dir="$(git config --global --includes --type=path --get core.hooksPath 2>/dev/null || true)"
-if [ -z "$global_dir" ]; then
-  global_dir="$(git config --system --includes --type=path --get core.hooksPath 2>/dev/null || true)"
-fi
-gate="${global_dir:-$HOME/.git-hooks}/pre-push"
-
-# ゲートを呼べないとき: 明示の緊急回避だけは通し、それ以外は止める。
+# ゲートを呼べないとき: 標準入力を読み切ってから、明示の緊急回避だけは通し、それ以外は止める。
 refuse() {
+  cat >/dev/null || true
   if [ "${AI_REVIEW_BYPASS:-0}" = "1" ]; then
     echo "[pre-push] AI_REVIEW_BYPASS=1 のため、ゲートを呼ばずに push します（${1}）。理由をコミットログか PR に残してください。" >&2
     exit 0
@@ -36,15 +23,24 @@ refuse() {
   exit 1
 }
 
+# ゲートから呼び戻された（またはその印が環境に残っている）: ゲートが通過済みかどうかを確かめられないので止める。
+# 今の /ai-review のゲートは .git/hooks/pre-push を呼び継ぐので、ここには戻ってこない。
+if [ -n "${WC_PREPUSH_GATE_CALLED:-}" ]; then
+  refuse "ゲートから scripts/hooks/pre-push が呼び戻されました（WC_PREPUSH_GATE_CALLED が設定済み）。ゲートの呼び継ぎ先を確かめてください。"
+fi
+export WC_PREPUSH_GATE_CALLED=1
+
+find_gate || refuse "${gate_error} ゲートの場所を決められません。"
+
 if [ ! -e "$gate" ]; then
   refuse "push 前ゲート（${gate}）が見つかりません。/ai-review の pre-push を ${gate} に置き、chmod +x してから push してください。"
 fi
 if [ ! -x "$gate" ]; then
   refuse "push 前ゲート（${gate}）はありますが、実行できません。chmod +x してから push してください。"
 fi
-# グローバルの core.hooksPath がこのディレクトリを指していると、自分自身を呼ぶことになる。
-if [ "$gate" -ef "$0" ]; then
-  refuse "グローバルの core.hooksPath が scripts/hooks を指しています（${gate}）。ゲートを呼べません。"
+# ゲートとして見つけたのがこのフック自身かそのコピーなら、呼ぶと自分を呼び続ける。
+if [ "$gate" -ef "$0" ] || grep -qF "$WC_PREPUSH_CHAIN_MARKER" "$gate" 2>/dev/null; then
+  refuse "グローバルの core.hooksPath がこのフック自身（またはそのコピー）を指しています（${gate}）。ゲートを呼べません。"
 fi
 
 exec "$gate" "$@"

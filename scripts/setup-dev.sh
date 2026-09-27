@@ -22,4 +22,13 @@ git config core.hooksPath "${root}/scripts/hooks"
 echo "✓ core.hooksPath = ${root}/scripts/hooks"
 echo "  本体での commit は pre-commit で拒否されます（worktree は許可）。"
 echo "  push は pre-push がグローバルの AI レビューゲートを呼び継ぎます。"
+
+# pre-push はゲートを呼べないと push を止めるので、ここで先に知らせる（設定は済ませる）。
+. "${root}/scripts/hooks/find-gate.sh"
+if ! find_gate; then
+  echo "⚠ ${gate_error} push のたびに pre-push が止めます。" >&2
+elif [ ! -x "$gate" ]; then
+  echo "⚠ push 前ゲート（${gate}）が見つかりません（または実行できません）。" >&2
+  echo "  /ai-review の pre-push を ${gate} に置いて chmod +x するまで、push は pre-push が止めます。" >&2
+fi
 echo "  worktree を切るときは: scripts/new-worktree.sh <topic>"
