@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+# wc-tournament-tracker:pre-push-chain
+# push 前の AI レビューゲート（グローバルの pre-push）を呼び継ぐ。
+#
+# scripts/setup-dev.sh は core.hooksPath を scripts/hooks にする（pre-commit で本体での commit を拒否するため）。
+# すると git はグローバルの core.hooksPath（例: ~/.git-hooks）を見なくなり、そこにある
+# /ai-review の pre-push ゲートが黙って止まる。ここからそのゲートを呼び、git が渡す引数（remote 名と URL）と
+# 標準入力（push する ref の一覧）をそのまま渡す。
+#
+# ゲートを呼べないときは push を止める（黙って通さない）。緊急回避はゲートと同じ手段:
+#   AI_REVIEW_BYPASS=1 git push   （理由をコミットログか PR に残す。ゲートを呼べないときもここで通す）
+set -euo pipefail
+. "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/find-gate.sh"
+
+# ゲートを呼べないとき: 標準入力を読み切ってから、明示の緊急回避だけは通し、それ以外は止める。
+refuse() {
+  cat >/dev/null || true
+  if [ "${AI_REVIEW_BYPASS:-0}" = "1" ]; then
+    echo "[pre-push] AI_REVIEW_BYPASS=1 のため、ゲートを呼ばずに push します（${1}）。理由をコミットログか PR に残してください。" >&2
+    exit 0
+  fi
+  printf '%s\n' "⛔ ${1}" "   緊急時のみ: AI_REVIEW_BYPASS=1 git push （理由をコミットログか PR に残す）" >&2
+  exit 1
+}
+
+# ゲートから呼び戻された（またはその印が環境に残っている）: ゲートが通過済みかどうかを確かめられないので止める。
+# 今の /ai-review のゲートは .git/hooks/pre-push を呼び継ぐので、ここには戻ってこない。
+if [ -n "${WC_PREPUSH_GATE_CALLED:-}" ]; then
+  refuse "ゲートから scripts/hooks/pre-push が呼び戻されました（WC_PREPUSH_GATE_CALLED が設定済み）。ゲートの呼び継ぎ先を確かめてください。"
+fi
+export WC_PREPUSH_GATE_CALLED=1
+
+find_gate || refuse "${gate_error} ゲートの場所を決められません。"
+
+if [ ! -e "$gate" ]; then
+  refuse "push 前ゲート（${gate}）が見つかりません。/ai-review の pre-push を ${gate} に置き、chmod +x してから push してください。"
+fi
+if [ ! -x "$gate" ]; then
+  refuse "push 前ゲート（${gate}）はありますが、実行できません。chmod +x してから push してください。"
+fi
+# ゲートとして見つけたのがこのフック自身かそのコピーなら、呼ぶと自分を呼び続ける。
+if [ "$gate" -ef "$0" ] || grep -qF "$WC_PREPUSH_CHAIN_MARKER" "$gate" 2>/dev/null; then
+  refuse "グローバルの core.hooksPath がこのフック自身（またはそのコピー）を指しています（${gate}）。ゲートを呼べません。"
+fi
+
+exec "$gate" "$@"
