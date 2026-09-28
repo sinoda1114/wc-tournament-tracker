@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
 # CI（required check）が緑のときだけ PR を squash マージする番人用ラッパー。
-# GitHub Free のプライベートリポは branch protection が使えないため、唯一のマージ者である
-# 番人の側で「CI必須」を強制する（branch protection の代替＝レイヤー1相当）。
+# main の保護設定でも同じチェックが必須になっている。GitHub 側は加えて「会話の解決」も必須にしているので、
+# 未解決のレビューのスレッドがあると、最後の gh pr merge が理由を出して止まる。
 #
 # 使い方:  scripts/safe-merge.sh <PR番号>     例: scripts/safe-merge.sh 46
 set -euo pipefail
 
-# main の CI ワークフロー（ci.yml）の単一ジョブ名。required 扱いするチェック。
-REQUIRED_CHECK="typecheck / lint / test / build / audit"
+# required 扱いするチェック。main の保護設定の required status checks と同じ名前にする
+# （gh api repos/sinoda1114/wc-tournament-tracker/branches/main/protection -q .required_status_checks.contexts）。
+REQUIRED_CHECK="ci / build"
 
 pr="${1:-}"
 if ! [[ "$pr" =~ ^[0-9]+$ ]]; then
