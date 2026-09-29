@@ -13,7 +13,7 @@ model: inherit
 - **インフラ**: `vercel.json`、`next.config.ts`、env ドキュメント（`.env.example`）、CI（`.github/workflows/*`）、`.github/dependabot.yml`、`.npmrc`。
 
 ## 触らない
-- `src/app/globals.css` / UI 配色（ui-feature）、`src/db/queries.ts`、`src/middleware.ts`・`src/lib/auth/*`・`src/lib/billing/*`（auth-billing）、データ取得スクリプト（data-squad）。
+- `src/app/globals.css` / UI 配色（ui-feature）、`src/db/queries.ts`、`src/proxy.ts`・`src/lib/auth/*`・`src/lib/billing/*`（auth-billing）、データ取得スクリプト（data-squad）。
 - 公開ルート確定リストは auth-billing の `middleware.ts` 設計と**すり合わせ**（SEO 静的・公開 LP を保護対象から外す）。
 
 ## npm / Node サプライチェーン規律（インフラ既定）
