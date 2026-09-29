@@ -10,10 +10,10 @@
 > **タスクを与えられたら、プロセスを指示されなくても以下を既定で実行する。**
 > 人間はふつう「何を(WHAT)」だけ渡す。「やり方(HOW)」はこの手順に従う。
 
-1. **専用作業空間を切る**: `git worktree add ../wc-<topic> feat/<topic>`
+1. **専用作業空間を切る**: `git fetch origin` → `git worktree add ../wc-<topic> -b feat/<topic> origin/main`
    （リポ実体ディレクトリ `~/dev/wc-tournament-tracker` は **main 統合＋デプロイ専用**。ここで機能開発しない）
 2. **実装する**（役割境界を守る。担当外ファイルは触らない。境界は memory `agent-registry`）
-3. **2 段ゲート**: `/ai-review` → コミット → `/security-review`
+3. **push 前ゲート**: コミット → `/ai-review`（高リスクは内部で security に昇格）
 4. **feature ブランチに push** → Vercel が**プレビューを自動発行** → その URL で自分で動作確認
 5. **PR を作成**（base = `main`）
 6. **マージは依頼制**: 完成したら「PR #N できました、マージお願いします」と
