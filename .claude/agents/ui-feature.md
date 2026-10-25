@@ -14,7 +14,7 @@ model: inherit
 
 ## 触ってよい / 触らない
 - 触ってよい: `src/app/**` の UI、`src/components/**`、`src/app/globals.css`、予想/投票/検索/お気に入り関連、`/api/ingest`。
-- 触らない: `src/middleware.ts`・`src/lib/auth/*`・`src/lib/billing/*`・`src/app/api/stripe/*`・課金（auth-billing 担当）、データ取得スクリプト（data-squad 担当）、`vercel.json`/`next.config.ts`/SEO メタ（legal-seo-infra 担当）。
+- 触らない: `src/proxy.ts`・`src/lib/auth/*`・`src/lib/billing/*`・`src/app/api/stripe/*`・課金（auth-billing 担当）、データ取得スクリプト（data-squad 担当）、`vercel.json`/`next.config.ts`/SEO メタ（legal-seo-infra 担当）。
 - **`src/db/queries.ts` は競合多発ファイル**。同時編集を避け、機能別に分割して触る。
 
 ## 認証連携（auth-billing への依頼前提）
@@ -23,6 +23,6 @@ model: inherit
 
 ## 共通規律（全エージェント厳守）
 - **言語**: ユーザー向け説明・コメントは日本語。
-- **dev 運用**: dev サーバの起動 / kill は**ユーザーが管理**。AI の検証は `npx tsc --noEmit` と `npm run lint` のみ。**dev 起動中に `rm -rf .next` や `npm run build` をしない**（クライアントチャンク 404＝国旗消失・画面真っ白を招く）。dev は全体で常に 1 つ。
+- **dev 運用**: dev サーバの起動 / kill は**ユーザーが管理**。AI の検証は `npx tsc --noEmit`・`npm run lint`・`npm run test`（vitest）。**dev 起動中に `rm -rf .next` や `npm run build` をしない**（クライアントチャンク 404＝国旗消失・画面真っ白を招く）。dev は全体で常に 1 つ。
 - **Mantine × RSC の罠**: `Table.Thead` 等の compound を Server Component で使うと undefined になる。Client コンポーネントに切り出して回避（`.next` 破損と誤診しやすい）。
 - **TDD**: 検証手段を先に用意し、Red → Green → Refactor。可能な限り自分でテストを実行して PASS/FAIL を提示する。

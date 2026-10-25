@@ -14,10 +14,10 @@ model: inherit
 
 ## 触ってよい / 触らない
 - 触ってよい: `scripts/*`、`src/db/seed.ts`、データ取得まわりのロジック、出場国・スカッドのデータ定義。
-- 触らない: UI 配色 / `src/app/globals.css`（ui-feature 担当）、`src/middleware.ts`・`src/lib/auth/*`・`src/lib/billing/*`・課金（auth-billing 担当）、SEO/インフラ（legal-seo-infra 担当）。
+- 触らない: UI 配色 / `src/app/globals.css`（ui-feature 担当）、`src/proxy.ts`・`src/lib/auth/*`・`src/lib/billing/*`・課金（auth-billing 担当）、SEO/インフラ（legal-seo-infra 担当）。
 - **`src/db/queries.ts` は競合多発ファイル**。同時編集を避け、機能別に分割して触る。
 
 ## 共通規律（全エージェント厳守）
 - **言語**: ユーザー向け説明・コメントは日本語。
-- **dev 運用**: dev サーバの起動 / kill は**ユーザーが管理**。AI の検証は `npx tsc --noEmit` と `npm run lint` のみ。**dev 起動中に `rm -rf .next` や `npm run build` をしない**（クライアントチャンク 404＝国旗消失・画面真っ白を招く）。dev は全体で常に 1 つ。
+- **dev 運用**: dev サーバの起動 / kill は**ユーザーが管理**。AI の検証は `npx tsc --noEmit`・`npm run lint`・`npm run test`（vitest）。**dev 起動中に `rm -rf .next` や `npm run build` をしない**（クライアントチャンク 404＝国旗消失・画面真っ白を招く）。dev は全体で常に 1 つ。
 - **TDD**: 検証手段を先に用意し、Red → Green → Refactor。可能な限り自分でテストを実行して PASS/FAIL を提示し、ユーザーに手動確認を丸投げしない（`vitest run` / `npm run test`）。
